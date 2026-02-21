@@ -126,7 +126,7 @@ func _helper() -> void:
 ## Method and Expression Standards
 
 - **Prefer `match` over chained `if/elif`** for state switching
-- **Use `await`** for async operations — never use manual timers for control flow
+- **Use `await` or `signals`** for async operations — never use manual timers for control flow
 - **Complex expressions must be resolved into a local variable first:** any method parameter that involves concatenation or math with more than two components must be assigned to a named local variable before being passed into the method
 
 ```gdscript
@@ -156,7 +156,7 @@ move_and_collide(Vector2(horizontal_velocity, vertical_velocity))
 ## Patterns to Avoid
 
 - `get_node()` with magic strings beyond direct children — use `@onready` instead
-- Untyped variables (`var x = 5` — always `var x: int = 5`)
+- Untyped function parameters (`x` — always `x: int`)
 - Generic, non-descriptive node or variable names (`Button1`, `node`, `temp`)
 - Abbreviations in any identifier
 - Calling `Input.is_action_pressed()` directly — use `InputManager` autoload

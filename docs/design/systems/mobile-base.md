@@ -129,10 +129,35 @@ When Integrity reaches 0%, the ship is destroyed. **Partial persistence applies:
 
 ---
 
+## Module and Building Durability
+
+Ship modules, crafting machines, and placed structures have **durability** — they can be damaged and must be repaired with crafted materials.
+
+- Durability is a per-module health value (not a global ship stat — that's Integrity)
+- A damaged module continues functioning at reduced efficiency until it reaches 0%, at which point it stops working entirely
+- Repair requires materials appropriate to the module tier; the player performs repairs manually or assigns a repair drone [→ pending drone system definition, OQ-018]
+
+**What does NOT have durability:** Tools held by the player. Tools are permanent once crafted — they consume suit battery charge to operate instead. See `docs/design/systems/meaningful-mining.md`.
+
+### Suit Battery Recharging
+
+The ship recharges the player's suit battery. When the player is at or near the ship, they can recharge fully. This creates the core field-management loop: the player works outward from the ship until battery runs low, then returns to recharge (or uses a spare battery to extend field time).
+
+Recharging draws from the ship's **Power** global variable. A ship with low power charges the suit more slowly [→ balance TBD]. See OQ-021 for suit battery spec details.
+
+**Deferred damage sources (not in first pass):**
+- Weather damage to modules → OQ-019
+- Enemy NPC targeting of individual modules → OQ-020
+
+In the first pass, module durability degrades only from: navigation transit hazards and hull breaches caused by Integrity loss.
+
+---
+
 ## Open Items
 
 - Exact hull tier progression and max module counts [→ OQ-008]
 - Emergency fuel-out consequences (full stop? forced landing? ship damage?)
 - Specific transit hazard event types and resolution mechanics
+- Drone system definition [→ OQ-018] — required before Automation Hub implementation
 - Third-person base-building UI/UX spec [→ ui-ux-designer] — must support gamepad as first-class input
 - Diegetic HUD indicators for Global Variables in first-person mode [→ ui-ux-designer] — must support gamepad as first-class input

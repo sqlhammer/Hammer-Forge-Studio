@@ -83,9 +83,12 @@ Each entry:
 
 - **Q:** How many hull tiers does the ship have, and what are the max module counts per tier?
 - **Impact:** Blocks finalization of module system in `docs/design/systems/mobile-base.md`.
-- **Options:** To be designed by game-designer in next documentation pass.
-- **Status:** Open
-- **Resolution:** —
+- **Status:** Resolved
+- **Resolution:**
+  - **Hull Tiers:** 3 tiers of technology to start, designed as an extensible system for future additions.
+  - **Module Capacity:** No hard module count limit. Instead, implement a **weight-based system** where each hull tier supports a maximum weight capacity. This allows for tuning through gameplay testing without hard rebalancing.
+  - **Progression Feel:** Both expansion and specialization. Players allocate research points between specialized equipment and raw output capacity, creating meaningful trade-off decisions.
+  - **Narrative Integration:** As tiers are unlocked, the alien AI (Rel) is further integrated into the ship systems, unlocking new tech trees alongside new hull capacity.
 
 ---
 
@@ -93,11 +96,8 @@ Each entry:
 
 - **Q:** Should higher-purity deposits also yield more material per deposit, or only reduce crafting energy cost?
 - **Impact:** Affects the resource economy balance and player incentive to seek high-purity deposits. Blocks final purity system design in `docs/design/systems/meaningful-mining.md`.
-- **Options:**
-  1. Purity affects crafting cost only (simpler; cleaner mental model)
-  2. Purity affects both yield quantity and crafting cost (richer reward but more complex balancing)
-- **Status:** Open
-- **Resolution:** —
+- **Status:** Resolved
+- **Resolution:** **Purity affects crafting cost only.** Higher-purity deposits reduce energy cost to process but yield the same material quantity as lower-purity sources. This keeps the resource economy simpler, more predictable, and easier to balance. Purity serves as an efficiency reward rather than a yield multiplier.
 
 ---
 
@@ -105,12 +105,8 @@ Each entry:
 
 - **Q:** Do NPC factions compete for rare materials in Tier 3–4 biomes?
 - **Impact:** Affects late-game threat design, narrative opportunities, and whether the game needs faction/diplomacy systems.
-- **Options:**
-  1. No factions — hostile AI enemies only (simpler; keeps single-player focus clean)
-  2. Hostile factions with no interaction — competing for the same rare veins but cannot be negotiated with
-  3. Factions with limited interaction — can be avoided, fought, or (with effort) bargained with
-- **Status:** Open — world setting now resolved; this can be decided in context of the alien world setting (no other humans present; enemy entities are likely ecological/environmental rather than factional)
-- **Resolution:** —
+- **Status:** Resolved
+- **Resolution:** **No factions — hostile AI enemies only. No faction/diplomacy systems.** All NPCs are low-intelligence creatures, robots, or cyborgs. This preserves "Tactical Solitude" as a core theme — the player is truly alone in terms of intelligent interaction (Rel is an extension of the player's own toolkit, not a separate entity with agency). Late-game threats are ecological, environmental, or automated Serev defenses — not competing intelligences.
 
 ---
 
@@ -147,6 +143,80 @@ Each entry:
 - **Impact:** Was blocking all dialogue labels, ship UI, and companion writing.
 - **Status:** Resolved
 - **Resolution:** **Rel.** A fragment of the Serev's distributed intelligence, housed in a recovered artifact. The name functions as both designation and identity — short, precise, heard constantly. Neither fully alien nor fully human. Like Rel itself.
+
+---
+
+## OQ-018: Drone System Definition
+
+- **Q:** What are mining drones, physically and mechanically? What is their relationship to the ship, the player, and the world?
+- **Impact:** Blocks Automation Hub implementation, drone program UI, resource logistics code, and threat interaction design.
+- **Status:** Resolved (core architecture decided; implementation details tracked as open items in `meaningful-mining.md`)
+- **Resolution:**
+  - **Drones are physical entities present in the world.** They are not an abstracted background process. The player can observe them operating.
+  - **Scanner-first constraint:** A drone cannot be assigned to a deposit unless the player has already completed a Phase 2 Analysis on that specific deposit. The drone executes the player's knowledge — it does not scout or scan independently. A player who has analyzed more deposits has more targets available to assign. A player who has not scanned cannot delegate.
+  - This preserves the scanner-first design philosophy into the automation phase: skilled players who scan thoroughly operate better drone programs than players who rush.
+  - **Remaining implementation details (pending — game-designer next pass):** Physical form and locomotion (flying vs. ground vs. hybrid), deployment model (launch/return from Automation Hub), operating radius, resource logistics (how extracted material reaches ship cargo), destruction and replacement mechanics, lore origin (human tech vs. Serev-derived).
+
+---
+
+## OQ-021: Suit Battery System Details
+
+- **Q:** What are the parameters of the suit battery system? What can be upgraded, carried, and crafted?
+- **Impact:** Affects field-time balance, tool energy drain tuning, scanner energy cost, crafting economy (spare batteries), and ship power draw for recharging.
+- **Status:** Resolved
+- **Resolution:**
+  - **Tool energy:** Tools consume suit battery charge. No tool durability.
+  - **Scanner energy drain:** Free. Neither phase costs battery. Scanning is always available.
+  - **Battery depletion penalty:** At 0% charge, movement speed drops 25%. Player is never immobilized. Scanning remains functional.
+  - **Battery capacity:** Upgradable via the suit's dedicated upgrade system (separate from ship tech tree). See `docs/design/systems/player-suit.md`.
+  - **Recharge rate:** Fast — a few seconds at the ship. Not instant; not a meaningful wait.
+  - **Spare battery carry limit:** General inventory slots — no dedicated slot. Carrying batteries trades space with extracted resources.
+  - **Spare battery source:** Both crafted (reliable baseline) and found in world (exploration reward; may offer better quality than crafted).
+  - **Drone energy:** Drawn from ship Power, not suit battery — confirmed. Draw rate TBD (balance pass).
+  - **Suit upgrade system:** Four axes — Battery Capacity, Movement Speed, Scanner Range/Quality, Armor/Damage Resistance. See `docs/design/systems/player-suit.md`.
+
+---
+
+## OQ-019: Weather Damage to Structures
+
+- **Q:** How does weather affect building and module durability? What weather types exist and what damage do they deal?
+- **Impact:** Affects module durability system, biome weather design, and hazard balancing.
+- **Status:** Deferred — not implemented in first pass. The durability system for buildings and modules ships first without weather damage. Weather as a durability source is a post-launch or later-milestone feature.
+- **Resolution (when addressed):** Define weather types per biome, damage rates, and which modules are vulnerable vs. protected.
+
+---
+
+## OQ-020: Enemy NPC Attacks on Structures
+
+- **Q:** Can hostile NPCs target and damage ship modules and buildings? How does this interact with module durability?
+- **Impact:** Affects enemy AI targeting, combat design, and module durability tuning.
+- **Status:** Deferred — not implemented in first pass. NPCs deal damage to the ship's Integrity (already modeled as a global variable) but do not target individual modules in V1. Per-module NPC damage is a later feature.
+- **Resolution (when addressed):** Define which enemy types can target modules, damage rates, and whether module destruction is a discrete event or a health-pool degradation.
+
+---
+
+## OQ-016: Biome Design — First Biome
+
+- **Q:** What is the first biome? What are its resources, threat level, and visual character? How does the biome system stay extensible for future additions?
+- **Impact:** Was blocking resource economy design, procedural generation architecture, environment art direction, and the tutorial experience.
+- **Status:** Resolved
+- **Resolution:**
+  - **Architecture:** Biomes are the fundamental world unit. Each defines a threat tier (1–4), a resource palette, and a visual identity. New biomes are registered without architectural changes. See `docs/design/systems/biomes.md` for the full system spec and catalog format.
+  - **First biome: Overgrown Suburbs (B001).** Threat Tier 1 (Low). Rolling hilly terrain with sparse dying alien foliage and scattered debris from Serev technology and small residential ruins. Minimal hostile NPCs — designed as the tutorial zone.
+  - **Resources:** Scrap Metal (surface fragments as walk-up pickups; embedded deposits requiring Hand Drill) and Organic Matter (hand-harvested from plant-life; used as low-efficiency fuel).
+  - **Tutorial role:** Scrap Metal fragments introduce walk-up pickup before the full scanner loop is required. The biome is non-threatening by design — the world's danger is introduced as the player ventures into higher-tier zones.
+
+---
+
+## OQ-017: Scanner UI Design and HUD Overlay
+
+- **Q:** How does the scanner communicate information to the player? What are the UX flows for locating and analyzing deposits?
+- **Impact:** Was blocking scanner system implementation, HUD architecture, and gamepad control scheme design.
+- **Status:** Resolved
+- **Resolution:** Two-phase scanning system. Fully documented in `docs/design/systems/meaningful-mining.md` under "Scanner UX: Two-Phase Scanning."
+  - **Phase 1 — Locate:** Hold key → radial selection wheel (resource type). Release → ping expands outward from player. Detected deposits appear as direction + distance markers on the compass (Satisfactory-style). Designed for analog stick input first; mouse equally valid.
+  - **Phase 2 — Analyze:** Hold button in close range of a deposit → 2–3 second committed scan. Output: purity (1–5 stars), quantity density (Low/Medium/High), energy cost to mine, and 1–4 lit pattern lines on the resource geometry.
+  - **Mining Minigame:** Trace the lit lines with the mining laser before extraction completes for a +50% base bonus (variable by resource type and pattern difficulty). Drones cannot perform the minigame — manual play always outperforms drone yield on a per-deposit basis.
 
 ---
 

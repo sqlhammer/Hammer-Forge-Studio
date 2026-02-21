@@ -74,6 +74,8 @@ Detailed system specifications live in `docs/design/systems/`. Each spec defines
 |---|---|---|
 | Mobile Base (Atmospheric Ship) | [`docs/design/systems/mobile-base.md`](systems/mobile-base.md) | Draft |
 | Meaningful Mining | [`docs/design/systems/meaningful-mining.md`](systems/meaningful-mining.md) | Draft |
+| Biomes | [`docs/design/systems/biomes.md`](systems/biomes.md) | Draft |
+| Player Suit | [`docs/design/systems/player-suit.md`](systems/player-suit.md) | Draft |
 | Endgame Arc (The Moses Factor) | [`docs/design/systems/endgame-arc.md`](systems/endgame-arc.md) | Draft |
 
 ---

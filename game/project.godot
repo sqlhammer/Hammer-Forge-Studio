@@ -13,3 +13,8 @@ config_version=5
 config/name="core"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+Global="*res://autoloads/Global.gd"
+InputManager="*res://autoloads/InputManager.gd"

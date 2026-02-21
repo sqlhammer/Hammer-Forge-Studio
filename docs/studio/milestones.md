@@ -25,6 +25,7 @@
 | # | Milestone | Target Date | Status | Total | Open | Done | QA Sign-off |
 |---|-----------|-------------|--------|-------|------|------|-------------|
 | M0 | Studio Setup — Team infrastructure, ticket system, docs | 2026-02-20 | Active | — | — | — | — |
+| M1 | Core Game Architecture — Player controller, input system, view modes | 2026-03-14 | Planning | 7 | 7 | 0 | — |
 
 ---
 
@@ -43,3 +44,26 @@
 **Dependencies:** None
 
 **Risks:** None identified
+
+---
+
+### M1 — Core Game Architecture
+
+**Goal:** Build testable first-person and third-person player control systems with a unified input architecture.
+
+**Scope:**
+- Input system design and architecture specification
+- InputManager autoload for keyboard and gamepad input normalization
+- First-person player controller (movement, camera control)
+- Third-person orbital camera system (ship/base view)
+- Integrated player scene with view-switching
+- Code review and QA testing
+
+**Tickets:** TICKET-0001 through TICKET-0007
+
+**Dependencies:** M0 (infrastructure must be in place)
+
+**Risks:**
+- Input normalization across gamepad types may require iteration
+- Camera control smoothness and responsiveness may need tuning post-review
+- View-switching transitions require careful state management to avoid input conflicts

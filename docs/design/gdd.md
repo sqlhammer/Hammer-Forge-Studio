@@ -14,6 +14,7 @@
 **Genre:** Single-player open-world sci-fi survival (crafting, mining, base building)
 **Platform:** PC (Windows/Steam primary; Linux/Mac via Godot export). Console post-launch (PS5 / Xbox Series X). Gamepad is a first-class citizen from day one — all systems must be designed for controller. See `docs/studio/prd.md`.
 **Engine:** Godot 4.5
+**Visual Format:** 3D
 **Target Audience:** "The Efficient Architect" — tech-savvy players (late 20s–40s) who demand purposeful progression and reward automation over busywork. Solo players who value deep immersion over social gameplay.
 
 **Setting:** The dying planet Aur. The Serev rose here, built a planetary-scale machine — the Naer-Reth — to save themselves, and were consumed by it. The player — a human researcher who arrived in cryo-sleep to study the Serev — wakes up to find them already gone. Only Rel remains. Only the Naer-Reth waits to be finished. See `docs/narrative/narrative-bible.md` for the full world overview.
@@ -72,6 +73,7 @@ Detailed system specifications live in `docs/design/systems/`. Each spec defines
 
 | System | Spec File | Status |
 |---|---|---|
+| Input System | [`docs/design/systems/input-system.md`](systems/input-system.md) | In Review |
 | Mobile Base (Atmospheric Ship) | [`docs/design/systems/mobile-base.md`](systems/mobile-base.md) | Draft |
 | Meaningful Mining | [`docs/design/systems/meaningful-mining.md`](systems/meaningful-mining.md) | Draft |
 | Biomes | [`docs/design/systems/biomes.md`](systems/biomes.md) | Draft |

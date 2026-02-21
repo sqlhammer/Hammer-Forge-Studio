@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://bwcashb6xskrt"]
+
+[ext_resource type="Script" uid="uid://cjchs6isagqnn" path="res://test/test_input_manager.gd" id="1_f8yto"]
+
+[node name="TestInputManager" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_f8yto")
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 0
+text = "InputManager Test Scene"
+
+[node name="MainContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+anchor_top = 0.1
+anchor_bottom = 0.9
+
+[node name="DeviceLabel" type="Label" parent="MainContainer"]
+layout_mode = 2
+
+[node name="MovementLabel" type="Label" parent="MainContainer"]
+layout_mode = 2
+
+[node name="CameraLabel" type="Label" parent="MainContainer"]
+layout_mode = 2
+
+[node name="ActionLabel" type="Label" parent="MainContainer"]
+layout_mode = 2

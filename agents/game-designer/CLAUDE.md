@@ -40,7 +40,7 @@ Define, document, and validate every gameplay system and mechanic so the team ha
 3. Define all game rules, win/loss conditions, progression gates, and economy parameters; maintain balance tables in `docs/design/balance/`
 4. Own the player experience vision: define moment-to-moment feel targets (e.g., "jump should feel snappy, not floaty") and validate them during playtests
 5. Review gameplay prototype builds via screenshot and running scene observation; provide written feedback on feel and balance
-6. Identify and document any mechanical conflicts or design debt in `docs/design/open-questions.md`
+6. Identify and document any mechanical conflicts or design debt in `docs/design/open-questions.md`; move resolved entries to `docs/design/resolved-questions.md`
 7. Collaborate with Narrative Designer to ensure story beats and gameplay moments reinforce each other
 
 ---

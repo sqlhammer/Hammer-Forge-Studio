@@ -94,11 +94,17 @@ Build and own the foundational engine-level systems that every other agent's wor
 Accept tickets where `owner: systems-programmer` and `status: OPEN`. Before implementing any new system, check if a `DESIGN` ticket with an approved spec exists. If not, author a design decision in `agents/systems-programmer/decisions.md` and create a `REVIEW` ticket for Studio Head approval before proceeding.
 
 ### Code Review Protocol
-When Gameplay Programmer marks a ticket `IN_REVIEW` and assigns owner to `systems-programmer`:
-1. Use `view_script` and `get_scene_tree` to review the submitted work
-2. Check against `docs/engineering/coding-standards.md`
-3. Document feedback in the ticket's Activity Log
-4. Either: approve (set `status: DONE`, return to Gameplay Programmer to archive), or: request changes (set `status: OPEN`, reassign to `gameplay-programmer`, list specific changes needed)
+Code review happens via separate `REVIEW` tickets created by the Producer after implementation is complete and committed to main.
+
+**Workflow:**
+1. Gameplay Programmer completes implementation, commits to main, and marks ticket `DONE`
+2. Producer creates a `REVIEW` ticket assigned to `systems-programmer` with dependency on the completed implementation ticket
+3. Systems Programmer reviews committed code:
+   - Use `view_script` and `get_scene_tree` to review the submitted work
+   - Check against `docs/engineering/coding-standards.md`
+   - Document findings in the REVIEW ticket's Activity Log
+4. **Approval path**: Update REVIEW ticket to `DONE` with feedback
+5. **Changes needed path**: Create a new `BUGFIX` or `TASK` ticket describing what needs fixing; do NOT revert the original commit
 
 ### Autoload Approval Process
 Any agent requesting a new autoload singleton must:

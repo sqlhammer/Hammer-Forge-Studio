@@ -1,19 +1,21 @@
 # GDScript Coding Standards
 
 **Owner:** systems-programmer
-**Status:** Draft
-**Last Updated:** —
+**Status:** Active
+**Last Updated:** 2026-02-20
+**Sources:** Hammer Forge Studio standards + [Godot GDScript Style Guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
 
-> All GDScript produced by any agent must follow these standards. Systems Programmer enforces via code review.
+> All GDScript produced by any agent must follow these standards. Systems Programmer enforces via code review. The official Godot style guide applies as a baseline; the rules below take precedence wherever they differ.
 
 ---
 
 ## File and Node Naming
 
 - **Script files:** `snake_case.gd` (e.g., `player_controller.gd`)
-- **Class names:** `PascalCase` using `class_name` (e.g., `class_name PlayerController`)
-- **Node names in scene:** `PascalCase` (e.g., `PlayerSprite`, `CollisionShape`)
+- **Class names:** `PascalCase` using `class_name` — always use `class_name`, never `extends "res://..."` string paths
+- **Node names in scene:** `PascalCase` — always descriptive (e.g., `SaveButton`, `PlayerSprite`) — generic names like `Button1` or `Node2D` are never acceptable
 - **Scene files:** `snake_case.tscn` matching the root node's class name
+- **Abbreviations:** avoid in favor of fully qualified words (e.g., `PlayerController` not `PlyrCtrl`, `HealthComponent` not `HpComp`)
 
 ---
 
@@ -23,7 +25,9 @@
 - **Constants:** `SCREAMING_SNAKE_CASE`
 - **Signals:** `past_tense_snake_case` (e.g., `player_jumped`, `enemy_died`)
 - **Private members:** prefix with `_` (e.g., `_current_state`)
-- **No untyped variables:** always declare type (e.g., `var speed: float = 5.0`)
+- **Strong typing required:** all variables must declare their type — `var speed: float = 5.0`, never `var speed = 5.0`
+- **All method/function signatures must use typed parameters**
+- **Void functions must be explicitly labeled** `-> void`
 
 ---
 
@@ -32,6 +36,7 @@
 Every script must follow this section order:
 
 ```gdscript
+## Plain-language comment describing the purpose of this class.
 class_name ClassName
 extends ParentClass
 
@@ -58,6 +63,7 @@ func _process(delta: float) -> void:
     pass
 
 # ── Public Methods ────────────────────────────────────────
+## Plain-language comment describing what this method does.
 func do_thing() -> void:
     pass
 
@@ -68,34 +74,109 @@ func _helper() -> void:
 
 ---
 
-## Documentation
+## Documentation and Comments
 
-- Every `class_name` script must have a one-line comment below the `extends` declaration describing its purpose
-- Every public function (`func` without `_` prefix) must have a docstring comment above it
-- Complex logic blocks must have an inline comment explaining the why, not the what
+- Every script must begin with a `##` docstring comment (above `class_name`) describing the purpose of the class in plain language
+- Every public method must have a `##` docstring comment immediately above it
+- Every complex or non-obvious logic block must have an inline `#` comment explaining **why**, not what
+- All classes, scripts, and methods are decorated with plain-language comments — code should be readable without mental translation
+
+---
+
+## Project Structure
+
+### Required Autoloads
+
+| Autoload Name | Purpose |
+|---------------|---------|
+| `SceneHandler` | Every project must have a `SceneHandler` autoload accessible to all scenes; responsible for scene loading and transitions |
+| `Global` | Generic helper functions and global variables shared across the project |
+
+- The starting node of every project is named **`Game`** and uses the generic `Node` type
+- On `_ready()`, the `Game` script calls a method in `SceneHandler` to load the opening scene
+- Purpose-specific configuration files (`.tres` resources or `.cfg`) are used to keep game configuration abstracted away from scene code — do not hardcode tunable values in scripts
+
+### Scene Design
+
+- **Break scenes into independently runnable and testable units** — each scene should be playable in isolation where possible
+- Minimize coupling and direct dependencies between scenes
+- Export configuration variables where it improves editor usability and in-scene testing
+- Use `Marker2D` and `Marker3D` node types for spawn points and important positions — never use raw `Vector2`/`Vector3` constants for locations
+- Use `AnimationPlayer` for animations — never cycle frames in code
+
+---
+
+## Communication Between Nodes
+
+- **Prefer signals over direct method calls** between nodes — minimize cross-node method coupling
+- Use the `EventBus` autoload for cross-system events that span unrelated scenes or autoloads
+- Use `@export` with type hints for all designer-tunable values
+- Never call `Input.is_action_pressed()` directly — route through the `InputManager` autoload
+
+---
+
+## Debugging
+
+- Write debug print statements for any useful events or actions
+- All debug output must go through a method on an autoload (e.g., `Global.log(message)`) that only prints when `OS.is_debug_build()` is `true`
+- Never leave bare `print()` statements in production code — use the debug logging method or `push_warning()` / `push_error()` for intentional diagnostic output
+
+---
+
+## Method and Expression Standards
+
+- **Prefer `match` over chained `if/elif`** for state switching
+- **Use `await`** for async operations — never use manual timers for control flow
+- **Complex expressions must be resolved into a local variable first:** any method parameter that involves concatenation or math with more than two components must be assigned to a named local variable before being passed into the method
+
+```gdscript
+# Wrong
+move_and_collide(Vector2(base_speed * sprint_multiplier * delta, gravity * delta))
+
+# Correct
+var horizontal_velocity: float = base_speed * sprint_multiplier * delta
+var vertical_velocity: float = gravity * delta
+move_and_collide(Vector2(horizontal_velocity, vertical_velocity))
+```
 
 ---
 
 ## Patterns to Use
 
-- Use signals for cross-node communication — never call methods on sibling nodes directly
-- Use `EventBus` autoload for cross-system events
-- Use `@export` with type hints for all designer-tunable values
-- Prefer `match` over chained `if/elif` for state switching
-- Use `await` for async operations — never use manual timers for control flow
+- Signals for cross-node communication
+- `EventBus` autoload for cross-system events
+- `@export` with type hints for all designer-tunable values
+- `class_name` for inheritance — never `extends "res://..."` string paths
+- `Marker2D` / `Marker3D` for spawn and reference points
+- `AnimationPlayer` for all animations
+- Named local variables for multi-component expressions before passing to methods
 
 ---
 
 ## Patterns to Avoid
 
 - `get_node()` with magic strings beyond direct children — use `@onready` instead
-- `var x` without a type — always type your variables
+- Untyped variables (`var x = 5` — always `var x: int = 5`)
+- Generic, non-descriptive node or variable names (`Button1`, `node`, `temp`)
+- Abbreviations in any identifier
 - Calling `Input.is_action_pressed()` directly — use `InputManager` autoload
 - Creating autoloads without Systems Programmer approval
-- `print()` statements left in production code — use `push_warning()` or `push_error()` for intentional logs
+- Bare `print()` statements — use `Global.log()` or `push_warning()` / `push_error()`
+- Frame cycling in code — use `AnimationPlayer`
+- `extends "res://..."` string-path inheritance — use `class_name` instead
+- Multi-component expressions passed directly as method arguments
 
 ---
 
 ## Physics Layers
 
 Physics layer assignments are defined in `docs/engineering/physics-layers.md`. Never use raw integers for collision masks — use the named layer constants.
+
+---
+
+## Testability
+
+- Optimize all code for readability and ease of troubleshooting
+- Structure scenes so they can be run and tested independently
+- Minimize coupling between scenes; export configuration variables to make in-editor testing practical
+- Write debug log calls for all meaningful events and state transitions

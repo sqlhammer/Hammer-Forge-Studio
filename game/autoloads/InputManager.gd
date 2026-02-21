@@ -1,6 +1,5 @@
 ## Centralized input management system that normalizes keyboard and gamepad input.
 ## Provides a unified interface for querying input state across all gameplay contexts.
-class_name InputManager
 extends Node
 
 # ── Constants ─────────────────────────────────────────────
@@ -11,8 +10,6 @@ const INPUT_DEVICE_SWITCH_DEBOUNCE: float = 0.1
 
 # ── Signals ───────────────────────────────────────────────
 signal input_device_changed(device: String)  # "keyboard" or "gamepad"
-signal action_pressed(action: String)
-signal action_released(action: String)
 
 # ── Exported Variables ────────────────────────────────────
 @export var mouse_sensitivity_x: float = 1.0
@@ -35,7 +32,6 @@ var _last_gamepad_activity: float = 0.0
 func _ready() -> void:
 	set_process_input(true)
 	_setup_input_actions()
-	Global.log("InputManager initialized")
 
 func _input(event: InputEvent) -> void:
 	# Track which input device is being used
@@ -76,7 +72,7 @@ func get_analog_input(stick: String) -> Vector2:
 			raw_input.y = Input.get_joy_axis(_gamepad_index, JOY_AXIS_RIGHT_Y)
 			return _apply_dead_zone(raw_input, GAMEPAD_DEAD_ZONE_CAMERA)
 		_:
-			Global.log("WARNING: Invalid stick name '%s'" % stick)
+			push_warning("InputManager: Invalid stick name '%s'" % stick)
 			return Vector2.ZERO
 
 ## Returns analog input from left or right trigger with dead zone applied.
@@ -91,7 +87,7 @@ func get_trigger_input(trigger: String) -> float:
 		"right":
 			raw_input = Input.get_joy_axis(_gamepad_index, JOY_AXIS_TRIGGER_RIGHT)
 		_:
-			Global.log("WARNING: Invalid trigger name '%s'" % trigger)
+			push_warning("InputManager: Invalid trigger name '%s'" % trigger)
 			return 0.0
 	
 	# Normalize trigger input from [-1, 1] to [0, 1] and apply dead zone
@@ -136,8 +132,6 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("ship_right", [KEY_D, KEY_RIGHT])
 	_add_action_if_missing("ship_accelerate", [KEY_SPACE])
 	_add_action_if_missing("ship_emergency_stop", [KEY_X])
-	
-	Global.log("InputManager: Input actions configured")
 
 ## Adds an input action if it doesn't already exist.
 func _add_action_if_missing(action_name: String, keys: Array) -> void:
@@ -170,5 +164,4 @@ func _switch_input_device(device: String) -> void:
 	
 	_current_input_device = device
 	_device_switch_timer = 0.0
-	Global.log("InputManager: Input device switched to '%s'" % device)
 	input_device_changed.emit(device)

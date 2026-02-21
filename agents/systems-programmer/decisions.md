@@ -52,3 +52,60 @@
 - Should we add input buffering for action queuing (e.g., buffer jump input for 1 frame)?
 
 See `docs/engineering/architecture.md` for full API documentation.
+
+---
+
+## [2026-02-21] [TICKET-0003] First-Person Controller Code Review
+
+**Context:** Gameplay Programmer submitted PlayerFirstPerson.gd for code review. Script implements character movement, camera control, and gravity per design spec.
+
+**Decision:** ✅ APPROVED for production. Script meets all coding standards and architecture requirements.
+
+**Review Findings:**
+- Strong type annotations throughout: COMPLIANT
+- Docstrings on all public methods: COMPLIANT
+- Proper section ordering (constants → exported → private → onready → built-in → public → private): CORRECT
+- All input routed through InputManager (no direct Input API calls): CORRECT
+- Method naming (snake_case) and class naming (PascalCase): CORRECT
+- No dead code or unused variables: CLEAN
+- Frame-rate independent movement (delta scaling): CORRECT
+- Pitch clamping prevents upside-down camera: GOOD
+- Warning ignore annotation appropriate for autoload type checking: ACCEPTABLE
+
+**Rationale:**
+- Code is clean, readable, and maintainable
+- Physics implementation (CharacterBody3D) is appropriate
+- Input handling design shows good separation of concerns
+- Ready for integration into TICKET-0005
+
+---
+
+## [2026-02-21] [TICKET-0004] Third-Person Controller Code Review
+
+**Context:** Gameplay Programmer submitted PlayerThirdPerson.gd for code review. Script implements orbital camera system using spherical coordinates per design spec.
+
+**Decision:** ✅ APPROVED for production. Minor warnings are non-blocking; core functionality and standards compliance are excellent.
+
+**Review Findings:**
+- Strong type annotations throughout: COMPLIANT
+- Docstrings on all public methods: COMPLIANT
+- Proper section ordering: CORRECT
+- All input routed through InputManager: CORRECT
+- Method naming and class naming: CORRECT
+- Spherical coordinate math (sin/cos orbital calculations): CORRECT
+- Smooth damping via lerp interpolation: GOOD
+- Framerate-independent input scaling: CORRECT
+- Public API design (set_orbit_center, get_camera_position, reset_orbit): GOOD
+
+**Minor Non-Blocking Issues:**
+- Parameter "position" shadows Node3D.position property in set_orbit_center()
+  - Severity: LOW (no runtime impact; suggestion: rename to target_pos in future refinement)
+- Parameter "delta" unused in _apply_orbit_damping()
+  - Severity: LOW (suggestion: rename to _delta to suppress compiler warning in future)
+
+**Rationale:**
+- Orbital camera implementation is mathematically sound
+- Zoom constraints (MIN: 5, MAX: 50) are reasonable
+- Error handling on _ready() is appropriate
+- Warning ignore annotations properly suppress autoload type checking warnings
+- Ready for integration into TICKET-0005

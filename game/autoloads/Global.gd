@@ -1,5 +1,4 @@
 ## Global utility autoload for shared helper functions and debug logging.
-class_name Global
 extends Node
 
 # ── Public Methods ────────────────────────────────────────

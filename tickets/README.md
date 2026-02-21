@@ -117,11 +117,26 @@ What the next owner needs to know when this ticket is transferred to them.
 
 ## Archiving
 
-When a ticket reaches `status: DONE` or `CANCELLED`:
-1. Move the file to `tickets/_archive/TICKET-NNNN.md`
-2. Add a final Activity Log entry: `YYYY-MM-DD [slug] Archived`
+### Producer Responsibility: Regular Archival Sweeps
 
-Only the Producer archives tickets.
+The **Producer** is responsible for archiving completed tickets. This is an explicit workflow step:
+
+1. **Schedule:** Perform archival sweeps at the end of each sprint or daily during active development
+2. **Trigger:** When a ticket reaches `status: DONE` or `CANCELLED`, it becomes eligible for archival
+3. **Process:**
+   - Review all tickets in `tickets/` with `status: DONE` or `CANCELLED`
+   - For each eligible ticket:
+     - Move the file to `tickets/_archive/TICKET-NNNN.md`
+     - Add a final Activity Log entry: `YYYY-MM-DD [producer] Archived`
+   - Commit the archival batch as a single commit: `"Archive: Move completed tickets to _archive (TICKET-NNNN, TICKET-NNNN, ...)"`
+
+### Archival Checklist
+
+Before archiving a ticket, verify:
+- ✅ `status: DONE` or `CANCELLED` (no other statuses should be archived)
+- ✅ Code committed to `main` (if applicable — DONE tickets with repo changes must be committed)
+- ✅ All acceptance criteria met (checked in ticket)
+- ✅ No blocked dependencies (if tickets depend on it, do not archive yet)
 
 ---
 

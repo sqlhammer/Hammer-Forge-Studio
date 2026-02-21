@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://dgsdtnrvdxe1h"]
+
+[ext_resource type="Script" uid="uid://b0tjxdbp58jvs" path="res://scripts/gameplay/player_first_person.gd" id="1_fim4v"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fim4v"]
+radius = 0.4
+height = 1.8
+
+[node name="PlayerFirstPerson" type="CharacterBody3D"]
+script = ExtResource("1_fim4v")
+
+[node name="CollisionShape" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_fim4v")
+
+[node name="Head" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="Head"]

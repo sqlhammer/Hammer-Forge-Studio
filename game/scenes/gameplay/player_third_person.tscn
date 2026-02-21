@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://bscmpu86ki1i8"]
+
+[ext_resource type="Script" uid="uid://blwc3yc5nsfii" path="res://scripts/gameplay/player_third_person.gd" id="1_b777b"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_b777b"]
+size = Vector3(4, 3, 8)
+
+[node name="PlayerThirdPerson" type="Node3D"]
+script = ExtResource("1_b777b")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+
+[node name="TargetModel" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_b777b")

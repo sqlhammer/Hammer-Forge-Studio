@@ -2,7 +2,7 @@
 
 **Owner:** systems-programmer
 **Status:** Active
-**Last Updated:** 2026-02-20
+**Last Updated:** 2026-02-21
 **Sources:** Hammer Forge Studio standards + [Godot GDScript Style Guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
 
 > All GDScript produced by any agent must follow these standards. Systems Programmer enforces via code review. The official Godot style guide applies as a baseline; the rules below take precedence wherever they differ.
@@ -12,7 +12,7 @@
 ## File and Node Naming
 
 - **Script files:** `snake_case.gd` (e.g., `player_controller.gd`)
-- **Class names:** `PascalCase` using `class_name` — always use `class_name`, never `extends "res://..."` string paths
+- **Class names:** `PascalCase` using `class_name` — always use `class_name` unless it hides or shadows another class, never `extends "res://..."` string paths
 - **Node names in scene:** `PascalCase` — always descriptive (e.g., `SaveButton`, `PlayerSprite`) — generic names like `Button1` or `Node2D` are never acceptable
 - **Scene files:** `snake_case.tscn` matching the root node's class name
 - **Abbreviations:** avoid in favor of fully qualified words (e.g., `PlayerController` not `PlyrCtrl`, `HealthComponent` not `HpComp`)
@@ -115,6 +115,21 @@ func _helper() -> void:
 
 ---
 
+## Godot Editor Compliance
+
+**All code must compile and run without errors in the Godot Editor. The Studio Head must be able to open the project and execute scenes without encountering unaddressed errors or warnings.**
+
+- **No Godot Editor errors are acceptable.** All editor-reported errors must be resolved before a ticket is marked DONE.
+- **All compiler warnings must be resolved.** Warning suppression using `@warning_ignore()` is **not permitted** without explicit Studio Head approval. Agents must fix the underlying issue, not suppress the warning.
+- **Scripts must have zero syntax errors** when opened in the Godot editor
+- **Debug builds must run without errors.** If errors appear during play-testing, they must be fixed before moving to the next ticket.
+- **Type checking must pass.** All variables and function signatures must be properly typed to pass Godot's type checker.
+
+This rule applies to all agents. Systems Programmer enforces this during code review. Any requested suppression must be escalated to the Studio Head for approval before being applied.
+
+
+---
+
 ## Debugging
 
 - Write debug print statements for any useful events or actions
@@ -165,6 +180,7 @@ move_and_collide(Vector2(horizontal_velocity, vertical_velocity))
 - Frame cycling in code — use `AnimationPlayer`
 - `extends "res://..."` string-path inheritance — use `class_name` instead
 - Multi-component expressions passed directly as method arguments
+- **Leaving Godot Editor errors or unaddressed warnings in code** — see "Godot Editor Compliance" section
 
 ---
 

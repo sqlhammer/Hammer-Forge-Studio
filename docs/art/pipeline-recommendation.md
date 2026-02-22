@@ -198,9 +198,9 @@ Both pipelines were evaluated against the six criteria from `docs/art/poc-evalua
 
 | Item | Monthly Cost |
 |------|-------------|
-| Tripo3D Professional | $11.94 |
+| Tripo3D Professional | $19.94 |
 | Blender | $0 (open source) |
-| **Total** | **$11.94/month** |
+| **Total** | **$19.94/month** |
 
 At Professional tier: ~75 assets/month, sufficient for M2-M3 production.
 

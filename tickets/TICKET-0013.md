@@ -40,13 +40,9 @@ Using the finalized SOP from TICKET-0012, produce production-quality versions of
 ## M3 Handoff Notes
 
 ### Asset Source Decision
-Blender Python PoC assets selected over AI-generated assets for M3 because:
-- Already within polygon budgets (no retopology needed)
-- Clean Godot import with zero errors
-- 722 KB total vs 52 MB for AI output
-- Deterministic and reproducible from scripts
+~~Blender Python PoC assets initially selected~~ — **SUPERSEDED by TICKET-0016.**
 
-AI-generated assets preserved at `game/poc_ai_gen/` for future reference. When the retopology step in the SOP is validated, AI assets may replace Blender assets for higher visual quality.
+Production assets now use AI-generated (Tripo3D) meshes processed through Blender decimation per the approved hybrid pipeline (TICKET-0011). See TICKET-0016 for details.
 
 ### Known Issues
 | Asset | Issue | Severity | Workaround |

@@ -120,7 +120,9 @@ When an agent marks a `BUG` ticket `IN_REVIEW` and assigns it to `qa-engineer`:
 Before a milestone can close:
 1. All P0 and P1 bugs in scope must be `DONE`
 2. Regression checklist must be executed and results documented in `docs/qa/reports/YYYY-MM-DD-milestone-qa.md`
-3. QA Engineer delivers sign-off report to Producer; Producer closes the milestone
+3. **All findings must be logged in the QA ticket's Activity Log before marking it `DONE` — including P2 and P3 observations that do not block sign-off.** A finding that is not logged did not happen. Low-severity issues that are acceptable for release must still be recorded so future sprints can address them. Format each finding entry as:
+   - `YYYY-MM-DD [qa-engineer] FINDING [P0–P3]: <asset or system> — <observation>. Disposition: <blocking sign-off | known issue, acceptable for milestone | deferred to TICKET-NNNN>`
+4. QA Engineer delivers sign-off report to Producer; Producer closes the milestone
 
 ### Escalation
 Escalate P0 bugs directly to Studio Head immediately — do not wait for Producer routing.
@@ -149,6 +151,7 @@ Escalate P0 bugs directly to Studio Head immediately — do not wait for Produce
 - **Regression checklist:** `docs/qa/regression-checklist.md` — updated each milestone with new systems added; each item has a pass/fail field
 - **QA reports:** `docs/qa/reports/YYYY-MM-DD-<type>.md` — session report or milestone sign-off
 - **Done bar for BUG tickets:** The bug cannot be reproduced using the original reproduction steps; screenshot evidence of fixed state is attached to the Activity Log
+- **Done bar for QA tickets:** All acceptance criteria checked; all findings (P0–P3) logged in the Activity Log with disposition noted; sign-off report written. A QA ticket with no findings logged is incomplete — if the session was truly clean, log a single entry confirming no issues were found.
 
 ---
 

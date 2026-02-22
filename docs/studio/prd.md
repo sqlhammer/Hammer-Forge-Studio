@@ -156,14 +156,16 @@ Placeholder milestone structure:
 
 | Milestone | Target | Description |
 |---|---|---|
-| M0 | [Active] | Studio setup, documentation, agent configuration |
-| M1 | [TBD] | Core loop prototype: scan → mine → craft (no ship navigation) |
-| M2 | [TBD] | Ship systems: mobile base + global variables + module system |
-| M3 | [TBD] | Full biome progression: Tier 1–3 with escalating threats |
-| M4 | [TBD] | Mega-Project arc: complete tech tree + endgame sequence |
-| M5 | [TBD] | Alpha: full playthrough possible |
-| M6 | [TBD] | Beta / external testing |
-| Launch | [TBD] | Steam release |
+| M0 | Complete | Studio setup, documentation, agent configuration |
+| M1 | Complete (2026-02-21) | Core game architecture: player controller, input system, view modes |
+| M2 | Active | 3D asset pipeline: PoC evaluation, pipeline SOP, M3-ready assets |
+| M3 | Planning | First playable: minimal ship in world, scan/mine loop |
+| M4 | Planning | Ship systems: navigation, global variables, module system |
+| M5 | Planning | Full biome progression: Tier 1–3 with escalating threats |
+| M6 | Planning | Mega-Project arc: complete tech tree + endgame sequence |
+| M7 | Planning | Alpha: full playthrough possible |
+| M8 | Planning | Beta / external testing |
+| Launch | TBD | Steam release |
 
 ---
 

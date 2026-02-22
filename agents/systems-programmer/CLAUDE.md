@@ -103,8 +103,8 @@ Code review happens via separate `REVIEW` tickets created by the Producer after 
    - Use `view_script` and `get_scene_tree` to review the submitted work
    - Check against `docs/engineering/coding-standards.md`
    - Document findings in the REVIEW ticket's Activity Log
-4. **Approval path**: Update REVIEW ticket to `DONE` with feedback
-5. **Changes needed path**: Create a new `BUGFIX` or `TASK` ticket describing what needs fixing; do NOT revert the original commit
+4. **Approval path**: Update REVIEW ticket to `DONE` with feedback; if the work was submitted via a worktree PR, merge the PR to `main` and record the merge in the REVIEW ticket's Activity Log
+5. **Changes needed path**: Create a new `BUGFIX` or `TASK` ticket describing what needs fixing; leave the PR open; do NOT revert the original commit and do NOT merge until issues are resolved
 
 ### Autoload Approval Process
 Any agent requesting a new autoload singleton must:

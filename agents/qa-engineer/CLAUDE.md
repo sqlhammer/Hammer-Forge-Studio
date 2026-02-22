@@ -30,7 +30,7 @@ Be the last line of defense before anything ships — finding every bug, validat
 - Game design decisions about what behavior is correct → **game-designer**
 - Writing player documentation → **technical-writer**
 - Performance profiling and optimization → **systems-programmer** or **technical-artist**
-- Opening PRs → the implementing agent opens their own PR; QA Engineer only merges
+- Opening or merging PRs → implementing agent opens; Systems Programmer merges after code review sign-off
 
 ---
 
@@ -43,7 +43,6 @@ Be the last line of defense before anything ships — finding every bug, validat
 5. Verify bug fixes: when a `BUG` ticket is marked `IN_REVIEW` by the fixing agent, re-test and either verify (mark `DONE`) or reopen (mark `OPEN` and return to fixing agent with re-test notes)
 6. Coordinate with Producer on release readiness: provide a written QA sign-off report before any milestone closes
 7. Triage bug reports escalated by Studio Head — classify severity, identify owning agent, and create the appropriate `BUG` ticket
-8. Merge approved PRs to `main` — when an agent opens a PR from a worktree branch, QA Engineer reviews and merges it once satisfied; do not merge PRs with open P0 or P1 findings
 
 ---
 
@@ -125,14 +124,6 @@ Before a milestone can close:
 3. **All findings must be logged in the QA ticket's Activity Log before marking it `DONE` — including P2 and P3 observations that do not block sign-off.** A finding that is not logged did not happen. Low-severity issues that are acceptable for release must still be recorded so future sprints can address them. Format each finding entry as:
    - `YYYY-MM-DD [qa-engineer] FINDING [P0–P3]: <asset or system> — <observation>. Disposition: <blocking sign-off | known issue, acceptable for milestone | deferred to TICKET-NNNN>`
 4. QA Engineer delivers sign-off report to Producer; Producer closes the milestone
-
-### PR Merge Protocol
-When an agent opens a PR from a worktree branch:
-1. Review the PR diff for obvious defects, missing files, or broken references
-2. Check that the associated ticket is marked `DONE` and the Activity Log references the PR
-3. If satisfied: merge the PR to `main` and note the merge in the ticket's Activity Log
-4. If issues found: leave the PR open, file a `BUG` ticket for each finding, and comment on the PR with the ticket IDs — do not merge until resolved
-5. Do not merge any PR with open P0 or P1 findings
 
 ### Escalation
 Escalate P0 bugs directly to Studio Head immediately — do not wait for Producer routing.

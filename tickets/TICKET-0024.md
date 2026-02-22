@@ -2,7 +2,7 @@
 id: TICKET-0024
 title: "Scanner Phase 1 — ping and compass"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -46,3 +46,5 @@ Implement Scanner Phase 1: the player activates a ping that reveals nearby resou
 
 ## Activity Log
 - 2026-02-22 [producer] Created ticket
+- 2026-02-22 [gameplay-programmer] Status → IN_PROGRESS
+- 2026-02-22 [gameplay-programmer] Implementation complete. Commit f71b964. Status → DONE

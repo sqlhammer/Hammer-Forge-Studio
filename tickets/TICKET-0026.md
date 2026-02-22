@@ -2,7 +2,7 @@
 id: TICKET-0026
 title: "Mining interaction"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -49,3 +49,5 @@ Implement the mining interaction: the player holds Use Tool near an analyzed dep
 
 ## Activity Log
 - 2026-02-22 [producer] Created ticket
+- 2026-02-22 [gameplay-programmer] Status → IN_PROGRESS
+- 2026-02-22 [gameplay-programmer] Implementation complete. Commit f71b964. Status → DONE

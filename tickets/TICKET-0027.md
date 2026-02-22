@@ -2,7 +2,7 @@
 id: TICKET-0027
 title: "HUD — battery bar and pickup notifications"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -41,3 +41,5 @@ Implement the standalone HUD elements that are not part of another gameplay syst
 
 ## Activity Log
 - 2026-02-22 [producer] Created ticket
+- 2026-02-22 [gameplay-programmer] Status → IN_PROGRESS
+- 2026-02-22 [gameplay-programmer] Implementation complete. Commit f71b964. Status → DONE

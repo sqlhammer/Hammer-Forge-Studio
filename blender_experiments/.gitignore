@@ -1,0 +1,16 @@
+# Virtual environment
+.venv/
+
+# Generated 3D assets (rebuild from scripts)
+*.blend
+*.blend1
+*.obj
+*.mtl
+*.glb
+*.gltf
+
+# Python cache
+__pycache__/
+
+# Test output
+test_cube/

@@ -15,6 +15,7 @@ signal depleted
 
 # ── Private Variables ─────────────────────────────────────
 var _remaining_quantity: int = 0
+var _is_pinged: bool = false
 var _is_analyzed: bool = false
 
 # ── Built-in Virtual Methods ──────────────────────────────
@@ -34,6 +35,14 @@ func get_total() -> int:
 ## Returns true if the deposit has been fully mined.
 func is_depleted() -> bool:
 	return _remaining_quantity <= 0
+
+## Returns true if the scanner has pinged this deposit.
+func is_pinged() -> bool:
+	return _is_pinged
+
+## Marks this deposit as pinged by the scanner.
+func mark_pinged() -> void:
+	_is_pinged = true
 
 ## Returns true if the scanner has analyzed this deposit.
 func is_analyzed() -> bool:
@@ -90,6 +99,7 @@ func serialize() -> Dictionary:
 		"deposit_tier": deposit_tier,
 		"total_quantity": total_quantity,
 		"remaining_quantity": _remaining_quantity,
+		"is_pinged": _is_pinged,
 		"is_analyzed": _is_analyzed,
 		"position": {
 			"x": global_position.x,
@@ -106,6 +116,7 @@ func deserialize(data: Dictionary) -> void:
 	deposit_tier = data.get("deposit_tier", ResourceDefs.DepositTier.TIER_1) as ResourceDefs.DepositTier
 	total_quantity = data.get("total_quantity", 40) as int
 	_remaining_quantity = data.get("remaining_quantity", total_quantity) as int
+	_is_pinged = data.get("is_pinged", false) as bool
 	_is_analyzed = data.get("is_analyzed", false) as bool
 	var pos: Dictionary = data.get("position", {})
 	if not pos.is_empty():

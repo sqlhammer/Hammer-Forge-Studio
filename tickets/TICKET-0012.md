@@ -43,3 +43,4 @@ Using the pipeline decision from TICKET-0011, produce the authoritative SOP for 
 ## Activity Log
 - 2026-02-22 [producer] Created ticket; depends on TICKET-0011
 - 2026-02-22 [technical-artist] SOP v1.0 written at docs/art/3d-pipeline-sop.md. Covers hybrid pipeline (AI Gen + Blender Python), with decision rule, step-by-step for both sub-pipelines, worked example (hand drill via AI pipeline), common failure modes, and Blender decimation workflow for AI output optimization. Tech-specs.md updated with real polygon budgets, texture budgets, draw call targets, import settings, directory structure, naming conventions, and validation checklist. All AC met. DONE.
+- 2026-02-22 [producer] PROCESS VIOLATION FLAGGED — this ticket was completed before TICKET-0011 received Studio Head approval. Work product may need revision if the pipeline decision changes. Status held as DONE pending TICKET-0015 resolution; Studio Head may request rework via a new TASK ticket.

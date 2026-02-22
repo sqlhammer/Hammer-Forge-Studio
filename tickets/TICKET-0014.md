@@ -9,7 +9,7 @@ created_by: producer
 created_at: 2026-02-22
 updated_at: 2026-02-22
 milestone: "M2"
-depends_on: [TICKET-0012, TICKET-0013]
+depends_on: [TICKET-0012, TICKET-0013, TICKET-0015]
 blocks: []
 tags: [qa, art-pipeline, validation]
 ---
@@ -44,3 +44,4 @@ Validate that all 4 game assets import cleanly into Godot, meet the art tech spe
 
 ## Activity Log
 - 2026-02-22 [producer] Created ticket; depends on TICKET-0012, TICKET-0013
+- 2026-02-22 [producer] GATED — added dependency on TICKET-0015. TICKET-0011 pipeline decision was never approved by Studio Head before TICKET-0012 and TICKET-0013 were marked DONE. QA must not begin until TICKET-0015 is resolved.

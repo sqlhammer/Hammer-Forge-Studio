@@ -27,7 +27,7 @@
 | M0 | Studio Setup — Team infrastructure, ticket system, docs | 2026-02-20 | Complete | — | — | — | — |
 | M1 | Core Game Architecture — Player controller, input system, view modes | 2026-02-21 | Complete | 7 | 0 | 7 | 2026-02-21 |
 | M2 | 3D Asset Pipeline — PoC evaluation, pipeline SOP, M3-ready assets | 2026-02-22 | Complete | 10 | 0 | 10 | 2026-02-22 |
-| M3 | First Playable — Minimal ship in world, scan/mine loop | — | Planning | — | — | — | — |
+| M3 | First Playable — Minimal ship in world, scan/mine loop | — | Active | 13 | 13 | 0 | — |
 | M4 | Ship Systems — Navigation, global variables, module system | — | Planning | — | — | — | — |
 | M5 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
 | M6 | Mega-Project Arc — Full tech tree, endgame sequence | — | Planning | — | — | — | — |
@@ -101,11 +101,48 @@
 
 ### M3 — First Playable
 
-**Goal:** Player can exist in a minimal game world, exit the ship onto alien terrain, scan for a resource deposit, mine it, and return to the ship. First end-to-end pass of the core loop.
+**Goal:** Player can exist in a minimal game world, spawn at the ship, scan for resource deposits, navigate via compass, analyze a deposit, mine it with the hand drill, collect resources into inventory, manage suit battery, and return to the ship to recharge. First end-to-end pass of the core loop.
 
-**Scope:** TBD — to be defined after M2 closes.
+**Scope:**
+- First-person perspective only (third-person deferred)
+- Scanner Phase 1: ping reveals deposits, compass markers with distance readout
+- Scanner Phase 2: hold-to-analyze, readout shows purity/density/energy cost
+- Mining: hold-to-extract with hand drill, battery drain, inventory collection, deposit depletion
+- Suit battery: drains during mining, recharges at ship, 25% movement penalty at 0%
+- Inventory: 15 slots, 100 per stack, slot-based grid UI
+- HUD: compass, battery bar, mining progress, pickup notifications
+- Greybox test world: bounded area, ship as static landmark with recharge zone, 8–12 deposits
+- Ship is a static mesh — no systems, no navigation, no interior
+- One resource type: Scrap Metal (Tier 1)
+- No respawning deposits
+- UI style guide and wireframes from UI/UX designer, implemented by programmers
+
+**Tickets:** TICKET-0019 through TICKET-0031
+
+| Phase | Ticket | Title | Type | Owner |
+|-------|--------|-------|------|-------|
+| Foundation | TICKET-0019 | UI style guide and M3 wireframes | DESIGN | ui-ux-designer |
+| Foundation | TICKET-0020 | Resource data definitions | DESIGN | systems-programmer |
+| Foundation | TICKET-0021 | Inventory system — data layer | FEATURE | systems-programmer |
+| Foundation | TICKET-0022 | Deposit system — data layer | FEATURE | systems-programmer |
+| Foundation | TICKET-0023 | Suit battery system | FEATURE | systems-programmer |
+| Gameplay | TICKET-0024 | Scanner Phase 1 — ping and compass | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0025 | Scanner Phase 2 — analyze deposit | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0026 | Mining interaction | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0027 | HUD — battery bar and pickup notifications | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0028 | Inventory UI | FEATURE | gameplay-programmer |
+| Integration | TICKET-0029 | Greybox test world | TASK | gameplay-programmer |
+| QA | TICKET-0030 | Code review — M3 systems | REVIEW | systems-programmer |
+| QA | TICKET-0031 | QA testing — M3 full loop | TASK | qa-engineer |
+
+**Deferred Items:** 14 items tracked in `docs/studio/deferred-items.md` — includes mining minigame, radial wheel, ship systems, navigation, processing, tech tree, tool tiers, drones, and more.
 
 **Dependencies:** M2 (assets and pipeline required before world-building begins)
+
+**Risks:**
+- UI/UX wireframes (TICKET-0019) are on the critical path — gameplay tickets cannot start HUD work without them
+- Compass and scanner integration may require iteration to feel right in first-person — budget for playtest tuning
+- Inventory UI is the first significant Control node work in the project — may surface Godot UI patterns that need establishing
 
 ---
 

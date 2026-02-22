@@ -26,7 +26,7 @@
 |---|-----------|-------------|--------|-------|------|------|-------------|
 | M0 | Studio Setup — Team infrastructure, ticket system, docs | 2026-02-20 | Complete | — | — | — | — |
 | M1 | Core Game Architecture — Player controller, input system, view modes | 2026-02-21 | Complete | 7 | 0 | 7 | 2026-02-21 |
-| M2 | 3D Asset Pipeline — PoC evaluation, pipeline SOP, M3-ready assets | — | Active | 7 | 7 | 0 | — |
+| M2 | 3D Asset Pipeline — PoC evaluation, pipeline SOP, M3-ready assets | 2026-02-22 | Complete | 10 | 0 | 10 | 2026-02-22 |
 | M3 | First Playable — Minimal ship in world, scan/mine loop | — | Planning | — | — | — | — |
 | M4 | Ship Systems — Navigation, global variables, module system | — | Planning | — | — | — | — |
 | M5 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |

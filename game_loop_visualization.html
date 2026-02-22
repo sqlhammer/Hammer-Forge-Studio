@@ -3,656 +3,840 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Inheritance - Game Loop Architecture</title>
+    <title>The Inheritance — Game Loop Architecture</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg-deep:     #080c1c;
+            --bg-base:     #0f1528;
+            --bg-panel:    #151d33;
+            --bg-card:     #1c2540;
+            --teal:        #4ecdc4;
+            --teal-dim:    #2a6f7f;
+            --teal-faint:  #1a3a40;
+            --green:       #7ec699;
+            --green-dim:   #3d6b4a;
+            --yellow:      #f7b731;
+            --yellow-dim:  #7a5910;
+            --red:         #e05c5c;
+            --red-dim:     #6b2020;
+            --purple:      #a390e2;
+            --purple-dim:  #4a3870;
+            --text:        #d8dde8;
+            --text-dim:    #7a8499;
+            --text-bright: #ffffff;
+            --border:      #2a3550;
         }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Courier New', monospace;
-            background: #0a0e27;
+            background: var(--bg-deep);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            color: var(--text);
             padding: 20px;
-            color: #e0e0e0;
         }
-
-        .container {
-            background: #1a1f3a;
-            border: 2px solid #2a6f7f;
-            border-radius: 8px;
-            padding: 30px;
-            max-width: 1400px;
-            width: 100%;
-            box-shadow: 0 0 40px rgba(42, 111, 127, 0.3);
-        }
-
-        h1 {
+        .page-header {
             text-align: center;
-            color: #4ecdc4;
-            margin-bottom: 8px;
-            font-size: 28px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #a0a0a0;
-            margin-bottom: 30px;
-            font-size: 13px;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #2a6f7f;
-            padding-bottom: 10px;
-        }
-
-        .tab-btn {
-            padding: 8px 16px;
-            background: transparent;
-            border: 1px solid #2a6f7f;
-            color: #a0a0a0;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-
-        .tab-btn:hover {
-            color: #4ecdc4;
-            border-color: #4ecdc4;
-        }
-
-        .tab-btn.active {
-            background: #2a6f7f;
-            color: #4ecdc4;
-            border-color: #4ecdc4;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        svg {
-            width: 100%;
-            height: auto;
-            display: block;
-            background: #0f1423;
-            border: 1px solid #2a6f7f;
-            border-radius: 4px;
+            padding: 24px 0 20px;
+            border-bottom: 1px solid var(--teal-dim);
             margin-bottom: 20px;
         }
-
-        .legend {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-            padding: 15px;
-            background: #0f1423;
-            border: 1px solid #2a6f7f;
-            border-radius: 4px;
+        .page-header h1 { color: var(--teal); font-size: 22px; letter-spacing: 3px; text-transform: uppercase; }
+        .page-header p  { color: var(--text-dim); font-size: 11px; margin-top: 6px; }
+        .tabs {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 8px 14px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
             font-size: 11px;
-        }
-
-        .legend-item {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
-        .info-section {
-            background: #0f1423;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 20px;
-            font-size: 12px;
-            line-height: 1.6;
-            border-left: 3px solid #4ecdc4;
-        }
-
-        .info-section h3 {
-            color: #4ecdc4;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            font-size: 12px;
             letter-spacing: 1px;
-        }
-
-        .code-block {
-            background: #1a1f3a;
-            padding: 12px;
+            text-transform: uppercase;
             border-radius: 3px;
-            overflow-x: auto;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: var(--teal); border-color: var(--teal-dim); }
+        .tab-btn.active { background: var(--teal-dim); color: var(--teal); border-color: var(--teal); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Layout helpers */
+        .row { display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
+        .col { flex: 1; min-width: 260px; }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+        .card-teal   { border-left: 3px solid var(--teal); }
+        .card-green  { border-left: 3px solid var(--green); }
+        .card-yellow { border-left: 3px solid var(--yellow); }
+        .card-red    { border-left: 3px solid var(--red); }
+        .card-purple { border-left: 3px solid var(--purple); }
+        .card h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .card-teal   h3 { color: var(--teal); }
+        .card-green  h3 { color: var(--green); }
+        .card-yellow h3 { color: var(--yellow); }
+        .card-red    h3 { color: var(--red); }
+        .card-purple h3 { color: var(--purple); }
+
+        /* SVG host */
+        .svg-wrap {
+            background: var(--bg-base);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+        svg { width: 100%; height: auto; display: block; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th {
+            background: var(--bg-panel);
+            color: var(--teal);
+            padding: 6px 8px;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 10px;
+        }
+        td { padding: 5px 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg-panel); }
+
+        /* Key-value */
+        .kv { font-size: 11px; line-height: 1.9; }
+        .kv .k { color: var(--text-dim); }
+        .kv .v { color: var(--text-bright); }
+        .kv .v.teal   { color: var(--teal); }
+        .kv .v.green  { color: var(--green); }
+        .kv .v.yellow { color: var(--yellow); }
+        .kv .v.red    { color: var(--red); }
+        .kv .v.purple { color: var(--purple); }
+
+        /* Code-style formula */
+        .formula {
+            background: var(--bg-base);
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            font-size: 11px;
+            color: var(--green);
+            border-radius: 3px;
+            line-height: 1.8;
             margin-top: 8px;
-            font-size: 11px;
-            color: #7ec699;
         }
 
-        .progression-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .phase-card {
-            padding: 15px;
-            border: 1px solid #2a6f7f;
-            border-radius: 4px;
-            background: #0f1423;
-        }
-
-        .phase-card h3 {
-            color: #4ecdc4;
-            margin-bottom: 8px;
-            font-size: 12px;
-        }
-
-        .phase-card ul {
-            list-style: none;
-            font-size: 11px;
-            color: #a0a0a0;
-            line-height: 1.6;
-        }
-
-        .phase-card li:before {
-            content: "→ ";
-            color: #4ecdc4;
-        }
-
-        .variables-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .var-card {
-            padding: 12px;
-            border: 1px solid #2a6f7f;
-            background: #0f1423;
-            border-radius: 4px;
-            font-size: 11px;
-        }
-
-        .var-card .name {
-            color: #4ecdc4;
+        /* Tag badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             font-weight: bold;
-            margin-bottom: 4px;
         }
+        .badge-teal   { background: var(--teal-faint);  color: var(--teal); }
+        .badge-green  { background: var(--green-dim);   color: var(--green); }
+        .badge-yellow { background: var(--yellow-dim);  color: var(--yellow); }
+        .badge-red    { background: var(--red-dim);     color: var(--red); }
+        .badge-purple { background: var(--purple-dim);  color: var(--purple); }
 
-        .var-card .desc {
-            color: #a0a0a0;
-            line-height: 1.4;
-        }
+        /* Pill row for booleans */
+        .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 
-        .highlight {
-            color: #ff6b6b;
-        }
+        /* Separator */
+        hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+        p { font-size: 11px; line-height: 1.7; color: var(--text); }
+        ul { font-size: 11px; line-height: 1.9; padding-left: 16px; color: var(--text); }
+        li { margin-bottom: 1px; }
+        li::marker { color: var(--teal-dim); }
+
+        /* Input context columns */
+        .ctx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 800px) { .ctx-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>⚙ The Inheritance</h1>
-        <p class="subtitle">Game Loop Architecture & Systems Flow</p>
 
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('main-loop')">Main Loop</button>
-            <button class="tab-btn" onclick="switchTab('mining-phase')">Mining Phase</button>
-            <button class="tab-btn" onclick="switchTab('ship-systems')">Ship Systems</button>
-            <button class="tab-btn" onclick="switchTab('progression')">Progression</button>
-        </div>
+<div class="page-header">
+    <h1>The Inheritance — Game Loop Architecture</h1>
+    <p>Aur / Naer-Reth / The Inheritance &nbsp;·&nbsp; Engine: Godot 4.5 &nbsp;·&nbsp; Format: 3D Single-Player &nbsp;·&nbsp; Last Updated: 2026-02-21</p>
+</div>
 
-        <!-- MAIN LOOP TAB -->
-        <div id="main-loop" class="tab-content active">
-            <svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                        <polygon points="0 0, 10 3, 0 6" fill="#4ecdc4" />
-                    </marker>
-                    <style>
-                        .node-text { font-family: 'Courier New'; font-size: 14px; font-weight: bold; }
-                        .sub-text { font-family: 'Courier New'; font-size: 10px; }
-                        .node { filter: drop-shadow(0 0 8px rgba(78, 205, 196, 0.3)); }
-                        .arrow { stroke: #4ecdc4; stroke-width: 2; fill: none; }
-                    </style>
-                </defs>
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('core-loop',this)">Core Loop</button>
+    <button class="tab-btn" onclick="switchTab('mining',this)">Mining System</button>
+    <button class="tab-btn" onclick="switchTab('ship-suit',this)">Ship & Suit</button>
+    <button class="tab-btn" onclick="switchTab('biomes',this)">Biomes</button>
+    <button class="tab-btn" onclick="switchTab('endgame',this)">Endgame Arc</button>
+    <button class="tab-btn" onclick="switchTab('input',this)">Input System</button>
+</div>
 
-                <!-- Title -->
-                <text x="600" y="30" text-anchor="middle" style="font-size: 18px; fill: #4ecdc4; font-weight: bold;">
-                    Core Gameplay Loop: SCAN → MINE → PROCESS → BUILD → NAVIGATE
-                </text>
+<!-- ═══════════════════════════════════════════════════════ CORE LOOP ═══ -->
+<div id="core-loop" class="tab-content active">
 
-                <!-- Main Loop Boxes -->
-                <!-- SCAN -->
-                <g class="node">
-                    <rect x="80" y="80" width="160" height="100" rx="8" fill="#2a6f7f" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="160" y="110" text-anchor="middle" class="node-text" fill="#fff">SCAN</text>
-                    <text x="160" y="128" text-anchor="middle" class="sub-text" fill="#e0e0e0">Phase 1: Locate</text>
-                    <text x="160" y="143" text-anchor="middle" class="sub-text" fill="#e0e0e0">Phase 2: Analyze</text>
-                    <text x="160" y="158" text-anchor="middle" class="sub-text" fill="#a0a0a0">Deposit Data</text>
-                </g>
+    <div class="svg-wrap">
+        <svg viewBox="0 0 1100 320" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#4ecdc4"/></marker>
+            <marker id="arr-dim" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2a6f7f"/></marker>
+            <marker id="arr-red" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#e05c5c"/></marker>
+        </defs>
 
-                <!-- Arrow -->
-                <path d="M 240 130 Q 310 130 360 130" class="arrow" marker-end="url(#arrowhead)"/>
+        <!-- Background label -->
+        <text x="550" y="20" text-anchor="middle" font-family="'Courier New'" font-size="11" fill="#2a6f7f" font-weight="bold">CORE GAMEPLAY LOOP — THE INHERITANCE</text>
 
-                <!-- MINE -->
-                <g class="node">
-                    <rect x="360" y="80" width="160" height="100" rx="8" fill="#7ec699" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="440" y="110" text-anchor="middle" class="node-text" fill="#000">MINE</text>
-                    <text x="440" y="128" text-anchor="middle" class="sub-text" fill="#000">Tool Selection</text>
-                    <text x="440" y="143" text-anchor="middle" class="sub-text" fill="#000">Line Trace Minigame</text>
-                    <text x="440" y="158" text-anchor="middle" class="sub-text" fill="#000">Extract Resources</text>
-                </g>
+        <!-- Phase labels along the top -->
+        <text x="90"  y="45" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7ec699">EARLY LOOP</text>
+        <text x="372" y="45" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#f7b731">ALL PHASES</text>
+        <text x="627" y="45" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#a390e2">LATE GAME</text>
 
-                <!-- Arrow -->
-                <path d="M 520 130 Q 590 130 640 130" class="arrow" marker-end="url(#arrowhead)"/>
+        <!-- SCAN -->
+        <rect x="10" y="55" width="160" height="110" rx="6" fill="#1a3a40" stroke="#4ecdc4" stroke-width="2"/>
+        <text x="90" y="78" text-anchor="middle" font-family="'Courier New'" font-size="13" font-weight="bold" fill="#4ecdc4">SCAN</text>
+        <text x="90" y="95"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Phase 1: Locate ping</text>
+        <text x="90" y="108" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Phase 2: Analyze deposit</text>
+        <text x="90" y="121" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Purity / Qty / Energy cost</text>
+        <text x="90" y="134" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Required tool revealed</text>
+        <text x="90" y="152" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">No battery cost</text>
 
-                <!-- PROCESS -->
-                <g class="node">
-                    <rect x="640" y="80" width="160" height="100" rx="8" fill="#f7b731" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="720" y="110" text-anchor="middle" class="node-text" fill="#000">PROCESS</text>
-                    <text x="720" y="128" text-anchor="middle" class="sub-text" fill="#000">Smelting</text>
-                    <text x="720" y="143" text-anchor="middle" class="sub-text" fill="#000">Refining & Crafting</text>
-                    <text x="720" y="158" text-anchor="middle" class="sub-text" fill="#000">Ship Battery Drain</text>
-                </g>
+        <line x1="170" y1="110" x2="210" y2="110" stroke="#4ecdc4" stroke-width="2" marker-end="url(#arr)"/>
 
-                <!-- Arrow -->
-                <path d="M 800 130 Q 870 130 920 130" class="arrow" marker-end="url(#arrowhead)"/>
+        <!-- MINE -->
+        <rect x="210" y="55" width="160" height="110" rx="6" fill="#1a3322" stroke="#7ec699" stroke-width="2"/>
+        <text x="290" y="78" text-anchor="middle" font-family="'Courier New'" font-size="13" font-weight="bold" fill="#7ec699">MINE</text>
+        <text x="290" y="95"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Select correct tool tier</text>
+        <text x="290" y="108" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Extract (base yield)</text>
+        <text x="290" y="121" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Minigame → +50% bonus</text>
+        <text x="290" y="134" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Return to ship to recharge</text>
+        <text x="290" y="152" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Consumes suit battery</text>
 
-                <!-- BUILD -->
-                <g class="node">
-                    <rect x="920" y="80" width="160" height="100" rx="8" fill="#ff6b6b" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="1000" y="110" text-anchor="middle" class="node-text" fill="#fff">BUILD/UPGRADE</text>
-                    <text x="1000" y="128" text-anchor="middle" class="sub-text" fill="#fff">Ship Modules</text>
-                    <text x="1000" y="143" text-anchor="middle" class="sub-text" fill="#fff">Tech Tree Unlock</text>
-                    <text x="1000" y="158" text-anchor="middle" class="sub-text" fill="#fff">Weight ↑ Fuel ↑</text>
-                </g>
+        <line x1="370" y1="110" x2="410" y2="110" stroke="#4ecdc4" stroke-width="2" marker-end="url(#arr)"/>
 
-                <!-- Return Arrow (bottom) -->
-                <path d="M 1000 180 L 1000 250 Q 1000 280 970 280 L 100 280 Q 70 280 70 250 L 70 180" class="arrow" marker-end="url(#arrowhead)" stroke-dasharray="5,5"/>
+        <!-- PROCESS -->
+        <rect x="410" y="55" width="160" height="110" rx="6" fill="#2a2010" stroke="#f7b731" stroke-width="2"/>
+        <text x="490" y="78" text-anchor="middle" font-family="'Courier New'" font-size="13" font-weight="bold" fill="#f7b731">PROCESS</text>
+        <text x="490" y="95"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Smelt raw ore</text>
+        <text x="490" y="108" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Refine into components</text>
+        <text x="490" y="121" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Craft consumables</text>
+        <text x="490" y="134" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Cost × (1/purity modifier)</text>
+        <text x="490" y="152" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Ship power draw</text>
 
-                <!-- NAVIGATE -->
-                <g class="node">
-                    <rect x="30" y="300" width="160" height="100" rx="8" fill="#a390e2" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="110" y="330" text-anchor="middle" class="node-text" fill="#fff">NAVIGATE</text>
-                    <text x="110" y="348" text-anchor="middle" class="sub-text" fill="#fff">Select Biome Zone</text>
-                    <text x="110" y="363" text-anchor="middle" class="sub-text" fill="#fff">Transit Hazards</text>
-                    <text x="110" y="378" text-anchor="middle" class="sub-text" fill="#fff">Fuel Consumption</text>
-                </g>
+        <line x1="570" y1="110" x2="610" y2="110" stroke="#4ecdc4" stroke-width="2" marker-end="url(#arr)"/>
 
-                <!-- Back to SCAN -->
-                <path d="M 190 350 Q 290 350 160 180" class="arrow" marker-end="url(#arrowhead)" stroke-dasharray="5,5"/>
-                <text x="280" y="340" style="font-size: 11px; fill: #a0a0a0;">Loop Repeats</text>
-                <text x="60" y="420" style="font-size: 11px; fill: #a0a0a0;">at Escalating Scale</text>
+        <!-- BUILD / UPGRADE -->
+        <rect x="610" y="55" width="160" height="110" rx="6" fill="#2a1a1a" stroke="#e05c5c" stroke-width="2"/>
+        <text x="690" y="78" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#e05c5c">BUILD / UPGRADE</text>
+        <text x="690" y="95"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Install ship modules</text>
+        <text x="690" y="108" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Unlock tech tree nodes</text>
+        <text x="690" y="121" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Weight ↑ → Fuel cost ↑</text>
+        <text x="690" y="134" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Upgrade suit axes</text>
+        <text x="690" y="152" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Trade-off, not free growth</text>
 
-                <!-- Side annotations -->
-                <rect x="250" y="320" width="250" height="150" rx="4" fill="none" stroke="#2a6f7f" stroke-dasharray="3,3" stroke-width="1"/>
-                <text x="260" y="340" style="font-size: 11px; fill: #4ecdc4; font-weight: bold;">Automation Phase (Mid-Game+)</text>
-                <text x="260" y="358" style="font-size: 10px; fill: #a0a0a0;">Mining Drones:</text>
-                <text x="260" y="373" style="font-size: 10px; fill: #a0a0a0;">  • Execute scanner-first extraction</text>
-                <text x="260" y="388" style="font-size: 10px; fill: #a0a0a0;">  • Based on player Phase 2 analysis</text>
-                <text x="260" y="403" style="font-size: 10px; fill: #a0a0a0;">  • Auto-smelter processes in background</text>
-                <text x="260" y="418" style="font-size: 10px; fill: #a0a0a0;">  • Player focuses on strategy</text>
-                <text x="260" y="433" style="font-size: 10px; fill: #a0a0a0;">  • Manual play always outperforms drones</text>
+        <line x1="770" y1="110" x2="810" y2="110" stroke="#4ecdc4" stroke-width="2" marker-end="url(#arr)"/>
 
-                <!-- Late game gate -->
-                <rect x="550" y="320" width="250" height="150" rx="4" fill="none" stroke="#ff6b6b" stroke-dasharray="3,3" stroke-width="1"/>
-                <text x="560" y="340" style="font-size: 11px; fill: #ff6b6b; font-weight: bold;">Late Game: Mega-Project</text>
-                <text x="560" y="358" style="font-size: 10px; fill: #a0a0a0;">High-Threat Biomes:</text>
-                <text x="560" y="373" style="font-size: 10px; fill: #a0a0a0;">  • Rare tier-4 materials</text>
-                <text x="560" y="388" style="font-size: 10px; fill: #a0a0a0;">  • Escalating enemy threats</text>
-                <text x="560" y="403" style="font-size: 10px; fill: #a0a0a0;">  • Ship must be fully optimized</text>
-                <text x="560" y="418" style="font-size: 10px; fill: #a0a0a0;">  • Win condition reached at completion</text>
-                <text x="560" y="433" style="font-size: 10px; fill: #a0a0a0;">  • Naer-Reth activation (sacrifice ending)</text>
-            </svg>
+        <!-- NAVIGATE -->
+        <rect x="810" y="55" width="165" height="110" rx="6" fill="#1e1a2e" stroke="#a390e2" stroke-width="2"/>
+        <text x="893" y="78" text-anchor="middle" font-family="'Courier New'" font-size="13" font-weight="bold" fill="#a390e2">NAVIGATE</text>
+        <text x="893" y="95"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Select destination biome</text>
+        <text x="893" y="108" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Manage transit hazards</text>
+        <text x="893" y="121" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Fuel consumed by weight</text>
+        <text x="893" y="134" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Unlock higher-tier biomes</text>
+        <text x="893" y="152" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Ship systems stay live</text>
 
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #2a6f7f;"></div>
-                    <span>Exploration & Data Gathering</span>
+        <!-- Loop-back arrow -->
+        <path d="M 975 165 Q 975 240 550 240 Q 90 240 90 165" stroke="#2a6f7f" stroke-width="1.5" stroke-dasharray="5,4" fill="none" marker-end="url(#arr-dim)"/>
+        <text x="550" y="232" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#2a6f7f">Loop repeats at escalating scale → deeper biomes, higher purity, more automation</text>
+
+        <!-- Late gate note -->
+        <rect x="810" y="280" width="265" height="28" rx="3" fill="#1e1a2e" stroke="#e05c5c" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="943" y="293" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#e05c5c">LATE GATE → Naer-Reth activation =</text>
+        <text x="943" y="303" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#e05c5c">Win (First Cycle) / True Ending (Cycle 2)</text>
+
+        <!-- Automation overlay note -->
+        <rect x="210" y="185" width="360" height="28" rx="3" fill="#0f1528" stroke="#7ec699" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="390" y="198" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7ec699">MID-GAME: Mining drones + Auto-smelter eliminate manual MINE + PROCESS</text>
+        <text x="390" y="208" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Drones require player Phase 2 Analysis first — scanner skill always matters</text>
+        </svg>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="card card-teal">
+                <h3>What the player does</h3>
+                <div class="kv">
+                    <div><span class="k">Spends: </span><span class="v">Time, fuel, suit battery, ship power budget, risk exposure</span></div>
+                    <div><span class="k">Gets: </span><span class="v">Resources, ship upgrades, automation tools, new biome access, Mega-Project progress</span></div>
+                    <div><span class="k">Loss condition: </span><span class="v red">Ship Integrity = 0 (tech tree + schematics persist on respawn)</span></div>
+                    <div><span class="k">Win condition: </span><span class="v teal">Naer-Reth activation (Cycle 1) / Regulator interface (Cycle 2)</span></div>
+                    <div><span class="k">No: </span><span class="v">Starvation timers, forced busywork, dead-end tech nodes</span></div>
                 </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #7ec699;"></div>
-                    <span>Extraction & Skill Expression</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #f7b731;"></div>
-                    <span>Crafting & Resource Conversion</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #ff6b6b;"></div>
-                    <span>Progression & Unlocks</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #a390e2;"></div>
-                    <span>Movement & Navigation</span>
-                </div>
-            </div>
-
-            <div class="info-section">
-                <h3>Core Philosophy</h3>
-                <p><strong>Scanner-First Design:</strong> Players discover before they act. Blind harvesting is inefficient by design.</p>
-                <p style="margin-top: 8px;"><strong>Nomadic Survival:</strong> The ship moves constantly. Every destination is purposeful. Settling in place is never the goal.</p>
-                <p style="margin-top: 8px;"><strong>Automation as Reward:</strong> Early game is manual and hands-on. Mid-game unlocks drones. Late game runs complex systems autonomously.</p>
             </div>
         </div>
-
-        <!-- MINING PHASE TAB -->
-        <div id="mining-phase" class="tab-content">
-            <svg viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                        <polygon points="0 0, 10 3, 0 6" fill="#4ecdc4" />
-                    </marker>
-                    <style>
-                        .node-text { font-family: 'Courier New'; font-size: 14px; font-weight: bold; }
-                        .sub-text { font-family: 'Courier New'; font-size: 10px; }
-                    </style>
-                </defs>
-
-                <text x="600" y="30" text-anchor="middle" style="font-size: 16px; fill: #4ecdc4; font-weight: bold;">
-                    Detailed Mining Loop: Scanner → Deposit Analysis → Tool Selection → Extraction
-                </text>
-
-                <!-- PHASE 1: LOCATE -->
-                <g>
-                    <rect x="50" y="70" width="200" height="120" rx="8" fill="#2a6f7f" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="150" y="100" text-anchor="middle" class="node-text" fill="#fff">PHASE 1: LOCATE</text>
-                    <text x="150" y="120" text-anchor="middle" class="sub-text" fill="#e0e0e0">Hold [Locate Key]</text>
-                    <text x="150" y="133" text-anchor="middle" class="sub-text" fill="#e0e0e0">Select resource type</text>
-                    <text x="150" y="146" text-anchor="middle" class="sub-text" fill="#e0e0e0">Ping expands outward</text>
-                    <text x="150" y="159" text-anchor="middle" class="sub-text" fill="#e0e0e0">Compass markers appear</text>
-                    <text x="150" y="172" text-anchor="middle" class="sub-text" fill="#a0a0a0">No battery cost</text>
-                </g>
-
-                <path d="M 250 130 L 330 130" class="arrow" marker-end="url(#arrowhead2)" stroke="#4ecdc4" stroke-width="2" fill="none"/>
-
-                <!-- PHASE 2: ANALYZE -->
-                <g>
-                    <rect x="330" y="70" width="200" height="120" rx="8" fill="#7ec699" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="430" y="100" text-anchor="middle" class="node-text" fill="#000">PHASE 2: ANALYZE</text>
-                    <text x="430" y="120" text-anchor="middle" class="sub-text" fill="#000">Walk up to deposit</text>
-                    <text x="430" y="133" text-anchor="middle" class="sub-text" fill="#000">Hold [Analyze Button]</text>
-                    <text x="430" y="146" text-anchor="middle" class="sub-text" fill="#000">2-3 seconds to scan</text>
-                    <text x="430" y="159" text-anchor="middle" class="sub-text" fill="#000">Mining pattern revealed</text>
-                    <text x="430" y="172" text-anchor="middle" class="sub-text" fill="#a0a0a0">No battery cost</text>
-                </g>
-
-                <path d="M 530 130 L 610 130" class="arrow" marker-end="url(#arrowhead2)" stroke="#4ecdc4" stroke-width="2" fill="none"/>
-
-                <!-- TOOL SELECT -->
-                <g>
-                    <rect x="610" y="70" width="200" height="120" rx="8" fill="#f7b731" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="710" y="100" text-anchor="middle" class="node-text" fill="#000">TOOL SELECTION</text>
-                    <text x="710" y="120" text-anchor="middle" class="sub-text" fill="#000">Purity ★★★☆☆</text>
-                    <text x="710" y="133" text-anchor="middle" class="sub-text" fill="#000">Energy cost shown</text>
-                    <text x="710" y="146" text-anchor="middle" class="sub-text" fill="#000">Select: Hand Drill</text>
-                    <text x="710" y="159" text-anchor="middle" class="sub-text" fill="#000">Check suit battery</text>
-                    <text x="710" y="172" text-anchor="middle" class="sub-text" fill="#000">~Tier 1 resource</text>
-                </g>
-
-                <path d="M 810 130 L 890 130" class="arrow" marker-end="url(#arrowhead2)" stroke="#4ecdc4" stroke-width="2" fill="none"/>
-
-                <!-- EXTRACT OPTIONS -->
-                <g>
-                    <rect x="890" y="70" width="240" height="120" rx="8" fill="#a390e2" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="1010" y="100" text-anchor="middle" class="node-text" fill="#fff">EXTRACT OPTIONS</text>
-                    <text x="1010" y="120" text-anchor="middle" class="sub-text" fill="#fff">Option A: Baseline</text>
-                    <text x="1010" y="133" text-anchor="middle" class="sub-text" fill="#a0a0a0">  Standard yield</text>
-                    <text x="1010" y="146" text-anchor="middle" class="sub-text" fill="#fff">Option B: Minigame</text>
-                    <text x="1010" y="159" text-anchor="middle" class="sub-text" fill="#a0a0a0">  Trace lines for +50%</text>
-                    <text x="1010" y="172" text-anchor="middle" class="sub-text" fill="#a0a0a0">  (No penalty on fail)</text>
-                </g>
-
-                <!-- SCANNER OUTPUT DETAILS -->
-                <rect x="50" y="230" width="1080" height="140" rx="8" fill="none" stroke="#2a6f7f" stroke-width="2" stroke-dasharray="3,3"/>
-                <text x="70" y="255" style="font-size: 12px; fill: #4ecdc4; font-weight: bold;">PHASE 2 ANALYSIS OUTPUT:</text>
-
-                <text x="70" y="280" style="font-size: 10px; fill: #a0a0a0;">Purity Rating: ★★★☆☆ (3/5) — baseline crafting cost</text>
-                <text x="70" y="295" style="font-size: 10px; fill: #a0a0a0;">Quantity Density: Medium — approximately 12-18 ore units</text>
-                <text x="70" y="310" style="font-size: 10px; fill: #a0a0a0;">Total Energy Required: ~45 suit battery charge to fully mine</text>
-                <text x="70" y="325" style="font-size: 10px; fill: #a0a0a0;">Mining Pattern: 3 curved lines — difficulty tier 2 (moderate bonus ceiling)</text>
-                <text x="70" y="340" style="font-size: 10px; fill: #a0a0a0;">Required Tool: Pneumatic Drill (Tier 2) — must have crafted this first</text>
-                <text x="70" y="355" style="font-size: 10px; fill: #a0a0a0;">Notes: No higher deposits nearby (scanner tier determines detection depth)</text>
-
-                <!-- PURITY MECHANICS -->
-                <rect x="50" y="400" width="1080" height="170" rx="8" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-dasharray="3,3"/>
-                <text x="70" y="425" style="font-size: 12px; fill: #ff6b6b; font-weight: bold;">PURITY AFFECTS CRAFTING COST:</text>
-
-                <text x="70" y="450" style="font-size: 10px; fill: #a0a0a0;">★☆☆☆☆ (1-star) → 0.60x modifier  = 67% more expensive to craft from</text>
-                <text x="280" y="450" style="font-size: 10px; fill: #a0a0a0;">★★☆☆☆ (2-star) → 0.80x modifier  = 25% more expensive</text>
-
-                <text x="70" y="465" style="font-size: 10px; fill: #e0e0e0;">★★★☆☆ (3-star) → 1.00x modifier  = baseline cost (most common)</text>
-                <text x="380" y="465" style="font-size: 10px; fill: #e0e0e0;">★★★★☆ (4-star) → 1.25x modifier  = 20% cheaper</text>
-
-                <text x="70" y="480" style="font-size: 10px; fill: #7ec699;">★★★★★ (5-star) → 1.60x modifier  = 37.5% cheaper (late-game advantage)</text>
-
-                <text x="70" y="505" style="font-size: 10px; fill: #a0a0a0;">Purity Distribution by Biome:</text>
-                <text x="70" y="520" style="font-size: 10px; fill: #a0a0a0;">  • Tier 1 (low-threat): 1-3 star common, rare 4-star</text>
-                <text x="70" y="535" style="font-size: 10px; fill: #a0a0a0;">  • Tier 2 (medium-threat): 2-4 star common, 5-star possible</text>
-                <text x="70" y="550" style="font-size: 10px; fill: #a0a0a0;">  • Tier 3 (high-threat): 3-5 star, 5-star is incentive to risk zone</text>
-                <text x="70" y="565" style="font-size: 10px; fill: #a0a0a0;">  • Tier 4 (Mega-Project): Unique materials, always 5-star</text>
-            </svg>
-
-            <div class="info-section">
-                <h3>Mining Loop Design Principles</h3>
-                <p><strong>No Blind Clicking:</strong> Every mining decision is informed by scanner data. The minigame is optional but rewards player skill.</p>
-                <p style="margin-top: 8px;"><strong>Purity Matters:</strong> High-purity deposits are rarer and found deeper. A 5-star vein is a meaningful discovery worth navigating to and defending.</p>
-                <p style="margin-top: 8px;"><strong>Tool Gating:</strong> Each deposit tier requires a specific tool. Wrong tool = no extraction. Progression is tied to unlocking better tools.</p>
-                <p style="margin-top: 8px;"><strong>Automation Preserves Skill:</strong> Mining drones execute baseline extraction (no minigame). Manual mining always outperforms drones on a per-deposit basis.</p>
+        <div class="col">
+            <div class="card card-green">
+                <h3>Three Design Pillars that Shape the Loop</h3>
+                <ul>
+                    <li><strong style="color:var(--green)">Scanner-First:</strong> Discover before acting. Blind harvesting is inefficient by design.</li>
+                    <li><strong style="color:var(--yellow)">Automation as Reward:</strong> Earned through tech tree — never given. Manual play always outperforms drones on a per-deposit basis.</li>
+                    <li><strong style="color:var(--purple)">Nomadic Survival:</strong> The ship moves constantly. Settling in place is never the goal. Every move is purposeful.</li>
+                </ul>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- SHIP SYSTEMS TAB -->
-        <div id="ship-systems" class="tab-content">
-            <svg viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <style>
-                        .var-name { font-family: 'Courier New'; font-size: 14px; font-weight: bold; }
-                        .var-desc { font-family: 'Courier New'; font-size: 10px; }
-                    </style>
-                </defs>
+<!-- ═══════════════════════════════════════════════════════ MINING ════ -->
+<div id="mining" class="tab-content">
 
-                <text x="600" y="30" text-anchor="middle" style="font-size: 16px; fill: #4ecdc4; font-weight: bold;">
-                    Ship Global Variables: The Living Ship System
-                </text>
+    <div class="svg-wrap">
+        <svg viewBox="0 0 1100 230" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <marker id="arr2" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#4ecdc4"/></marker>
+            <marker id="arr2r" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#e05c5c"/></marker>
+        </defs>
 
-                <!-- POWER -->
-                <g>
-                    <rect x="50" y="70" width="260" height="180" rx="8" fill="#2a6f7f" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="180" y="100" text-anchor="middle" class="var-name" fill="#4ecdc4">POWER (0–100%)</text>
-                    <text x="60" y="125" style="font-size: 9px; fill: #a0a0a0;">Output - Consumption</text>
-                    <text x="60" y="138" style="font-size: 9px; fill: #e0e0e0;">• Generators: Solar, Fuel Cell,</text>
-                    <text x="60" y="149" style="font-size: 9px; fill: #e0e0e0;">  Fusion Core</text>
-                    <text x="60" y="162" style="font-size: 9px; fill: #e0e0e0;">• Every module draws power</text>
-                    <text x="60" y="175" style="font-size: 9px; fill: #e0e0e0;">• 0% → non-essential shutdown</text>
-                    <text x="60" y="188" style="font-size: 9px; fill: #e0e0e0;">• Prolonged 0% → critical fail</text>
-                    <text x="60" y="201" style="font-size: 9px; fill: #e0e0e0;">• Disables: Heat management,</text>
-                    <text x="60" y="212" style="font-size: 9px; fill: #e0e0e0;">  O2 recyclers, suit charging</text>
-                    <text x="60" y="225" style="font-size: 9px; fill: #ff6b6b;">⚠ Critical resource for survival</text>
-                </g>
+        <text x="550" y="20" text-anchor="middle" font-family="'Courier New'" font-size="11" fill="#2a6f7f" font-weight="bold">DETAILED MINING FLOW — SCANNER-FIRST DESIGN LAW</text>
 
-                <!-- INTEGRITY -->
-                <g>
-                    <rect x="330" y="70" width="260" height="180" rx="8" fill="#7ec699" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="460" y="100" text-anchor="middle" class="var-name" fill="#000">INTEGRITY (0–100%)</text>
-                    <text x="340" y="125" style="font-size: 9px; fill: #000;">Structural health of hull</text>
-                    <text x="340" y="138" style="font-size: 9px; fill: #000;">• Damaged by: Hazards,</text>
-                    <text x="340" y="149" style="font-size: 9px; fill: #000;">  enemy attacks, events</text>
-                    <text x="340" y="162" style="font-size: 9px; fill: #000;">• Repaired with crafted materials</text>
-                    <text x="340" y="175" style="font-size: 9px; fill: #000;">• 0% → Ship destroyed (LOSS)</text>
-                    <text x="340" y="188" style="font-size: 9px; fill: #a0a0a0;">Partial Persistence on Loss:</text>
-                    <text x="340" y="201" style="font-size: 9px; fill: #a0a0a0;">  ✓ Tech tree progress</text>
-                    <text x="340" y="212" style="font-size: 9px; fill: #a0a0a0;">  ✓ Schematics learned</text>
-                    <text x="340" y="225" style="font-size: 9px; fill: #a0a0a0;">  ✗ Resources, modules, cargo lost</text>
-                </g>
+        <!-- P1 Locate -->
+        <rect x="10" y="35" width="185" height="140" rx="6" fill="#1a3a40" stroke="#4ecdc4" stroke-width="2"/>
+        <text x="102" y="58" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#4ecdc4">PHASE 1: LOCATE</text>
+        <text x="102" y="73"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Hold [Locate Key] → radial wheel</text>
+        <text x="102" y="85"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Select resource type on wheel</text>
+        <text x="102" y="97"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Ping expands in all directions</text>
+        <text x="102" y="109" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Deposits → compass markers</text>
+        <text x="102" y="121" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Nearest marker highlighted</text>
+        <text x="102" y="133" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Navigate toward deposit</text>
+        <text x="102" y="152" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">No battery cost · Low scanner</text>
+        <text x="102" y="162" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">= shorter range; high tier hidden</text>
 
-                <!-- HEAT -->
-                <g>
-                    <rect x="610" y="70" width="260" height="180" rx="8" fill="#f7b731" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="740" y="100" text-anchor="middle" class="var-name" fill="#000">HEAT (0–100%)</text>
-                    <text x="620" y="125" style="font-size: 9px; fill: #000;">Internal temperature</text>
-                    <text x="620" y="138" style="font-size: 9px; fill: #000;">• Biome type influences drift</text>
-                    <text x="620" y="149" style="font-size: 9px; fill: #000;">• Extreme temps degrade modules</text>
-                    <text x="620" y="162" style="font-size: 9px; fill: #000;">• High heat increases power draw</text>
-                    <text x="620" y="175" style="font-size: 9px; fill: #000;">• Managed by Thermal Regulator</text>
-                    <text x="620" y="188" style="font-size: 9px; fill: #000;">  module (TBD tier progression)</text>
-                    <text x="620" y="201" style="font-size: 9px; fill: #000;">• Low power = low cooling</text>
-                    <text x="620" y="212" style="font-size: 9px; fill: #000;">• Heat drifts toward ambient</text>
-                    <text x="620" y="225" style="font-size: 9px; fill: #a0a0a0;">Goal: Keep in safe range</text>
-                </g>
+        <line x1="195" y1="105" x2="235" y2="105" stroke="#4ecdc4" stroke-width="2" marker-end="url(#arr2)"/>
 
-                <!-- OXYGEN -->
-                <g>
-                    <rect x="890" y="70" width="260" height="180" rx="8" fill="#ff6b6b" stroke="#4ecdc4" stroke-width="2"/>
-                    <text x="1020" y="100" text-anchor="middle" class="var-name" fill="#fff">OXYGEN (0–100%)</text>
-                    <text x="900" y="125" style="font-size: 9px; fill: #fff;">Atmospheric viability</text>
-                    <text x="900" y="138" style="font-size: 9px; fill: #fff;">• Degraded by hull breaches</text>
-                    <text x="900" y="149" style="font-size: 9px; fill: #fff;">  and certain biome hazards</text>
-                    <text x="900" y="162" style="font-size: 9px; fill: #fff;">• 0% → Countdown timer starts</text>
-                    <text x="900" y="175" style="font-size: 9px; fill: #fff;">  before player health affected</text>
-                    <text x="900" y="188" style="font-size: 9px; fill: #fff;">• Maintained by O2 Recycler</text>
-                    <text x="900" y="201" style="font-size: 9px; fill: #fff;">  module (required in toxic zones)</text>
-                    <text x="900" y="212" style="font-size: 9px; fill: #fff;">• Low power = no recycling</text>
-                    <text x="900" y="225" style="font-size: 9px; fill: #a0a0a0;">Goal: Maintain > 0%</text>
-                </g>
+        <!-- P2 Analyze -->
+        <rect x="235" y="35" width="185" height="140" rx="6" fill="#1a3322" stroke="#7ec699" stroke-width="2"/>
+        <text x="327" y="58" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#7ec699">PHASE 2: ANALYZE</text>
+        <text x="327" y="73"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Walk up to deposit (close range)</text>
+        <text x="327" y="85"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Hold [Analyze] 2-3 sec</text>
+        <text x="327" y="97"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#f7b731">→ Purity: ★★★★☆ (4/5)</text>
+        <text x="327" y="109" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#f7b731">→ Qty density: Medium</text>
+        <text x="327" y="121" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#f7b731">→ Energy cost: ~45 battery %</text>
+        <text x="327" y="133" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#f7b731">→ Mining pattern: 2 lines</text>
+        <text x="327" y="152" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">No battery cost · Deliberate,</text>
+        <text x="327" y="162" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">committed action by design</text>
 
-                <!-- INTERDEPENDENCIES -->
-                <rect x="50" y="280" width="1100" height="190" rx="8" fill="none" stroke="#2a6f7f" stroke-width="2" stroke-dasharray="3,3"/>
-                <text x="70" y="305" style="font-size: 12px; fill: #4ecdc4; font-weight: bold;">VARIABLE INTERDEPENDENCIES (Cascade Failures):</text>
+        <line x1="420" y1="105" x2="460" y2="105" stroke="#4ecdc4" stroke-width="2" marker-end="url(#arr2)"/>
 
-                <text x="70" y="330" style="font-size: 10px; fill: #a0a0a0;">↓ Low POWER</text>
-                <text x="200" y="330" style="font-size: 10px; fill: #ff6b6b;">→ Thermal management disabled → Heat drifts toward biome ambient</text>
-                <text x="70" y="345" style="font-size: 10px; fill: #a0a0a0;">↓ Low POWER</text>
-                <text x="200" y="345" style="font-size: 10px; fill: #ff6b6b;">→ O2 recyclers offline → Oxygen begins dropping</text>
+        <!-- Tool Select -->
+        <rect x="460" y="35" width="175" height="140" rx="6" fill="#2a2010" stroke="#f7b731" stroke-width="2"/>
+        <text x="547" y="58" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#f7b731">TOOL SELECT</text>
+        <text x="547" y="73"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Check required tool tier</text>
+        <text x="547" y="85"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">T1: Hand Drill (start)</text>
+        <text x="547" y="97"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">T2: Pneumatic Drill</text>
+        <text x="547" y="109" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">T3: Thermal Drill</text>
+        <text x="547" y="121" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">T4: Plasma / Resonance Bore</text>
+        <text x="547" y="133" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Wrong tool = 0 extraction</text>
+        <text x="547" y="152" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Check suit battery vs cost</text>
+        <text x="547" y="162" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Return if insufficient</text>
 
-                <text x="70" y="365" style="font-size: 10px; fill: #a0a0a0;">↑ High HEAT</text>
-                <text x="200" y="365" style="font-size: 10px; fill: #ff6b6b;">→ Cooling systems work harder → Power consumption increases</text>
-                <text x="70" y="380" style="font-size: 10px; fill: #a0a0a0;">↓ Low INTEGRITY</text>
-                <text x="200" y="380" style="font-size: 10px; fill: #ff6b6b;">→ Hull breaches form → Oxygen drops</text>
+        <line x1="635" y1="105" x2="680" y2="105" stroke="#4ecdc4" stroke-width="2" marker-end="url(#arr2)"/>
 
-                <text x="70" y="405" style="font-size: 10px; fill: #7ec699;">⚙ DESIGN INTENT: The ship is a living system. Neglect one variable and cascading failures begin.</text>
-                <text x="70" y="420" style="font-size: 10px; fill: #7ec699;">⚙ Management of these four variables is the core survival challenge of the game.</text>
-                <text x="70" y="435" style="font-size: 10px; fill: #7ec699;">⚙ No arbitrary starvation timers — scarcity is tied to PROGRESS GATES, not SURVIVAL BUSYWORK.</text>
-            </svg>
+        <!-- Branch: standard vs minigame -->
+        <rect x="680" y="35" width="200" height="65" rx="6" fill="#2a1a1a" stroke="#e05c5c" stroke-width="2"/>
+        <text x="780" y="55" text-anchor="middle" font-family="'Courier New'" font-size="10" font-weight="bold" fill="#e05c5c">EXTRACT (Standard)</text>
+        <text x="780" y="68" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Fire tool → drain battery</text>
+        <text x="780" y="80" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Base yield obtained</text>
+        <text x="780" y="92" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Always succeeds · No risk</text>
+
+        <rect x="680" y="115" width="200" height="65" rx="6" fill="#1a3322" stroke="#7ec699" stroke-width="2"/>
+        <text x="780" y="135" text-anchor="middle" font-family="'Courier New'" font-size="10" font-weight="bold" fill="#7ec699">EXTRACT (Minigame)</text>
+        <text x="780" y="148" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#d8dde8">Trace lit lines on deposit</text>
+        <text x="780" y="160" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7ec699">Success: base + up to +50%</text>
+        <text x="780" y="172" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Fail: base yield only, no penalty</text>
+
+        <!-- Drone note -->
+        <rect x="905" y="35" width="185" height="145" rx="6" fill="#0f1528" stroke="#2a3550" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="997" y="55" text-anchor="middle" font-family="'Courier New'" font-size="10" font-weight="bold" fill="#7a8499">DRONE AUTOMATION</text>
+        <text x="997" y="70"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Requires Phase 2 Analysis</text>
+        <text x="997" y="82"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">first — cannot skip</text>
+        <text x="997" y="94"  text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Configurable: type, purity</text>
+        <text x="997" y="106" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">threshold, radius, priority</text>
+        <text x="997" y="118" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Always base yield (no minigame)</text>
+        <text x="997" y="130" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Energy from ship power (not suit)</text>
+        <text x="997" y="148" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#4ecdc4">Manual always beats drones</text>
+        <text x="997" y="160" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#4ecdc4">on a per-deposit basis</text>
+        </svg>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="card card-yellow">
+                <h3>Purity Rating System</h3>
+                <table>
+                    <tr><th>Purity</th><th>Modifier</th><th>Crafting Cost Effect</th><th>Biome</th></tr>
+                    <tr><td>★☆☆☆☆</td><td>0.60×</td><td><span class="v red">+67% more expensive</span></td><td>Tier 1</td></tr>
+                    <tr><td>★★☆☆☆</td><td>0.80×</td><td><span class="v red">+25% more expensive</span></td><td>Tier 1–2</td></tr>
+                    <tr><td>★★★☆☆</td><td>1.00×</td><td>Baseline (most common)</td><td>Tier 1–3</td></tr>
+                    <tr><td>★★★★☆</td><td>1.25×</td><td><span class="v green">20% cheaper</span></td><td>Tier 2–3</td></tr>
+                    <tr><td>★★★★★</td><td>1.60×</td><td><span class="v teal">37.5% cheaper — significant</span></td><td>Tier 3–4</td></tr>
+                </table>
+                <div class="formula">Crafting Energy Cost = Base Cost × (1 / Purity Modifier)</div>
+            </div>
         </div>
-
-        <!-- PROGRESSION TAB -->
-        <div id="progression" class="tab-content">
-            <div class="progression-grid">
-                <div class="phase-card">
-                    <h3>Early Game: "The Foundation"</h3>
-                    <ul>
-                        <li>Manual resource extraction</li>
-                        <li>Hand Drill only</li>
-                        <li>Basic scanner (Tier 1)</li>
-                        <li>Small ship: minimal modules</li>
-                        <li>Low fuel capacity</li>
-                        <li>Restricted to low-threat biomes</li>
-                        <li>Focus: Learn scanner-mining loop</li>
-                        <li>Gate: First automation component</li>
-                    </ul>
-                </div>
-
-                <div class="phase-card">
-                    <h3>Mid Game: "The Expansion"</h3>
-                    <ul>
-                        <li>Mining drones unlock</li>
-                        <li>Auto-smelter available</li>
-                        <li>Multiple tool tiers unlocked</li>
-                        <li>Scanner upgraded</li>
-                        <li>Ship grows modularly</li>
-                        <li>Medium-threat biomes accessible</li>
-                        <li>Focus: Optimize, explore, stockpile</li>
-                        <li>Gate: Mega-Project tech node</li>
-                    </ul>
-                </div>
-
-                <div class="phase-card">
-                    <h3>Late Game: "The Reckoning"</h3>
-                    <ul>
-                        <li>Mega-Project nodes only</li>
-                        <li>Tier 4 tools available</li>
-                        <li>High-threat zones required</li>
-                        <li>Full ship optimization needed</li>
-                        <li>Complex automation chains</li>
-                        <li>Rare materials farming</li>
-                        <li>Focus: Execute Mega-Project</li>
-                        <li>Gate: Naer-Reth activation = WIN</li>
-                    </ul>
-                </div>
+        <div class="col">
+            <div class="card card-teal">
+                <h3>Tool Tier Gates</h3>
+                <table>
+                    <tr><th>Tier</th><th>Tool</th><th>Deposit Type</th><th>Unlock</th></tr>
+                    <tr><td>T1</td><td>Hand Drill</td><td>Surface / soft rock</td><td>Game start</td></tr>
+                    <tr><td>T2</td><td>Pneumatic Drill</td><td>Medium depth; composite</td><td>Early craft</td></tr>
+                    <tr><td>T3</td><td>Thermal Drill</td><td>Deep; dense mineral veins</td><td>Mid-game craft</td></tr>
+                    <tr><td>T4</td><td>Plasma Cutter / Resonance Bore</td><td>Extreme depth / exotic</td><td>Late-game craft</td></tr>
+                </table>
+                <p style="margin-top:8px; color: var(--text-dim)">Tools have <strong style="color:var(--text)">no durability</strong>. They consume suit battery only. Wrong tool = deposit cannot be touched.</p>
             </div>
+        </div>
+    </div>
+</div>
 
-            <div class="info-section">
-                <h3>Progression Gates & Win Conditions</h3>
-                <p><strong>First Cycle Win ("The Tragedy"):</strong> Complete Naer-Reth activation. This restores the planet's ecology but drains all energy (including the player's). The player does not escape. The ending is always tragic on the first playthrough.</p>
-                <p style="margin-top: 8px;"><strong>Second Cycle (New Game+):</strong> Players who complete the first cycle carry meta-knowledge. A hidden path becomes available: modifying the Naer-Reth to prevent the destruction cycle. This requires 2× total resources and is significantly harder.</p>
-                <p style="margin-top: 8px;"><strong>Loss Condition (Ship Destruction):</strong> Integrity reaches 0% → ship is destroyed. Tech tree and schematics persist. Resources and modules are lost. Player respawns at the last safe location with a starter ship configuration and rebuilds faster because they know everything.</p>
-                <p style="margin-top: 8px;"><strong>No Attrition Loss:</strong> Starvation is NOT a loss condition. No forced survival timers. The game does not punish players for pausing exploration.</p>
-            </div>
+<!-- ═══════════════════════════════════════════════════ SHIP & SUIT ════ -->
+<div id="ship-suit" class="tab-content">
 
-            <div class="info-section">
-                <h3>Tech Tree Structure</h3>
-                <div class="code-block">
-Early/Mid Game: Broad and flexible
-  → Player chooses their path
-  → Multiple viable strategies
+    <div class="row">
+        <!-- Ship Global Vars -->
+        <div class="col" style="flex:2; min-width: 400px;">
+            <div class="card card-teal">
+                <h3>Ship Global Variables — The Living Ship</h3>
+                <div class="svg-wrap" style="margin-top:10px; margin-bottom:0;">
+                    <svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg">
+                    <!-- POWER -->
+                    <rect x="10"  y="10" width="155" height="115" rx="5" fill="#1a3a40" stroke="#4ecdc4" stroke-width="2"/>
+                    <text x="87"  y="30" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#4ecdc4">POWER</text>
+                    <text x="87"  y="44" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">0 – 100%</text>
+                    <text x="20"  y="60" font-family="'Courier New'" font-size="9" fill="#d8dde8">Output minus module draw</text>
+                    <text x="20"  y="74" font-family="'Courier New'" font-size="9" fill="#d8dde8">Generators: solar/cell/fusion</text>
+                    <text x="20"  y="88" font-family="'Courier New'" font-size="9" fill="#d8dde8">0% → non-essential offline</text>
+                    <text x="20" y="102" font-family="'Courier New'" font-size="9" fill="#e05c5c">Prolonged 0% → critical fail</text>
+                    <text x="20" y="116" font-family="'Courier New'" font-size="9" fill="#7a8499">Charges suit battery (slow if low)</text>
 
-Late Game: Converges to Mega-Project spine
-  → Single required progression path
-  → All nodes enable automation, survivability, or Mega-Project progress
-  → No dead-end nodes (every unlock has value)
+                    <!-- INTEGRITY -->
+                    <rect x="175" y="10" width="155" height="115" rx="5" fill="#1a3322" stroke="#7ec699" stroke-width="2"/>
+                    <text x="252"  y="30" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#7ec699">INTEGRITY</text>
+                    <text x="252"  y="44" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">0 – 100%</text>
+                    <text x="185"  y="60" font-family="'Courier New'" font-size="9" fill="#d8dde8">Hull structural health</text>
+                    <text x="185"  y="74" font-family="'Courier New'" font-size="9" fill="#d8dde8">Hazards, attacks, events</text>
+                    <text x="185"  y="88" font-family="'Courier New'" font-size="9" fill="#d8dde8">Repaired with crafted mats</text>
+                    <text x="185" y="102" font-family="'Courier New'" font-size="9" fill="#e05c5c">0% → Ship destroyed (LOSS)</text>
+                    <text x="185" y="116" font-family="'Courier New'" font-size="9" fill="#7a8499">Tech tree + schematics persist</text>
 
-Mega-Project Nodes:
-  → Distributed across world's biomes
-  → Requires high-threat zone exploration
-  → Completion = game win condition
+                    <!-- HEAT -->
+                    <rect x="340" y="10" width="155" height="115" rx="5" fill="#2a2010" stroke="#f7b731" stroke-width="2"/>
+                    <text x="417"  y="30" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#f7b731">HEAT</text>
+                    <text x="417"  y="44" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">0 – 100%</text>
+                    <text x="350"  y="60" font-family="'Courier New'" font-size="9" fill="#d8dde8">Internal temperature</text>
+                    <text x="350"  y="74" font-family="'Courier New'" font-size="9" fill="#d8dde8">Drifts toward biome ambient</text>
+                    <text x="350"  y="88" font-family="'Courier New'" font-size="9" fill="#d8dde8">Managed: Thermal Regulator</text>
+                    <text x="350" y="102" font-family="'Courier New'" font-size="9" fill="#e05c5c">Extreme → module malfunction</text>
+                    <text x="350" y="116" font-family="'Courier New'" font-size="9" fill="#7a8499">High heat → more power draw</text>
+
+                    <!-- OXYGEN -->
+                    <rect x="505" y="10" width="165" height="115" rx="5" fill="#2a1a1a" stroke="#e05c5c" stroke-width="2"/>
+                    <text x="587"  y="30" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#e05c5c">OXYGEN</text>
+                    <text x="587"  y="44" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">0 – 100%</text>
+                    <text x="515"  y="60" font-family="'Courier New'" font-size="9" fill="#d8dde8">Atmospheric viability</text>
+                    <text x="515"  y="74" font-family="'Courier New'" font-size="9" fill="#d8dde8">Hull breaches + biome hazards</text>
+                    <text x="515"  y="88" font-family="'Courier New'" font-size="9" fill="#d8dde8">Managed: O2 Recycler module</text>
+                    <text x="515" y="102" font-family="'Courier New'" font-size="9" fill="#e05c5c">0% → countdown before dmg</text>
+                    <text x="515" y="116" font-family="'Courier New'" font-size="9" fill="#7a8499">Required in toxic atmosphere zones</text>
+
+                    <!-- Cascade arrows -->
+                    <text x="340" y="148" font-family="'Courier New'" font-size="9" font-weight="bold" fill="#e05c5c">CASCADE FAILURES:</text>
+                    <text x="10"  y="165" font-family="'Courier New'" font-size="9" fill="#7a8499">POWER ↓  →  Heat management offline  →  Heat drifts to biome extreme</text>
+                    <text x="10"  y="180" font-family="'Courier New'" font-size="9" fill="#7a8499">POWER ↓  →  O2 recyclers offline     →  Oxygen begins dropping</text>
+                    <text x="10"  y="195" font-family="'Courier New'" font-size="9" fill="#7a8499">HEAT ↑   →  Cooling draws more power  →  Power deficit worsens</text>
+                    <text x="10"  y="210" font-family="'Courier New'" font-size="9" fill="#7a8499">INTEGRITY ↓ → Hull breaches          →  Oxygen drops</text>
+                    <text x="10"  y="230" font-family="'Courier New'" font-size="9" fill="#4ecdc4">Design law: Neglect one variable and cascading failures begin. The ship is a living system.</text>
+                    </svg>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        function switchTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
+    <div class="row">
+        <div class="col">
+            <div class="card card-yellow">
+                <h3>Module System — Weight/Performance Formula</h3>
+                <div class="formula">
+Total Ship Weight  = Hull Base Weight + Σ(all module weights)
 
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+Fuel Consumption   = Base Rate × (1 + Weight Modifier)
+Top Speed          = Base Speed × (1 − Weight Modifier)
 
-            // Show selected tab
-            document.getElementById(tabName).classList.add('active');
+Weight Modifier    = (Total Weight − Optimal Weight) / Optimal Weight
+                     [clamped to 0 at or below Optimal Weight]
+                </div>
+                <p style="margin-top:8px">Every module added = trade-off. There is no optimal loadout — only choices.</p>
+                <hr>
+                <table style="margin-top:8px">
+                    <tr><th>Category</th><th>Function</th></tr>
+                    <tr><td>Power Generation</td><td>Solar panels, fuel cells, fusion cores</td></tr>
+                    <tr><td>Propulsion</td><td>Required for navigation; upgrades speed + efficiency</td></tr>
+                    <tr><td>Structural</td><td>Increases max Integrity; anchors other modules</td></tr>
+                    <tr><td>Extraction Bay</td><td>On-board smelting and ore processing</td></tr>
+                    <tr><td>Automation Hub</td><td>Drone housing + auto-smelter (mid-game unlock)</td></tr>
+                    <tr><td>Thermal Management</td><td>Regulates Heat; required in extreme biomes</td></tr>
+                    <tr><td>Life Support</td><td>Maintains Oxygen; required in toxic zones</td></tr>
+                    <tr><td>Storage</td><td>Expands cargo capacity</td></tr>
+                    <tr><td>Scanner Array</td><td>Scanner range, resolution, deposit tier detection ceiling</td></tr>
+                    <tr><td>Weapons / Defense</td><td>Shields + weapons for high-threat zones</td></tr>
+                </table>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card card-purple">
+                <h3>Player Suit — Separate Upgrade Track</h3>
+                <p>The suit is the player's personal equipment. Its upgrade track is <strong>independent of the ship tech tree</strong> — suit upgrades do not compete with ship resources.</p>
+                <hr>
+                <table style="margin-top:8px">
+                    <tr><th>Axis</th><th>Effect</th></tr>
+                    <tr><td style="color:var(--teal)">Battery Capacity</td><td>Max field time before recharge; determines how long tools can fire</td></tr>
+                    <tr><td style="color:var(--green)">Movement Speed</td><td>Base movement; also reduces severity of 0%-battery speed penalty</td></tr>
+                    <tr><td style="color:var(--yellow)">Scanner Range/Quality</td><td>Player's baseline scanner — works within the Scanner Array module's detection ceiling</td></tr>
+                    <tr><td style="color:var(--red)">Armor / Resistance</td><td>Reduces damage from hazards and enemy attacks</td></tr>
+                </table>
+                <hr>
+                <p><strong style="color:var(--purple)">Scanner Interaction:</strong> Ship Scanner Array sets the <em>hard ceiling</em> (what tiers can be detected). Suit scanner upgrade improves <em>baseline range and resolution within that ceiling</em>. Both axes matter independently.</p>
+                <hr>
+                <p><strong style="color:var(--teal)">Battery &amp; Field Loop:</strong> Suit charges at ship (fast). Spare batteries occupy <em>general inventory slots</em> — carrying more spares = less cargo space. This is the core field-trip trade-off. Tools don't fire at 0%; movement speed −25% (never immobilized).</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-            // Add active class to clicked button
-            event.target.classList.add('active');
-        }
-    </script>
+<!-- ═══════════════════════════════════════════════════════ BIOMES ════ -->
+<div id="biomes" class="tab-content">
+
+    <div class="row">
+        <div class="col" style="flex:2">
+            <div class="card card-teal">
+                <h3>Biome Threat Tier Architecture</h3>
+                <table>
+                    <tr><th>Tier</th><th>Threat</th><th>Player Access Gate</th><th>Detectable Deposits</th><th>Purity Range</th></tr>
+                    <tr>
+                        <td><span class="badge badge-green">T1</span></td>
+                        <td>Low</td>
+                        <td>Game start — no gate</td>
+                        <td>Tier 1 only</td>
+                        <td>1–3★ (rare 4★)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-yellow">T2</span></td>
+                        <td>Medium</td>
+                        <td>Mid-game hull upgrade required</td>
+                        <td>Tier 1–2</td>
+                        <td>2–4★ (5★ rare)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-red">T3</span></td>
+                        <td>High</td>
+                        <td>Combat modules; Integrity &gt; 50% to enter</td>
+                        <td>Tier 1–3</td>
+                        <td>3–5★</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-purple">T4</span></td>
+                        <td>Extreme</td>
+                        <td>Mega-Project ship spec required</td>
+                        <td>Unique rare materials only</td>
+                        <td>Fixed 5★</td>
+                    </tr>
+                </table>
+                <p style="margin-top:10px">World generation: Biome <strong>type</strong> sets the resource palette. Biome <strong>tier</strong> sets purity &amp; depth distribution. No two worlds identical — meta-rules guarantee all Mega-Project materials appear somewhere.</p>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card card-green">
+                <h3>Resource Palette Structure</h3>
+                <ul>
+                    <li><strong>Primary resource:</strong> Most common; low-purity sources abundant</li>
+                    <li><strong>Secondary resource:</strong> Moderate presence; mixed purity</li>
+                    <li><strong>Rare resource:</strong> Uncommon; deep deposits or specific features</li>
+                    <li><strong>Surface collectibles:</strong> Visible without scanner; walk-up pickup</li>
+                </ul>
+                <hr>
+                <p><strong>Deposit Chains:</strong> High-tier scanners can detect adjacent lateral chains extending through the sub-surface. Exploiting a full chain may require repositioning the ship or deploying drones. Incentivizes staying in one zone vs. always moving on.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-teal">
+        <h3>B001 — Overgrown Suburbs <span class="badge badge-green" style="margin-left:8px">Tier 1 · Tutorial Zone</span></h3>
+        <div class="row" style="margin-top:10px">
+            <div class="col">
+                <div class="kv">
+                    <div><span class="k">Visual: </span><span class="v">Rolling hills, dying alien foliage, Serev residential ruins. Muted earth tones, oxidised metal, cracked synthetics.</span></div>
+                    <div><span class="k">Atmosphere: </span><span class="v">Quiet. Domestic in scale — where the Serev lived. The silence feels heavy.</span></div>
+                    <div><span class="k">Enemies: </span><span class="v">None / barely-functional Serev defense remnants. Designed as a safe learning zone.</span></div>
+                </div>
+            </div>
+            <div class="col">
+                <table>
+                    <tr><th>Resource</th><th>Type</th><th>Method</th><th>Use</th></tr>
+                    <tr><td>Scrap Metal (fragments)</td><td>Surface collectible</td><td>Walk-up pickup</td><td>Basic crafting</td></tr>
+                    <tr><td>Scrap Metal (embedded)</td><td>Tier 1 deposit</td><td>Ph1 → Ph2 → Hand Drill</td><td>Higher qty; same use</td></tr>
+                    <tr><td>Organic Matter</td><td>Surface collectible</td><td>Hand harvest</td><td>Fuel (low efficiency)</td></tr>
+                </table>
+            </div>
+        </div>
+        <p style="margin-top:10px"><strong style="color:var(--teal)">Design function:</strong> Scrap fragments teach walk-up pickup <em>before</em> the full scanner loop is required — reducing early friction. Organic Matter establishes the fuel system concept early. Scanner-mining loop introduced at its simplest form (1–2 line mining patterns). Serev ruins provide environmental storytelling without requiring combat.</p>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ ENDGAME ARC ════ -->
+<div id="endgame" class="tab-content">
+
+    <div class="svg-wrap">
+        <svg viewBox="0 0 1100 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <marker id="arr3" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#4ecdc4"/></marker>
+            <marker id="arr3r" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#e05c5c"/></marker>
+            <marker id="arr3g" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#7ec699"/></marker>
+        </defs>
+
+        <!-- Phase 1 Breadth -->
+        <rect x="10" y="10" width="260" height="160" rx="6" fill="#1a3a40" stroke="#4ecdc4" stroke-width="2"/>
+        <text x="140" y="32" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#4ecdc4">PHASE 1: BREADTH</text>
+        <text x="140" y="46" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Early / Mid Game</text>
+        <text x="20"  y="64" font-family="'Courier New'" font-size="9" fill="#d8dde8">Mining Tools (T1 → T4)</text>
+        <text x="20"  y="78" font-family="'Courier New'" font-size="9" fill="#d8dde8">Ship Modules (all categories)</text>
+        <text x="20"  y="92" font-family="'Courier New'" font-size="9" fill="#d8dde8">Automation (Drones, Auto-Smelters)</text>
+        <text x="20" y="106" font-family="'Courier New'" font-size="9" fill="#d8dde8">Survival (Integrity, O2, Heat)</text>
+        <text x="20" y="120" font-family="'Courier New'" font-size="9" fill="#d8dde8">Suit upgrade axes (4 independent)</text>
+        <text x="20" y="140" font-family="'Courier New'" font-size="9" fill="#7ec699">Multiple valid paths — player chooses</text>
+        <text x="20" y="155" font-family="'Courier New'" font-size="9" fill="#7ec699">No dead-end nodes</text>
+
+        <line x1="270" y1="90" x2="320" y2="90" stroke="#4ecdc4" stroke-width="2" marker-end="url(#arr3)"/>
+
+        <!-- Phase 2 Convergence -->
+        <rect x="320" y="10" width="240" height="160" rx="6" fill="#1e1a2e" stroke="#a390e2" stroke-width="2"/>
+        <text x="440" y="32" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#a390e2">PHASE 2: CONVERGENCE</text>
+        <text x="440" y="46" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Late Game — Final 20% of nodes</text>
+        <text x="330" y="64" font-family="'Courier New'" font-size="9" fill="#d8dde8">World-Engine Branch unlocks</text>
+        <text x="330" y="78" font-family="'Courier New'" font-size="9" fill="#d8dde8">WE Component 1 (Tier 3 rare mat)</text>
+        <text x="330" y="92" font-family="'Courier New'" font-size="9" fill="#d8dde8">WE Component 2 (Tier 3 rare mat)</text>
+        <text x="330" y="106" font-family="'Courier New'" font-size="9" fill="#e05c5c">WE Component 3 (Tier 4 extreme)</text>
+        <text x="330" y="120" font-family="'Courier New'" font-size="9" fill="#e05c5c">WE Component 4 (Tier 4 extreme)</text>
+        <text x="330" y="134" font-family="'Courier New'" font-size="9" fill="#d8dde8">WE Assembly Step 1 + 2</text>
+        <text x="330" y="155" font-family="'Courier New'" font-size="9" fill="#a390e2">High-threat zones now required</text>
+
+        <line x1="560" y1="90" x2="605" y2="90" stroke="#a390e2" stroke-width="2" marker-end="url(#arr3)"/>
+
+        <!-- First Cycle Activation -->
+        <rect x="605" y="10" width="195" height="160" rx="6" fill="#2a1a1a" stroke="#e05c5c" stroke-width="2"/>
+        <text x="702" y="32" text-anchor="middle" font-family="'Courier New'" font-size="10" font-weight="bold" fill="#e05c5c">NAER-RETH ACTIVATION</text>
+        <text x="702" y="46" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">First Cycle End — "The Tragedy"</text>
+        <text x="615" y="64" font-family="'Courier New'" font-size="9" fill="#d8dde8">Activation sequence triggers</text>
+        <text x="615" y="78" font-family="'Courier New'" font-size="9" fill="#d8dde8">Aur ecology begins to revive</text>
+        <text x="615" y="92" font-family="'Courier New'" font-size="9" fill="#e05c5c">Energy drain: ship, Rel, player</text>
+        <text x="615" y="106" font-family="'Courier New'" font-size="9" fill="#d8dde8">Rel's final words play</text>
+        <text x="615" y="120" font-family="'Courier New'" font-size="9" fill="#d8dde8">Credits: Aur, alive, centuries later</text>
+        <text x="615" y="134" font-family="'Courier New'" font-size="9" fill="#d8dde8">Another vessel approaches</text>
+        <text x="615" y="155" font-family="'Courier New'" font-size="9" fill="#7ec699">Second Cycle prompt appears</text>
+
+        <line x1="800" y1="90" x2="845" y2="90" stroke="#e05c5c" stroke-width="2" marker-end="url(#arr3r)"/>
+
+        <!-- New Game + Knowledge -->
+        <rect x="845" y="10" width="240" height="160" rx="6" fill="#1a3322" stroke="#7ec699" stroke-width="2"/>
+        <text x="965" y="32" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#7ec699">NEW GAME+ CARRY-OVER</text>
+        <text x="965" y="46" text-anchor="middle" font-family="'Courier New'" font-size="9" fill="#7a8499">Knowledge only — not resources</text>
+        <text x="855" y="64" font-family="'Courier New'" font-size="9" fill="#d8dde8">Player knows what Naer-Reth does</text>
+        <text x="855" y="78" font-family="'Courier New'" font-size="9" fill="#d8dde8">Hidden branch now accessible</text>
+        <text x="855" y="92" font-family="'Courier New'" font-size="9" fill="#d8dde8">Data fragments now readable</text>
+        <text x="855" y="106" font-family="'Courier New'" font-size="9" fill="#d8dde8">Rel can translate what it couldn't</text>
+        <text x="855" y="120" font-family="'Courier New'" font-size="9" fill="#d8dde8">World did not hide the truth —</text>
+        <text x="855" y="134" font-family="'Courier New'" font-size="9" fill="#d8dde8">player didn't know what to look for</text>
+        <text x="855" y="155" font-family="'Courier New'" font-size="9" fill="#7ec699">Start Second Cycle (harder)</text>
+
+        <!-- Second Cycle Regulator branch -->
+        <rect x="320" y="195" width="520" height="155" rx="6" fill="#1a1a2e" stroke="#a390e2" stroke-width="1" stroke-dasharray="5,3"/>
+        <text x="580" y="217" text-anchor="middle" font-family="'Courier New'" font-size="11" font-weight="bold" fill="#a390e2">SECOND CYCLE — THE REGULATOR (runs in parallel with Naer-Reth)</text>
+
+        <text x="330" y="238" font-family="'Courier New'" font-size="9" fill="#d8dde8">Regulator Component A: Tier 1+2 combined materials</text>
+        <text x="330" y="252" font-family="'Courier New'" font-size="9" fill="#d8dde8">Regulator Component B: Tier 2+3 combined materials</text>
+        <text x="330" y="266" font-family="'Courier New'" font-size="9" fill="#e05c5c">Regulator Component C: Tier 3+4 combined materials</text>
+        <text x="330" y="280" font-family="'Courier New'" font-size="9" fill="#f7b731">Regulator Component D: "The Record" — Second Cycle exclusive</text>
+        <text x="330" y="296" font-family="'Courier New'" font-size="9" fill="#7a8499">"The Record" located via data fragments (lore in Cycle 1; now coordinates)</text>
+        <text x="330" y="310" font-family="'Courier New'" font-size="9" fill="#7a8499">Requires revisiting all biome tiers — retrospective tour of the entire world</text>
+        <text x="330" y="326" font-family="'Courier New'" font-size="9" fill="#7a8499">Interface Assembly: requires BOTH Naer-Reth AND Regulator complete</text>
+        <text x="330" y="340" font-family="'Courier New'" font-size="9" fill="#7ec699">Total cost: 2× base Naer-Reth activation · True ending: Aur lives. Player lives.</text>
+        </svg>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="card card-red">
+                <h3>First Cycle — "The Tragedy" (Unavoidable)</h3>
+                <ul>
+                    <li>The Naer-Reth <em>does</em> revive the planet's ecology — it succeeds</li>
+                    <li>It also drains all energy from Aur's surface as fuel (geological, technological, biological)</li>
+                    <li>The Serev were consumed during its <em>first partial activation</em> — that is what destroyed them</li>
+                    <li>The player, the ship, and Rel are consumed during the full activation</li>
+                    <li>The player cannot avoid this ending on the First Cycle — only understand it before or after</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card card-green">
+                <h3>Second Cycle — "The True Ending" (Earned)</h3>
+                <ul>
+                    <li>Accessible only after completing the First Cycle (save flag gate — no skill check)</li>
+                    <li>The Regulator limits the Naer-Reth's drain to geological/solar sources only — excluding biological</li>
+                    <li>The Serev <em>knew</em> the Regulator could exist. They left instructions. The player was the intended recipient.</li>
+                    <li>Harder than the tragedy: 2× total resources, parallel construction tracks, all biome tiers revisited</li>
+                    <li>Aur lives. The player lives. Rel understands, finally and completely.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card card-purple">
+                <h3>Loss State — Ship Destruction</h3>
+                <table style="margin-top:4px">
+                    <tr><th>Lost</th><th>Persists</th></tr>
+                    <tr><td>All raw + refined resources</td><td>Tech tree progress</td></tr>
+                    <tr><td>All installed ship modules</td><td>All learned schematics</td></tr>
+                    <tr><td>Cargo / inventory</td><td>Rel (AI companion)</td></tr>
+                    <tr><td>Fuel</td><td>Biome map data</td></tr>
+                </table>
+                <p style="margin-top:8px">Player respawns with starter ship config. Rebuilds faster because they know everything. Narrative framing: the player is a researcher — their knowledge survives because <em>they</em> survive.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ INPUT SYSTEM ════ -->
+<div id="input" class="tab-content">
+
+    <div class="card card-teal" style="margin-bottom:14px">
+        <h3>InputManager Architecture — Centralized Routing</h3>
+        <div class="formula">
+Player Input (Keyboard/Mouse  OR  Gamepad)
+    ↓
+InputManager (autoload — persistent)
+    ├─→ PlayerFirstPerson controller    (if Context 1 active)
+    ├─→ PlayerThirdPerson controller   (if Context 2 active)
+    └─→ UI System                      (always active when menu open)
+
+Rules:
+  • Only ONE controller active at any time (first-person XOR third-person)
+  • Menu input is ALWAYS processed regardless of controller state
+  • Controllers call InputManager.is_action_pressed() — NEVER Input.is_action_pressed() directly
+  • Input remapping updates Godot project settings dynamically via InputManager
+  • Dead zones handled in InputManager, not in individual controllers
+        </div>
+    </div>
+
+    <div class="ctx-grid">
+        <!-- Context 1 -->
+        <div class="card card-green">
+            <h3>Context 1: First-Person Surface Exploration</h3>
+            <p>Camera: Ego perspective at head level. Free-look clamped to ±85° pitch.</p>
+            <table style="margin-top:10px">
+                <tr><th>Action</th><th>Keyboard</th><th>Gamepad</th></tr>
+                <tr><td>Move Forward</td><td>W</td><td>Left Stick ↑</td></tr>
+                <tr><td>Move Backward</td><td>S</td><td>Left Stick ↓</td></tr>
+                <tr><td>Strafe Left/Right</td><td>A / D</td><td>Left Stick ←/→</td></tr>
+                <tr><td>Camera Look H</td><td>Mouse X</td><td>Right Stick ←/→</td></tr>
+                <tr><td>Camera Look V</td><td>Mouse Y</td><td>Right Stick ↑/↓</td></tr>
+                <tr><td>Interact / Use</td><td>E</td><td>West (X)</td></tr>
+                <tr><td>Scanner</td><td>Q</td><td>Left Bumper</td></tr>
+                <tr><td>Use Tool</td><td>Left Click</td><td>Right Trigger</td></tr>
+                <tr><td style="color:var(--teal)">Switch View</td><td style="color:var(--teal)">Tab</td><td style="color:var(--teal)">Menu / Start</td></tr>
+            </table>
+            <p style="margin-top:8px; color:var(--text-dim)">Dead zones: LS 0.15 · RS 0.10 · Triggers 0.05</p>
+            <p style="color:var(--text-dim)">Aim assist active on gamepad for ranged tools (mild snap, not aimbot)</p>
+        </div>
+
+        <!-- Context 2 -->
+        <div class="card card-purple">
+            <h3>Context 2: Third-Person Ship Navigation</h3>
+            <p>Camera: Orbital spherical coords (yaw, pitch, distance) relative to ship. Default: 15u distance, 45° yaw, 30° pitch. Damping: 0.15.</p>
+            <table style="margin-top:10px">
+                <tr><th>Action</th><th>Keyboard</th><th>Gamepad</th></tr>
+                <tr><td>Ship Pitch</td><td>W / S</td><td>Right Stick ↑/↓</td></tr>
+                <tr><td>Ship Roll</td><td>A / D</td><td>Right Stick ←/→</td></tr>
+                <tr><td>Camera Orbit Yaw</td><td>Mouse X</td><td>Left Stick ←/→</td></tr>
+                <tr><td>Camera Orbit Pitch</td><td>Mouse Y</td><td>Left Stick ↑/↓</td></tr>
+                <tr><td>Zoom In / Out</td><td>Scroll / Num+−</td><td>LB/LT · RB/RT</td></tr>
+                <tr><td>Accelerate</td><td>Space</td><td>Right Trigger</td></tr>
+                <tr><td>Emergency Stop</td><td>X</td><td>South (A)</td></tr>
+                <tr><td style="color:var(--purple)">Switch View</td><td style="color:var(--purple)">Tab</td><td style="color:var(--purple)">Menu / Start</td></tr>
+            </table>
+            <p style="margin-top:8px; color:var(--text-dim)">Dead zones: LS 0.15 · RS 0.15 · Triggers 0.05</p>
+            <p style="color:var(--text-dim)">Orbital distance: min 5u, max 50u. Camera does NOT auto-rotate with ship.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="card card-teal">
+                <h3>View Mode Switching (Tab / Menu)</h3>
+                <ul>
+                    <li>Current view deactivates (freeze character / ship)</li>
+                    <li>Camera transitions smoothly over <strong>0.5 seconds</strong></li>
+                    <li>Control scheme switches immediately after transition</li>
+                    <li>Velocity preserved on switch (walking momentum / ship velocity)</li>
+                    <li>Mid-action: action completes in current context; switch queued after</li>
+                    <li>Rapid spam prevention: <strong>0.3s debounce cooldown</strong> on Tab/Menu</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card card-yellow">
+                <h3>Seamless Device Switching</h3>
+                <ul>
+                    <li>Gamepad → KB/Mouse: any key press or mouse movement</li>
+                    <li>KB/Mouse → Gamepad: any button or stick movement beyond dead zone</li>
+                    <li>Switch is immediate — no menu, no confirmation, no game pause</li>
+                    <li>UI button hints update instantly (E vs X / ● etc.)</li>
+                    <li>Activity debounced: <strong>0.1s window</strong> to prevent false switching</li>
+                    <li>Mouse movement alone (no click) counts as activity</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card card-red">
+                <h3>Gamepad First-Class Requirements</h3>
+                <ul>
+                    <li>All actions rebindable including gamepad layouts</li>
+                    <li>Analog triggers are <strong>pressure-sensitive [0.0–1.0]</strong>, not binary</li>
+                    <li>Left Stick = movement/camera primary (context-dependent)</li>
+                    <li>Right Stick = camera/rotation secondary (context-dependent)</li>
+                    <li>Sensitivity configurable per axis (X and Y separately)</li>
+                    <li>All UI legible at TV viewing distance</li>
+                    <li>Radial scanner wheel designed for analog stick input first</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(id, btn) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+</script>
 </body>
 </html>

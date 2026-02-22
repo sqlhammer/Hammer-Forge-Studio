@@ -2,7 +2,7 @@
 id: TICKET-0015
 title: "BLOCKER — Studio Head must approve pipeline decision before M2 QA proceeds"
 type: BLOCKER
-status: OPEN
+status: DONE
 priority: P0
 owner: producer
 created_by: producer
@@ -35,3 +35,4 @@ Additionally: the technical-artist's TICKET-0013 handoff notes reveal the final 
 ## Activity Log
 
 - 2026-02-22 [producer] Created blocker. technical-artist completed TICKET-0012 and TICKET-0013 while TICKET-0011 was still IN_REVIEW awaiting Studio Head decision. TICKET-0014 gated until approvals are in place. Escalated to Studio Head.
+- 2026-02-22 [producer] RESOLVED — TICKET-0011 approved by Studio Head (DONE). TICKET-0013 Blender-only selection rejected; TICKET-0016 created for hybrid rework. All decisions made. TICKET-0014 now depends on TICKET-0016. TICKET-0015 DONE.

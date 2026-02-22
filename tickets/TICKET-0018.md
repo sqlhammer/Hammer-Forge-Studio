@@ -2,7 +2,7 @@
 id: TICKET-0018
 title: "Archive PoC experiment artifacts and clean up game directory"
 type: TASK
-status: OPEN
+status: DONE
 priority: P2
 owner: technical-artist
 created_by: producer
@@ -20,18 +20,18 @@ The M2 PoC work generated experiment artifacts that are no longer part of the ap
 
 ## Acceptance Criteria
 
-- [ ] `experiments/m2-poc/` directory created at the repo root to house all M2 experiment artifacts
-- [ ] All AI-generated PoC assets moved from `game/poc_ai_gen/` to `experiments/m2-poc/ai-gen/`
-- [ ] Any intermediate Blender Python PoC outputs not already at production paths moved to `experiments/m2-poc/blender-python/`
-- [ ] `game/poc_ai_gen/` directory removed (must not remain as an empty folder)
-- [ ] Production assets at approved paths untouched and verified present after cleanup:
+- [x] `experiments/m2-poc/` directory created at the repo root to house all M2 experiment artifacts
+- [x] All AI-generated PoC assets moved from `game/poc_ai_gen/` to `experiments/m2-poc/ai-gen/`
+- [x] Any intermediate Blender Python PoC outputs not already at production paths moved to `experiments/m2-poc/blender-python/`
+- [x] `game/poc_ai_gen/` directory removed (must not remain as an empty folder)
+- [x] Production assets at approved paths untouched and verified present after cleanup:
   - `game/assets/meshes/tools/mesh_hand_drill.glb`
   - `game/assets/meshes/characters/mesh_player_character.glb`
   - `game/assets/meshes/vehicles/mesh_ship_exterior.glb`
   - `game/assets/meshes/props/mesh_resource_node_scrap.glb`
-- [ ] `experiments/m2-poc/README.md` written documenting what is archived, why it was not selected for production, and how to retrieve it if needed in future sprints
-- [ ] No `.import` files or Godot project references point to the archived paths — verify no broken references remain in `game/`
-- [ ] Changes committed to `main`
+- [x] `experiments/m2-poc/README.md` written documenting what is archived, why it was not selected for production, and how to retrieve it if needed in future sprints
+- [x] No `.import` files or Godot project references point to the archived paths — verify no broken references remain in `game/`
+- [x] Changes committed to `main`
 
 ## Implementation Notes
 
@@ -43,3 +43,5 @@ The M2 PoC work generated experiment artifacts that are no longer part of the ap
 ## Activity Log
 
 - 2026-02-22 [producer] Created ticket. M2 PoC artifacts require cleanup from game directory before M3 begins. Depends on TICKET-0016 (approved production assets must be in place before cleanup proceeds).
+- 2026-02-22 [technical-artist] IN_PROGRESS. Dependency TICKET-0016 confirmed DONE. Surveyed game/ for all PoC and experiment artifacts: game/poc_ai_gen/ (AI gen), game/poc_blender/ (Blender Python), game/experiment/ (misc tests), ai_gen_experiments/ (Tripo script + raw outputs).
+- 2026-02-22 [technical-artist] DONE. Archived all M2 PoC artifacts to experiments/m2-poc/ (ai-gen/, blender-python/, misc/). Removed game/poc_ai_gen/, game/poc_blender/, game/experiment/, ai_gen_experiments/. Stripped orphaned .import files. All 4 production assets verified present at approved paths. Godot filesystem scan clean — no broken references. README.md written documenting archive contents and retrieval instructions.

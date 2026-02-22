@@ -63,9 +63,11 @@ This ensures `main` is always in a working, committed state. PRs are used to sur
 
 ## Testing
 
-- **Always run tests after changes**
-- Test suites will be implemented as the project develops
-- Establish tests early for new features
+- The project uses the **Hammer Forge Tests** framework (`game/addons/hammer_forge_tests/`)
+- Unit tests live in `game/tests/` — one file per system, extending `TestSuite`
+- **QA Engineer** is responsible for writing unit tests and running the full test suite
+- The test suite must pass in full before any milestone can close — this is a hard gate on QA sign-off
+- Run tests via `res://addons/hammer_forge_tests/test_runner.tscn` in editor, or headless for CI
 
 ## Communication Style
 

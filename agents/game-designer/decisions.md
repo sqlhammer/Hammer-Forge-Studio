@@ -35,3 +35,23 @@
 - Gamepad vibration feedback in v1 or deferred to v2?
 
 See `docs/design/systems/input-system.md` for full specification.
+
+---
+
+## [2026-02-22] [TICKET-0008] PoC Evaluation Criteria Weighting
+
+**Context:** M2 requires comparing two 3D asset pipelines (Blender Python vs AI generation) across six dimensions. The evaluation framework needs weighted scoring so TICKET-0011 can produce a clear, defensible recommendation.
+
+**Decision:** Weighted scoring with Visual Quality at 25%, Iteration Speed and Consistency tied at 20%, Godot Compatibility at 15%, AI-Team Suitability and Maintainability at 10% each.
+
+**Alternatives considered:**
+1. Equal weighting across all six dimensions — rejected because not all dimensions are equally important; visual quality is a core differentiator per the GDD
+2. Pass/fail per dimension — rejected because it loses nuance; a pipeline might "pass" everything but still be clearly weaker overall
+3. Higher weight on AI-Team Suitability (prioritize automation) — rejected because a fast, automated pipeline that produces ugly assets doesn't serve the game's aesthetic goals
+
+**Rationale:**
+- Visual Quality leads (25%) because the GDD positions art direction as a differentiator; output that doesn't match the stylized sci-fi tone is unusable regardless of speed
+- Iteration Speed and Consistency share second place (20% each) because the AI-agent team needs both fast turnaround and coherent style across diverse asset types
+- Godot Compatibility (15%) is elevated above the automation dimensions because import friction directly blocks every downstream workflow
+- AI-Team Suitability and Maintainability (10% each) are important but secondary — a pipeline that scores well on everything else but requires some manual steps is still viable
+- 0.3-point threshold for hybrid recommendation prevents marginal differences from forcing an all-or-nothing choice

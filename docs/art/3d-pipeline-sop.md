@@ -41,7 +41,7 @@ Brief → Generate → Validate → Optimize → Import → Verify → Ship
 
 | Credential | Storage | Notes |
 |------------|---------|-------|
-| `TRIPO_API_KEY` | Windows system env var | Professional plan ($11.94/month). Set via System Properties → Environment Variables. Read into bash via: `export TRIPO_API_KEY="$(powershell -Command "[System.Environment]::GetEnvironmentVariable('TRIPO_API_KEY', 'User')")"` |
+| `TRIPO_API_KEY` | Windows system env var | Professional plan ($19.94/month). Set via System Properties → Environment Variables. Read into bash via: `export TRIPO_API_KEY="$(powershell -Command "[System.Environment]::GetEnvironmentVariable('TRIPO_API_KEY', 'User')")"` |
 
 ### Required Files
 

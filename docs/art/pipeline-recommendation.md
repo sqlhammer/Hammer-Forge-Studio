@@ -3,7 +3,7 @@
 **Ticket:** TICKET-0011
 **Author:** technical-artist
 **Date:** 2026-02-22
-**Status:** RECOMMENDATION READY — PENDING STUDIO HEAD DECISION
+**Status:** UPDATED WITH ACTUAL RESULTS — PENDING STUDIO HEAD DECISION
 
 ---
 
@@ -11,7 +11,7 @@
 
 **We recommend a hybrid pipeline: AI Generation (Tripo3D) as primary, with Blender Python as secondary for procedural/geometric assets and post-processing cleanup.**
 
-Both pipelines were evaluated against the six criteria from `docs/art/poc-evaluation-criteria.md`. The AI generation pipeline scores higher overall due to overwhelming speed advantage and AI-team suitability, while the Blender Python pipeline offers superior consistency and maintainability. A hybrid approach captures the strengths of both.
+Both pipelines were evaluated against the six criteria from `docs/art/poc-evaluation-criteria.md` and both have been executed with actual assets imported into Godot. The hybrid recommendation holds, but with an important caveat: AI-generated meshes require mandatory retopology before game use (100K-285K vertices vs 1.5K-15K budget). Blender Python's role as the cleanup/optimization layer is more critical than initially projected.
 
 ---
 
@@ -19,21 +19,23 @@ Both pipelines were evaluated against the six criteria from `docs/art/poc-evalua
 
 | Dimension | Weight | Blender Python (1-5) | Blender Weighted | AI Generation (1-5) | AI Weighted |
 |-----------|--------|----------------------|------------------|----------------------|-------------|
-| Visual Quality | 0.25 | 3 | 0.75 | 3.5 | 0.875 |
+| Visual Quality | 0.25 | 3 | 0.75 | 4 | 1.00 |
 | Iteration Speed | 0.20 | 3 | 0.60 | 5 | 1.00 |
-| Consistency | 0.20 | 4 | 0.80 | 2.5 | 0.50 |
-| Godot Compatibility | 0.15 | 4 | 0.60 | 4 | 0.60 |
-| AI-Team Suitability | 0.10 | 4 | 0.40 | 5 | 0.50 |
-| Maintainability | 0.10 | 5 | 0.50 | 3.5 | 0.35 |
-| **Total** | **1.00** | | **3.65** | | **3.725** |
+| Consistency | 0.20 | 4 | 0.80 | 2 | 0.40 |
+| Godot Compatibility | 0.15 | 4 | 0.60 | 3 | 0.45 |
+| AI-Team Suitability | 0.10 | 4 | 0.40 | 4 | 0.40 |
+| Maintainability | 0.10 | 5 | 0.50 | 3 | 0.30 |
+| **Total** | **1.00** | | **3.65** | | **3.55** |
 
-**Margin: 0.075 points** — within the 0.3-point hybrid threshold.
+**Updated with actual execution data.** Margin: 0.10 points in favor of Blender. Both within the 0.3-point hybrid threshold.
+
+**Score changes from pre-execution estimates:** AI Visual Quality up (3.5→4, textures are excellent), Consistency down (2.5→2, style drift confirmed), Godot Compatibility down (4→3, 285K vertex meshes need retopology), AI-Team Suitability down (5→4, API provisioning was painful), Maintainability down (3.5→3, non-deterministic output confirmed).
 
 ---
 
 ## Score Justification
 
-### Visual Quality (Blender: 3, AI Gen: 3.5)
+### Visual Quality (Blender: 3, AI Gen: 4)
 
 **Blender Python:**
 - Silhouettes are readable and proportions match the stylized aesthetic
@@ -43,13 +45,12 @@ Both pipelines were evaluated against the six criteria from `docs/art/poc-evalua
 - Score 3: Acceptable, meets the bar with minor issues
 
 **AI Generation (Tripo3D):**
-- v3.0 Ultra's 20B parameter model produces more naturally detailed meshes
-- AI-generated textures add visual richness that flat PBR colors cannot
-- Stylized output quality depends heavily on prompt engineering
-- Some assets may lean too realistic or too stylized without careful prompting
-- Score 3.5: Between acceptable and good; potential for 4 with prompt iteration
+- Full PBR texture sets (Color, Normal, ORM) automatically generated per asset
+- Detailed surface treatment — weathering, material transitions, surface detail
+- Each asset is visually recognizable and detailed at game camera distances
+- Score 4: Good quality, visually rich, clearly readable as intended objects
 
-**Evidence:** The Blender pipeline produces exactly what's coded — consistent but limited to primitive composition. AI generation produces more visually rich output but with less predictability.
+**Evidence (actual):** AI-generated hand drill has visible grip texture, metallic housing detail, and drill bit geometry. Player character shows suit fabric detail, helmet reflections. Ship exterior has hull paneling and engine detail. All significantly more visually rich than Blender's flat-color primitives.
 
 ### Iteration Speed (Blender: 3, AI Gen: 5)
 
@@ -69,7 +70,7 @@ Both pipelines were evaluated against the six criteria from `docs/art/poc-evalua
 
 **Evidence:** AI generation is ~150x faster for the generation step. Even accounting for prompt iteration (generate 5 variants per asset), total time is ~6 minutes vs ~3 hours.
 
-### Consistency (Blender: 4, AI Gen: 2.5)
+### Consistency (Blender: 4, AI Gen: 2)
 
 **Blender Python:**
 - Same material palette, same primitive patterns, same modifier stack across all assets
@@ -78,31 +79,34 @@ Both pipelines were evaluated against the six criteria from `docs/art/poc-evalua
 - Score 4: Strong cohesion; all four assets clearly share an art style
 
 **AI Generation (Tripo3D):**
-- Each generation is non-deterministic — different topology, proportions, and texture treatment
-- No style lock-in mechanism on consumer plans
-- Consistency requires disciplined prompting and variant selection
-- Four diverse asset types (tool, character, vehicle, prop) may diverge in style
-- Score 2.5: Some shared elements but noticeable style drift likely between asset types
+- Each asset has distinctly different texture treatment and style
+- No style lock-in mechanism — prompts with "Outer Wilds" did not produce cohesive style
+- Hand drill, character, ship, and resource node look like they come from different games
+- Score 2: Noticeable style drift between assets; would require post-processing to unify
 
-**Evidence:** This is the most significant weakness of AI generation. A hand drill and a ship generated independently may not look like they belong in the same game without post-processing to unify materials and color palettes.
+**Evidence (actual):** Viewing all 4 AI assets side-by-side in Godot, each has different lighting assumptions, texture resolution, and surface treatment. The Blender assets, by contrast, share a consistent material palette and geometric language.
 
-### Godot Compatibility (Blender: 4, AI Gen: 4)
+### Godot Compatibility (Blender: 4, AI Gen: 3)
 
 **Blender Python:**
 - GLB export via `bpy.ops.export_scene.gltf()` is well-tested
 - Scale set explicitly in scripts — imports at correct dimensions
 - PBR materials map to Godot's StandardMaterial3D
+- All 4 assets imported with zero errors, 722 KB total
 - Score 4: Clean import with minimal adjustment
 
 **AI Generation (Tripo3D):**
-- GLB is a native export format
-- Scale and orientation may need correction (AI tools don't guarantee game-engine-ready transforms)
-- AI-generated PBR textures should import cleanly
-- Score 4: Clean import expected; minor scale/orientation fix possible
+- GLB format imports, PBR textures auto-detected and compressed by Godot
+- Ship exterior (16 MB, 285K vertices) caused import contention — failed twice before succeeding
+- Player character (10.9 MB) failed once, succeeded on retry
+- Raw vertex counts (100K-285K) far exceed game poly budgets (1.5K-15K triangles)
+- Total asset weight 52 MB vs Blender's 722 KB — 72x larger
+- Retopology is mandatory before production use
+- Score 3: Imports work but raw output is not game-ready; significant post-processing required
 
-**Evidence:** Both pipelines produce GLB with PBR materials. Neither should have significant Godot import issues.
+**Evidence (actual):** Blender assets imported instantly with zero issues. AI assets required retries and are too heavy for game use without decimation/retopology. This is the most significant practical difference between the pipelines.
 
-### AI-Team Suitability (Blender: 4, AI Gen: 5)
+### AI-Team Suitability (Blender: 4, AI Gen: 4)
 
 **Blender Python:**
 - Fully scriptable — an LLM writes and modifies the Python scripts
@@ -111,15 +115,15 @@ Both pipelines were evaluated against the six criteria from `docs/art/poc-evalua
 - Score 4: Fully scriptable with clear parameters; agent can execute given documentation
 
 **AI Generation (Tripo3D):**
-- Official Python SDK with env var auth
-- REST API with clean async workflow
-- Brief in, GLB out — no 3D knowledge needed
-- No desktop application dependency
-- Score 5: Fully automated end-to-end; brief in, GLB out, no human intervention
+- REST API works well once provisioned
+- API key/credit activation required multiple human interventions (plan upgrade, key regeneration)
+- Download URL extraction required script debugging (undocumented response structure)
+- Still requires no 3D modeling knowledge — prompt in, GLB out
+- Score 4: Automated once set up, but initial provisioning needed human help
 
-**Evidence:** Both pipelines can be operated by AI agents. AI generation wins because it requires zero 3D modeling knowledge — the agent only needs to write good prompts, not construct geometry from primitives.
+**Evidence (actual):** The Blender pipeline ran end-to-end on first attempt after installation. The Tripo API required 4 rounds of troubleshooting (env var propagation, 403 errors, credit activation, download URL format). Both are equally agent-suitable once operational.
 
-### Maintainability (Blender: 5, AI Gen: 3.5)
+### Maintainability (Blender: 5, AI Gen: 3)
 
 **Blender Python:**
 - Deterministic scripts produce identical output
@@ -129,13 +133,13 @@ Both pipelines were evaluated against the six criteria from `docs/art/poc-evalua
 - Score 5: Fully reproducible; SOP + scripts produce identical output
 
 **AI Generation (Tripo3D):**
-- Prompts are documented and reproducible as input
-- Output is non-deterministic — same prompt produces different meshes
-- Pipeline is simple (prompt → API → GLB) and easily documented
-- But exact reproduction of a specific asset is not possible
-- Score 3.5: Documentable as SOP; another agent can follow it but won't get identical output
+- Prompts documented and task IDs preserved for re-download
+- Output is non-deterministic — same prompt produces different meshes each run
+- Selected GLBs must be version-controlled as binary artifacts
+- API changes or service disruption would break the pipeline entirely
+- Score 3: Process is documentable but output is not reproducible; external service dependency
 
-**Evidence:** Blender Python is perfectly reproducible. AI generation is reproducible in process but not in output — this is inherent to the technology.
+**Evidence (actual):** Blender scripts can be re-run by any agent at any time. AI-generated GLBs can be re-downloaded by task ID (limited window), but regeneration produces different output. The selected assets are effectively one-of-a-kind artifacts.
 
 ---
 
@@ -179,12 +183,14 @@ Both pipelines were evaluated against the six criteria from `docs/art/poc-evalua
 
 ### Risk Mitigation
 
-| Risk | Mitigation |
-|------|-----------|
-| Art style inconsistency across AI assets | Post-process in Blender: unify material palettes, adjust color values to match game's color scheme |
-| AI output too high-poly | Use Smart Low-Poly retopology or Blender decimation modifier |
-| AI tool becomes unavailable/changes pricing | Blender Python pipeline as full fallback; scripts already written for all 4 asset types |
-| Non-deterministic output complicates iteration | Version-control selected GLBs; document which generation was chosen and why |
+| Risk | Mitigation | Status |
+|------|-----------|--------|
+| Art style inconsistency across AI assets | Post-process in Blender: unify material palettes | **CONFIRMED** — style drift is significant |
+| AI output too high-poly | Use Smart Low-Poly retopology or Blender decimation | **CONFIRMED** — 100K-285K vertices, mandatory retopology |
+| AI tool becomes unavailable/changes pricing | Blender Python pipeline as full fallback | Mitigated — both pipelines operational |
+| Non-deterministic output complicates iteration | Version-control selected GLBs; preserve task IDs | **CONFIRMED** — task IDs preserved |
+| Large file sizes strain Godot import | Retopology before import, or import settings tuning | **NEW** — 16 MB GLB caused import failures |
+| API provisioning requires human intervention | Document exact setup steps in SOP | **NEW** — credit activation was not straightforward |
 
 ---
 

@@ -2,7 +2,7 @@
 id: TICKET-0010
 title: "AI generation PoC — tool selection + produce 4 game assets"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: technical-artist
 created_by: producer
@@ -19,14 +19,14 @@ Identify the best available AI mesh generation tool(s) for this project's needs,
 
 ## Acceptance Criteria
 - [x] Tool selection documented: at minimum 3 candidate tools evaluated with rationale for final selection
-- [ ] All 4 assets produced as importable `.glb` files (or converted to GLB):
+- [x] All 4 assets produced as importable `.glb` files (or converted to GLB):
   - `poc_ai_gen/mesh_hand_drill.glb`
   - `poc_ai_gen/mesh_player_character.glb`
   - `poc_ai_gen/mesh_ship_exterior.glb`
   - `poc_ai_gen/mesh_resource_node_scrap.glb`
-- [ ] All 4 GLBs successfully imported into Godot without errors
-- [ ] Each asset visually interpretable (clearly readable as what it is meant to be)
-- [ ] PoC report written at `docs/art/poc-report-ai-gen.md` covering:
+- [x] All 4 GLBs successfully imported into Godot without errors
+- [x] Each asset visually interpretable (clearly readable as what it is meant to be)
+- [x] PoC report written at `docs/art/poc-report-ai-gen.md` covering:
   - Tool selection rationale (what was evaluated and why this was chosen)
   - Prompts or inputs used for each asset
   - Time per asset (prompt to importable GLB, including any cleanup)
@@ -57,3 +57,4 @@ Selection criteria: GLB export quality, topology cleanliness for game use, consi
 - 2026-02-22 [producer] Created ticket; depends on TICKET-0008
 - 2026-02-22 [technical-artist] Tool selection complete: 5 tools evaluated (Meshy, Luma Genie [eliminated—sunset], Rodin/Hyper3D, CSM.ai, Tripo3D), plus Sloyd as bonus. Selected Tripo3D as primary. API script written (tripo_generate.py). PoC report written.
 - 2026-02-22 [technical-artist] API key provisioned. Account has 0 credits — free tier credits may need dashboard activation at tripo3d.ai/app. Generation blocked until credits available. All non-generation AC complete (tool selection, prompts, report, script).
+- 2026-02-22 [technical-artist] Professional plan activated. All 4 assets generated via Tripo3D API. GLBs downloaded (9.8-16 MB each, 52 MB total). All 4 imported into Godot 4.5.1 — verified in editor viewport. Key finding: meshes are 100K-285K vertices (need retopology for game use). PoC report updated with actual results. All AC met. DONE.

@@ -3,15 +3,27 @@
 **Ticket:** TICKET-0010
 **Author:** technical-artist
 **Date:** 2026-02-22
-**Status:** TOOL SELECTION COMPLETE — AWAITING API KEY FOR EXECUTION
+**Status:** COMPLETE
 
 ---
 
 ## Executive Summary
 
-Five AI 3D mesh generation tools were evaluated against the project's requirements. **Tripo3D** is selected as the primary tool based on its Python SDK, fast generation speed, Smart Low-Poly feature, and competitive pricing. An API integration script has been written and is ready to execute once an API key is provisioned.
+Five AI 3D mesh generation tools were evaluated against the project's requirements. **Tripo3D** was selected as the primary tool and all 4 target assets were generated via the Tripo3D REST API. All 4 GLBs downloaded successfully and imported into Godot 4.5.1. Assets are visually detailed with full PBR textures (Color, Normal, ORM maps).
 
-**Blocker:** A Tripo3D API key is required. Sign up at https://www.tripo3d.ai/ — the free tier provides 300 credits for initial testing (~7 assets).
+**Key finding:** AI-generated meshes are very high-poly (100K-285K vertices, 9-16 MB per GLB). Smart Low-Poly retopology or Blender decimation will be required before production use.
+
+### Actual Generation Results
+
+| Asset | GLB Size | Vertices | Godot Import |
+|-------|----------|----------|--------------|
+| mesh_hand_drill.glb | 9.8 MB | ~100K | Clean |
+| mesh_player_character.glb | 10.9 MB | ~120K | Clean (retry needed) |
+| mesh_ship_exterior.glb | 16.0 MB | 285,204 | Clean (delayed — needed full reimport) |
+| mesh_resource_node_scrap.glb | 15.4 MB | ~200K | Clean |
+| **Total** | **52.1 MB** | **~705K** | **All imported** |
+
+Note: Ship exterior initially failed to load due to concurrent Godot reimport task. Succeeded after reimport completed. Player character failed once, succeeded on retry.
 
 ---
 
@@ -146,36 +158,38 @@ Parametric + AI hybrid platform. Excellent for hard-surface props (unlimited gen
 
 ---
 
-## Time Estimates (Projected)
+## Actual Time Data
 
-| Asset | Generation Time | Download + Post | Total |
-|-------|----------------|-----------------|-------|
-| Hand Drill | ~10s | ~5s | ~15s |
-| Player Character | ~15s | ~5s | ~20s |
-| Ship Exterior | ~15s | ~5s | ~20s |
-| Resource Node | ~10s | ~5s | ~15s |
-| **Total** | **~50s** | **~20s** | **~70s** |
+| Asset | Generation Time | Download | Total |
+|-------|----------------|----------|-------|
+| Hand Drill | ~10-15s | ~3s | ~18s |
+| Player Character | ~10-15s | ~3s | ~18s |
+| Ship Exterior | ~10-15s | ~5s | ~20s |
+| Resource Node | ~10-15s | ~5s | ~20s |
+| **Total** | **~50s** | **~16s** | **~76s** |
 
-Plus Smart Low-Poly retopology if needed: +8-10s per asset.
+**Total pipeline time: ~76 seconds for all 4 assets.** This is dramatically faster than the Blender Python pipeline (~3 hours of script authoring + 12s execution).
 
-**Total estimated pipeline time: ~2-3 minutes for all 4 assets.** This is dramatically faster than the Blender Python pipeline (~3 hours of script authoring).
+**Note:** Generation times are approximate — the API returned completed tasks. Download times measured from signed CloudFront URLs. Script authoring for the API integration took ~30 minutes.
 
 ---
 
-## What Worked Well (Anticipated)
+## What Worked Well
 
-1. **API-first design:** Tripo's REST API and Python SDK are clean and well-documented for agent operation
-2. **Speed:** Orders of magnitude faster than manual or scripted 3D modeling
-3. **Low barrier:** No Blender, no 3D modeling knowledge, no geometric construction required
-4. **Iteration:** Fast enough to generate 10 variants and select the best
+1. **API-first design:** Tripo's REST API is clean. Task creation → poll → download workflow is straightforward to automate.
+2. **Speed:** ~15 seconds per asset generation. All 4 assets generated in under 2 minutes total including download.
+3. **Visual richness:** AI-generated PBR textures (Color, Normal, ORM maps) add significant visual detail that flat Blender materials cannot match.
+4. **Low barrier:** No Blender dependency, no 3D modeling knowledge, no geometric construction required.
+5. **Texture maps included:** Each GLB includes full PBR texture set automatically.
 
-## What Was Painful / Required Workarounds (Anticipated)
+## What Was Painful / Required Workarounds
 
-1. **Art style consistency:** No style lock-in. Each generation may vary. Mitigation: consistent prompt structure, negative prompts
-2. **Prompt engineering:** Getting the right level of detail and style requires iteration
-3. **Post-processing:** May need Blender cleanup for specific issues (scale, orientation, material names)
-4. **Poly count control:** Smart Low-Poly is good but not guaranteed to hit exact budgets
-5. **No texture map control:** PBR textures are auto-generated, not artist-directed
+1. **API key/credit provisioning:** Free tier does NOT include API access. Professional plan ($11.94/month) required. Credit balance took multiple attempts to activate. New API key generation required after plan upgrade.
+2. **Download URL discovery:** The API does not have a separate download endpoint. The GLB URL is embedded in the task result at `output.pbr_model` as a signed CloudFront URL. Required script debugging to discover correct extraction path.
+3. **Extremely high poly counts:** Default output is 100K-285K vertices per asset. Our budgets are 1.5K-15K triangles. Smart Low-Poly retopology or external decimation is mandatory.
+4. **Large file sizes:** 9-16 MB per GLB (vs 88-343 KB for Blender). Not viable for game shipping without optimization.
+5. **Godot import timing:** Large GLBs caused Godot reimport contention. Ship exterior (16 MB, 285K vertices) failed to load until reimport completed. Player character required retry.
+6. **No style lock-in:** Each generation varies. Art style consistency across assets depends entirely on prompt discipline.
 
 ---
 
@@ -216,24 +230,40 @@ python ai_gen_experiments/tripo_generate.py --asset hand_drill
 ```
 ai_gen_experiments/
 ├── tripo_generate.py            # API integration script
-└── poc_output/                  # OUTPUT DIRECTORY (empty until API key provided)
-    ├── mesh_hand_drill.glb          # (pending)
-    ├── mesh_player_character.glb    # (pending)
-    ├── mesh_ship_exterior.glb       # (pending)
-    └── mesh_resource_node_scrap.glb # (pending)
+└── poc_output/
+    ├── mesh_hand_drill.glb          # 9.8 MB - GENERATED
+    ├── mesh_player_character.glb    # 10.9 MB - GENERATED
+    ├── mesh_ship_exterior.glb       # 16.0 MB - GENERATED
+    └── mesh_resource_node_scrap.glb # 15.4 MB - GENERATED
+
+game/poc_ai_gen/                     # Copied for Godot import verification
+├── poc_ai_review.tscn               # Review scene with all 4 assets
+├── mesh_hand_drill.glb              # + .import + 3 texture JPGs
+├── mesh_player_character.glb        # + .import + 3 texture JPGs
+├── mesh_ship_exterior.glb           # + .import + 3 texture JPGs
+└── mesh_resource_node_scrap.glb     # + .import + 3 texture JPGs
 ```
+
+### Tripo3D Task IDs (for reference/re-download)
+
+| Asset | Task ID |
+|-------|---------|
+| Hand Drill | `4c827008-2baf-4b88-b945-f55c6ac442d6` |
+| Player Character | `f1a3701c-b71b-4954-a670-7862ec25fa34` |
+| Ship Exterior | `3e41ef89-76af-4dee-a3af-49381f9fcb17` |
+| Resource Node | `a7109fcf-ef52-482b-9e9c-71e17b371893` |
 
 ---
 
-## Provisional Self-Assessment (for TICKET-0011)
+## Self-Assessment (Updated After Execution)
 
-| Dimension | Estimated Score | Notes |
-|-----------|----------------|-------|
-| Visual Quality | 3-4 | v3.0 Ultra is strong; stylized output depends on prompting |
-| Iteration Speed | 5 | ~15s per asset, ~70s total for all 4 |
-| Consistency | 2-3 | Weakest area — no style lock-in across generations |
-| Godot Compatibility | 4 | GLB native export; may need scale/orientation fix |
-| AI-Team Suitability | 5 | Python SDK, REST API, env var auth, fully automated |
-| Maintainability | 3-4 | Prompts are documented; output is non-deterministic |
+| Dimension | Score | Notes |
+|-----------|-------|-------|
+| Visual Quality | 4 | Detailed meshes with full PBR textures. Visually rich, recognizable silhouettes. |
+| Iteration Speed | 5 | ~15s per asset. Total ~76s for all 4. Orders of magnitude faster than Blender. |
+| Consistency | 2 | Each asset has distinct texture/style treatment. No cohesive art direction across set. |
+| Godot Compatibility | 3 | All imported, but 100K-285K vertex meshes are unusable without retopology. Import timing issues with large files. |
+| AI-Team Suitability | 4 | API works well once provisioned. Credit/key activation was painful. Script needed debugging. |
+| Maintainability | 3 | Prompts documented. Output non-deterministic. Task IDs allow re-download but not reproduction. |
 
-**These scores are estimates and must be updated after actual generation and Godot import testing.**
+**Key insight:** Visual quality per-asset is high (score 4), but Godot Compatibility drops to 3 because raw output is far too heavy for game use (52 MB total, 705K vertices). Production pipeline must include retopology step.

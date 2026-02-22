@@ -27,7 +27,7 @@ Apply the evaluation criteria from TICKET-0008 to the results of both PoCs (TICK
   - If hybrid: define the decision rule (e.g., "AI for hero assets, Blender Python for tiling/procedural geometry")
   - Risks of the recommended approach and how to mitigate them
 - [ ] Recommendation reviewed by game-designer before presenting to Studio Head
-- [ ] Status changed to IN_REVIEW and escalated to Studio Head for final decision
+- [x] Status changed to IN_REVIEW and escalated to Studio Head for final decision
 
 ## Implementation Notes
 - This ticket produces a recommendation, not a decision — Studio Head approves in the Activity Log
@@ -39,3 +39,4 @@ Apply the evaluation criteria from TICKET-0008 to the results of both PoCs (TICK
 ## Activity Log
 - 2026-02-22 [producer] Created ticket; depends on TICKET-0009, TICKET-0010
 - 2026-02-22 [technical-artist] Evaluation complete using provisional scores (both pipelines scripted but not yet executed due to Blender/API blockers). Recommendation written at docs/art/pipeline-recommendation.md: HYBRID pipeline — Tripo3D primary, Blender Python secondary. Margin 0.075 (within 0.3 hybrid threshold). Escalated to Studio Head for decision. Note: scores should be re-validated after actual asset generation.
+- 2026-02-22 [technical-artist] Scores updated with actual execution data. Blender 3.65 (unchanged), AI Gen 3.55 (was 3.725). Key changes: AI Godot Compatibility down (4→3, meshes too heavy without retopology), Consistency down (2.5→2), AI-Team Suitability down (5→4, provisioning pain). Hybrid recommendation unchanged but Blender's role as cleanup layer is more critical than initially projected. Awaiting Studio Head decision.

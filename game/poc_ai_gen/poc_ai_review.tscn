@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://dsp4e2u3jvhsc"]
+
+[ext_resource type="PackedScene" uid="uid://bovcsa6w7k777" path="res://poc_ai_gen/mesh_hand_drill.glb" id="1_ajfdw"]
+[ext_resource type="PackedScene" uid="uid://1a1423f75sn8" path="res://poc_ai_gen/mesh_player_character.glb" id="2_krjpo"]
+[ext_resource type="PackedScene" uid="uid://c3rjymv7islsf" path="res://poc_ai_gen/mesh_resource_node_scrap.glb" id="3_q1vdl"]
+[ext_resource type="PackedScene" uid="uid://dtvjmxyihoij8" path="res://poc_ai_gen/mesh_ship_exterior.glb" id="4_8s62d"]
+
+[node name="PoCAIReview" type="Node3D"]
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+
+[node name="AI_HandDrill" type="Node3D" parent="." instance=ExtResource("1_ajfdw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 0)
+
+[node name="AI_PlayerCharacter" type="Node3D" parent="." instance=ExtResource("2_krjpo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0)
+
+[node name="AI_ResourceNode" type="Node3D" parent="." instance=ExtResource("3_q1vdl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0)
+
+[node name="AI_ShipExterior" type="Node3D" parent="." instance=ExtResource("4_8s62d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
+
+[node name="ReviewCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.25881904, 0, -0.25881904, 0.9659258, 1, 2, 6)

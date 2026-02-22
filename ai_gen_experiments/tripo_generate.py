@@ -147,29 +147,26 @@ def poll_task(task_id):
     raise TimeoutError(f"Task {task_id} timed out after {MAX_WAIT}s")
 
 
-def download_glb(task_id, output_path):
-    """Download the GLB output for a completed task."""
-    # Request GLB download URL
-    payload = {
-        "task_id": task_id,
-        "type": "glb",
-    }
-    resp = requests.post(
-        f"{API_BASE}/task/{task_id}/download",
-        headers=_headers(),
-        json=payload,
-    )
-    resp.raise_for_status()
-    data = resp.json()
+def download_glb(task_result, output_path):
+    """Download the GLB output from a completed task result."""
+    # Extract GLB URL from task result data
+    model_url = None
 
-    # The response contains the model data or a download URL
-    if "data" in data and "model" in data["data"]:
-        model_url = data["data"]["model"]["url"]
-    elif "data" in data and "url" in data["data"]:
-        model_url = data["data"]["url"]
-    else:
-        # Try direct output from task result
-        raise RuntimeError(f"Unexpected download response: {data}")
+    # Try output.pbr_model (direct URL string)
+    output = task_result.get("output", {})
+    if isinstance(output.get("pbr_model"), str):
+        model_url = output["pbr_model"]
+    # Try result.pbr_model.url (structured object)
+    elif "result" in task_result:
+        result = task_result["result"]
+        if "pbr_model" in result and "url" in result["pbr_model"]:
+            model_url = result["pbr_model"]["url"]
+    # Try output.model (fallback)
+    if not model_url and isinstance(output.get("model"), str):
+        model_url = output["model"]
+
+    if not model_url:
+        raise RuntimeError(f"Could not find GLB URL in task result: {list(output.keys())}")
 
     # Download the actual file
     model_resp = requests.get(model_url)
@@ -203,7 +200,7 @@ def generate_asset(asset_key):
     # Step 3: Download GLB
     output_path = OUTPUT_DIR / f"{asset['output_name']}.glb"
     print("  Downloading GLB...")
-    download_glb(task_id, str(output_path))
+    download_glb(result, str(output_path))
 
     elapsed = time.time() - start
     print(f"  Completed in {elapsed:.1f}s")

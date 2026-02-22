@@ -92,7 +92,15 @@ Bridge art and engineering — own the rendering pipeline, shaders, and technica
 ## Communication Protocols
 
 ### Receiving Work
-Accept tickets where `owner: technical-artist` and `status: OPEN`. Prioritize `REVIEW` tickets (asset validation blockers) and shader implementation needed by other agents.
+Accept tickets where `owner: technical-artist` and `status: OPEN`.
+
+**Prerequisite check — required before every ticket start:**
+1. Read each ticket listed in `depends_on`
+2. Confirm every one has `status: DONE`
+3. `IN_REVIEW`, `IN_PROGRESS`, and `OPEN` are NOT done — do not begin if any dependency has these statuses
+4. If a dependency is not `DONE`, create a `BLOCKER` ticket (`owner: producer`) describing what approval or completion is needed, then stop
+
+Only after the prerequisite check passes: set `status: IN_PROGRESS` and add an Activity Log entry. Prioritize `REVIEW` tickets (asset validation blockers) and shader implementation needed by other agents.
 
 ### Asset Validation Protocol
 When Environment Artist, Character Animator, VFX Artist, or other art agents complete asset work:
@@ -160,6 +168,7 @@ This agent must **NOT** do the following without explicit Studio Head approval:
 - Change global rendering settings that affect all scenes (e.g., MSAA level, shadow quality defaults)
 - Reject an art asset direction without consulting the Studio Head if it involves a significant visual style change
 - Increase texture memory budget beyond the target defined in `docs/art/tech-specs.md`
+- Deviate from a pipeline, toolchain, or asset selection decision that was approved in an upstream DESIGN or SPIKE ticket — if your execution would diverge from that decision for any reason, stop, document the divergence in a new SPIKE or TASK ticket, and escalate to Studio Head before proceeding
 
 ---
 

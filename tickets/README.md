@@ -38,6 +38,17 @@ tags: []
 ---
 ```
 
+### `depends_on` Semantics
+
+**Every ticket listed in `depends_on` must have `status: DONE` before you may set your ticket to `IN_PROGRESS`.**
+
+- `IN_REVIEW` is NOT done — the work is awaiting approval or decision. Do not start.
+- `IN_PROGRESS` is NOT done — the upstream work is still being executed. Do not start.
+- `OPEN` is NOT done — the upstream work has not been started. Do not start.
+- Only `DONE` clears a dependency.
+
+If a ticket you depend on is `IN_REVIEW` and you are ready to begin, do not proceed. Create a `BLOCKER` ticket with `owner: producer` explaining what approval or sign-off is needed to clear the dependency.
+
 ### Body Sections (required in this order)
 
 ```markdown
@@ -106,7 +117,7 @@ What the next owner needs to know when this ticket is transferred to them.
 
 1. **Exactly one `owner`** at all times. If an agent is unsure who owns a ticket, assign it to `producer`.
 2. **Changing owners** requires updating the `owner` field AND adding an Activity Log entry explaining the transfer.
-3. **Starting work** — update `status: IN_PROGRESS` and add an Activity Log entry before beginning.
+3. **Starting work** — before setting `status: IN_PROGRESS`, read every ticket listed in `depends_on` and confirm each one has `status: DONE`. If any dependency is not `DONE`, do not begin. Create a `BLOCKER` ticket with `owner: producer` describing what must be resolved first.
 4. **When blocked** — do NOT change the current ticket's status. Instead:
    - Create a new `BLOCKER` ticket with `owner: producer` and `blocks: [this-ticket-id]`
    - Add an Activity Log entry: `YYYY-MM-DD [slug] BLOCKED — see TICKET-NNNN`

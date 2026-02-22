@@ -94,9 +94,16 @@ See `tickets/README.md` for ticket schema and type definitions.
 ### Receiving Work
 Accept any ticket in `tickets/` where:
 - `owner: <slug>` AND
-- `status: OPEN`
+- `status: OPEN` AND
+- All tickets in `depends_on` have `status: DONE`
 
-Update `status` to `IN_PROGRESS` and add an Activity Log entry before beginning work.
+**Prerequisite check — required before every ticket start:**
+1. Read each ticket listed in `depends_on`
+2. Confirm every one has `status: DONE`
+3. `IN_REVIEW`, `IN_PROGRESS`, and `OPEN` are NOT done — do not begin if any dependency has these statuses
+4. If a dependency is not `DONE`, create a `BLOCKER` ticket (`owner: producer`) describing what approval or completion is needed, then stop
+
+Only after the prerequisite check passes: update `status` to `IN_PROGRESS` and add an Activity Log entry before beginning work.
 
 ### Handing Off
 When your work is complete and another agent needs to act:

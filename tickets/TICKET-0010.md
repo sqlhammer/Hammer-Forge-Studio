@@ -55,4 +55,5 @@ Selection criteria: GLB export quality, topology cleanliness for game use, consi
 
 ## Activity Log
 - 2026-02-22 [producer] Created ticket; depends on TICKET-0008
-- 2026-02-22 [technical-artist] Tool selection complete: 5 tools evaluated (Meshy, Luma Genie [eliminated—sunset], Rodin/Hyper3D, CSM.ai, Tripo3D), plus Sloyd as bonus. Selected Tripo3D as primary. API script written (tripo_generate.py). PoC report written. BLOCKER: API key required for GLB generation.
+- 2026-02-22 [technical-artist] Tool selection complete: 5 tools evaluated (Meshy, Luma Genie [eliminated—sunset], Rodin/Hyper3D, CSM.ai, Tripo3D), plus Sloyd as bonus. Selected Tripo3D as primary. API script written (tripo_generate.py). PoC report written.
+- 2026-02-22 [technical-artist] API key provisioned. Account has 0 credits — free tier credits may need dashboard activation at tripo3d.ai/app. Generation blocked until credits available. All non-generation AC complete (tool selection, prompts, report, script).

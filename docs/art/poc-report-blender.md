@@ -3,18 +3,28 @@
 **Ticket:** TICKET-0009
 **Author:** technical-artist
 **Date:** 2026-02-22
-**Status:** SCRIPTS COMPLETE — AWAITING BLENDER EXECUTION
+**Status:** COMPLETE
 
 ---
 
 ## Executive Summary
 
-Four Blender Python generation scripts have been written to produce all target assets using the existing `master_control.py` framework. The scripts are ready to execute but **require Blender to be installed** on the system to produce GLB output files.
+Four Blender Python generation scripts were written and executed using Blender 5.0.1 to produce all target assets. All 4 GLBs generated successfully in 12 seconds total and imported into Godot 4.5.1 with zero errors. Assets verified in the Godot editor 3D viewport.
 
-**Blocker:** Blender is not currently installed on this machine. Scripts must be run with:
+**Execution command:**
 ```
 blender --background --python blender_experiments/run_poc_all.py
 ```
+
+### Actual Generation Results
+
+| Asset | GLB Size | Generation Time | Godot Import |
+|-------|----------|----------------|--------------|
+| mesh_hand_drill.glb | 185 KB | 11.4s (includes first-run init) | Clean |
+| mesh_player_character.glb | 343 KB | 0.3s | Clean |
+| mesh_ship_exterior.glb | 88 KB | 0.3s | Clean |
+| mesh_resource_node_scrap.glb | 106 KB | 0.1s | Clean |
+| **Total** | **722 KB** | **12.0s** | **All clean** |
 
 ---
 
@@ -154,17 +164,29 @@ blender --background --python blender_experiments/run_poc_all.py
 
 ---
 
-## Time Estimates (Script Authoring)
+## Time Data
 
-| Asset | Script Writing Time | Estimated Blender Execution |
-|-------|--------------------|-----------------------------|
-| Hand Drill | ~45 min | ~10-30s |
-| Player Character | ~30 min (adapted from existing) | ~15-45s |
-| Ship Exterior | ~60 min | ~20-60s |
-| Resource Node | ~45 min | ~10-30s |
-| **Total** | **~3 hours** | **~1-3 min** |
+### Script Authoring (LLM agent)
 
-Note: Script writing time is for an LLM agent. A human Blender Python developer would likely be faster for initial scripts but slower for iteration at scale.
+| Asset | Script Writing Time |
+|-------|---------------------|
+| Hand Drill | ~45 min |
+| Player Character | ~30 min (adapted from existing) |
+| Ship Exterior | ~60 min |
+| Resource Node | ~45 min |
+| **Total** | **~3 hours** |
+
+### Actual Blender Execution (Blender 5.0.1, background mode)
+
+| Asset | Execution Time |
+|-------|---------------|
+| Hand Drill | 11.4s (includes Blender init) |
+| Player Character | 0.3s |
+| Ship Exterior | 0.3s |
+| Resource Node | 0.1s |
+| **Total** | **12.0s** |
+
+Note: First asset includes Blender startup/initialization overhead (~11s). Subsequent assets generate in under 0.5s each.
 
 ---
 
@@ -201,4 +223,4 @@ blender_experiments/
 | AI-Team Suitability | 4 | Fully scriptable, LLM can write/modify; requires Blender CLI |
 | Maintainability | 5 | Deterministic scripts, seeded random, documented patterns |
 
-**These scores are estimates and must be updated after actual execution and Godot import testing.**
+**Updated after execution:** Iteration Speed confirmed at 3 (script authoring dominates; execution is near-instant). Godot Compatibility confirmed at 4 (zero import errors, all materials map correctly). Visual quality confirmed at 3 (readable silhouettes, distinct material zones, no texture detail). Consistency confirmed at 4 (same visual language across all 4 assets).

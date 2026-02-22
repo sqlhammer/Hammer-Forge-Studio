@@ -19,3 +19,35 @@ Central log for all 3D generation attempts using `bpy`.
 - **Challenges/Fixes:** None
 
 ---
+
+### [2026-02-22 09:47:01] - Object: mesh_hand_drill
+- **Original Prompt:** "Handheld sci-fi extraction drill, stylized chunky proportions."
+- **Output Files:** `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_hand_drill.blend`, `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_hand_drill.obj`, `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_hand_drill.glb`
+- **Technical Strategy:** Beveled primitives with 8 PBR materials.
+- **Challenges/Fixes:** None
+
+---
+
+### [2026-02-22 09:47:02] - Object: mesh_player_character
+- **Original Prompt:** "Full-body humanoid in environmental research suit, T-pose, ~1.8m."
+- **Output Files:** `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_player_character.blend`, `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_player_character.obj`, `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_player_character.glb`
+- **Technical Strategy:** Multi-segment primitives with BMesh visor cutout, 10 PBR materials.
+- **Challenges/Fixes:** None
+
+---
+
+### [2026-02-22 09:47:02] - Object: mesh_ship_exterior
+- **Original Prompt:** "Atmospheric research vessel, utilitarian sci-fi, ~15m long."
+- **Output Files:** `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_ship_exterior.blend`, `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_ship_exterior.obj`, `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_ship_exterior.glb`
+- **Technical Strategy:** Beveled box hull sections with engine cylinders, 8 PBR materials.
+- **Challenges/Fixes:** None
+
+---
+
+### [2026-02-22 09:47:02] - Object: mesh_resource_node_scrap
+- **Original Prompt:** "Scrap metal deposit in alien debris, ~2m wide."
+- **Output Files:** `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_resource_node_scrap.blend`, `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_resource_node_scrap.obj`, `C:\repos\Hammer-Forge-Studio\blender_experiments\poc_output\mesh_resource_node_scrap.glb`
+- **Technical Strategy:** Deformed spheres + beveled cubes, seeded random, 7 PBR materials.
+- **Challenges/Fixes:** None
+
+---

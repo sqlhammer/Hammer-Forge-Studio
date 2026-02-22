@@ -2,7 +2,7 @@
 id: TICKET-0009
 title: "Blender Python PoC — produce 4 game assets"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: technical-artist
 created_by: producer
@@ -25,8 +25,8 @@ Using the existing Blender Python pipeline (`blender_experiments/`), produce all
   - `poc_blender/mesh_resource_node_scrap.glb`
 - [ ] All 4 GLBs successfully imported into Godot without errors
 - [ ] Each asset visually interpretable (clearly readable as what it is meant to be)
-- [ ] Python scripts used to generate each asset committed to `blender_experiments/`
-- [ ] PoC report written at `docs/art/poc-report-blender.md` covering:
+- [x] Python scripts used to generate each asset committed to `blender_experiments/`
+- [x] PoC report written at `docs/art/poc-report-blender.md` covering:
   - Time per asset (rough estimate)
   - What worked well
   - What was painful or required workarounds
@@ -43,3 +43,4 @@ Using the existing Blender Python pipeline (`blender_experiments/`), produce all
 
 ## Activity Log
 - 2026-02-22 [producer] Created ticket; depends on TICKET-0008
+- 2026-02-22 [technical-artist] Scripts complete: build_hand_drill.py, build_player_character.py, build_ship_exterior.py, build_resource_node.py, run_poc_all.py. PoC report written. BLOCKER: Blender not installed — GLB generation pending. All scripting AC met.

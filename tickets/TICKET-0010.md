@@ -2,7 +2,7 @@
 id: TICKET-0010
 title: "AI generation PoC — tool selection + produce 4 game assets"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: technical-artist
 created_by: producer
@@ -18,7 +18,7 @@ tags: [art-pipeline, ai-generation, poc]
 Identify the best available AI mesh generation tool(s) for this project's needs, then use the chosen tool(s) to produce all 4 target assets defined in TICKET-0008. Document the tool selection rationale, process, and results in a PoC report that feeds into the evaluation in TICKET-0011.
 
 ## Acceptance Criteria
-- [ ] Tool selection documented: at minimum 3 candidate tools evaluated with rationale for final selection
+- [x] Tool selection documented: at minimum 3 candidate tools evaluated with rationale for final selection
 - [ ] All 4 assets produced as importable `.glb` files (or converted to GLB):
   - `poc_ai_gen/mesh_hand_drill.glb`
   - `poc_ai_gen/mesh_player_character.glb`
@@ -55,3 +55,4 @@ Selection criteria: GLB export quality, topology cleanliness for game use, consi
 
 ## Activity Log
 - 2026-02-22 [producer] Created ticket; depends on TICKET-0008
+- 2026-02-22 [technical-artist] Tool selection complete: 5 tools evaluated (Meshy, Luma Genie [eliminated—sunset], Rodin/Hyper3D, CSM.ai, Tripo3D), plus Sloyd as bonus. Selected Tripo3D as primary. API script written (tripo_generate.py). PoC report written. BLOCKER: API key required for GLB generation.

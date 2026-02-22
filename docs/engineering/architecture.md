@@ -2,7 +2,7 @@
 
 **Owner:** systems-programmer
 **Status:** Active
-**Last Updated:** 2026-02-21
+**Last Updated:** 2026-02-22
 
 > Living document of all core engine systems. Updated whenever a new autoload or core system is added. Every public API must be documented here.
 
@@ -14,6 +14,7 @@
 |---------------|-------------|---------|
 | Global | `res://autoloads/Global.gd` | Shared utility functions and debug logging |
 | InputManager | `res://autoloads/InputManager.gd` | Centralized input handling and device management |
+| AgentLogger | `res://autoloads/AgentLogger.gd` | Structured JSONL logging for AI agent consumption |
 
 ---
 
@@ -98,6 +99,113 @@ InputManager automatically detects and switches between keyboard/mouse and gamep
 - Input actions are created dynamically at `_ready()` if they don't exist
 - Analog sticks return normalized values with dead zones applied
 - Gamepad triggers are normalized from [-1, 1] to [0, 1] for intuitive usage
+
+---
+
+### AgentLogger
+
+**Purpose:** Structured logging system that writes JSONL files for consumption by AI agents. Each log entry contains trace context, module info, agent-actionable advice, and tags. Separate from `Global.log()` — produces machine-readable output while `Global.log()` produces human-readable console output.
+
+**Public API:**
+```gdscript
+# Log levels
+enum LogLevel { DEBUG, INFO, WARNING, ERROR, FATAL, LOGIC_ERROR }
+
+# Core logging
+func log_entry(level: LogLevel, module: String, function_name: String,
+    message: String, context: Dictionary = {}, agent_advice: String = "",
+    tags: Array[String] = []) -> void
+
+# Convenience methods
+func log_error(module: String, function_name: String, message: String,
+    context: Dictionary = {}, advice: String = "") -> void
+func log_warning(module: String, function_name: String, message: String,
+    context: Dictionary = {}, advice: String = "") -> void
+func log_logic_error(module: String, function_name: String, message: String,
+    context: Dictionary = {}, advice: String = "") -> void
+
+# Test framework bridge
+func log_test_result(suite_name: String, test_name: String,
+    passed: bool, details: String = "") -> void
+
+# Control
+func flush() -> void
+func get_session_id() -> String
+func set_minimum_level(level: LogLevel) -> void
+func set_enabled(enabled: bool) -> void
+func get_entry_count() -> int
+```
+
+**Signals:**
+- `log_flushed(entry_count: int)` — Emitted after buffered entries are written to disk
+
+**JSONL Schema (one object per line):**
+```json
+{
+  "trace_id": "uuid-v4",
+  "timestamp": "ISO 8601",
+  "session_id": "uuid-v4",
+  "level": "ERROR",
+  "module": "PlayerFirstPerson",
+  "function": "apply_gravity",
+  "message": "Human-readable description",
+  "context": { "key": "value" },
+  "agent_advice": "Actionable guidance for AI agents",
+  "tags": ["physics", "player"],
+  "stack_trace": "res://path/to/script.gd:142"
+}
+```
+
+**File Output:**
+- Path: `user://logs/agent_log_YYYY-MM-DD_HH-MM-SS.jsonl`
+- Windows: `%APPDATA%\Godot\app_userdata\core\logs\`
+- Buffer: 50 entries or 10 seconds, whichever comes first
+- Rotation: Keeps last 10 session files, removes oldest automatically
+
+**Dependencies:** Global (for bootstrap logging only)
+
+**Design Notes:**
+- Buffer flushes on `NOTIFICATION_WM_CLOSE_REQUEST` to prevent data loss
+- Godot types (Vector2, Vector3, etc.) auto-serialized to strings for JSON safety
+- `stack_trace` only populated in debug builds (`get_stack()` returns empty in release)
+- Level filtering via `set_minimum_level()` — entries below threshold exit immediately with zero allocation
+
+---
+
+## Hammer Forge Tests (Unit Testing Framework)
+
+**Location:** `res://addons/hammer_forge_tests/`
+
+**Purpose:** Deterministic unit testing framework for GDScript logic. Provides a base class, assertion methods, and a runner that outputs results to console and JSON reports.
+
+**Key Classes:**
+- `TestSuite` (extends Node) — Base class for test suites. Self-registers into `"unit_tests"` group.
+- `TestRunner` (extends Node) — Discovers and executes suites from `res://tests/`
+- `TestResult` (extends Resource) — Data container for individual test results
+- `SignalSpy` (extends RefCounted) — Records signal emissions for assertion
+- `TestDouble` (extends RefCounted) — Manual stub/mock for method call verification
+
+**Writing Tests:**
+```gdscript
+class_name TestMyFeature
+extends TestSuite
+
+func register_tests() -> void:
+    add_test("descriptive_name", _test_descriptive_name)
+
+func _test_descriptive_name() -> void:
+    assert_true(some_condition, "Failure message")
+```
+
+**Running Tests:**
+- Editor: Open `res://addons/hammer_forge_tests/test_runner.tscn`, press F6
+- Headless: `godot --headless --path game addons/hammer_forge_tests/test_runner.tscn`
+- Filter: `-- --suite=input_manager`
+
+**Output:**
+- Console: Pass/fail per test via `Global.log()`
+- JSON report: `user://test_reports/test_report_<timestamp>.json`
+- AgentLogger bridge: Test results also written to JSONL with tags `["test", "automated"]`
 
 ---
 

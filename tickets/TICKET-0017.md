@@ -2,7 +2,7 @@
 id: TICKET-0017
 title: "Downscale Hand Drill and Resource Node textures to 1024x1024"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: technical-artist
 created_by: qa-engineer
@@ -58,3 +58,5 @@ QA ticket: TICKET-0014
 ## Activity Log
 
 - 2026-02-22 [qa-engineer] Created ticket from M2 QA finding M2-F01. Identified during TICKET-0014 validation. Both assets functional but not spec-compliant.
+- 2026-02-22 [technical-artist] IN_PROGRESS. All 6 affected textures confirmed at 2048x2048. Downscaling to 1024x1024 via Pillow LANCZOS resampling at JPEG quality 95.
+- 2026-02-22 [technical-artist] DONE. All 6 textures (Hand Drill: Color, Normal, ORM; Resource Node: Color, Normal, ORM) downscaled from 2048x2048 to 1024x1024. Godot filesystem scan triggered — reimport verified clean with no errors. Visual inspection in test_m2_assets scene confirms PBR materials intact. All assets now spec-compliant per docs/art/tech-specs.md.

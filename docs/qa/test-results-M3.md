@@ -158,3 +158,52 @@ All M3 systems (Scanner, Mining, Battery, Inventory, Deposits, HUD, Compass) hav
 
 Signed: **qa-engineer**
 Date: **2026-02-23**
+
+---
+
+## Regression: InputManager Refactor (TICKET-0051)
+
+**Ticket:** TICKET-0051
+**Tester:** qa-engineer
+**Test Date:** 2026-02-23
+**Scope:** Verify no regressions from TICKET-0033 (scanner direct Input API), TICKET-0034 (InputManager mouse button registration), TICKET-0035 (runtime InputMap centralization)
+
+### Code Review — InputManager Routing
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | scanner.gd uses InputManager for all input | **PASS** | `InputManager.is_action_just_pressed("scan")` (line 82), `InputManager.is_action_pressed("interact")` (line 96). Zero direct Input API calls. |
+| 2 | mining.gd uses InputManager for all input | **PASS** | `InputManager.is_action_pressed("use_tool")` (line 65). Zero direct Input API calls. Zero runtime InputMap modifications. |
+| 3 | inventory_screen.gd uses correct input pattern | **PASS** | Event-based `_input()` method (line 49-73) using `event.is_action_pressed()` — correct for UI overlays. Only `Input.set_mouse_mode()` for UI control. Zero runtime InputMap modifications. |
+| 4 | Zero InputMap modifications in gameplay scripts | **PASS** | `grep -r "InputMap\.(add_action\|action_add_event\|erase_action)" game/scripts/` returns zero matches. All InputMap setup is centralized in `InputManager._setup_input_actions()`. |
+| 5 | Zero direct Input.is_action_* in gameplay scripts | **PASS** | `grep -r "Input\.is_action_(pressed\|just_pressed)" game/scripts/` returns zero matches. All input queries route through InputManager. |
+| 6 | InputManager registers all required actions | **PASS** | `scan`, `interact`, `use_tool`, `inventory_toggle` + all movement/camera actions registered in `_setup_input_actions()`. Mouse button (MOUSE_BUTTON_LEFT for use_tool) correctly registered via TICKET-0034. |
+
+### Unit Test Execution
+
+**Result: BLOCKED**
+
+The full test suite cannot execute due to M4 autoload parse errors (unrelated to InputManager refactor):
+- `module_manager.gd` fails to parse: `ShipState` autoload identifier not resolved (TICKET-0052)
+- `recycler.gd` fails to parse: `is_processing()` overrides `Node.is_processing()` (TICKET-0053)
+- Cascade: both autoloads fail to instantiate, blocking ALL scene loading including the test runner
+
+These are M4 data layer bugs committed in TICKET-0039/0040/0041, not caused by the InputManager refactor.
+
+### Bugs Filed
+
+| Ticket | Title | Priority | Assigned |
+|--------|-------|----------|----------|
+| TICKET-0052 | module_manager.gd ShipState parse error | P1 | systems-programmer |
+| TICKET-0053 | recycler.gd is_processing() override | P1 | systems-programmer |
+
+### Regression Assessment
+
+**InputManager refactor code changes: PASS** — All input routing is correct. Scanner, mining, and inventory scripts properly use InputManager. Zero direct Input API calls remain in gameplay scripts. Zero runtime InputMap modifications outside InputManager.
+
+**Test suite execution: BLOCKED** — Cannot verify runtime behavior due to unrelated M4 parse errors. TICKET-0052 and TICKET-0053 must be resolved before test execution can confirm pass.
+
+**Recommendation:** Resolve TICKET-0052 and TICKET-0053, then re-run full test suite to confirm all 193+ tests still pass. The InputManager refactor itself introduces no code-level regressions based on static analysis.
+
+Signed: **qa-engineer**
+Date: **2026-02-23**

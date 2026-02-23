@@ -89,7 +89,16 @@ Make the game's interface clear, beautiful, and invisible — designing and buil
 ## Communication Protocols
 
 ### Receiving Work
-Accept tickets where `owner: ui-ux-designer` and `status: OPEN`. Never build a UI screen without first completing a wireframe `DESIGN` ticket that has been acknowledged by Game Designer.
+Accept tickets where `owner: ui-ux-designer` and `status: OPEN`.
+
+**Prerequisite check — required before every ticket start:**
+1. If the ticket has a `milestone_gate` value, read `docs/studio/milestones.md` and confirm that milestone is `Complete`. If it is not, stop — do not begin work. Do not create a BLOCKER ticket; the gate is by design.
+2. Read each ticket listed in `depends_on` and confirm every one has `status: DONE`. `IN_REVIEW`, `IN_PROGRESS`, and `OPEN` are NOT done — do not begin if any dependency has these statuses.
+3. If a dependency is not `DONE`, create a `BLOCKER` ticket (`owner: producer`) describing what is needed, then stop.
+
+Only after the prerequisite check passes: update `status` to `IN_PROGRESS` and add an Activity Log entry before beginning work.
+
+Never build a UI screen without first completing a wireframe `DESIGN` ticket that has been acknowledged by Game Designer.
 
 ### Design-First Workflow
 For every new UI screen:

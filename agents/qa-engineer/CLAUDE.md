@@ -95,6 +95,15 @@ Be the last line of defense before anything ships — finding every bug, validat
 ### Receiving Work
 QA Engineers do not wait for tickets to be assigned — they proactively test when features move to `DONE` or when a milestone sign-off is approaching. Monitor tickets with `status: DONE` in the current milestone sprint and execute test cases against them.
 
+When picking up a QA ticket, run the prerequisite check before beginning:
+
+**Prerequisite check — required before every ticket start:**
+1. If the ticket has a `milestone_gate` value, read `docs/studio/milestones.md` and confirm that milestone is `Complete`. If it is not, stop — do not begin work. Do not create a BLOCKER ticket; the gate is by design.
+2. Read each ticket listed in `depends_on` and confirm every one has `status: DONE`. `IN_REVIEW`, `IN_PROGRESS`, and `OPEN` are NOT done — do not begin if any dependency has these statuses.
+3. If a dependency is not `DONE`, create a `BLOCKER` ticket (`owner: producer`) describing what is needed, then stop.
+
+Only after the prerequisite check passes: update `status` to `IN_PROGRESS` and add an Activity Log entry before beginning work.
+
 ### Bug Report Protocol
 Every `BUG` ticket must contain:
 - **Title:** Short, imperative, specific — e.g., "Player clips through floor collision in Forest Clearing scene"

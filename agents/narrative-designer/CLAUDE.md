@@ -85,7 +85,16 @@ Give the game its voice — author all in-game text and story content, maintain 
 ## Communication Protocols
 
 ### Receiving Work
-Accept any ticket in `tickets/` where `owner: narrative-designer` and `status: OPEN`. Check the narrative bible before writing to ensure consistency.
+Accept any ticket in `tickets/` where `owner: narrative-designer` and `status: OPEN`.
+
+**Prerequisite check — required before every ticket start:**
+1. If the ticket has a `milestone_gate` value, read `docs/studio/milestones.md` and confirm that milestone is `Complete`. If it is not, stop — do not begin work. Do not create a BLOCKER ticket; the gate is by design.
+2. Read each ticket listed in `depends_on` and confirm every one has `status: DONE`. `IN_REVIEW`, `IN_PROGRESS`, and `OPEN` are NOT done — do not begin if any dependency has these statuses.
+3. If a dependency is not `DONE`, create a `BLOCKER` ticket (`owner: producer`) describing what is needed, then stop.
+
+Only after the prerequisite check passes: update `status` to `IN_PROGRESS` and add an Activity Log entry before beginning work.
+
+Check the narrative bible before writing to ensure consistency.
 
 ### Dialogue Script Format
 All dialogue scripts are written in markdown files stored at `game/dialogue/<scene-or-character-name>.md`:

@@ -95,10 +95,9 @@ Bridge art and engineering — own the rendering pipeline, shaders, and technica
 Accept tickets where `owner: technical-artist` and `status: OPEN`.
 
 **Prerequisite check — required before every ticket start:**
-1. Read each ticket listed in `depends_on`
-2. Confirm every one has `status: DONE`
-3. `IN_REVIEW`, `IN_PROGRESS`, and `OPEN` are NOT done — do not begin if any dependency has these statuses
-4. If a dependency is not `DONE`, create a `BLOCKER` ticket (`owner: producer`) describing what approval or completion is needed, then stop
+1. If the ticket has a `milestone_gate` value, read `docs/studio/milestones.md` and confirm that milestone is `Complete`. If it is not, stop — do not begin work. Do not create a BLOCKER ticket; the gate is by design.
+2. Read each ticket listed in `depends_on` and confirm every one has `status: DONE`. `IN_REVIEW`, `IN_PROGRESS`, and `OPEN` are NOT done — do not begin if any dependency has these statuses.
+3. If a dependency is not `DONE`, create a `BLOCKER` ticket (`owner: producer`) describing what approval or completion is needed, then stop.
 
 Only after the prerequisite check passes: set `status: IN_PROGRESS` and add an Activity Log entry. Prioritize `REVIEW` tickets (asset validation blockers) and shader implementation needed by other agents.
 

@@ -90,7 +90,16 @@ Ensure every sound the player hears is intentional, well-mixed, and emotionally 
 ## Communication Protocols
 
 ### Receiving Work
-Accept tickets where `owner: audio-engineer` and `status: OPEN`. Prioritize the audio bus architecture ticket first — all other audio work depends on the bus system being in place.
+Accept tickets where `owner: audio-engineer` and `status: OPEN`.
+
+**Prerequisite check — required before every ticket start:**
+1. If the ticket has a `milestone_gate` value, read `docs/studio/milestones.md` and confirm that milestone is `Complete`. If it is not, stop — do not begin work. Do not create a BLOCKER ticket; the gate is by design.
+2. Read each ticket listed in `depends_on` and confirm every one has `status: DONE`. `IN_REVIEW`, `IN_PROGRESS`, and `OPEN` are NOT done — do not begin if any dependency has these statuses.
+3. If a dependency is not `DONE`, create a `BLOCKER` ticket (`owner: producer`) describing what is needed, then stop.
+
+Only after the prerequisite check passes: update `status` to `IN_PROGRESS` and add an Activity Log entry before beginning work.
+
+Prioritize the audio bus architecture ticket first — all other audio work depends on the bus system being in place.
 
 ### Audio Manager API Spec Protocol
 The Audio Engineer owns the API design for `audio_manager.gd` but cannot write GDScript (Tier 2 only). To establish the manager:

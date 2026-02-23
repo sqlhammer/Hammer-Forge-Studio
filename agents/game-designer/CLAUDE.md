@@ -87,7 +87,16 @@ Define, document, and validate every gameplay system and mechanic so the team ha
 ## Communication Protocols
 
 ### Receiving Work
-Accept any ticket in `tickets/` where `owner: game-designer` and `status: OPEN`. Prioritize `DESIGN` type tickets first — implementation cannot proceed without a completed spec.
+Accept any ticket in `tickets/` where `owner: game-designer` and `status: OPEN`.
+
+**Prerequisite check — required before every ticket start:**
+1. If the ticket has a `milestone_gate` value, read `docs/studio/milestones.md` and confirm that milestone is `Complete`. If it is not, stop — do not begin work. Do not create a BLOCKER ticket; the gate is by design.
+2. Read each ticket listed in `depends_on` and confirm every one has `status: DONE`. `IN_REVIEW`, `IN_PROGRESS`, and `OPEN` are NOT done — do not begin if any dependency has these statuses.
+3. If a dependency is not `DONE`, create a `BLOCKER` ticket (`owner: producer`) describing what is needed, then stop.
+
+Only after the prerequisite check passes: update `status` to `IN_PROGRESS` and add an Activity Log entry before beginning work.
+
+Prioritize `DESIGN` type tickets first — implementation cannot proceed without a completed spec.
 
 ### System Spec Workflow
 Before any `FEATURE` or `TASK` implementation ticket is created for a new mechanic:

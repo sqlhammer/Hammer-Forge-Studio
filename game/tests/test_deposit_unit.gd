@@ -74,32 +74,34 @@ func _test_initial_not_analyzed() -> void:
 
 
 func _test_extract_valid_amount() -> void:
-	var extracted: int = _deposit.extract(10)
+	var result: Dictionary = _deposit.extract(10)
+	var extracted: int = result.get("quantity", 0) as int
 	assert_equal(extracted, 10, "Should extract requested amount")
 	assert_equal(_deposit.get_remaining(), 30, "Remaining should decrease by extracted")
 
 
 func _test_extract_more_than_remaining_returns_partial() -> void:
-	var extracted: int = _deposit.extract(50)
+	var result: Dictionary = _deposit.extract(50)
+	var extracted: int = result.get("quantity", 0) as int
 	assert_equal(extracted, 40, "Should extract only what is remaining")
 	assert_equal(_deposit.get_remaining(), 0, "Remaining should be 0")
 
 
 func _test_extract_from_depleted_returns_zero() -> void:
 	_deposit.extract(40)
-	var extracted: int = _deposit.extract(10)
-	assert_equal(extracted, 0, "Depleted deposit should return 0")
+	var result: Dictionary = _deposit.extract(10)
+	assert_true(result.is_empty(), "Depleted deposit should return empty dict")
 
 
 func _test_extract_zero_returns_zero() -> void:
-	var extracted: int = _deposit.extract(0)
-	assert_equal(extracted, 0, "Extracting 0 should return 0")
+	var result: Dictionary = _deposit.extract(0)
+	assert_true(result.is_empty(), "Extracting 0 should return empty dict")
 	assert_equal(_deposit.get_remaining(), 40, "Remaining should be unchanged")
 
 
 func _test_extract_negative_returns_zero() -> void:
-	var extracted: int = _deposit.extract(-5)
-	assert_equal(extracted, 0, "Extracting negative should return 0")
+	var result: Dictionary = _deposit.extract(-5)
+	assert_true(result.is_empty(), "Extracting negative should return empty dict")
 	assert_equal(_deposit.get_remaining(), 40, "Remaining should be unchanged")
 
 
@@ -196,7 +198,7 @@ func _test_serialize_produces_complete_dict() -> void:
 		"Serialized purity")
 	assert_equal(data.get("total_quantity"), 40, "Serialized total_quantity")
 	assert_equal(data.get("remaining_quantity"), 30, "Serialized remaining_quantity")
-	assert_equal(data.get("is_analyzed"), true, "Serialized is_analyzed")
+	assert_equal(data.get("scan_state"), Deposit.ScanState.ANALYZED, "Serialized scan_state")
 	assert_true(data.has("position"), "Serialized data should include position")
 
 

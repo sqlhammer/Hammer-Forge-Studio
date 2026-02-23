@@ -171,7 +171,7 @@ func _test_add_to_full_inventory_emits_inventory_full() -> void:
 	for i: int in range(Inventory.MAX_SLOTS):
 		var purity_index: int = (i % 5) + 1
 		_inventory.add_item(ResourceDefs.ResourceType.SCRAP_METAL,
-			purity_index as ResourceDefs.Purity, Inventory.MAX_STACK_SIZE)
+			purity_index as ResourceDefs.Purity, Inventory.DEFAULT_STACK_SIZE)
 	_spy.clear()
 	_inventory.add_item(
 		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 10)
@@ -184,7 +184,7 @@ func _test_add_to_full_inventory_returns_remainder() -> void:
 	for i: int in range(Inventory.MAX_SLOTS):
 		var purity_index: int = (i % 5) + 1
 		_inventory.add_item(ResourceDefs.ResourceType.SCRAP_METAL,
-			purity_index as ResourceDefs.Purity, Inventory.MAX_STACK_SIZE)
+			purity_index as ResourceDefs.Purity, Inventory.DEFAULT_STACK_SIZE)
 	var remainder: int = _inventory.add_item(
 		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 50)
 	assert_equal(remainder, 50, "Full inventory should return all items as remainder")
@@ -287,7 +287,7 @@ func _test_has_item_returns_false_when_absent() -> void:
 func _test_get_available_space_with_empty_inventory() -> void:
 	var space: int = _inventory.get_available_space(
 		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR)
-	var expected: int = Inventory.MAX_SLOTS * Inventory.MAX_STACK_SIZE
+	var expected: int = Inventory.MAX_SLOTS * Inventory.DEFAULT_STACK_SIZE
 	assert_equal(space, expected,
 		"Empty inventory should have 15*100 = 1500 available space")
 
@@ -326,12 +326,12 @@ func _test_is_full_when_all_slots_occupied() -> void:
 	for i: int in range(Inventory.MAX_SLOTS):
 		var purity_index: int = (i % 5) + 1
 		_inventory.add_item(ResourceDefs.ResourceType.SCRAP_METAL,
-			purity_index as ResourceDefs.Purity, Inventory.MAX_STACK_SIZE)
+			purity_index as ResourceDefs.Purity, Inventory.DEFAULT_STACK_SIZE)
 	assert_true(_inventory.is_full(), "Inventory should be full when all slots occupied")
 
 
 func _test_max_stack_size_is_100() -> void:
-	assert_equal(Inventory.MAX_STACK_SIZE, 100,
+	assert_equal(Inventory.DEFAULT_STACK_SIZE, 100,
 		"MAX_STACK_SIZE should be 100 per design spec")
 
 

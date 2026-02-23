@@ -3,16 +3,15 @@
 class_name TestSuitBatteryUnit
 extends TestSuite
 
-
 # ── Private Variables ─────────────────────────────────────
-var _battery: SuitBattery = null
+var _battery: SuitBatteryType = null
 var _spy: SignalSpy = null
 
 
 # ── Setup / Teardown ──────────────────────────────────────
 
 func before_each() -> void:
-	_battery = SuitBattery.new()
+	_battery = SuitBatteryType.new()
 	add_child(_battery)
 	_spy = SignalSpy.new()
 	_spy.watch(_battery, "charge_changed")
@@ -153,7 +152,7 @@ func _test_movement_multiplier_depleted() -> void:
 
 
 func _test_movement_penalty_is_25_percent() -> void:
-	assert_equal(SuitBattery.MOVEMENT_PENALTY, 0.25,
+	assert_equal(SuitBatteryType.MOVEMENT_PENALTY, 0.25,
 		"MOVEMENT_PENALTY constant should be 0.25")
 
 
@@ -263,18 +262,18 @@ func _test_restore_full_stops_recharging() -> void:
 
 
 func _test_recharge_rate_is_50_per_second() -> void:
-	assert_equal(SuitBattery.RECHARGE_RATE, 50.0,
+	assert_equal(SuitBatteryType.RECHARGE_RATE, 50.0,
 		"RECHARGE_RATE should be 50.0 per design spec")
 
 
 func _test_drain_rates_per_tier_correct() -> void:
-	assert_equal(SuitBattery.DRAIN_RATES_PER_TIER[ResourceDefs.DepositTier.TIER_1], 2.0,
+	assert_equal(SuitBatteryType.DRAIN_RATES_PER_TIER[ResourceDefs.DepositTier.TIER_1], 2.0,
 		"Tier 1 drain rate should be 2.0")
-	assert_equal(SuitBattery.DRAIN_RATES_PER_TIER[ResourceDefs.DepositTier.TIER_2], 4.0,
+	assert_equal(SuitBatteryType.DRAIN_RATES_PER_TIER[ResourceDefs.DepositTier.TIER_2], 4.0,
 		"Tier 2 drain rate should be 4.0")
-	assert_equal(SuitBattery.DRAIN_RATES_PER_TIER[ResourceDefs.DepositTier.TIER_3], 7.0,
+	assert_equal(SuitBatteryType.DRAIN_RATES_PER_TIER[ResourceDefs.DepositTier.TIER_3], 7.0,
 		"Tier 3 drain rate should be 7.0")
-	assert_equal(SuitBattery.DRAIN_RATES_PER_TIER[ResourceDefs.DepositTier.TIER_4], 12.0,
+	assert_equal(SuitBatteryType.DRAIN_RATES_PER_TIER[ResourceDefs.DepositTier.TIER_4], 12.0,
 		"Tier 4 drain rate should be 12.0")
 
 

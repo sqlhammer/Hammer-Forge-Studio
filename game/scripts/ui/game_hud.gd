@@ -11,6 +11,20 @@ var _pickup_notifications: PickupNotificationManager = null
 var _crosshair: Control = null
 var _scanner: Scanner = null
 
+# ── Built-in Virtual Methods ──────────────────────────────
+
+func _ready() -> void:
+	layer = 1
+	_build_hud()
+
+func _process(_delta: float) -> void:
+	# Show readout for already-analyzed deposits when aimed at
+	if _scanner:
+		var aimed: Deposit = _scanner.get_aimed_deposit()
+		if aimed and aimed.is_analyzed() and not aimed.is_depleted():
+			if _scanner_readout.get_current_deposit() != aimed:
+				_scanner_readout.show_readout(aimed)
+
 # ── Public Methods ────────────────────────────────────────
 
 ## Initializes the HUD with references to gameplay systems.
@@ -40,20 +54,6 @@ func get_compass_bar() -> CompassBar:
 ## Returns the scanner readout for external access.
 func get_scanner_readout() -> ScannerReadout:
 	return _scanner_readout
-
-# ── Built-in Virtual Methods ──────────────────────────────
-
-func _ready() -> void:
-	layer = 1
-	_build_hud()
-
-func _process(_delta: float) -> void:
-	# Show readout for already-analyzed deposits when aimed at
-	if _scanner:
-		var aimed: Deposit = _scanner.get_aimed_deposit()
-		if aimed and aimed.is_analyzed() and not aimed.is_depleted():
-			if _scanner_readout.get_current_deposit() != aimed:
-				_scanner_readout.show_readout(aimed)
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -115,15 +115,18 @@ func _create_crosshair() -> Control:
 # ── Signal Handlers ───────────────────────────────────────
 
 func _on_ping_completed(deposits: Array[Deposit]) -> void:
+	Global.log("HUD: ping completed — %d deposits detected" % deposits.size())
 	_compass_bar.add_ping_markers(deposits)
 
 func _on_analysis_started(_deposit: Deposit) -> void:
+	Global.log("HUD: analysis started — showing scan progress")
 	_mining_progress.show_progress("SCANNING", Color("#00D4AA"))
 
 func _on_analysis_progress(progress: float) -> void:
 	_mining_progress.update_progress(progress)
 
 func _on_analysis_completed(deposit: Deposit) -> void:
+	Global.log("HUD: analysis completed — showing readout")
 	_mining_progress.show_complete()
 	_scanner_readout.show_readout(deposit)
 
@@ -131,16 +134,19 @@ func _on_analysis_cancelled() -> void:
 	_mining_progress.hide_progress()
 
 func _on_mining_started(_deposit: Deposit) -> void:
+	Global.log("HUD: mining started — showing extraction progress")
 	_mining_progress.show_progress()
 
 func _on_mining_progress(progress: float) -> void:
 	_mining_progress.update_progress(progress)
 
 func _on_mining_completed(_deposit: Deposit, _resource_type: ResourceDefs.ResourceType, _purity: ResourceDefs.Purity, _quantity: int) -> void:
+	Global.log("HUD: mining completed")
 	_mining_progress.show_complete()
 
 func _on_mining_cancelled() -> void:
 	_mining_progress.hide_progress()
 
 func _on_mining_failed(reason: String) -> void:
+	Global.log("HUD: mining failed — %s" % reason)
 	_mining_progress.show_failed(reason)

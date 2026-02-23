@@ -32,29 +32,6 @@ var _density_label: Label = null
 var _energy_label: Label = null
 var _content_container: VBoxContainer = null
 
-# ── Public Methods ────────────────────────────────────────
-
-## Initializes with player reference for distance checks.
-func setup(player: CharacterBody3D) -> void:
-	_player = player
-
-## Shows the readout for a specific deposit.
-func show_readout(deposit: Deposit) -> void:
-	_current_deposit = deposit
-	_update_readout_data()
-	_is_visible = true
-	_animate_show()
-
-## Hides the readout.
-func hide_readout() -> void:
-	_is_visible = false
-	_current_deposit = null
-	_animate_hide()
-
-## Returns the currently displayed deposit.
-func get_current_deposit() -> Deposit:
-	return _current_deposit
-
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
@@ -76,6 +53,31 @@ func _process(_delta: float) -> void:
 	# Dismiss if deposit depleted
 	if _current_deposit.is_depleted():
 		hide_readout()
+
+# ── Public Methods ────────────────────────────────────────
+
+## Initializes with player reference for distance checks.
+func setup(player: CharacterBody3D) -> void:
+	_player = player
+
+## Shows the readout for a specific deposit.
+func show_readout(deposit: Deposit) -> void:
+	Global.log("ScannerReadout: showing readout for deposit at %s" % str(deposit.global_position))
+	_current_deposit = deposit
+	_update_readout_data()
+	_is_visible = true
+	_animate_show()
+
+## Hides the readout.
+func hide_readout() -> void:
+	Global.log("ScannerReadout: hiding readout")
+	_is_visible = false
+	_current_deposit = null
+	_animate_hide()
+
+## Returns the currently displayed deposit.
+func get_current_deposit() -> Deposit:
+	return _current_deposit
 
 # ── Private Methods ───────────────────────────────────────
 

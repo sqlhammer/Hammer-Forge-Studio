@@ -29,6 +29,15 @@ var _analysis_target: Deposit = null
 var _analysis_progress: float = 0.0
 var _is_analyzing: bool = false
 
+# ── Built-in Virtual Methods ──────────────────────────────
+
+func _process(delta: float) -> void:
+	if not _camera:
+		return
+	_update_ping_cooldown(delta)
+	_check_ping_input()
+	_update_analysis(delta)
+
 # ── Public Methods ────────────────────────────────────────
 
 ## Initializes the scanner with the player camera reference.
@@ -64,15 +73,6 @@ func is_analyzing() -> bool:
 func get_analysis_target() -> Deposit:
 	return _analysis_target
 
-# ── Built-in Virtual Methods ──────────────────────────────
-
-func _process(delta: float) -> void:
-	if not _camera:
-		return
-	_update_ping_cooldown(delta)
-	_check_ping_input()
-	_update_analysis(delta)
-
 # ── Private Methods ───────────────────────────────────────
 
 func _update_ping_cooldown(delta: float) -> void:
@@ -86,6 +86,7 @@ func _do_ping() -> void:
 	_ping_cooldown_timer = PING_COOLDOWN
 	var player_pos: Vector3 = _player.global_position
 	var deposits: Array[Deposit] = DepositRegistry.get_in_range(player_pos, PING_RANGE)
+	Global.log("Scanner: ping fired — %d deposits in range" % deposits.size())
 	for deposit: Deposit in deposits:
 		if not deposit.is_pinged():
 			deposit.ping()
@@ -110,16 +111,19 @@ func _start_analysis(deposit: Deposit) -> void:
 	_analysis_target = deposit
 	_analysis_progress = 0.0
 	_is_analyzing = true
+	Global.log("Scanner: analysis started on deposit at %s" % str(deposit.global_position))
 	analysis_started.emit(deposit)
 
 func _complete_analysis() -> void:
 	if _analysis_target:
 		_analysis_target.mark_analyzed()
+		Global.log("Scanner: analysis completed on deposit at %s" % str(_analysis_target.global_position))
 		analysis_completed.emit(_analysis_target)
 	_is_analyzing = false
 	_analysis_progress = 0.0
 
 func _cancel_analysis() -> void:
+	Global.log("Scanner: analysis cancelled")
 	_is_analyzing = false
 	_analysis_progress = 0.0
 	_analysis_target = null

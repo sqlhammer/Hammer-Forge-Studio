@@ -2,7 +2,7 @@
 id: TICKET-0034
 title: "FIX: InputManager use_tool registers mouse button as InputEventKey"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: systems-programmer
 created_by: systems-programmer
@@ -34,3 +34,4 @@ tags: [input, coding-standards, inputmanager]
 
 ## Activity Log
 - 2026-02-23 [systems-programmer] Created from TICKET-0030 P2 findings
+- 2026-02-23 [systems-programmer] Implemented: added `mouse_buttons` parameter to `_add_action_if_missing()`, use_tool now correctly registers `InputEventMouseButton` for `MOUSE_BUTTON_LEFT`

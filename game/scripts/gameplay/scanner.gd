@@ -79,7 +79,7 @@ func _update_ping_cooldown(delta: float) -> void:
 	_ping_cooldown_timer = maxf(_ping_cooldown_timer - delta, 0.0)
 
 func _check_ping_input() -> void:
-	if Input.is_action_just_pressed("scan") and _ping_cooldown_timer <= 0.0:
+	if InputManager.is_action_just_pressed("scan") and _ping_cooldown_timer <= 0.0:
 		_do_ping()
 
 func _do_ping() -> void:

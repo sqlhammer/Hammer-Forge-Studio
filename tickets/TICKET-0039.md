@@ -2,7 +2,7 @@
 id: TICKET-0039
 title: "Ship global variables — data layer"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -38,3 +38,4 @@ Define the data model for the ship's four global variables: Power, Integrity, He
 
 ## Activity Log
 - 2026-02-23 [producer] Created ticket
+- 2026-02-23 [systems-programmer] Implemented: ShipState autoload with Power/Integrity/Heat/Oxygen (0.0-100.0 clamped), BASELINE_POWER=30.0, change signals, module power draw registration/deregistration, adjust/reset helpers. Pattern: autoload (consistent with InputManager/Global)

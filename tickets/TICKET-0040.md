@@ -2,7 +2,7 @@
 id: TICKET-0040
 title: "Module system — data layer and framework"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -39,3 +39,4 @@ Define the module system architecture. Modules are discrete, installable units t
 
 ## Activity Log
 - 2026-02-23 [producer] Created ticket
+- 2026-02-23 [systems-programmer] Implemented: ModuleDefs (module_defs.gd) with ModuleType/ModuleTier enums, catalog pattern with recycler entry, static helpers. ModuleManager autoload with install/remove API, inventory cost validation, power draw registration via ShipState, install_failed signal with reason codes

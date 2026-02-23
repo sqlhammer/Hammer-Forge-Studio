@@ -10,7 +10,7 @@ signal inventory_full
 
 # ── Constants ─────────────────────────────────────────────
 const MAX_SLOTS: int = 15
-const MAX_STACK_SIZE: int = 100
+const DEFAULT_STACK_SIZE: int = 100
 
 # ── Private Variables ─────────────────────────────────────
 
@@ -60,6 +60,7 @@ func add_item(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Pur
 	if quantity <= 0 or resource_type == ResourceDefs.ResourceType.NONE:
 		return quantity
 	var remaining: int = quantity
+	var stack_size: int = _get_stack_size(resource_type)
 
 	# First pass: stack into existing matching slots
 	for i: int in range(MAX_SLOTS):
@@ -69,7 +70,7 @@ func add_item(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Pur
 			continue
 		if _slots[i].get("resource_type") == resource_type and _slots[i].get("purity") == purity:
 			var current_qty: int = _slots[i].get("quantity", 0) as int
-			var space: int = MAX_STACK_SIZE - current_qty
+			var space: int = stack_size - current_qty
 			if space > 0:
 				var to_add: int = mini(remaining, space)
 				_slots[i]["quantity"] = current_qty + to_add
@@ -82,7 +83,7 @@ func add_item(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Pur
 			break
 		if not _slots[i].is_empty():
 			continue
-		var to_add: int = mini(remaining, MAX_STACK_SIZE)
+		var to_add: int = mini(remaining, stack_size)
 		_slots[i] = {
 			"resource_type": resource_type,
 			"purity": purity,
@@ -168,13 +169,18 @@ func has_item(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Pur
 
 ## Returns how many more of this resource+purity can be added (considering existing stacks + empty slots).
 func get_available_space(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Purity) -> int:
+	var stack_size: int = _get_stack_size(resource_type)
 	var space: int = 0
 	for slot: Dictionary in _slots:
 		if slot.is_empty():
-			space += MAX_STACK_SIZE
+			space += stack_size
 		elif slot.get("resource_type") == resource_type and slot.get("purity") == purity:
-			space += MAX_STACK_SIZE - (slot.get("quantity", 0) as int)
+			space += stack_size - (slot.get("quantity", 0) as int)
 	return space
+
+## Returns true if there is room to add `quantity` of this resource+purity.
+func has_space_for(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Purity, quantity: int) -> bool:
+	return get_available_space(resource_type, purity) >= quantity
 
 ## Clears the entire inventory.
 func clear_all() -> void:
@@ -192,3 +198,9 @@ func get_contents() -> Array[Dictionary]:
 			entry["slot_index"] = i
 			contents.append(entry)
 	return contents
+
+# ── Private Methods ──────────────────────────────────────
+
+## Returns the max stack size for a resource type from the catalog, or DEFAULT_STACK_SIZE as fallback.
+func _get_stack_size(resource_type: ResourceDefs.ResourceType) -> int:
+	return ResourceDefs.get_stack_size(resource_type)

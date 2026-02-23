@@ -71,10 +71,15 @@ const DENSITY_QUANTITY_RANGES: Dictionary = {
 }
 
 ## Resource catalog — keyed by ResourceType.
-## Each entry defines display name, deposit tier, and base energy cost per unit.
+## Each entry defines display name, description, stack size, icon path, category,
+## deposit tier, and base energy cost per unit.
 const RESOURCE_CATALOG: Dictionary = {
 	ResourceType.SCRAP_METAL: {
 		"name": "Scrap Metal",
+		"description": "Salvaged metal fragments. Common building material for basic repairs and crafting.",
+		"stack_size": 100,
+		"icon": "",
+		"category": "raw_material",
 		"deposit_tier": DepositTier.TIER_1,
 		"base_energy_per_unit": 2.0,
 	},
@@ -108,3 +113,18 @@ static func get_required_tier(resource_type: ResourceType) -> DepositTier:
 static func get_base_energy_per_unit(resource_type: ResourceType) -> float:
 	var entry: Dictionary = RESOURCE_CATALOG.get(resource_type, {})
 	return entry.get("base_energy_per_unit", 1.0) as float
+
+## Returns the max stack size for a resource type (default 100).
+static func get_stack_size(resource_type: ResourceType) -> int:
+	var entry: Dictionary = RESOURCE_CATALOG.get(resource_type, {})
+	return entry.get("stack_size", 100) as int
+
+## Returns the description for a resource type.
+static func get_description(resource_type: ResourceType) -> String:
+	var entry: Dictionary = RESOURCE_CATALOG.get(resource_type, {})
+	return entry.get("description", "") as String
+
+## Returns the category for a resource type.
+static func get_category(resource_type: ResourceType) -> String:
+	var entry: Dictionary = RESOURCE_CATALOG.get(resource_type, {})
+	return entry.get("category", "") as String

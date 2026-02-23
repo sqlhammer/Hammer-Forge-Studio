@@ -2,8 +2,18 @@
 class_name Deposit
 extends Node3D
 
+# ── Enums ────────────────────────────────────────────────
+
+## Scanner discovery state for this deposit.
+enum ScanState {
+	UNDISCOVERED = 0,  ## Not yet detected by scanner
+	PINGED = 1,        ## Located by scanner ping (Phase 1) — appears on compass
+	ANALYZED = 2,      ## Fully analyzed (Phase 2) — purity/density/cost visible
+}
+
 # ── Signals ──────────────────────────────────────────────
 signal quantity_changed(remaining: int, total: int)
+signal scan_state_changed(new_state: ScanState)
 signal depleted
 
 # ── Exported Variables ────────────────────────────────────
@@ -15,8 +25,7 @@ signal depleted
 
 # ── Private Variables ─────────────────────────────────────
 var _remaining_quantity: int = 0
-var _is_pinged: bool = false
-var _is_analyzed: bool = false
+var _scan_state: ScanState = ScanState.UNDISCOVERED
 
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
@@ -36,32 +45,45 @@ func get_total() -> int:
 func is_depleted() -> bool:
 	return _remaining_quantity <= 0
 
-## Returns true if the scanner has pinged this deposit.
+## Returns the current scan state.
+func get_scan_state() -> ScanState:
+	return _scan_state
+
+## Returns true if the deposit has been pinged or analyzed (visible on compass).
 func is_pinged() -> bool:
-	return _is_pinged
+	return _scan_state >= ScanState.PINGED
 
-## Marks this deposit as pinged by the scanner.
-func mark_pinged() -> void:
-	_is_pinged = true
-
-## Returns true if the scanner has analyzed this deposit.
+## Returns true if the scanner has fully analyzed this deposit.
 func is_analyzed() -> bool:
-	return _is_analyzed
+	return _scan_state == ScanState.ANALYZED
 
-## Marks this deposit as analyzed by the scanner.
+## Marks this deposit as pinged by scanner Phase 1. Appears on compass.
+func ping() -> void:
+	if _scan_state < ScanState.PINGED:
+		_scan_state = ScanState.PINGED
+		scan_state_changed.emit(_scan_state)
+
+## Marks this deposit as fully analyzed by scanner Phase 2.
 func mark_analyzed() -> void:
-	_is_analyzed = true
+	if _scan_state < ScanState.ANALYZED:
+		_scan_state = ScanState.ANALYZED
+		scan_state_changed.emit(_scan_state)
 
-## Extracts up to `amount` units from the deposit. Returns the quantity actually extracted.
-func extract(amount: int) -> int:
+## Extracts up to `amount` units from the deposit.
+## Returns a Dictionary: { "resource_type", "purity", "quantity" } or empty dict if nothing extracted.
+func extract(amount: int) -> Dictionary:
 	if amount <= 0 or is_depleted():
-		return 0
+		return {}
 	var extracted: int = mini(amount, _remaining_quantity)
 	_remaining_quantity -= extracted
 	quantity_changed.emit(_remaining_quantity, total_quantity)
 	if _remaining_quantity <= 0:
 		depleted.emit()
-	return extracted
+	return {
+		"resource_type": resource_type,
+		"purity": purity,
+		"quantity": extracted,
+	}
 
 ## Returns the total energy cost to fully extract this deposit.
 func get_total_energy_cost() -> float:
@@ -72,12 +94,14 @@ func get_total_energy_cost() -> float:
 func get_analysis_summary() -> Dictionary:
 	return {
 		"resource_name": ResourceDefs.get_resource_name(resource_type),
+		"resource_type": resource_type,
 		"purity": purity,
 		"purity_name": ResourceDefs.PURITY_NAMES.get(purity, "Unknown"),
 		"density_name": ResourceDefs.DENSITY_NAMES.get(density_tier, "Unknown"),
 		"remaining": _remaining_quantity,
 		"total": total_quantity,
 		"energy_cost": get_total_energy_cost(),
+		"scan_state": _scan_state,
 		"is_depleted": is_depleted(),
 	}
 
@@ -89,6 +113,7 @@ func setup(p_resource_type: ResourceDefs.ResourceType, p_purity: ResourceDefs.Pu
 	deposit_tier = ResourceDefs.get_required_tier(p_resource_type)
 	total_quantity = p_quantity
 	_remaining_quantity = p_quantity
+	_scan_state = ScanState.UNDISCOVERED
 
 ## Serializes deposit state for persistence.
 func serialize() -> Dictionary:
@@ -99,8 +124,7 @@ func serialize() -> Dictionary:
 		"deposit_tier": deposit_tier,
 		"total_quantity": total_quantity,
 		"remaining_quantity": _remaining_quantity,
-		"is_pinged": _is_pinged,
-		"is_analyzed": _is_analyzed,
+		"scan_state": _scan_state,
 		"position": {
 			"x": global_position.x,
 			"y": global_position.y,
@@ -116,8 +140,13 @@ func deserialize(data: Dictionary) -> void:
 	deposit_tier = data.get("deposit_tier", ResourceDefs.DepositTier.TIER_1) as ResourceDefs.DepositTier
 	total_quantity = data.get("total_quantity", 40) as int
 	_remaining_quantity = data.get("remaining_quantity", total_quantity) as int
-	_is_pinged = data.get("is_pinged", false) as bool
-	_is_analyzed = data.get("is_analyzed", false) as bool
+	# Backwards-compatible: accept both "scan_state" and legacy "is_analyzed"
+	if data.has("scan_state"):
+		_scan_state = data.get("scan_state", ScanState.UNDISCOVERED) as ScanState
+	elif data.get("is_analyzed", false):
+		_scan_state = ScanState.ANALYZED
+	else:
+		_scan_state = ScanState.UNDISCOVERED
 	var pos: Dictionary = data.get("position", {})
 	if not pos.is_empty():
 		global_position = Vector3(

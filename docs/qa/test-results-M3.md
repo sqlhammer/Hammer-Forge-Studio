@@ -12,23 +12,24 @@
 
 **M3 QA SIGN-OFF: APPROVED**
 
-All 178 unit tests pass across 8 test suites. Two new test suites added (Scanner: 23 tests, Mining: 23 tests). One P1 bugfix applied during QA (class_name/autoload conflict blocking all autoload singletons). One pre-existing P2 issue identified (battery bar polygon rendering). Test world loads and runs without fatal errors.
+All 193 unit tests pass across 9 test suites. Three new test suites added (Scanner: 23, Mining: 23, CompassBar: 15). One P1 bugfix applied during QA (class_name/autoload conflict blocking all autoload singletons). One pre-existing P2 issue identified (battery bar polygon rendering). Test world loads and runs without fatal errors or runtime crashes.
 
 ---
 
 ## Unit Test Results
 
-**Total: 178 passed, 0 failed, 0 skipped**
+**Total: 193 passed, 0 failed, 0 skipped**
 
 | Suite | Tests | Result | Notes |
 |-------|-------|--------|-------|
+| TestCompassBarUnit | 15 | **NEW — ALL PASS** | Marker management, dedup, capacity, depletion cleanup, bearing math |
 | TestDepositUnit | 20 | **ALL PASS** | Updated for P1 extract() Dictionary return |
 | TestDepositRegistryUnit | 17 | **ALL PASS** | Updated for DepositRegistryType class_name |
-| TestInputManagerUnit | 27 | **ALL PASS** | Regression suite from M1 |
+| TestInputManagerUnit | 11 | **ALL PASS** | Regression suite from M1 |
 | TestInventoryUnit | 34 | **ALL PASS** | Updated DEFAULT_STACK_SIZE constant |
-| TestMiningUnit | 23 | **NEW — ALL PASS** | Extraction data flow, inventory integration, battery drain |
+| TestMiningUnit | 26 | **ALL PASS** | Extraction data flow, inventory integration, battery drain |
 | TestResourceDefsUnit | 15 | **ALL PASS** | Regression suite from M3 Phase 1 |
-| TestScannerUnit | 23 | **NEW — ALL PASS** | Constants, scan state machine, registry ping, analysis |
+| TestScannerUnit | 23 | **ALL PASS** | Constants, scan state machine, registry ping, analysis |
 | TestSuitBatteryUnit | 32 | **ALL PASS** | Updated for SuitBatteryType class_name |
 
 ### New Test Coverage (M3)
@@ -41,13 +42,22 @@ All 178 unit tests pass across 8 test suites. Two new test suites added (Scanner
 - Registry ping simulation (range filtering, depleted exclusion)
 - Analysis summary structure and content
 
-**TestMiningUnit (23 tests):**
+**TestMiningUnit (26 tests):**
 - Mining constants (EXTRACTION_DURATION, EXTRACTION_AMOUNT, ranges)
 - Extract() Dictionary return (P1 bugfix verification)
 - Extract → inventory integration (stacking, overflow, full inventory)
 - Battery drain calculations (per-cycle cost, can_mine threshold)
 - Complete mining flow simulation (extract + add + drain)
 - Edge cases (deposit depletion, battery depletion mid-mining)
+
+**TestCompassBarUnit (15 tests):**
+- Constants (MARKER_PERSIST_TIME, MAX_MARKERS, DISTANCE_CONE_DEG, COMPASS_WIDTH)
+- Marker add tracking (single, multiple deposits)
+- Deduplication (same deposit added twice is no-op)
+- Capacity enforcement (MAX_MARKERS limit respected)
+- Marker removal (correct deposit removed, unknown deposit is no-op)
+- Depletion cleanup (depleted deposits auto-removed, active deposits preserved)
+- Bearing-to-screen-x calculation (center, left edge, right edge, 360-degree wrapping)
 
 ---
 
@@ -144,7 +154,7 @@ Per QA protocol: no P0 or P1 bugs remain open. P2 finding is cosmetic and does n
 
 **M3 Milestone: Scan / Mine Gameplay Loop — APPROVED**
 
-All M3 systems (Scanner, Mining, Battery, Inventory, Deposits, HUD) have unit test coverage and pass. Two new test suites added covering 46 tests for Scanner and Mining. One P1 autoload conflict identified, root-caused, and fixed. Test world runs without fatal errors. Total test count: 178 (up from 118 at M3 start).
+All M3 systems (Scanner, Mining, Battery, Inventory, Deposits, HUD, Compass) have unit test coverage and pass. Three new test suites added covering 64 tests for Scanner, Mining, and CompassBar. One P1 autoload conflict identified, root-caused, and fixed. Test world runs without fatal errors or runtime crashes. Total test count: 193 (up from 118 at M3 start).
 
 Signed: **qa-engineer**
 Date: **2026-02-23**

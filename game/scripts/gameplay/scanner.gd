@@ -88,7 +88,7 @@ func _do_ping() -> void:
 	var deposits: Array[Deposit] = DepositRegistry.get_in_range(player_pos, PING_RANGE)
 	for deposit: Deposit in deposits:
 		if not deposit.is_pinged():
-			deposit.mark_pinged()
+			deposit.ping()
 	ping_completed.emit(deposits)
 
 func _update_analysis(delta: float) -> void:

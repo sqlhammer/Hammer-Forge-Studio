@@ -7,7 +7,7 @@ priority: P1
 owner: systems-programmer
 created_by: producer
 created_at: 2026-02-22
-updated_at: 2026-02-22
+updated_at: 2026-02-23
 milestone: "M3"
 depends_on: [TICKET-0024, TICKET-0025, TICKET-0026, TICKET-0027, TICKET-0028, TICKET-0029]
 blocks: [TICKET-0031]
@@ -41,3 +41,4 @@ Code review of all M3 gameplay systems. The systems programmer reviews all gamep
 
 ## Activity Log
 - 2026-02-22 [producer] Created ticket
+- 2026-02-23 [producer] All dependencies (TICKET-0024–0029) merged to main. PR #6 (gameplay), PR #8 (data layer fixes), PR #9 (unit tests) all merged. Code is on main and ready for review. Ticket unblocked — assign to systems-programmer.

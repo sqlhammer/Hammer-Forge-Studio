@@ -2,7 +2,7 @@
 
 **Owner:** systems-programmer
 **Status:** Active
-**Last Updated:** 2026-02-21
+**Last Updated:** 2026-02-23
 **Sources:** Hammer Forge Studio standards + [Godot GDScript Style Guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
 
 > All GDScript produced by any agent must follow these standards. Systems Programmer enforces via code review. The official Godot style guide applies as a baseline; the rules below take precedence wherever they differ.

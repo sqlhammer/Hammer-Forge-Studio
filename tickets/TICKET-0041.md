@@ -2,7 +2,7 @@
 id: TICKET-0041
 title: "Recycler module — data layer and logic"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -39,3 +39,4 @@ Implement the Recycler as the first working ship module. Converts Scrap Metal in
 
 ## Activity Log
 - 2026-02-23 [producer] Created ticket
+- 2026-02-23 [systems-programmer] Implemented: Recycler autoload with recipe (3 Scrap Metal → 1 Metal, 5s processing), job start/cancel/collect API, progress signal, any-purity input consumption. Added METAL resource type to ResourceDefs (stack_size=50, processed_material category). Output collected manually (not auto-deposited). Recycler power draw=10.0, within BASELINE_POWER=30.0

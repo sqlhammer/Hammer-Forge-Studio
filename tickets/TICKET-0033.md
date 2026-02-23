@@ -2,7 +2,7 @@
 id: TICKET-0033
 title: "FIX: scanner.gd uses direct Input API call — route through InputManager"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: systems-programmer
 created_by: systems-programmer
@@ -34,3 +34,4 @@ tags: [input, coding-standards, scanner]
 
 ## Activity Log
 - 2026-02-23 [systems-programmer] Created from TICKET-0030 P2 findings
+- 2026-02-23 [systems-programmer] Implemented: added `is_action_just_pressed()` to InputManager, updated scanner.gd:82 to route through InputManager, verified no other direct `Input.is_action_just_pressed` calls in gameplay scripts

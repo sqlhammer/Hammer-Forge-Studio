@@ -52,6 +52,10 @@ func _process(delta: float) -> void:
 func is_action_pressed(action: String) -> bool:
 	return Input.is_action_pressed(action)
 
+## Returns true if the specified action was just pressed this frame.
+func is_action_just_pressed(action: String) -> bool:
+	return Input.is_action_just_pressed(action)
+
 ## Returns the analog strength (0.0 - 1.0) of the specified action.
 func get_action_strength(action: String) -> float:
 	return Input.get_action_strength(action)
@@ -120,7 +124,7 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("camera_look_vertical", [])  # Mouse only
 	_add_action_if_missing("interact", [KEY_E])
 	_add_action_if_missing("scan", [KEY_Q])
-	_add_action_if_missing("use_tool", [MOUSE_BUTTON_LEFT])
+	_add_action_if_missing("use_tool", [], [MOUSE_BUTTON_LEFT])
 	_add_action_if_missing("switch_view", [KEY_TAB])
 	_add_action_if_missing("pause", [KEY_ESCAPE])
 	_add_action_if_missing("jump", [KEY_SPACE])
@@ -134,14 +138,18 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("ship_emergency_stop", [KEY_X])
 
 ## Adds an input action if it doesn't already exist.
-func _add_action_if_missing(action_name: String, keys: Array) -> void:
+func _add_action_if_missing(action_name: String, keys: Array = [], mouse_buttons: Array = []) -> void:
 	if InputMap.has_action(action_name):
 		return
-	
+
 	InputMap.add_action(action_name)
 	for key in keys:
 		var event := InputEventKey.new()
 		event.keycode = key
+		InputMap.action_add_event(action_name, event)
+	for button in mouse_buttons:
+		var event := InputEventMouseButton.new()
+		event.button_index = button
 		InputMap.action_add_event(action_name, event)
 
 ## Applies dead zone to a 2D axis input (typically from analog stick).

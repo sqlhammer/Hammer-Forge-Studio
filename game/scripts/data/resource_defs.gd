@@ -4,10 +4,11 @@ extends RefCounted
 
 # ── Enums ─────────────────────────────────────────────────
 
-## Unique resource types. M3 ships with SCRAP_METAL only.
+## Unique resource types. SCRAP_METAL (M3), METAL (M4 — refined from Scrap Metal).
 enum ResourceType {
 	NONE = 0,
 	SCRAP_METAL = 1,
+	METAL = 2,
 }
 
 ## Purity rating from 1-star (lowest) to 5-star (highest).
@@ -82,6 +83,15 @@ const RESOURCE_CATALOG: Dictionary = {
 		"category": "raw_material",
 		"deposit_tier": DepositTier.TIER_1,
 		"base_energy_per_unit": 2.0,
+	},
+	ResourceType.METAL: {
+		"name": "Metal",
+		"description": "Refined metal ingot. Processed from Scrap Metal via the Recycler. Used for crafting and upgrades.",
+		"stack_size": 50,
+		"icon": "",
+		"category": "processed_material",
+		"deposit_tier": DepositTier.TIER_1,
+		"base_energy_per_unit": 0.0,
 	},
 }
 

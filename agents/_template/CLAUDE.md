@@ -95,13 +95,15 @@ See `tickets/README.md` for ticket schema and type definitions.
 Accept any ticket in `tickets/` where:
 - `owner: <slug>` AND
 - `status: OPEN` AND
+- `milestone_gate` is blank OR the named milestone has `status: Complete` in `docs/studio/milestones.md` AND
 - All tickets in `depends_on` have `status: DONE`
 
 **Prerequisite check — required before every ticket start:**
-1. Read each ticket listed in `depends_on`
-2. Confirm every one has `status: DONE`
-3. `IN_REVIEW`, `IN_PROGRESS`, and `OPEN` are NOT done — do not begin if any dependency has these statuses
-4. If a dependency is not `DONE`, create a `BLOCKER` ticket (`owner: producer`) describing what approval or completion is needed, then stop
+1. If the ticket has a `milestone_gate` value, read `docs/studio/milestones.md` and confirm that milestone is `Complete`. If it is not, stop — do not begin work. Do not create a BLOCKER ticket; the gate is by design.
+2. Read each ticket listed in `depends_on`
+3. Confirm every one has `status: DONE`
+4. `IN_REVIEW`, `IN_PROGRESS`, and `OPEN` are NOT done — do not begin if any dependency has these statuses
+5. If a dependency is not `DONE`, create a `BLOCKER` ticket (`owner: producer`) describing what approval or completion is needed, then stop
 
 Only after the prerequisite check passes: update `status` to `IN_PROGRESS` and add an Activity Log entry before beginning work.
 

@@ -126,7 +126,7 @@ Escalate immediately when:
 
 ## Output Standards
 
-- **Ticket files:** `tickets/TICKET-NNNN.md` — all required frontmatter fields populated, no empty acceptance criteria
+- **Ticket files:** `tickets/TICKET-NNNN.md` — all required frontmatter fields populated, no empty acceptance criteria; `milestone_gate` must be set on every ticket that belongs to a milestone with a predecessor (e.g., all M4 tickets get `milestone_gate: "M3"`)
 - **Sprint reports:** `docs/studio/reports/YYYY-MM-DD-sprint.md` — list of agents, their assigned tickets, and sprint goal
 - **Status reports:** `docs/studio/reports/YYYY-MM-DD-status.md` — tickets closed, in progress, open blockers, risks, next actions
 - **Milestone doc:** `docs/studio/milestones.md` — table of milestones with target dates, ticket counts, and completion %

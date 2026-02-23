@@ -2,7 +2,7 @@
 id: TICKET-0029
 title: "Greybox test world"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -47,3 +47,5 @@ Build a small, bounded greybox test level that serves as the M3 gameplay environ
 
 ## Activity Log
 - 2026-02-22 [producer] Created ticket
+- 2026-02-22 [gameplay-programmer] Status → IN_PROGRESS
+- 2026-02-22 [gameplay-programmer] Implementation complete. Commit f71b964. Status → DONE

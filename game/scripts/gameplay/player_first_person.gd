@@ -47,6 +47,10 @@ func _input(event: InputEvent) -> void:
 			_apply_mouse_look(mouse_delta)
 
 # ── Public Methods ────────────────────────────────────────
+## Returns the player's active camera.
+func get_camera() -> Camera3D:
+	return _camera
+
 ## Returns the current velocity of the player.
 func get_current_velocity() -> Vector3:
 	return _velocity
@@ -79,6 +83,9 @@ func _update_movement(delta: float) -> void:
 	var speed: float = movement_speed
 	if input_vector.y < 0:  # Moving backward
 		speed = movement_speed_backward
+
+	# Apply battery movement penalty
+	speed *= SuitBattery.get_movement_multiplier()
 
 	# Calculate movement velocity (horizontal only)
 	var move_direction: Vector3 = (forward * input_vector.y + right * input_vector.x) * speed

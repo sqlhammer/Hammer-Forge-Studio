@@ -36,50 +36,6 @@ var _dim_rect: ColorRect = null
 var _main_panel: PanelContainer = null
 var _font: Font = null
 
-# ── Public Methods ────────────────────────────────────────
-
-## Toggles the inventory open/closed.
-func toggle() -> void:
-	if _is_open:
-		close_inventory()
-	else:
-		open_inventory()
-
-## Opens the inventory.
-func open_inventory() -> void:
-	_is_open = true
-	visible = true
-	_focused_slot = 0
-	_refresh_all_slots()
-	_update_focus_visual()
-	_update_detail_area()
-	get_tree().paused = true
-	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-	# Appear animation
-	_dim_rect.modulate.a = 0.0
-	_main_panel.modulate.a = 0.0
-	_main_panel.scale = Vector2(0.95, 0.95)
-	var tween: Tween = create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(_dim_rect, "modulate:a", 1.0, 0.15)
-	tween.tween_property(_main_panel, "modulate:a", 1.0, 0.2)
-	tween.tween_property(_main_panel, "scale", Vector2.ONE, 0.2).set_ease(Tween.EASE_OUT)
-
-## Closes the inventory.
-func close_inventory() -> void:
-	_is_open = false
-	get_tree().paused = false
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	var tween: Tween = create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(_dim_rect, "modulate:a", 0.0, 0.15)
-	tween.tween_property(_main_panel, "modulate:a", 0.0, 0.15)
-	tween.tween_callback(func() -> void: visible = false)
-
-## Returns true if the inventory is currently open.
-func is_open() -> bool:
-	return _is_open
-
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
@@ -116,6 +72,52 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed("ui_cancel"):
 		close_inventory()
 		get_viewport().set_input_as_handled()
+
+# ── Public Methods ────────────────────────────────────────
+
+## Toggles the inventory open/closed.
+func toggle() -> void:
+	if _is_open:
+		close_inventory()
+	else:
+		open_inventory()
+
+## Opens the inventory.
+func open_inventory() -> void:
+	Global.log("InventoryScreen: opened")
+	_is_open = true
+	visible = true
+	_focused_slot = 0
+	_refresh_all_slots()
+	_update_focus_visual()
+	_update_detail_area()
+	get_tree().paused = true
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	# Appear animation
+	_dim_rect.modulate.a = 0.0
+	_main_panel.modulate.a = 0.0
+	_main_panel.scale = Vector2(0.95, 0.95)
+	var tween: Tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(_dim_rect, "modulate:a", 1.0, 0.15)
+	tween.tween_property(_main_panel, "modulate:a", 1.0, 0.2)
+	tween.tween_property(_main_panel, "scale", Vector2.ONE, 0.2).set_ease(Tween.EASE_OUT)
+
+## Closes the inventory.
+func close_inventory() -> void:
+	Global.log("InventoryScreen: closed")
+	_is_open = false
+	get_tree().paused = false
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	var tween: Tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(_dim_rect, "modulate:a", 0.0, 0.15)
+	tween.tween_property(_main_panel, "modulate:a", 0.0, 0.15)
+	tween.tween_callback(func() -> void: visible = false)
+
+## Returns true if the inventory is currently open.
+func is_open() -> bool:
+	return _is_open
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -338,6 +340,7 @@ func _move_focus(dx: int, dy: int) -> void:
 	_update_detail_area()
 
 func _on_slot_changed(slot_index: int) -> void:
+	Global.log("InventoryScreen: slot %d changed" % slot_index)
 	if _is_open:
 		_refresh_slot(slot_index)
 		if slot_index == _focused_slot:

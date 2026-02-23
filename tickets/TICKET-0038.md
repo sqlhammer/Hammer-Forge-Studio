@@ -2,7 +2,7 @@
 id: TICKET-0038
 title: "FIX: test_world.gd missing class_name"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: systems-programmer
@@ -29,3 +29,4 @@ tags: [coding-standards, test-world]
 
 ## Activity Log
 - 2026-02-23 [systems-programmer] Created from TICKET-0030 P2 findings
+- 2026-02-23 [gameplay-programmer] Added class_name TestWorld to test_world.gd

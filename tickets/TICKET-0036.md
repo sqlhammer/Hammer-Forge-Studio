@@ -2,7 +2,7 @@
 id: TICKET-0036
 title: "FIX: missing debug logging across all M3 gameplay scripts"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: systems-programmer
@@ -40,3 +40,4 @@ Zero `Global.log()` calls exist across all M3 gameplay code. The coding standard
 
 ## Activity Log
 - 2026-02-23 [systems-programmer] Created from TICKET-0030 P2 findings
+- 2026-02-23 [gameplay-programmer] Added Global.log() calls to all 8 M3 gameplay scripts: scanner.gd, mining.gd, compass_bar.gd, game_hud.gd, inventory_screen.gd, mining_progress.gd, scanner_readout.gd, test_world.gd

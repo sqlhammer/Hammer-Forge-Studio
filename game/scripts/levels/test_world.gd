@@ -1,4 +1,5 @@
 ## M3 greybox test world: bounded play area with ship, deposits, and all gameplay systems.
+class_name TestWorld
 extends Node3D
 
 # ── Constants ─────────────────────────────────────────────
@@ -27,6 +28,7 @@ var _deposit_container: Node3D = null
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
+	Global.log("TestWorld: initializing")
 	_build_environment()
 	_build_ground()
 	_build_boundaries()
@@ -36,6 +38,7 @@ func _ready() -> void:
 	_setup_gameplay_systems()
 	_setup_hud()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	Global.log("TestWorld: initialization complete")
 
 func _process(delta: float) -> void:
 	_update_recharge(delta)
@@ -280,8 +283,10 @@ func _update_recharge(delta: float) -> void:
 
 func _on_recharge_zone_entered(body: Node3D) -> void:
 	if body == _first_person:
+		Global.log("TestWorld: player entered recharge zone")
 		SuitBattery.start_recharge()
 
 func _on_recharge_zone_exited(body: Node3D) -> void:
 	if body == _first_person:
+		Global.log("TestWorld: player exited recharge zone")
 		SuitBattery.stop_recharge()

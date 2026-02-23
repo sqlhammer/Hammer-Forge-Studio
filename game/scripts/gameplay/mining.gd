@@ -27,6 +27,17 @@ var _mining_progress: float = 0.0
 var _is_mining: bool = false
 var _drill_mesh: MeshInstance3D = null
 
+# ── Built-in Virtual Methods ──────────────────────────────
+
+func _ready() -> void:
+	_ensure_use_tool_input()
+
+func _process(delta: float) -> void:
+	if not _camera:
+		return
+	_update_mining(delta)
+	_update_drill_visibility()
+
 # ── Public Methods ────────────────────────────────────────
 
 ## Initializes the mining system with required references.
@@ -47,17 +58,6 @@ func is_mining() -> bool:
 ## Returns the current mining target deposit.
 func get_mining_target() -> Deposit:
 	return _mining_target
-
-# ── Built-in Virtual Methods ──────────────────────────────
-
-func _ready() -> void:
-	_ensure_use_tool_input()
-
-func _process(delta: float) -> void:
-	if not _camera:
-		return
-	_update_mining(delta)
-	_update_drill_visibility()
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -84,12 +84,14 @@ func _update_mining(delta: float) -> void:
 		if not SuitBattery.can_mine(aimed_deposit.deposit_tier):
 			if _is_mining:
 				_cancel_mining()
+			Global.log("Mining: failed — insufficient battery charge")
 			mining_failed.emit("NO CHARGE")
 			return
 
 		if PlayerInventory.is_full():
 			if _is_mining:
 				_cancel_mining()
+			Global.log("Mining: failed — inventory full")
 			mining_failed.emit("INVENTORY FULL")
 			return
 
@@ -120,6 +122,7 @@ func _start_mining(deposit: Deposit) -> void:
 	_mining_target = deposit
 	_mining_progress = 0.0
 	_is_mining = true
+	Global.log("Mining: extraction started on deposit at %s" % str(deposit.global_position))
 	mining_started.emit(deposit)
 
 func _complete_mining() -> void:
@@ -127,6 +130,7 @@ func _complete_mining() -> void:
 		return
 	var result: Dictionary = _mining_target.extract(EXTRACTION_AMOUNT)
 	if result.is_empty():
+		Global.log("Mining: extraction returned empty result")
 		return
 	var extracted: int = result.get("quantity", 0) as int
 	if extracted > 0:
@@ -136,6 +140,7 @@ func _complete_mining() -> void:
 			extracted,
 		)
 		var added: int = extracted - leftover
+		Global.log("Mining: extraction completed — extracted %d, added %d to inventory, leftover %d" % [extracted, added, leftover])
 		if added > 0:
 			mining_completed.emit(_mining_target, _mining_target.resource_type, _mining_target.purity, added)
 	_is_mining = false
@@ -144,6 +149,7 @@ func _complete_mining() -> void:
 	_mining_target = null
 
 func _cancel_mining() -> void:
+	Global.log("Mining: extraction cancelled")
 	_is_mining = false
 	_mining_progress = 0.0
 	_mining_target = null

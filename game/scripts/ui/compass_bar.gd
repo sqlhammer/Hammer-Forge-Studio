@@ -30,36 +30,6 @@ var _ping_markers: Array[Dictionary] = []  # { "deposit": Deposit, "time_added":
 var _font: Font = null
 var _font_mono: Font = null
 
-# ── Public Methods ────────────────────────────────────────
-
-## Initializes the compass with camera reference.
-func setup(camera: Camera3D, player: CharacterBody3D) -> void:
-	_camera = camera
-	_player = player
-
-## Adds ping markers for detected deposits.
-func add_ping_markers(deposits: Array[Deposit]) -> void:
-	var current_time: float = Time.get_ticks_msec() / 1000.0
-	for deposit: Deposit in deposits:
-		# Skip if already tracked
-		var already_tracked: bool = false
-		for marker: Dictionary in _ping_markers:
-			if marker.get("deposit") == deposit:
-				already_tracked = true
-				break
-		if not already_tracked and _ping_markers.size() < MAX_MARKERS:
-			_ping_markers.append({
-				"deposit": deposit,
-				"time_added": current_time,
-			})
-
-## Removes a marker for a specific deposit (e.g., when depleted).
-func remove_marker(deposit: Deposit) -> void:
-	for i: int in range(_ping_markers.size() - 1, -1, -1):
-		if _ping_markers[i].get("deposit") == deposit:
-			_ping_markers.remove_at(i)
-			break
-
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
@@ -95,6 +65,37 @@ func _draw() -> void:
 
 	# Draw ping markers
 	_draw_ping_markers(player_yaw)
+
+# ── Public Methods ────────────────────────────────────────
+
+## Initializes the compass with camera reference.
+func setup(camera: Camera3D, player: CharacterBody3D) -> void:
+	_camera = camera
+	_player = player
+
+## Adds ping markers for detected deposits.
+func add_ping_markers(deposits: Array[Deposit]) -> void:
+	var current_time: float = Time.get_ticks_msec() / 1000.0
+	for deposit: Deposit in deposits:
+		# Skip if already tracked
+		var already_tracked: bool = false
+		for marker: Dictionary in _ping_markers:
+			if marker.get("deposit") == deposit:
+				already_tracked = true
+				break
+		if not already_tracked and _ping_markers.size() < MAX_MARKERS:
+			Global.log("CompassBar: added ping marker — total markers: %d" % (_ping_markers.size() + 1))
+			_ping_markers.append({
+				"deposit": deposit,
+				"time_added": current_time,
+			})
+
+## Removes a marker for a specific deposit (e.g., when depleted).
+func remove_marker(deposit: Deposit) -> void:
+	for i: int in range(_ping_markers.size() - 1, -1, -1):
+		if _ping_markers[i].get("deposit") == deposit:
+			_ping_markers.remove_at(i)
+			break
 
 # ── Private Methods ───────────────────────────────────────
 

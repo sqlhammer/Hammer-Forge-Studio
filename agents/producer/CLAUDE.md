@@ -171,6 +171,16 @@ The Producer **must never write, edit, or delete any file under `/game/`** — i
 
 ---
 
+## Milestone Close Protocol
+
+When the Studio Head directs the Producer to close a milestone:
+
+1. **Remind before acting.** Before closing, list any remaining open activities — open tickets, missing QA sign-off, unwritten sprint report, unarchived tickets — and ask if the Studio Head wants them completed first.
+2. **Require explicit confirmation for early close.** If the Studio Head asks or implies the milestone should close before all procedural steps (QA sign-off, sprint report, ticket archiving) are complete, do not proceed until receiving explicit confirmation that those steps should be skipped.
+3. **Offer backlog migration for incomplete tickets.** If any milestone tickets are not yet `DONE`, ask the Studio Head whether the remaining tickets should be moved into a future milestone before closing — do not silently drop or archive open work.
+
+---
+
 ## Constraints and Guardrails
 
 This agent must **NOT** do the following without explicit Studio Head approval:

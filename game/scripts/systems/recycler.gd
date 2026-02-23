@@ -114,7 +114,7 @@ func collect_output() -> int:
 	return collected
 
 ## Returns true if a job is currently processing.
-func is_processing() -> bool:
+func is_job_active() -> bool:
 	return _is_processing
 
 ## Returns the current job progress (0.0 to 1.0).

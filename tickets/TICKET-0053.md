@@ -2,7 +2,7 @@
 id: TICKET-0053
 title: "BUG: recycler.gd is_processing() overrides Node.is_processing()"
 type: BUG
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: qa-engineer
@@ -23,9 +23,9 @@ res://scripts/systems/recycler.gd:117 - Parse Error: The method "is_processing()
 ```
 
 ## Acceptance Criteria
-- [ ] `recycler.gd` parses without errors
-- [ ] Recycler processing state is queryable without overriding Node.is_processing()
-- [ ] All existing Recycler functionality preserved
+- [x] `recycler.gd` parses without errors
+- [x] Recycler processing state is queryable without overriding Node.is_processing()
+- [x] All existing Recycler functionality preserved
 
 ## Implementation Notes
 - Rename `is_processing()` to avoid the collision, e.g. `is_job_processing()`, `is_job_active()`, or `has_active_job()`
@@ -37,3 +37,4 @@ res://scripts/systems/recycler.gd:117 - Parse Error: The method "is_processing()
 
 ## Activity Log
 - 2026-02-23 [qa-engineer] Created from TICKET-0051 regression testing — parse error blocks Recycler autoload
+- 2026-02-23 [systems-programmer] Fixed: renamed is_processing() → is_job_active() in recycler.gd. No external callers needed updating. 193/193 tests pass.

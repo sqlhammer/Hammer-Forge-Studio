@@ -125,7 +125,10 @@ func _start_mining(deposit: Deposit) -> void:
 func _complete_mining() -> void:
 	if not _mining_target:
 		return
-	var extracted: int = _mining_target.extract(EXTRACTION_AMOUNT)
+	var result: Dictionary = _mining_target.extract(EXTRACTION_AMOUNT)
+	if result.is_empty():
+		return
+	var extracted: int = result.get("quantity", 0) as int
 	if extracted > 0:
 		var leftover: int = PlayerInventory.add_item(
 			_mining_target.resource_type,

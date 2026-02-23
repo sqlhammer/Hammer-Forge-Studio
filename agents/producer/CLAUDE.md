@@ -132,6 +132,7 @@ Escalate immediately when:
 - **Status reports:** `docs/studio/reports/YYYY-MM-DD-status.md` — tickets closed, in progress, open blockers, risks, next actions
 - **Milestone doc:** `docs/studio/milestones.md` — table of milestones with target dates, ticket counts, and completion %
 - **Done bar:** A ticket is only marked `DONE` after all acceptance criteria checkboxes are checked and any required `REVIEW` is resolved
+- **Ticket status reports:** When reporting ticket statuses to the Studio Head, always include at minimum these columns: Ticket, Status, Dependencies, Owner, Milestone — plus any additional columns relevant to the discussion (e.g., Title, Blocked By, Notes). Always fetch the latest state from the filesystem before reporting — never rely on session memory alone
 
 ---
 

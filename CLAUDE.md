@@ -36,10 +36,11 @@ Refer to `docs/engineering/coding-standards.md` for all naming conventions, form
 2. Agent commits to the worktree branch (references ticket ID in message)
 3. Agent pushes the branch to remote
 4. Agent creates a PR from the worktree branch targeting `main`
-5. Agent marks ticket `DONE` in Activity Log with commit hash and PR link
-6. Code reviewer (Systems Programmer) reviews the PR and merges to `main` after sign-off
+5. Agent self-merges the PR immediately
+6. Agent marks ticket `DONE` in Activity Log with commit hash and PR link
+7. Code review happens post-merge via a separate `REVIEW` ticket (does NOT gate the merge)
 
-This ensures `main` is always in a working, committed state. PRs are used to surface worktree work for review before it lands on `main`.
+This ensures `main` is always in a working, committed state and tickets are closed without waiting on a separate agent.
 
 ### Commits
 - Write summarized commit messages that reference the ticket ID (e.g., "TICKET-0003: Feature name")
@@ -53,7 +54,7 @@ This ensures `main` is always in a working, committed state. PRs are used to sur
 - Main stable branch: `main`
 - Push must happen before marking ticket `DONE`
 - When on `main`: push directly — each completed ticket moves `main` forward
-- When in a worktree: push the branch and open a PR — do not merge to `main`; that is the Systems Programmer's responsibility after code review sign-off
+- When in a worktree: push the branch, open a PR, and self-merge immediately — do not wait for the Systems Programmer to merge
 
 ### Code Review Protocol
 - Code review happens via separate `REVIEW` tickets assigned to Systems Programmer

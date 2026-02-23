@@ -3,9 +3,8 @@
 class_name TestDepositRegistryUnit
 extends TestSuite
 
-
 # ── Private Variables ─────────────────────────────────────
-var _registry: DepositRegistry = null
+var _registry: DepositRegistryType = null
 var _spy: SignalSpy = null
 var _deposits: Array[Deposit] = []
 
@@ -13,7 +12,7 @@ var _deposits: Array[Deposit] = []
 # ── Setup / Teardown ──────────────────────────────────────
 
 func before_each() -> void:
-	_registry = DepositRegistry.new()
+	_registry = DepositRegistryType.new()
 	add_child(_registry)
 	_spy = SignalSpy.new()
 	_spy.watch(_registry, "deposit_registered")
@@ -187,10 +186,10 @@ func _test_generate_m3_deposits_creates_valid_count() -> void:
 		add_child(deposit)
 		_deposits.append(deposit)
 	var count: int = generated.size()
-	assert_true(count >= DepositRegistry.M3_DEPOSIT_COUNT_MIN,
-		"Should generate at least %d deposits" % DepositRegistry.M3_DEPOSIT_COUNT_MIN)
-	assert_true(count <= DepositRegistry.M3_DEPOSIT_COUNT_MAX,
-		"Should generate at most %d deposits" % DepositRegistry.M3_DEPOSIT_COUNT_MAX)
+	assert_true(count >= DepositRegistryType.M3_DEPOSIT_COUNT_MIN,
+		"Should generate at least %d deposits" % DepositRegistryType.M3_DEPOSIT_COUNT_MIN)
+	assert_true(count <= DepositRegistryType.M3_DEPOSIT_COUNT_MAX,
+		"Should generate at most %d deposits" % DepositRegistryType.M3_DEPOSIT_COUNT_MAX)
 
 
 func _test_generate_m3_deposits_all_scrap_metal() -> void:
@@ -212,7 +211,7 @@ func _test_generate_m3_deposits_auto_registers() -> void:
 
 
 func _test_m3_deposit_count_constants_valid() -> void:
-	assert_equal(DepositRegistry.M3_DEPOSIT_COUNT_MIN, 8,
+	assert_equal(DepositRegistryType.M3_DEPOSIT_COUNT_MIN, 8,
 		"M3 min deposit count should be 8")
-	assert_equal(DepositRegistry.M3_DEPOSIT_COUNT_MAX, 12,
+	assert_equal(DepositRegistryType.M3_DEPOSIT_COUNT_MAX, 12,
 		"M3 max deposit count should be 12")

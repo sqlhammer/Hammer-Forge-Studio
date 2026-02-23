@@ -1,5 +1,5 @@
 ## Manages the player suit's battery: charge, drain, recharge, and depletion penalties.
-class_name SuitBattery
+class_name SuitBatteryType
 extends Node
 
 # ── Signals ──────────────────────────────────────────────

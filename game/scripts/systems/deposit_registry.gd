@@ -1,5 +1,5 @@
 ## Tracks all deposits in the world and provides query/generation utilities.
-class_name DepositRegistry
+class_name DepositRegistryType
 extends Node
 
 # ── Signals ──────────────────────────────────────────────

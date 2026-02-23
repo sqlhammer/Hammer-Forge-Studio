@@ -117,11 +117,11 @@ func _draw_battery_icon(pos: Vector2, color: Color) -> void:
 	# Simple lightning bolt icon
 	var points: PackedVector2Array = PackedVector2Array([
 		pos + Vector2(14, 0),
-		pos + Vector2(8, 10),
 		pos + Vector2(14, 10),
-		pos + Vector2(10, 24),
 		pos + Vector2(16, 12),
+		pos + Vector2(10, 24),
 		pos + Vector2(10, 12),
+		pos + Vector2(8, 10),
 	])
 	draw_colored_polygon(points, color)
 

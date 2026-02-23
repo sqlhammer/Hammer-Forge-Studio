@@ -5,8 +5,8 @@ extends Node3D
 const WORLD_SIZE: float = 100.0
 const WALL_HEIGHT: float = 8.0
 const DEPOSIT_SPREAD: float = 60.0
-const DEPOSIT_VISUAL_SCALE := Vector3(0.8, 0.8, 0.8)
-const DEPOSIT_COLLISION_RADIUS: float = 1.0
+const DEPOSIT_VISUAL_SCALE := Vector3(3.2, 3.2, 3.2)
+const DEPOSIT_COLLISION_RADIUS: float = 1.5
 
 ## Physics layers
 const LAYER_PLAYER: int = 1 << 0  # Layer 1
@@ -143,6 +143,8 @@ func _build_ship() -> void:
 	if ship_scene and ship_scene is PackedScene:
 		var ship_mesh: Node3D = (ship_scene as PackedScene).instantiate()
 		ship_mesh.name = "ShipMesh"
+		ship_mesh.scale = Vector3(4, 4, 4)
+		ship_mesh.position.y = 1.1
 		ship.add_child(ship_mesh)
 
 	# Ship collision (approximate with a box)
@@ -152,9 +154,9 @@ func _build_ship() -> void:
 	ship_body.collision_mask = 0
 	var ship_col := CollisionShape3D.new()
 	var ship_shape := BoxShape3D.new()
-	ship_shape.size = Vector3(6, 4, 10)
+	ship_shape.size = Vector3(3.5, 2.2, 4.0)
 	ship_col.shape = ship_shape
-	ship_col.position.y = 2.0
+	ship_col.position.y = 1.1
 	ship_body.add_child(ship_col)
 	ship.add_child(ship_body)
 
@@ -165,9 +167,9 @@ func _build_ship() -> void:
 	_recharge_zone.collision_mask = LAYER_PLAYER
 	var recharge_col := CollisionShape3D.new()
 	var recharge_shape := BoxShape3D.new()
-	recharge_shape.size = Vector3(12, 6, 16)
+	recharge_shape.size = Vector3(8.0, 5.0, 10.0)
 	recharge_col.shape = recharge_shape
-	recharge_col.position.y = 3.0
+	recharge_col.position.y = 1.5
 	_recharge_zone.add_child(recharge_col)
 	ship.add_child(_recharge_zone)
 
@@ -181,7 +183,7 @@ func _spawn_player() -> void:
 		return
 	_player = player_scene.instantiate()
 	_player.name = "Player"
-	_player.position = Vector3(0, 0, 8)  # Spawn near ship
+	_player.position = Vector3(0, 0.9, 8)  # Spawn near ship, Y=0.9 to rest capsule on ground
 	add_child(_player)
 
 	# Get first-person controller and camera
@@ -206,12 +208,17 @@ func _generate_deposits() -> void:
 		# Ensure deposit is on the ground
 		deposit.position.y = 0.0
 		_deposit_container.add_child(deposit)
+		deposit.depleted.connect(func() -> void:
+			DepositRegistry.unregister(deposit)
+			deposit.queue_free()
+		)
 
 		# Add visual mesh
 		if scrap_mesh_scene and scrap_mesh_scene is PackedScene:
 			var mesh_instance: Node3D = (scrap_mesh_scene as PackedScene).instantiate()
 			mesh_instance.name = "Mesh"
 			mesh_instance.scale = DEPOSIT_VISUAL_SCALE
+			mesh_instance.position.y = 0.9
 			deposit.add_child(mesh_instance)
 		else:
 			# Fallback: colored box
@@ -233,7 +240,7 @@ func _generate_deposits() -> void:
 		var sphere := SphereShape3D.new()
 		sphere.radius = DEPOSIT_COLLISION_RADIUS
 		col.shape = sphere
-		col.position.y = 0.5
+		col.position.y = 0.9
 		body.add_child(col)
 		deposit.add_child(body)
 

@@ -126,7 +126,7 @@ func _update_camera(delta: float) -> void:
 		_camera.rotation.x = _camera_pitch
 
 	# Apply head bob to camera position
-	_camera.position.y = head_height + _head_bob_offset
+	_camera.position.y = _head_bob_offset
 
 ## Applies mouse look rotation.
 func _apply_mouse_look(mouse_delta: Vector2) -> void:

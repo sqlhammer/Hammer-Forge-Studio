@@ -92,7 +92,7 @@ func generate_m3_deposits(origin: Vector3, spread_radius: float) -> Array[Deposi
 		# Place in random XZ position around origin, on ground plane (Y=0)
 		var angle: float = randf() * TAU
 		var dist: float = randf_range(spread_radius * 0.2, spread_radius)
-		deposit.global_position = Vector3(
+		deposit.position = Vector3(
 			origin.x + cos(angle) * dist,
 			origin.y,
 			origin.z + sin(angle) * dist,

@@ -88,7 +88,7 @@ func _build_hud() -> void:
 	_scanner_readout.anchor_right = 1.0
 	_scanner_readout.anchor_top = 0.5
 	_scanner_readout.anchor_bottom = 0.5
-	_scanner_readout.position = Vector2(-ScannerReadout.READOUT_WIDTH - 80, -80)
+	_scanner_readout.position = Vector2(-ScannerReadout.READOUT_WIDTH - 80, -160)
 	root.add_child(_scanner_readout)
 
 	# Battery bar — bottom-left
@@ -131,7 +131,6 @@ func _on_analysis_cancelled() -> void:
 	_mining_progress.hide_progress()
 
 func _on_mining_started(_deposit: Deposit) -> void:
-	_scanner_readout.hide_readout()
 	_mining_progress.show_progress()
 
 func _on_mining_progress(progress: float) -> void:

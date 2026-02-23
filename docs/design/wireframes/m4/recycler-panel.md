@@ -9,19 +9,28 @@
 
 ## Purpose
 
-The Recycler is the first processing module the player installs in the ship. This panel is the interaction UI for converting raw resources (Scrap Metal) into processed materials (Metal). The player opens this panel by interacting with the placed Recycler module inside the ship. It supports queuing a single job, monitoring progress, and collecting the output.
+The Recycler is the first processing module the player installs in the ship. This panel is the interaction UI for converting raw resources (Scrap Metal) into processed materials (Metal). The panel represents the screen built into the front face of the physical Recycler machine (see `recycler-machine.md` for the 3D form factor). The player walks up to the machine, interacts, and this UI opens as a screen-space overlay — narratively, the player is reading the machine's built-in display.
+
+---
+
+## Relationship to Physical Machine
+
+The Recycler machine has a 40cm x 30cm screen embedded in its front face (see `recycler-machine.md`). This panel wireframe defines what appears on that screen. In practice, the panel renders as a full-screen overlay for usability (the physical screen is too small for comfortable UI at standing distance), but the machine's screen brightens to active teal when the panel is open, anchoring the interaction to the physical object.
+
+See `recycler-machine.md` for: machine dimensions, placement in module zone, visual landmarks (input hopper, output tray, status light, screen), and greybox material spec.
 
 ---
 
 ## Interaction Model
 
-1. Player walks to placed Recycler module inside ship
-2. Interact prompt appears ("Press [E] to use Recycler")
-3. Player presses interact — Recycler panel opens as a full-screen overlay
-4. Player selects input resource from their inventory, starts the job
-5. Player can close the panel and return later — the job continues processing
-6. When done, player reopens the panel and collects the output
-7. Close with cancel input (Esc / B button)
+1. Player walks toward the placed Recycler machine inside the ship
+2. At 3m: status light and screen glow are visible on the machine
+3. At 2m: interact prompt appears ("Press [E] to use Recycler")
+4. Player presses interact — machine screen brightens, panel opens as screen-space overlay
+5. Player selects input resource from their inventory, starts the job
+6. Player can close the panel and return later — the job continues processing (status light on machine pulses amber)
+7. When done, machine status light turns green — player reopens the panel and collects the output
+8. Close with cancel input (Esc / B button) — machine screen dims back to idle
 
 ---
 

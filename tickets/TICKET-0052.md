@@ -2,7 +2,7 @@
 id: TICKET-0052
 title: "BUG: module_manager.gd cannot resolve ShipState autoload at parse time"
 type: BUG
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: qa-engineer
@@ -36,10 +36,10 @@ Other autoloads (`Global`, `PlayerInventory`) referenced by the same script reso
 3. Both autoloads crash -> all scenes fail to load -> test runner cannot execute
 
 ## Acceptance Criteria
-- [ ] `module_manager.gd` parses without errors
-- [ ] `ShipState` autoload is accessible from `module_manager.gd` at runtime
-- [ ] All scenes load successfully (test runner, test_world, etc.)
-- [ ] Full test suite runs and all existing tests pass
+- [x] `module_manager.gd` parses without errors
+- [x] `ShipState` autoload is accessible from `module_manager.gd` at runtime
+- [x] All scenes load successfully (test runner, test_world, etc.)
+- [x] Full test suite runs and all existing tests pass
 
 ## Implementation Notes
 - Possibly related to the M3 P1 finding (TICKET-0032): class_name/autoload conflicts. The same pattern was fixed for `SuitBattery` -> `SuitBatteryType` and `DepositRegistry` -> `DepositRegistryType`.
@@ -51,3 +51,4 @@ Other autoloads (`Global`, `PlayerInventory`) referenced by the same script reso
 
 ## Activity Log
 - 2026-02-23 [qa-engineer] Created from TICKET-0051 regression testing — parse errors block all scene execution
+- 2026-02-23 [systems-programmer] Resolved: ShipState error was a cascade from TICKET-0053 (recycler.gd is_processing() override). Once TICKET-0053 was fixed, module_manager.gd compiles and runs without errors. ShipState autoload resolves correctly. 193/193 tests pass.

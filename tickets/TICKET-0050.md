@@ -2,7 +2,7 @@
 id: TICKET-0050
 title: "BUG: Scan results hidden on mine-start; overlap with extraction notification"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -18,13 +18,13 @@ tags: [bug, hud, scanner, mining, ux]
 Three related HUD issues degrade the scan/mine loop. First, `game_hud.gd:_on_mining_started` calls `_scanner_readout.hide_readout()`, which actively dismisses the scan results the moment mining begins — the player loses purity/density/energy data exactly when they need it. Second, the `_process` loop in `game_hud.gd` that auto-shows the readout for already-analyzed deposits is suppressed while mining is active (because `hide_readout()` was just called). Third, the `ScannerReadout` panel and the `PickupNotificationManager` are both right-anchored at center-right with overlapping vertical ranges, causing visual collision when an extraction completes while the readout is visible.
 
 ## Acceptance Criteria
-- [ ] Scan results remain visible throughout the full mining hold — from start through completion/cancellation
-- [ ] Pointing at an already-analyzed deposit (while not mining) shows the scan readout immediately
-- [ ] Pointing at an already-analyzed deposit while mining shows (or keeps showing) the scan readout
-- [ ] After mining completes, the pickup notification (center-right toast) does not overlap the scan readout panel
-- [ ] After mining completes and the readout is dismissed, the pickup notification occupies the full right-side zone cleanly
-- [ ] No regression: readout still auto-dismisses when player walks beyond `DISMISS_DISTANCE` from the deposit
-- [ ] No regression: readout still hides when the deposit is depleted
+- [x] Scan results remain visible throughout the full mining hold — from start through completion/cancellation
+- [x] Pointing at an already-analyzed deposit (while not mining) shows the scan readout immediately
+- [x] Pointing at an already-analyzed deposit while mining shows (or keeps showing) the scan readout
+- [x] After mining completes, the pickup notification (center-right toast) does not overlap the scan readout panel
+- [x] After mining completes and the readout is dismissed, the pickup notification occupies the full right-side zone cleanly
+- [x] No regression: readout still auto-dismisses when player walks beyond `DISMISS_DISTANCE` from the deposit
+- [x] No regression: readout still hides when the deposit is depleted
 
 ## Implementation Notes
 **Root cause — hide on mining start** (`game_hud.gd:134`):
@@ -53,3 +53,4 @@ The existing `_process` loop already handles this for the idle case but is under
 
 ## Activity Log
 - 2026-02-23 [producer] Created ticket
+- 2026-02-23 [gameplay-programmer] Fixed: removed hide_readout() from _on_mining_started, shifted ScannerReadout y from -80 to -160 to clear PickupNotificationManager

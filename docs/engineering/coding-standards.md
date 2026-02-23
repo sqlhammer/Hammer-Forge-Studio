@@ -12,7 +12,7 @@
 ## File and Node Naming
 
 - **Script files:** `snake_case.gd` (e.g., `player_controller.gd`)
-- **Class names:** `PascalCase` using `class_name` — always use `class_name` unless it hides or shadows another class, never `extends "res://..."` string paths
+- **Class names:** `PascalCase` using `class_name` — always use `class_name` unless it hides or shadows another class or the script is an autoload, never `extends "res://..."` string paths
 - **Node names in scene:** `PascalCase` — always descriptive (e.g., `SaveButton`, `PlayerSprite`) — generic names like `Button1` or `Node2D` are never acceptable
 - **Scene files:** `snake_case.tscn` matching the root node's class name
 - **Abbreviations:** avoid in favor of fully qualified words (e.g., `PlayerController` not `PlyrCtrl`, `HealthComponent` not `HpComp`)

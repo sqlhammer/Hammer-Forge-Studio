@@ -76,6 +76,14 @@ This ensures `main` is always in a working, committed state and tickets are clos
 - Focus on practical information and outcomes
 - No verbose explanations unless specifically requested
 
+### Ticket Status Tables
+
+When reporting ticket statuses, always include **at minimum** these columns in this order:
+
+| Ticket | Title | Status | Owner | Dependencies | Milestone |
+
+Add extra columns (e.g., Notes, Blocked By) only when relevant to the discussion. Never omit the required columns.
+
 ## Common Tasks
 
 Assist with:

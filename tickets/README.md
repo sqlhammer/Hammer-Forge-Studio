@@ -32,11 +32,22 @@ created_by: <agent-slug> | studio-head
 created_at: YYYY-MM-DD
 updated_at: YYYY-MM-DD
 milestone: ""
+milestone_gate: ""
 depends_on: []
 blocks: []
 tags: []
 ---
 ```
+
+### `milestone_gate` Semantics
+
+**If `milestone_gate` is set, the named milestone must have `status: Complete` in `docs/studio/milestones.md` before any agent may set this ticket to `IN_PROGRESS`.**
+
+This is a hard gate — individual ticket dependencies do not override it. An agent must not begin work on a gated ticket, even if all `depends_on` entries are `DONE`, until the milestone gate is cleared.
+
+If a milestone gate is blocking you, do not create a BLOCKER ticket — the gate is by design. Wait for the milestone to close.
+
+---
 
 ### `depends_on` Semantics
 

@@ -9,6 +9,7 @@ created_by: producer
 created_at: 2026-02-23
 updated_at: 2026-02-23
 milestone: "M4"
+milestone_gate: "M3"
 depends_on: []
 blocks: [TICKET-0045, TICKET-0046, TICKET-0047]
 tags: [ui, ux, design, wireframes]

@@ -9,6 +9,7 @@ created_by: producer
 created_at: 2026-02-23
 updated_at: 2026-02-23
 milestone: "M4"
+milestone_gate: "M3"
 depends_on: [TICKET-0042]
 blocks: [TICKET-0044]
 tags: [ship, interior, scene, greybox]

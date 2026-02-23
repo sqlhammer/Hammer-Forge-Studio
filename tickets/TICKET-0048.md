@@ -9,6 +9,7 @@ created_by: producer
 created_at: 2026-02-23
 updated_at: 2026-02-23
 milestone: "M4"
+milestone_gate: "M3"
 depends_on: [TICKET-0043, TICKET-0044, TICKET-0045, TICKET-0046, TICKET-0047]
 blocks: [TICKET-0049]
 tags: [review, code-quality]

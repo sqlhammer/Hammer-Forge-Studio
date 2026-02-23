@@ -9,6 +9,7 @@ created_by: producer
 created_at: 2026-02-23
 updated_at: 2026-02-23
 milestone: "M4"
+milestone_gate: "M3"
 depends_on: [TICKET-0040]
 blocks: [TICKET-0045]
 tags: [ship, modules, recycler, crafting]

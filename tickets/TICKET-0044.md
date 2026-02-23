@@ -10,7 +10,7 @@ created_at: 2026-02-23
 updated_at: 2026-02-23
 milestone: "M4"
 milestone_gate: "M3"
-depends_on: [TICKET-0040, TICKET-0043]
+depends_on: [TICKET-0040, TICKET-0043, TICKET-0054]
 blocks: [TICKET-0045]
 tags: [ship, modules, interaction, gameplay]
 ---
@@ -23,7 +23,7 @@ Player can install the Recycler module inside the ship interior. Interacting wit
 - [ ] Module selection UI displays available modules from the module catalog (Recycler in M4) with install cost shown
 - [ ] Install blocked with feedback if player lacks sufficient resources
 - [ ] Confirming install deducts Scrap Metal from player inventory
-- [ ] Installed Recycler appears visually in the placement zone (placeholder mesh acceptable)
+- [ ] Installed Recycler appears visually in the placement zone using `game/assets/meshes/machines/mesh_recycler_module.glb` (delivered by TICKET-0054)
 - [ ] Installed Recycler is interactable — opens Recycler panel (TICKET-0045)
 - [ ] Placement zone shows occupied/empty state correctly
 - [ ] Install persists correctly — Recycler still installed after leaving and re-entering ship
@@ -32,7 +32,7 @@ Player can install the Recycler module inside the ship interior. Interacting wit
 
 ## Implementation Notes
 - Module selection UI can be a simple list — no complex layout needed in M4
-- Placeholder mesh for the installed Recycler is fine; M6 (Ship Interior) will add proper visuals
+- Use `game/assets/meshes/machines/mesh_recycler_module.glb` (TICKET-0054) for the installed machine — this is a greybox asset, not a placeholder; M8 (Visual Asset Refinement) will polish it
 - Reference the module install API from TICKET-0040 for resource deduction logic
 - Only one placement zone required in M4; the framework should support multiple for future milestones
 
@@ -41,3 +41,4 @@ Player can install the Recycler module inside the ship interior. Interacting wit
 
 ## Activity Log
 - 2026-02-23 [producer] Created ticket
+- 2026-02-23 [producer] Added TICKET-0054 dependency; updated acceptance criteria and implementation notes to reference real Recycler mesh asset rather than placeholder

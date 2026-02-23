@@ -43,7 +43,6 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	visible = false
 	_font = ThemeDB.fallback_font
-	_ensure_inventory_toggle_input()
 	_build_ui()
 	PlayerInventory.slot_changed.connect(_on_slot_changed)
 
@@ -120,13 +119,6 @@ func is_open() -> bool:
 	return _is_open
 
 # ── Private Methods ───────────────────────────────────────
-
-func _ensure_inventory_toggle_input() -> void:
-	if not InputMap.has_action("inventory_toggle"):
-		InputMap.add_action("inventory_toggle")
-		var key_event := InputEventKey.new()
-		key_event.keycode = KEY_I
-		InputMap.action_add_event("inventory_toggle", key_event)
 
 func _build_ui() -> void:
 	# Dim background

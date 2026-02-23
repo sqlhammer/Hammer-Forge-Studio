@@ -47,6 +47,7 @@ func _test_first_person_actions_are_registered() -> void:
 	assert_true(InputMap.has_action("interact"), "interact action should exist")
 	assert_true(InputMap.has_action("scan"), "scan action should exist")
 	assert_true(InputMap.has_action("use_tool"), "use_tool action should exist")
+	assert_true(InputMap.has_action("inventory_toggle"), "inventory_toggle action should exist")
 
 
 func _test_third_person_actions_are_registered() -> void:

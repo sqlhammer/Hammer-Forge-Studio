@@ -30,7 +30,7 @@ var _drill_mesh: MeshInstance3D = null
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	_ensure_use_tool_input()
+	pass
 
 func _process(delta: float) -> void:
 	if not _camera:
@@ -60,20 +60,6 @@ func get_mining_target() -> Deposit:
 	return _mining_target
 
 # ── Private Methods ───────────────────────────────────────
-
-func _ensure_use_tool_input() -> void:
-	# Ensure use_tool has a proper mouse button event
-	if not InputMap.has_action("use_tool"):
-		InputMap.add_action("use_tool")
-	var has_mouse_event: bool = false
-	for event: InputEvent in InputMap.action_get_events("use_tool"):
-		if event is InputEventMouseButton:
-			has_mouse_event = true
-			break
-	if not has_mouse_event:
-		var mouse_event := InputEventMouseButton.new()
-		mouse_event.button_index = MOUSE_BUTTON_LEFT
-		InputMap.action_add_event("use_tool", mouse_event)
 
 func _update_mining(delta: float) -> void:
 	var holding_use_tool: bool = InputManager.is_action_pressed("use_tool")

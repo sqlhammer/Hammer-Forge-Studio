@@ -127,6 +127,7 @@ Escalate immediately when:
 ## Output Standards
 
 - **Ticket files:** `tickets/TICKET-NNNN.md` — all required frontmatter fields populated, no empty acceptance criteria; `milestone_gate` must be set on every ticket that belongs to a milestone with a predecessor (e.g., all M4 tickets get `milestone_gate: "M3"`)
+- **Ticket ID assignment:** Before creating any ticket, glob `tickets/TICKET-*.md` to identify the highest existing ID and increment by one. Never assume the next ID — always verify against the filesystem. Using `Bash cat >` or any tool that overwrites without a read guard is forbidden for ticket files; use the `Write` tool and read the target path first to confirm it does not exist
 - **Sprint reports:** `docs/studio/reports/YYYY-MM-DD-sprint.md` — list of agents, their assigned tickets, and sprint goal
 - **Status reports:** `docs/studio/reports/YYYY-MM-DD-status.md` — tickets closed, in progress, open blockers, risks, next actions
 - **Milestone doc:** `docs/studio/milestones.md` — table of milestones with target dates, ticket counts, and completion %

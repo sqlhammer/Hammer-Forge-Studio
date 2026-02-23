@@ -28,11 +28,17 @@
 | M1 | Core Game Architecture — Player controller, input system, view modes | 2026-02-21 | Complete | 7 | 0 | 7 | 2026-02-21 |
 | M2 | 3D Asset Pipeline — PoC evaluation, pipeline SOP, M3-ready assets | 2026-02-22 | Complete | 10 | 0 | 10 | 2026-02-22 |
 | M3 | First Playable — Minimal ship in world, scan/mine loop | — | Active | 13 | 8 | 5 | — |
-| M4 | Ship Systems — Navigation, global variables, module system | — | Planning | — | — | — | — |
-| M5 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
-| M6 | Mega-Project Arc — Full tech tree, endgame sequence | — | Planning | — | — | — | — |
-| M7 | Alpha — Full playthrough possible | — | Planning | — | — | — | — |
-| M8 | Beta — External testing | — | Planning | — | — | — | — |
+| M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Planning | 11 | 11 | 0 | — |
+| M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Planning | — | — | — | — |
+| M6 | Ship Interior — Cockpit and machine room buildout | — | Planning | — | — | — | — |
+| M7 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |
+| M8 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
+| M9 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
+| M10 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
+| M11 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
+| M12 | Mega-Project Arc — Full tech tree, endgame sequence | — | Planning | — | — | — | — |
+| M13 | Alpha — Full playthrough possible | — | Planning | — | — | — | — |
+| M14 | Beta — External testing | — | Planning | — | — | — | — |
 
 ---
 
@@ -146,50 +152,137 @@
 
 ---
 
-### M4 — Ship Systems
+### M4 — Ship Infrastructure
 
-**Goal:** The ship is a living entity. Player can navigate the ship across the world map, manage global variables (Power, Integrity, Heat, Oxygen), and install at least one module type.
+**Goal:** The ship becomes a living entity. Player can enter a greybox ship interior, review ship global variables (Power, Integrity, Heat, Oxygen), install the Recycler module, and convert Scrap Metal into Metal — establishing the module system and the first step of the processing pipeline.
 
-**Scope:** TBD — to be defined after M3 closes.
+**Scope:**
+- Ship global variables (Power, Integrity, Heat, Oxygen) — data layer, signals, baseline power
+- Baseline ship power: always-on, sufficient to recharge player suit and run one Tier 1 machine
+- Module system framework: install/remove API, power draw tracking, extensible catalog
+- Recycler module: Scrap Metal → Metal, runs on baseline power, costs Scrap Metal to install
+- Greybox ship interior scene: walkable, enter/exit from exterior, module placement zone
+- Module placement mechanic: interact with placement zone to install Recycler from catalog
+- Recycler interaction panel UI: queue jobs, monitor progress, collect output
+- HUD: ship globals displayed when inside ship
+- Inventory UI: ship stats sidebar showing all four globals when outside ship
 
-**Dependencies:** M3 (first playable world required as the environment ship navigates)
+**Tickets:** TICKET-0039 through TICKET-0049
+
+| Phase | Ticket | Title | Type | Owner |
+|-------|--------|-------|------|-------|
+| Foundation | TICKET-0039 | Ship global variables — data layer | FEATURE | systems-programmer |
+| Foundation | TICKET-0040 | Module system — data layer and framework | FEATURE | systems-programmer |
+| Foundation | TICKET-0041 | Recycler module — data layer and logic | FEATURE | systems-programmer |
+| Foundation | TICKET-0042 | UI/UX — ship globals HUD, ship stats sidebar, Recycler panel, interior wireframes | DESIGN | ui-ux-designer |
+| Gameplay | TICKET-0043 | Greybox ship interior scene | TASK | gameplay-programmer |
+| Gameplay | TICKET-0044 | Module placement mechanic | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0045 | Recycler interaction panel UI | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0046 | HUD — ship globals display | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0047 | Inventory UI — ship stats sidebar | FEATURE | gameplay-programmer |
+| QA | TICKET-0048 | Code review — M4 systems | REVIEW | systems-programmer |
+| QA | TICKET-0049 | QA testing — M4 full loop | TASK | qa-engineer |
+
+**Deferred Items scheduled in M4:** D-003 (ship global variables → TICKET-0039)
+
+**Dependencies:** M3 (first playable world and inventory system required)
 
 ---
 
-### M5 — Biome Progression
+### M5 — Processing & Crafting
 
-**Goal:** Full Tier 1–3 biome progression with escalating threats and resource gates.
+**Goal:** Close the full core loop. Player can smelt raw materials, craft components, and build/upgrade ship systems from the tech tree.
 
-**Scope:** TBD
+**Scope:** TBD — to be defined after M4 closes.
 
-**Dependencies:** M4
+**Dependencies:** M4 (module system and Recycler establish the processing foundation)
 
 ---
 
-### M6 — Mega-Project Arc
+### M6 — Ship Interior
 
-**Goal:** Complete tech tree and endgame sequence playable end-to-end.
+**Goal:** The ship interior is fully realized. Player has a defined cockpit and a large machine room for placing modules.
 
-**Scope:** TBD
+**Scope:** TBD — to be defined after M5 closes.
 
 **Dependencies:** M5
 
 ---
 
-### M7 — Alpha
+### M7 — Ship Navigation
 
-**Goal:** Full playthrough from ship start to Naer-Reth activation is possible.
+**Goal:** Player can navigate the ship between biomes. Travel consumes fuel based on distance and ship weight.
 
-**Scope:** TBD
+**Scope:** TBD — to be defined after M6 closes.
 
 **Dependencies:** M6
 
 ---
 
-### M8 — Beta / External Testing
+### M8 — Visual Asset Refinement
+
+**Goal:** Polished art pass on all existing game assets.
+
+**Scope:** TBD — to be defined after M7 closes.
+
+**Dependencies:** M7
+
+---
+
+### M9 — Movement & Usability Refinement
+
+**Goal:** Game feel, first-person controls, and HUD/UX tuning pass.
+
+**Scope:** TBD — to be defined after M8 closes.
+
+**Dependencies:** M8
+
+---
+
+### M10 — Content Expansion
+
+**Goal:** Additional material resources, crafting recipes, and tech tree depth.
+
+**Scope:** TBD — to be defined after M9 closes.
+
+**Dependencies:** M9
+
+---
+
+### M11 — Biome Progression
+
+**Goal:** Full Tier 1–3 biome progression with escalating threats and resource gates.
+
+**Scope:** TBD — to be defined after M10 closes.
+
+**Dependencies:** M10
+
+---
+
+### M12 — Mega-Project Arc
+
+**Goal:** Complete tech tree and endgame sequence playable end-to-end.
+
+**Scope:** TBD
+
+**Dependencies:** M11
+
+---
+
+### M13 — Alpha
+
+**Goal:** Full playthrough from ship start to Naer-Reth activation is possible.
+
+**Scope:** TBD
+
+**Dependencies:** M12
+
+---
+
+### M14 — Beta / External Testing
 
 **Goal:** External testers can complete the game. Polish and bug-fix pass.
 
 **Scope:** TBD
 
-**Dependencies:** M7
+**Dependencies:** M13

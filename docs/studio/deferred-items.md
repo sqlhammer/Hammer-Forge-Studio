@@ -29,10 +29,10 @@
 |----|-------------|------------|-----------------|---------------------|--------|--------------|
 | D-001 | Scanner radial wheel (resource type selection for Phase 1 ping) | `docs/design/systems/meaningful-mining.md` | M3 has only one resource type (Scrap Metal) — radial wheel adds UI complexity with no gameplay value until multiple resources exist | M5 (Biome Progression) | Open | — |
 | D-002 | Mining minigame (trace lit lines on deposit for +50% yield bonus) | `docs/design/systems/meaningful-mining.md` | Adds interaction depth but is not required for core loop validation; hold-to-extract proves the loop | M4 (Ship Systems) or M5 | Open | — |
-| D-003 | Ship global variables (Power, Integrity, Heat, Oxygen) | `docs/design/systems/mobile-base.md` | Ship is a static landmark in M3 — systems require full module architecture | M4 (Ship Systems) | Open | — |
-| D-004 | Ship navigation between biomes | `docs/design/systems/mobile-base.md` | M3 is a single bounded test area — navigation requires biome generation and fuel systems | M4 (Ship Systems) | Open | — |
-| D-005 | Resource processing (smelting, refining, crafting components) | `docs/design/gdd.md` | Core loop in M3 ends at collection — processing requires the ship's Extraction Bay module | M4 (Ship Systems) | Open | — |
-| D-006 | Build/upgrade from tech tree | `docs/design/gdd.md` | No tech tree in M3 — requires processing pipeline and module system first | M4 (Ship Systems) | Open | — |
+| D-003 | Ship global variables (Power, Integrity, Heat, Oxygen) | `docs/design/systems/mobile-base.md` | Ship is a static landmark in M3 — systems require full module architecture | M4 (Ship Infrastructure) | Scheduled | TICKET-0039 |
+| D-004 | Ship navigation between biomes | `docs/design/systems/mobile-base.md` | M3 is a single bounded test area — navigation requires biome generation and fuel systems | M7 (Ship Navigation) | Open | — |
+| D-005 | Resource processing (smelting, refining, crafting components) | `docs/design/gdd.md` | Core loop in M3 ends at collection — processing requires the ship's Extraction Bay module | M5 (Processing & Crafting) | Open | — |
+| D-006 | Build/upgrade from tech tree | `docs/design/gdd.md` | No tech tree in M3 — requires processing pipeline and module system first | M5 (Processing & Crafting) | Open | — |
 | D-007 | Resource node respawning | `docs/design/systems/meaningful-mining.md` | Depleted deposits stay depleted in M3 — respawn mechanics tied to biome balancing | M5 (Biome Progression) | Open | — |
 | D-008 | Multiple resource types beyond Scrap Metal | `docs/design/systems/biomes.md` | M3 tutorial zone uses only Scrap Metal — additional resources arrive with new biomes and tool tiers | M5 (Biome Progression) | Open | — |
 | D-009 | Mining drones (mid-game automation) | `docs/design/systems/meaningful-mining.md` | Automation is a mid-game reward — requires drone programming UI, ship Power draw, defense modules | M5 or M6 | Open | — |

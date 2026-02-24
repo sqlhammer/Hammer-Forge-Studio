@@ -22,7 +22,7 @@ signal input_device_changed(device: String)  # "keyboard" or "gamepad"
 const GAMEPLAY_ACTIONS: Array[String] = [
 	"move_forward", "move_backward", "move_left", "move_right",
 	"interact", "scan", "use_tool", "switch_view", "jump",
-	"inventory_toggle",
+	"inventory_toggle", "use_item",
 	"ship_forward", "ship_backward", "ship_left", "ship_right",
 	"ship_accelerate", "ship_emergency_stop",
 ]
@@ -156,7 +156,8 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("pause", [KEY_ESCAPE])
 	_add_action_if_missing("jump", [KEY_SPACE])
 	_add_action_if_missing("inventory_toggle", [KEY_I])
-	
+	_add_action_if_missing("use_item", [KEY_G])
+
 	# Third-Person Context Actions
 	_add_action_if_missing("ship_forward", [KEY_W, KEY_UP])
 	_add_action_if_missing("ship_backward", [KEY_S, KEY_DOWN])

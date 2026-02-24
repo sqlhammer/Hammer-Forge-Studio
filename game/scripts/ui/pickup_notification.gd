@@ -62,6 +62,17 @@ func show_pickup(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.
 	# Create new toast
 	_create_toast(key, resource_type, purity, quantity, COLOR_GREEN)
 
+## Shows a generic text notification with a given accent color.
+func show_message(text: String, accent_color: Color = COLOR_GREEN) -> void:
+	if get_child_count() >= MAX_VISIBLE:
+		_dismiss_oldest()
+	var toast := _create_raw_toast(text, "", accent_color)
+	add_child(toast)
+	_animate_appear(toast)
+	var tween: Tween = create_tween()
+	tween.tween_interval(TOAST_DURATION)
+	tween.tween_callback(func() -> void: _dismiss_toast(toast))
+
 ## Shows an "inventory full" notification.
 func show_inventory_full() -> void:
 	var toast := _create_raw_toast("Inventory Full", "", COLOR_CORAL)

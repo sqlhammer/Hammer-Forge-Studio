@@ -54,6 +54,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_update_recharge(delta)
 	_update_ship_interact()
+	_update_use_item()
 
 func _input(event: InputEvent) -> void:
 	# Toggle mouse capture with Escape
@@ -383,6 +384,29 @@ func _begin_exit_ship() -> void:
 	_transitioning = true
 	await _ship_interior.exit_ship()
 	_transitioning = false
+
+func _update_use_item() -> void:
+	if not InputManager.is_action_just_pressed("use_item"):
+		return
+	# Spare Battery cannot be used inside the ship (suit auto-recharges there)
+	if _ship_interior and _ship_interior.is_player_inside():
+		return
+	# Don't use while transitioning
+	if _transitioning:
+		return
+	# Check if suit battery is already full
+	if SuitBattery.get_charge_percent() >= 1.0:
+		if _hud:
+			_hud.show_notification("Battery already full", Color("#94A3B8"))
+		return
+	# Attempt to use a Spare Battery from inventory
+	var success: bool = SpareBattery.use()
+	if success:
+		if _hud:
+			_hud.show_notification("Battery Recharged!", Color("#00D4AA"))
+	else:
+		if _hud:
+			_hud.show_notification("No Spare Batteries", Color("#FF6B5A"))
 
 func _setup_ship_ui() -> void:
 	# Module placement UI

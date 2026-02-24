@@ -16,7 +16,7 @@ The tech tree is the player's strategic planning interface. It communicates what
 ## Interaction Model
 
 1. Player opens the tech tree from the ship's command interface (interact prompt at terminal)
-2. Full-screen overlay opens — game pauses
+2. Full-screen overlay opens
 3. Player navigates nodes with D-pad / left stick; each node is a focusable element
 4. On a focusable unlockable node: resource cost is shown in the node detail panel
 5. Player presses Confirm to attempt unlock — a confirmation dialog appears

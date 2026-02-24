@@ -10,6 +10,7 @@ var _mining_progress: MiningProgress = null
 var _pickup_notifications: PickupNotificationManager = null
 var _crosshair: Control = null
 var _scanner: Scanner = null
+var _ship_globals: ShipGlobalsHUD = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -54,6 +55,11 @@ func get_compass_bar() -> CompassBar:
 ## Returns the scanner readout for external access.
 func get_scanner_readout() -> ScannerReadout:
 	return _scanner_readout
+
+## Shows or hides the ship globals HUD panel.
+func show_ship_globals(show: bool) -> void:
+	if _ship_globals:
+		_ship_globals.set_ship_visible(show)
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -105,6 +111,12 @@ func _build_hud() -> void:
 	_pickup_notifications.anchor_bottom = 0.5
 	_pickup_notifications.position = Vector2(-PickupNotificationManager.TOAST_WIDTH - 32, 0)
 	root.add_child(_pickup_notifications)
+
+	# Ship globals — bottom-right (hidden by default, shown when inside ship)
+	_ship_globals = ShipGlobalsHUD.new()
+	_ship_globals.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_ship_globals.position = Vector2(-ShipGlobalsHUD.PANEL_WIDTH - 32, -ShipGlobalsHUD.PANEL_HEIGHT - 32)
+	root.add_child(_ship_globals)
 
 func _create_crosshair() -> Control:
 	var dot := ColorRect.new()

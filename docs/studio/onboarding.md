@@ -2,7 +2,7 @@
 
 **Owner:** technical-writer
 **Status:** Draft
-**Last Updated:** 2026-02-20
+**Last Updated:** 2026-02-23
 
 > Start here. This guide is for any new agent or human contributor joining Hammer Forge Studio.
 
@@ -38,6 +38,25 @@ Key rules:
 - Tickets have exactly one owner at a time
 - When blocked: create a new BLOCKER ticket, don't just change status
 - Producer routes all blockers
+
+---
+
+## How Work Is Organized: Milestones and Phases
+
+The project is organized into **Milestones** — goal containers that define what gets built and when. Every milestone is divided into **Phases**.
+
+**Phases** are scope-bounded work containers within a milestone. Examples: "Foundation," "Gameplay," "Integration," "Review & QA." A phase is complete when all its tickets reach `DONE` — not when a clock expires.
+
+**Phase Gates** are checkpoints that fire when all tickets in a phase are done. The Producer manages phase transitions. When a gate passes, the next phase opens automatically. When a gate fails, the Studio Head is paged.
+
+**What this means for you as an agent:**
+- You will be assigned tickets that belong to a phase
+- Do not begin a ticket until all its `depends_on` entries are `DONE`
+- Do not begin work on a ticket in Phase N+1 if the Phase N gate has not passed
+- The Producer manages phase transitions — you do not need to track this yourself
+- If you are unsure whether you can start a ticket, check with the Producer
+
+Phase definitions and gate status are maintained in `docs/studio/milestones.md`.
 
 ---
 
@@ -80,4 +99,4 @@ Agents do NOT coordinate in real-time — they work asynchronously through the t
 1. Review this doc and the agent roster
 2. Create tickets via the format in `tickets/README.md`
 3. Assign tickets to the appropriate agent slug
-4. Monitor `docs/studio/reports/` for weekly status updates
+4. Monitor `docs/studio/reports/` for Phase Gate Summaries and milestone status

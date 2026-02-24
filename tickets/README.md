@@ -33,11 +33,16 @@ created_at: YYYY-MM-DD
 updated_at: YYYY-MM-DD
 milestone: ""
 milestone_gate: ""
+phase: ""
 depends_on: []
 blocks: []
 tags: []
 ---
 ```
+
+### `phase` Field
+
+**Optional.** The name of the milestone phase this ticket belongs to (e.g., `"Foundation"`, `"Gameplay"`, `"QA"`). Set by the Producer when creating tickets within a phased milestone. Agents use this to understand where their work fits within the milestone structure.
 
 ### `milestone_gate` Semantics
 
@@ -49,7 +54,7 @@ If a milestone gate is blocking you, do not create a BLOCKER ticket — the gate
 
 ---
 
-### `depends_on` Semantics
+### `depends_on` Semantics and the Dependency Gate Rule
 
 **Every ticket listed in `depends_on` must have `status: DONE` before you may set your ticket to `IN_PROGRESS`.**
 
@@ -57,6 +62,8 @@ If a milestone gate is blocking you, do not create a BLOCKER ticket — the gate
 - `IN_PROGRESS` is NOT done — the upstream work is still being executed. Do not start.
 - `OPEN` is NOT done — the upstream work has not been started. Do not start.
 - Only `DONE` clears a dependency.
+
+**A ticket cannot be set to `IN_PROGRESS` if any ticket in its `depends_on` list is not `DONE`. The Producer enforces this rule mechanically. Agents must not bypass it.**
 
 If a ticket you depend on is `IN_REVIEW` and you are ready to begin, do not proceed. Create a `BLOCKER` ticket with `owner: producer` explaining what approval or sign-off is needed to clear the dependency.
 
@@ -118,7 +125,7 @@ What the next owner needs to know when this ticket is transferred to them.
 | Priority | Meaning |
 |----------|---------|
 | `P0` | Critical — blocks release or causes data loss/crashes; escalate to Studio Head immediately |
-| `P1` | High — blocks meaningful gameplay; must be resolved in current sprint |
+| `P1` | High — blocks meaningful gameplay; must be resolved in the current phase |
 | `P2` | Normal — defect or feature that should be addressed this milestone |
 | `P3` | Low — polish, nice-to-have; addressed when higher priority work is clear |
 
@@ -143,7 +150,7 @@ What the next owner needs to know when this ticket is transferred to them.
 
 The **Producer** is responsible for archiving completed tickets. This is an explicit workflow step:
 
-1. **Schedule:** Perform archival sweeps at the end of each sprint or daily during active development
+1. **Schedule:** Perform archival sweeps at each phase gate or daily during active development
 2. **Trigger:** When a ticket reaches `status: DONE` or `CANCELLED`, it becomes eligible for archival
 3. **Process:**
    - Review all tickets in `tickets/` with `status: DONE` or `CANCELLED`

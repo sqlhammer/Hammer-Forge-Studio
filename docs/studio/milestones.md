@@ -2,19 +2,20 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** —
+**Last Updated:** 2026-02-23
 
-> Tracks all project milestones, their target dates, and completion status. Studio Head sets milestone goals; Producer maintains this document.
+> Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
 ---
 
-## Format
+## Milestone Schema
 
 | Field | Description |
 |-------|-------------|
 | Milestone | Name and short description |
 | Target Date | Planned completion |
 | Status | Planning / Active / QA / Complete |
+| Phases | Named phases within this milestone (e.g., Foundation, Gameplay, QA) |
 | Tickets | Count of total / open / done tickets in scope |
 | QA Sign-off | Date QA Engineer signed off (required to close) |
 
@@ -27,8 +28,8 @@
 | M0 | Studio Setup — Team infrastructure, ticket system, docs | 2026-02-20 | Complete | — | — | — | — |
 | M1 | Core Game Architecture — Player controller, input system, view modes | 2026-02-21 | Complete | 7 | 0 | 7 | 2026-02-21 |
 | M2 | 3D Asset Pipeline — PoC evaluation, pipeline SOP, M3-ready assets | 2026-02-22 | Complete | 10 | 0 | 10 | 2026-02-22 |
-| M3 | First Playable — Minimal ship in world, scan/mine loop | — | Active | 13 | 8 | 5 | — |
-| M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Planning | 11 | 11 | 0 | — |
+| M3 | First Playable — Minimal ship in world, scan/mine loop | — | Complete | 13 | 0 | 13 | 2026-02-23 |
+| M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Active | 11 | 11 | 0 | — |
 | M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Planning | — | — | — | — |
 | M6 | Ship Interior — Cockpit and machine room buildout | — | Planning | — | — | — | — |
 | M7 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |
@@ -54,6 +55,8 @@
 - Docs directory structure in place
 - Root README updated
 
+**Phases:** N/A — M0 predates the Phase Gate model.
+
 **Dependencies:** None
 
 **Risks:** None identified
@@ -72,6 +75,8 @@
 - Integrated player scene with view-switching
 - Code review and QA testing
 
+**Phases:** N/A — M1 predates the Phase Gate model.
+
 **Tickets:** TICKET-0001 through TICKET-0007 (archived)
 
 **Dependencies:** M0 (infrastructure must be in place)
@@ -80,7 +85,7 @@
 
 ---
 
-### M2 — 3D Asset Pipeline
+### M2 — 3D Asset Pipeline ✅
 
 **Goal:** Establish the authoritative, repeatable 3D asset production pipeline through competitive PoC evaluation. Close with a documented SOP, completed art tech specs, and 4 game-ready assets for M3.
 
@@ -92,6 +97,8 @@
 - 3D pipeline SOP and completed art tech specs
 - Final M3-ready production assets using the chosen pipeline
 - QA import validation and pipeline reproducibility check
+
+**Phases:** N/A — M2 predates the Phase Gate model.
 
 **Tickets:** TICKET-0008 through TICKET-0014
 
@@ -105,7 +112,7 @@
 
 ---
 
-### M3 — First Playable
+### M3 — First Playable ✅
 
 **Goal:** Player can exist in a minimal game world, spawn at the ship, scan for resource deposits, navigate via compass, analyze a deposit, mine it with the hand drill, collect resources into inventory, manage suit battery, and return to the ship to recharge. First end-to-end pass of the core loop.
 
@@ -122,6 +129,12 @@
 - One resource type: Scrap Metal (Tier 1)
 - No respawning deposits
 - UI style guide and wireframes from UI/UX designer, implemented by programmers
+
+**Phases:**
+- **Foundation** (TICKET-0019–TICKET-0023): UI style guide, resource definitions, inventory/deposit/battery data layers
+- **Gameplay** (TICKET-0024–TICKET-0028): Scanner, mining, HUD, inventory UI
+- **Integration** (TICKET-0029): Greybox test world
+- **QA** (TICKET-0030–TICKET-0031): Code review and full loop QA
 
 **Tickets:** TICKET-0019 through TICKET-0031
 
@@ -145,10 +158,7 @@
 
 **Dependencies:** M2 (assets and pipeline required before world-building begins)
 
-**Risks:**
-- UI/UX wireframes (TICKET-0019) are on the critical path — gameplay tickets cannot start HUD work without them
-- Compass and scanner integration may require iteration to feel right in first-person — budget for playtest tuning
-- Inventory UI is the first significant Control node work in the project — may surface Godot UI patterns that need establishing
+**Closed:** 2026-02-23 — QA sign-off by qa-engineer (193/193 tests passing)
 
 ---
 
@@ -166,6 +176,11 @@
 - Recycler interaction panel UI: queue jobs, monitor progress, collect output
 - HUD: ship globals displayed when inside ship
 - Inventory UI: ship stats sidebar showing all four globals when outside ship
+
+**Phases:**
+- **Foundation** (TICKET-0039–TICKET-0042): Ship globals data layer, module system, Recycler data layer, UI/UX designs
+- **Gameplay** (TICKET-0043–TICKET-0047): Greybox ship interior, module placement mechanic, Recycler UI, HUD, inventory sidebar
+- **QA** (TICKET-0048–TICKET-0049): Code review and full loop QA
 
 **Tickets:** TICKET-0039 through TICKET-0049
 
@@ -195,6 +210,8 @@
 
 **Scope:** TBD — to be defined after M4 closes.
 
+**Phases:** To be defined at M5 kickoff — requires Studio Head approval before agents begin work.
+
 **Dependencies:** M4 (module system and Recycler establish the processing foundation)
 
 ---
@@ -204,6 +221,8 @@
 **Goal:** The ship interior is fully realized. Player has a defined cockpit and a large machine room for placing modules.
 
 **Scope:** TBD — to be defined after M5 closes.
+
+**Phases:** To be defined at M6 kickoff — requires Studio Head approval before agents begin work.
 
 **Dependencies:** M5
 
@@ -215,6 +234,8 @@
 
 **Scope:** TBD — to be defined after M6 closes.
 
+**Phases:** To be defined at M7 kickoff — requires Studio Head approval before agents begin work.
+
 **Dependencies:** M6
 
 ---
@@ -224,6 +245,8 @@
 **Goal:** Polished art pass on all existing game assets.
 
 **Scope:** TBD — to be defined after M7 closes.
+
+**Phases:** To be defined at M8 kickoff — requires Studio Head approval before agents begin work.
 
 **Dependencies:** M7
 
@@ -235,6 +258,8 @@
 
 **Scope:** TBD — to be defined after M8 closes.
 
+**Phases:** To be defined at M9 kickoff — requires Studio Head approval before agents begin work.
+
 **Dependencies:** M8
 
 ---
@@ -244,6 +269,8 @@
 **Goal:** Additional material resources, crafting recipes, and tech tree depth.
 
 **Scope:** TBD — to be defined after M9 closes.
+
+**Phases:** To be defined at M10 kickoff — requires Studio Head approval before agents begin work.
 
 **Dependencies:** M9
 
@@ -255,6 +282,8 @@
 
 **Scope:** TBD — to be defined after M10 closes.
 
+**Phases:** To be defined at M11 kickoff — requires Studio Head approval before agents begin work.
+
 **Dependencies:** M10
 
 ---
@@ -264,6 +293,8 @@
 **Goal:** Complete tech tree and endgame sequence playable end-to-end.
 
 **Scope:** TBD
+
+**Phases:** To be defined at M12 kickoff — requires Studio Head approval before agents begin work.
 
 **Dependencies:** M11
 
@@ -275,6 +306,8 @@
 
 **Scope:** TBD
 
+**Phases:** To be defined at M13 kickoff — requires Studio Head approval before agents begin work.
+
 **Dependencies:** M12
 
 ---
@@ -285,4 +318,25 @@
 
 **Scope:** TBD
 
+**Phases:** To be defined at M14 kickoff — requires Studio Head approval before agents begin work.
+
 **Dependencies:** M13
+
+---
+
+## Appendix — Phase Gate Checklist
+
+A Phase Gate fires when all tickets in a phase reach `DONE`. The Producer evaluates the following checklist. **All four conditions must be true for the gate to PASS.**
+
+| Check | Condition |
+|-------|-----------|
+| ✅ Tickets | Every ticket in the phase has status `DONE` |
+| ✅ Tests | Full test suite passes with zero failures |
+| ✅ Cross-milestone | No parse errors or test-runner blockers affecting prior milestone test suites |
+| ✅ Dependency graph | No ticket was set to `IN_PROGRESS` while any `depends_on` entry was non-DONE |
+
+**On PASS:** Producer posts a Phase Gate Summary (`docs/studio/templates/phase-gate-summary.md`) and opens the next phase automatically. Studio Head is not notified.
+
+**On FAIL:** Producer pages Studio Head immediately with the specific failure condition. Next phase does not open until Studio Head resolves or explicitly overrides the failure.
+
+Phase Gate Summary reports are saved to `docs/studio/reports/` as `YYYY-MM-DD-[milestone]-[phase]-gate.md`.

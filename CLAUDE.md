@@ -62,6 +62,56 @@ This ensures `main` is always in a working, committed state and tickets are clos
 - Code review does NOT block commits—commits happen immediately upon implementation completion
 - If code review requests changes, create a new `BUGFIX` or `TASK` ticket; do not revert the original commit
 
+## Phase Gate Protocol
+
+### What Is a Phase?
+
+Every milestone is divided into 2–4 named phases (e.g., "Foundation," "Gameplay," "Integration," "Review & QA"). A phase is:
+
+- **Scope-bounded, not time-bounded.** A phase is complete when its tickets are done, not when a clock expires.
+- **Named and purposeful.** Names reflect the work being done, not a number.
+- **Defined at milestone kickoff** by the Studio Head (with Producer drafting assistance). Phase definitions are part of the milestone document and require Studio Head approval before agents begin work.
+- **Sequential by default.** Agents do not begin Phase N+1 until the Phase N gate passes. Exception: the Studio Head may explicitly mark phases as parallel-eligible in the milestone definition.
+
+### When Does a Gate Fire?
+
+A Phase Gate fires automatically when all tickets in a phase reach `DONE`. The Producer agent is responsible for enforcing it.
+
+### Gate Pass Conditions
+
+A gate **passes** only when ALL of the following are true:
+
+- ✅ Every ticket in the phase has status `DONE`
+- ✅ The full test suite passes with zero failures
+- ✅ No cross-milestone parse errors or test-runner blockers exist
+- ✅ The dependency graph is clean — no ticket was started while a `depends_on` was non-DONE
+
+### On Gate PASS
+
+Producer posts a Phase Gate Summary (see `docs/studio/templates/phase-gate-summary.md`) and opens the next phase automatically. The Studio Head is **not** paged on a gate pass.
+
+### On Gate FAIL
+
+Producer pages the Studio Head immediately with the specific failure condition. No work on the next phase begins until the Studio Head resolves or explicitly overrides the failure.
+
+## Studio Head Touchpoints
+
+The Studio Head is engaged at exactly three points per milestone:
+
+1. **Milestone Kickoff** — approves milestone scope and phase definitions before agents begin work
+2. **Phase Gate Failure** — paged for triage; must resolve or override before the next phase opens
+3. **Milestone QA Close** — QA sign-off is a hard gate; Studio Head grants final approval
+
+The Studio Head is **not** paged at phase gate passes, individual ticket completions, or code review openings.
+
+## Process Violation Enforcement Rules
+
+These are hard rules enforced by the Producer. They are not suggestions.
+
+**Rule 1 — Dependency Gate:** An agent may not begin work on a ticket if any ticket listed in its `depends_on` field is not `DONE`. If an agent attempts this, the Producer flags it immediately and halts the ticket.
+
+**Rule 2 — Cross-Milestone Bleed:** If work in milestone M(n+1) introduces parse errors, test failures, or breaking changes that affect M(n)'s test suite, the Producer creates a P1 blocker ticket, assigns it to the responsible agent, and the offending milestone's phase gate cannot pass until it is resolved.
+
 ## Testing
 
 - The project uses the **Hammer Forge Tests** framework (`game/addons/hammer_forge_tests/`)

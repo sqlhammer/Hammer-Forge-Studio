@@ -30,7 +30,7 @@
 | M2 | 3D Asset Pipeline — PoC evaluation, pipeline SOP, M3-ready assets | 2026-02-22 | Complete | 10 | 0 | 10 | 2026-02-22 |
 | M3 | First Playable — Minimal ship in world, scan/mine loop | — | Complete | 13 | 0 | 13 | 2026-02-23 |
 | M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Complete | 21 | 0 | 21 | 2026-02-24 |
-| M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Planning | — | — | — | — |
+| M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Active | 17 | 17 | 0 | — |
 | M6 | Ship Interior — Cockpit and machine room buildout | — | Planning | — | — | — | — |
 | M7 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |
 | M8 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
@@ -210,9 +210,43 @@
 
 **Goal:** Close the full core loop. Player can smelt raw materials, craft components, and build/upgrade ship systems from the tech tree.
 
-**Scope:** TBD — to be defined after M4 closes.
+**Scope:**
+- Tech tree (minimal): Fabricator node (100 Metal to unlock), Automation Hub node (requires Fabricator)
+- Fabricator ship module: new installable machine; produces Spare Battery and Head Lamp
+- Fabricator 3D mesh: physical asset placed in greybox ship interior
+- Mining minigame: trace lit lines on deposit for +50% yield bonus (D-002)
+- Mining drones: Automation Hub module, drone programming UI, physical drones in world (D-009)
+- Spare Battery: carriable consumable, restores suit battery in field (D-011)
+- Head Lamp: permanent suit equipment, toggleable directional light, drains suit battery (new)
+- Third-person scan/mine: full scan/mine loop parity in third-person camera mode (D-014)
+- Ship machine SOP: reusable process doc for adding future ship machines
 
-**Phases:** To be defined at M5 kickoff — requires Studio Head approval before agents begin work.
+**Phases:**
+- **Foundation** (TICKET-0060–TICKET-0067): Data layers, UI/UX designs, Fabricator 3D mesh, SOP
+- **Gameplay** (TICKET-0068–TICKET-0074): Tech tree UI, Fabricator panel, minigame, third-person scan/mine, drones, Spare Battery, Head Lamp
+- **QA** (TICKET-0075–TICKET-0076): Code review and full loop QA
+
+**Tickets:** TICKET-0060 through TICKET-0076
+
+| Phase | Ticket | Title | Type | Owner |
+|-------|--------|-------|------|-------|
+| Foundation | TICKET-0060 | Tech tree — data layer | FEATURE | systems-programmer |
+| Foundation | TICKET-0061 | Fabricator module — data layer and recipes | FEATURE | systems-programmer |
+| Foundation | TICKET-0062 | Spare Battery — item data layer | FEATURE | systems-programmer |
+| Foundation | TICKET-0063 | Head Lamp — item data layer | FEATURE | systems-programmer |
+| Foundation | TICKET-0064 | Mining drone system — data layer and Automation Hub | FEATURE | systems-programmer |
+| Foundation | TICKET-0065 | UI/UX — tech tree, Fabricator panel, minigame overlay, drone UI, third-person HUD | DESIGN | ui-ux-designer |
+| Foundation | TICKET-0066 | Ship machine process flow — SOP | TASK | producer |
+| Foundation | TICKET-0067 | Fabricator — 3D mesh and ship interior placement | TASK | technical-artist |
+| Gameplay | TICKET-0068 | Tech tree UI | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0069 | Fabricator interaction panel UI | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0070 | Mining minigame — line tracing for yield bonus | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0071 | Third-person scan/mine gameplay | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0072 | Automation Hub + drone system | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0073 | Spare Battery — field carry and use mechanic | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0074 | Head Lamp — toggle mechanic and visual | FEATURE | gameplay-programmer |
+| QA | TICKET-0075 | Code review — M5 systems | REVIEW | systems-programmer |
+| QA | TICKET-0076 | QA testing — M5 full loop | TASK | qa-engineer |
 
 **Dependencies:** M4 (module system and Recycler establish the processing foundation)
 

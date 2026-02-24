@@ -2,7 +2,7 @@
 id: TICKET-0074
 title: "Head Lamp — toggle mechanic and visual"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -43,3 +43,4 @@ Implement the Head Lamp toggle mechanic and its in-world visual. The Head Lamp i
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-25 [gameplay-programmer] DONE — commit 7cd7f62, PR #42 merged. Added toggle_head_lamp action (F key), SpotLight3D on camera, signal-driven visibility toggle.

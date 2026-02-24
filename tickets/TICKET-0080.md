@@ -2,7 +2,7 @@
 id: TICKET-0080
 title: "Compliance — update ship machine SOP for non-pause model"
 type: TASK
-status: OPEN
+status: DONE
 priority: P2
 owner: producer
 created_by: producer
@@ -40,7 +40,13 @@ Per DEC-0001 (decision log), in-world UI menus do not pause the game. The Ship M
 - The Fabricator (M5) is the new canonical reference machine — document it as the first machine built to the correct model.
 
 ## Handoff Notes
-(Leave blank until handoff occurs.)
+
+SOP updated. Key changes:
+- DEC-0001 panel interaction model callout added to Overview
+- Fabricator (M5) is now the canonical reference for all future machines
+- Recycler (M4) Step 7 note corrected — `PROCESS_MODE_ALWAYS` and `get_tree().paused` marked as obsolete workarounds, TICKET-0077 cited as remediation
+- Step 7 checklist item updated to explicitly state non-pause behavior
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket — compliance with DEC-0001
+- 2026-02-24 [producer] DONE — commit 5349725, pushed to main

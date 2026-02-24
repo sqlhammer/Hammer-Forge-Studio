@@ -2,7 +2,7 @@
 id: TICKET-0082
 title: "Bugfix — player blocked from entering ship when standing close to hull"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -44,3 +44,4 @@ The player cannot trigger ship entry when standing flush against or very close t
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket
+- 2026-02-25 [gameplay-programmer] DONE — commit 288f2b3, PR #44 merged. Repositioned ShipEnterZone to straddle hull edge (Z 18–28), was entirely inside hull (Z 10.5–16.5).

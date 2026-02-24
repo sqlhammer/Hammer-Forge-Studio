@@ -30,7 +30,7 @@
 | M2 | 3D Asset Pipeline — PoC evaluation, pipeline SOP, M3-ready assets | 2026-02-22 | Complete | 10 | 0 | 10 | 2026-02-22 |
 | M3 | First Playable — Minimal ship in world, scan/mine loop | — | Complete | 13 | 0 | 13 | 2026-02-23 |
 | M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Complete | 21 | 0 | 21 | 2026-02-24 |
-| M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Active | 17 | 17 | 0 | — |
+| M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Active | 23 | 23 | 0 | — |
 | M6 | Ship Interior — Cockpit and machine room buildout | — | Planning | — | — | — | — |
 | M7 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |
 | M8 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
@@ -222,11 +222,12 @@
 - Ship machine SOP: reusable process doc for adding future ship machines
 
 **Phases:**
-- **Foundation** (TICKET-0060–TICKET-0067): Data layers, UI/UX designs, Fabricator 3D mesh, SOP
-- **Gameplay** (TICKET-0068–TICKET-0074): Tech tree UI, Fabricator panel, minigame, third-person scan/mine, drones, Spare Battery, Head Lamp
+- **Foundation** (TICKET-0060–TICKET-0067, TICKET-0081): Data layers, UI/UX designs, Fabricator 3D mesh, SOP, ship exterior rescale
+- **Gameplay** (TICKET-0068–TICKET-0074, TICKET-0082): Tech tree UI, Fabricator panel, minigame, third-person scan/mine, drones, Spare Battery, Head Lamp, ship entry bugfix
+- **Compliance** (TICKET-0077–TICKET-0080): DEC-0001 non-pause model remediation
 - **QA** (TICKET-0075–TICKET-0076): Code review and full loop QA
 
-**Tickets:** TICKET-0060 through TICKET-0076
+**Tickets:** TICKET-0060 through TICKET-0082 (excluding archived gaps)
 
 | Phase | Ticket | Title | Type | Owner |
 |-------|--------|-------|------|-------|
@@ -238,6 +239,7 @@
 | Foundation | TICKET-0065 | UI/UX — tech tree, Fabricator panel, minigame overlay, drone UI, third-person HUD | DESIGN | ui-ux-designer |
 | Foundation | TICKET-0066 | Ship machine process flow — SOP | TASK | producer |
 | Foundation | TICKET-0067 | Fabricator — 3D mesh and ship interior placement | TASK | technical-artist |
+| Foundation | TICKET-0081 | Ship exterior — scale mesh to 3× current size | TASK | technical-artist |
 | Gameplay | TICKET-0068 | Tech tree UI | FEATURE | gameplay-programmer |
 | Gameplay | TICKET-0069 | Fabricator interaction panel UI | FEATURE | gameplay-programmer |
 | Gameplay | TICKET-0070 | Mining minigame — line tracing for yield bonus | FEATURE | gameplay-programmer |
@@ -245,6 +247,11 @@
 | Gameplay | TICKET-0072 | Automation Hub + drone system | FEATURE | gameplay-programmer |
 | Gameplay | TICKET-0073 | Spare Battery — field carry and use mechanic | FEATURE | gameplay-programmer |
 | Gameplay | TICKET-0074 | Head Lamp — toggle mechanic and visual | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0082 | Bugfix — player blocked from entering ship when standing close to hull | BUGFIX | gameplay-programmer |
+| Compliance | TICKET-0077 | Compliance — remove game pause from in-world UI panels | TASK | gameplay-programmer |
+| Compliance | TICKET-0078 | Compliance — update UI wireframes and style guide for non-pause model | TASK | ui-ux-designer |
+| Compliance | TICKET-0079 | Compliance — update input system design doc | TASK | systems-programmer |
+| Compliance | TICKET-0080 | Compliance — update ship machine SOP | TASK | producer |
 | QA | TICKET-0075 | Code review — M5 systems | REVIEW | systems-programmer |
 | QA | TICKET-0076 | QA testing — M5 full loop | TASK | qa-engineer |
 

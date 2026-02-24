@@ -5,10 +5,12 @@ extends RefCounted
 # ── Enums ─────────────────────────────────────────────────
 
 ## Unique resource types. SCRAP_METAL (M3), METAL (M4 — refined from Scrap Metal).
+## SPARE_BATTERY (M5 — crafted consumable, restores suit battery).
 enum ResourceType {
 	NONE = 0,
 	SCRAP_METAL = 1,
 	METAL = 2,
+	SPARE_BATTERY = 3,
 }
 
 ## Purity rating from 1-star (lowest) to 5-star (highest).
@@ -90,6 +92,15 @@ const RESOURCE_CATALOG: Dictionary = {
 		"stack_size": 50,
 		"icon": "",
 		"category": "processed_material",
+		"deposit_tier": DepositTier.TIER_1,
+		"base_energy_per_unit": 0.0,
+	},
+	ResourceType.SPARE_BATTERY: {
+		"name": "Spare Battery",
+		"description": "A portable power cell for the player's suit. Single-use: restores suit battery to 100% when consumed in the field. Crafted at the Fabricator.",
+		"stack_size": 1,
+		"icon": "",
+		"category": "consumable",
 		"deposit_tier": DepositTier.TIER_1,
 		"base_energy_per_unit": 0.0,
 	},

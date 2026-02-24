@@ -33,6 +33,13 @@ func install_module(module_id: String) -> bool:
 		Global.log("ModuleManager: install failed — '%s' already installed" % module_id)
 		return false
 
+	# Validate tech tree gate — module cannot be installed until the required node is unlocked.
+	var tech_tree_gate: String = ModuleDefs.get_tech_tree_gate(module_id)
+	if not tech_tree_gate.is_empty() and not TechTree.is_unlocked(tech_tree_gate):
+		install_failed.emit(module_id, "TECH_TREE_LOCKED")
+		Global.log("ModuleManager: install failed — '%s' requires tech tree node '%s' to be unlocked" % [module_id, tech_tree_gate])
+		return false
+
 	# Validate power capacity
 	var power_draw: float = entry.get("power_draw", 0.0) as float
 	if ShipState.would_exceed_capacity(power_draw):

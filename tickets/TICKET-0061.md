@@ -2,7 +2,7 @@
 id: TICKET-0061
 title: "Fabricator module — data layer and recipes"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -42,3 +42,5 @@ Define the Fabricator as a ship module in the module system — a crafting machi
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-24 [systems-programmer] Started implementation
+- 2026-02-24 [systems-programmer] Implemented FabricatorDefs (scripts/data/fabricator_defs.gd) with recipe catalog (spare_battery, head_lamp). Created Fabricator autoload (scripts/systems/fabricator.gd) with queue_job(), cancel_job(), progress tracking, and dual output modes (inventory/equip). Added Fabricator and AutomationHub modules to ModuleDefs with tech_tree_gate field. Added get_tech_tree_gate() helper. Added tech tree gate check to ModuleManager.install_module(). Registered Fabricator in project.godot.

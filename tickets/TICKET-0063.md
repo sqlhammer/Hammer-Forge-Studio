@@ -2,7 +2,7 @@
 id: TICKET-0063
 title: "Head Lamp — item data layer"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -38,3 +38,5 @@ Define the Head Lamp as a suit equipment item — a directional light that attac
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-24 [systems-programmer] Started implementation
+- 2026-02-24 [systems-programmer] Created HeadLamp autoload (scripts/systems/head_lamp.gd) with is_equipped/active state, toggle(), force_off(), battery drain via _process, and ConfigFile persistence. Registered in project.godot. Recipe constants defined for Fabricator integration.

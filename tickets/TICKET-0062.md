@@ -2,7 +2,7 @@
 id: TICKET-0062
 title: "Spare Battery — item data layer"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -38,3 +38,5 @@ Define the Spare Battery as a carriable inventory item. A Spare Battery occupies
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-24 [systems-programmer] Started implementation
+- 2026-02-24 [systems-programmer] Added SPARE_BATTERY to ResourceDefs enum and catalog (stack_size=1, consumable). Created SpareBattery class (scripts/systems/spare_battery.gd) with static use() method. Recipe constants defined for Fabricator integration.

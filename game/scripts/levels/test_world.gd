@@ -34,6 +34,8 @@ var _transitioning: bool = false
 var _module_placement_ui: ModulePlacementUI = null
 var _recycler_panel: RecyclerPanel = null
 var _head_lamp_light: SpotLight3D = null
+var _third_person: PlayerThirdPerson = null
+var _player_manager: PlayerManager = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -204,10 +206,16 @@ func _spawn_player() -> void:
 	_player.position = Vector3(0, 0.9, 24)  # Spawn near ship entrance (3× hull), Y=0.9 to rest capsule on ground
 	add_child(_player)
 
-	# Get first-person controller and camera
+	# Get controllers and camera
 	_first_person = _player.get_node("FirstPersonController") as CharacterBody3D
+	_third_person = _player.get_node("ThirdPersonController") as PlayerThirdPerson
 	if _first_person and _first_person.has_method("get_camera"):
 		_camera = _first_person.get_camera()
+
+	# Connect view mode switching
+	_player_manager = _player as PlayerManager
+	if _player_manager:
+		_player_manager.view_mode_changed.connect(_on_view_mode_changed)
 
 	# Set player collision layer
 	if _first_person:
@@ -539,3 +547,20 @@ func _on_player_exited_ship() -> void:
 		_recycler_panel.close()
 	if _module_placement_ui and _module_placement_ui.is_open():
 		_module_placement_ui.close()
+
+func _on_view_mode_changed(mode: String) -> void:
+	Global.log("TestWorld: view mode changed to %s" % mode)
+	var new_camera: Camera3D = null
+	if mode == "third_person" and _third_person:
+		new_camera = _third_person.get_camera()
+	elif _first_person and _first_person.has_method("get_camera"):
+		new_camera = _first_person.get_camera()
+	if new_camera:
+		_camera = new_camera
+		if _scanner:
+			_scanner.set_camera(new_camera)
+			_scanner.set_view_mode(mode)
+		if _mining:
+			_mining.set_camera(new_camera)
+	if _hud:
+		_hud.set_crosshair_visible(mode == "first_person")

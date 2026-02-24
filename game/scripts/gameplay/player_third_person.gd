@@ -61,6 +61,10 @@ func set_orbit_center(center_position: Vector3) -> void:
 func get_orbit_center() -> Vector3:
 	return _orbit_center
 
+## Returns the orbital camera node.
+func get_camera() -> Camera3D:
+	return _camera
+
 ## Returns the current camera world position.
 func get_camera_position() -> Vector3:
 	return _camera.global_position

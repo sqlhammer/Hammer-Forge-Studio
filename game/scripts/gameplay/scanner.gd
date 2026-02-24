@@ -1,4 +1,5 @@
-## Scanner system: handles ping detection and deposit analysis via camera raycast.
+## Scanner system: handles ping detection and deposit analysis.
+## Supports first-person (raycast) and third-person (proximity) targeting.
 class_name Scanner
 extends Node
 
@@ -28,6 +29,7 @@ var _ping_cooldown_timer: float = 0.0
 var _analysis_target: Deposit = null
 var _analysis_progress: float = 0.0
 var _is_analyzing: bool = false
+var _view_mode: String = "first_person"
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -45,21 +47,19 @@ func setup(camera: Camera3D, player: CharacterBody3D) -> void:
 	_camera = camera
 	_player = player
 
+## Updates the active camera reference (used on view mode switch).
+func set_camera(camera: Camera3D) -> void:
+	_camera = camera
+
+## Sets the current view mode for targeting behavior.
+func set_view_mode(mode: String) -> void:
+	_view_mode = mode
+
 ## Returns the aimed deposit within interaction range, or null.
 func get_aimed_deposit() -> Deposit:
-	if not _camera:
-		return null
-	var result: Dictionary = _cast_interaction_ray()
-	if result.is_empty():
-		return null
-	var collider: Object = result.get("collider")
-	if not collider:
-		return null
-	# The collider is the StaticBody3D child of the Deposit node
-	var parent: Node = collider.get_parent()
-	if parent is Deposit:
-		return parent as Deposit
-	return null
+	if _view_mode == "third_person":
+		return _get_nearest_deposit()
+	return _get_raycast_deposit()
 
 ## Returns the current analysis progress (0.0 to 1.0).
 func get_analysis_progress() -> float:
@@ -128,6 +128,36 @@ func _cancel_analysis() -> void:
 	_analysis_progress = 0.0
 	_analysis_target = null
 	analysis_cancelled.emit()
+
+func _get_raycast_deposit() -> Deposit:
+	if not _camera:
+		return null
+	var result: Dictionary = _cast_interaction_ray()
+	if result.is_empty():
+		return null
+	var collider: Object = result.get("collider")
+	if not collider:
+		return null
+	var parent: Node = collider.get_parent()
+	if parent is Deposit:
+		return parent as Deposit
+	return null
+
+func _get_nearest_deposit() -> Deposit:
+	if not _player:
+		return null
+	var player_pos: Vector3 = _player.global_position
+	var deposits: Array[Deposit] = DepositRegistry.get_in_range(player_pos, ANALYSIS_MAX_RANGE)
+	var nearest: Deposit = null
+	var nearest_dist: float = INF
+	for deposit: Deposit in deposits:
+		if deposit.is_depleted():
+			continue
+		var dist: float = player_pos.distance_to(deposit.global_position)
+		if dist < nearest_dist:
+			nearest_dist = dist
+			nearest = deposit
+	return nearest
 
 func _cast_interaction_ray() -> Dictionary:
 	var space_state: PhysicsDirectSpaceState3D = _camera.get_world_3d().direct_space_state

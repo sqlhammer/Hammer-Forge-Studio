@@ -43,7 +43,7 @@ var _current_alert_keys: Array[String] = []
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	process_mode = Node.PROCESS_MODE_INHERIT
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_build_ui()
 	_connect_signals()

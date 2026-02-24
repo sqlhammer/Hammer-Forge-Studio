@@ -2,7 +2,7 @@
 id: TICKET-0071
 title: "Third-person scan/mine gameplay"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -41,3 +41,4 @@ Enable scanning and mining in third-person camera mode. M3 implemented scan/mine
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-25 [gameplay-programmer] DONE — commit cb51338, PR #48 merged. Proximity targeting in third-person, camera swap on view switch, crosshair toggle.

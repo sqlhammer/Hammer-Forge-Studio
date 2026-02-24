@@ -161,6 +161,14 @@ func _tick_drones(delta: float) -> void:
 	for drone_id: int in drones_to_remove:
 		_drones.erase(drone_id)
 
+## Called by gameplay scripts (TICKET-0072) when a drone physically arrives at the target deposit.
+func notify_drone_arrived(drone_id: int) -> void:
+	if not _drones.has(drone_id):
+		return
+	var drone: DroneAgent = _drones[drone_id] as DroneAgent
+	drone.start_extracting()
+	Global.log("AutomationHub: drone %d arrived at target, now extracting" % drone_id)
+
 ## Called by gameplay scripts (TICKET-0072) when a drone finishes extraction at a deposit.
 ## deposit_id: the deposit node name. yield_quantity: units extracted.
 func notify_extraction_complete(drone_id: int, deposit_id: String, yield_quantity: int) -> void:

@@ -51,6 +51,7 @@ var _fade_layer: CanvasLayer = null
 var _player_ref: CharacterBody3D = null
 var _is_player_inside: bool = false
 var _player_in_exit_zone: bool = false
+var _terminal_area: Area3D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -60,6 +61,7 @@ func _ready() -> void:
 	_build_spawn_markers()
 	_build_lighting()
 	_build_fade_overlay()
+	_build_terminal()
 	Global.log("ShipInterior: initialized")
 
 # ── Public Methods ────────────────────────────────────────
@@ -158,6 +160,12 @@ func get_first_empty_zone() -> int:
 ## Returns true if the player is standing in the exit zone.
 func is_player_in_exit_zone() -> bool:
 	return _player_in_exit_zone
+
+## Returns true if the player is near the tech tree terminal on the north wall.
+func is_player_near_terminal() -> bool:
+	if not _player_ref or not _terminal_area:
+		return false
+	return _terminal_area.get_overlapping_bodies().has(_player_ref)
 
 ## Returns true if the player is near a placement zone. Returns the zone index or -1.
 func get_nearby_zone_index() -> int:
@@ -361,6 +369,38 @@ func _create_static_surface(surface_name: String, size: Vector3, pos: Vector3, c
 	body.add_child(col)
 
 	add_child(body)
+
+func _build_terminal() -> void:
+	var half_d: float = BAY_DEPTH / 2.0
+	# Greybox terminal mesh on the north wall
+	var terminal_mesh := MeshInstance3D.new()
+	terminal_mesh.name = "TerminalMesh"
+	var box := BoxMesh.new()
+	box.size = Vector3(1.0, 1.5, 0.3)
+	terminal_mesh.mesh = box
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color("#2A4A4A")
+	mat.emission_enabled = true
+	mat.emission = Color("#00D4AA")
+	mat.emission_energy_multiplier = 0.4
+	terminal_mesh.material_override = mat
+	terminal_mesh.position = Vector3(0, 0.75, -half_d + 0.25)
+	add_child(terminal_mesh)
+
+	# Interaction area for terminal
+	_terminal_area = Area3D.new()
+	_terminal_area.name = "TerminalArea"
+	_terminal_area.collision_layer = 0
+	_terminal_area.collision_mask = LAYER_PLAYER
+	var col := CollisionShape3D.new()
+	col.name = "TerminalShape"
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(2.0, 2.0, 1.5)
+	col.shape = shape
+	col.position = Vector3(0, 1.0, -half_d + 0.75)
+	_terminal_area.add_child(col)
+	add_child(_terminal_area)
+	Global.log("ShipInterior: tech tree terminal built")
 
 func _update_zone_visual(zone_index: int) -> void:
 	if zone_index < 0 or zone_index >= _zone_floor_markers.size():

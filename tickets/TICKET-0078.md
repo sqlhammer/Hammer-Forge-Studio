@@ -2,7 +2,7 @@
 id: TICKET-0078
 title: "Compliance — update UI wireframes and style guide for non-pause model"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: ui-ux-designer
 created_by: producer
@@ -56,3 +56,5 @@ Per DEC-0001 (decision log), in-world UI menus do not pause the game. Multiple w
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket — compliance with DEC-0001; blocks TICKET-0068, TICKET-0069, TICKET-0072
+- 2026-02-24 [ui-ux-designer] Status → IN_PROGRESS. Auditing all 7 docs for pause language.
+- 2026-02-24 [ui-ux-designer] Status → DONE. Commit: 030b95b. All 7 files updated + ship-stats-sidebar.md (additional stale reference found during audit). All get_tree().paused and PROCESS_MODE_WHEN_PAUSED references removed from in-world UI docs; replaced with InputManager input-suppression pattern. ui-style-guide.md Surface row decoupled inventory/machine panels from pause category.

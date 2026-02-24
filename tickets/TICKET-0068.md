@@ -2,7 +2,7 @@
 id: TICKET-0068
 title: "Tech tree UI"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -44,3 +44,4 @@ Implement the tech tree UI — the screen through which players spend processed 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
 - 2026-02-24 [producer] Added TICKET-0078 to depends_on — wireframes must be updated for non-pause model (DEC-0001) before implementation begins
+- 2026-02-24 [gameplay-programmer] DONE — Implemented TechTreePanel (procedural CanvasLayer, two-node graph, detail panel, confirmation dialog, keyboard nav) + tech tree terminal in ship interior. Commit 71b973d, PR #50 merged.

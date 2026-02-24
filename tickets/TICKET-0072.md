@@ -2,7 +2,7 @@
 id: TICKET-0072
 title: "Automation Hub + drone system"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -46,3 +46,4 @@ Implement the Automation Hub ship module and its mining drone system. The Automa
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
 - 2026-02-24 [producer] Added TICKET-0078 to depends_on — wireframes must be updated for non-pause model (DEC-0001) before implementation begins
+- 2026-02-24 [gameplay-programmer] DONE — Implemented AutomationHubPanel (drone programming UI with 5 filter rows, status cards), DroneController (physical drone with state machine + greybox mesh), DroneManager (auto-assignment by priority), plus interaction dispatch refactor in test_world.gd. Commit 71b973d, PR #50 merged.

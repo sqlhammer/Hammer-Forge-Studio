@@ -2,7 +2,7 @@
 id: TICKET-0069
 title: "Fabricator interaction panel UI"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -45,3 +45,4 @@ Implement the Fabricator interaction panel — the in-world UI the player opens 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
 - 2026-02-24 [producer] Added TICKET-0078 to depends_on — wireframes must be updated for non-pause model (DEC-0001) before implementation begins
+- 2026-02-24 [gameplay-programmer] DONE — Implemented FabricatorPanel (procedural CanvasLayer, recipe list with categories/affordability, job detail with progress bar, START/completion flow). Commit 71b973d, PR #50 merged.

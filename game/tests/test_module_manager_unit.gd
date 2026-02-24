@@ -45,6 +45,8 @@ func register_tests() -> void:
 	add_test("install_recycler_with_resources_succeeds", _test_install_recycler_with_resources_succeeds)
 	add_test("install_emits_module_installed", _test_install_emits_module_installed)
 	add_test("install_deducts_resources_from_inventory", _test_install_deducts_resources_from_inventory)
+	add_test("install_with_mixed_purities_succeeds", _test_install_with_mixed_purities_succeeds)
+	add_test("install_consumes_lowest_purity_first", _test_install_consumes_lowest_purity_first)
 	add_test("install_registers_power_draw", _test_install_registers_power_draw)
 	add_test("installed_module_appears_in_query", _test_installed_module_appears_in_query)
 	# Install failure modes
@@ -110,6 +112,33 @@ func _test_install_deducts_resources_from_inventory() -> void:
 	var remaining: int = PlayerInventory.get_count(
 		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR)
 	assert_equal(remaining, 0, "Install should deduct all 20 Scrap Metal from inventory")
+
+
+func _test_install_with_mixed_purities_succeeds() -> void:
+	# 10 @ 1-star + 10 @ 3-star = 20 total (need 20)
+	PlayerInventory.add_item(
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 10)
+	PlayerInventory.add_item(
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR, 10)
+	var result: bool = _manager.install_module("recycler")
+	assert_true(result, "Install should succeed with mixed-purity resources totaling 20")
+	assert_true(_manager.is_installed("recycler"), "Recycler should be installed")
+
+
+func _test_install_consumes_lowest_purity_first() -> void:
+	# 15 @ 1-star + 10 @ 3-star = 25 total (need 20)
+	PlayerInventory.add_item(
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 15)
+	PlayerInventory.add_item(
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR, 10)
+	_manager.install_module("recycler")
+	# Should consume all 15 @ 1-star, then 5 from 3-star
+	var one_star: int = PlayerInventory.get_count(
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR)
+	var three_star: int = PlayerInventory.get_count(
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR)
+	assert_equal(one_star, 0, "All 1-star should be consumed first")
+	assert_equal(three_star, 5, "Only 5 of 10 three-star should be consumed")
 
 
 func _test_install_registers_power_draw() -> void:

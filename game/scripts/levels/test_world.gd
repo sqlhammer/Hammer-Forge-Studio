@@ -423,18 +423,44 @@ func _place_module_visual(module_id: String, zone_index: int) -> void:
 			_ship_interior.place_module_in_zone(zone_index, mesh_node)
 			Global.log("TestWorld: placed recycler mesh in zone %d" % zone_index)
 		else:
-			# Fallback: greybox placeholder
-			var fallback := MeshInstance3D.new()
-			var box := BoxMesh.new()
-			box.size = Vector3(1.8, 1.4, 1.2)
-			fallback.mesh = box
-			var mat := StandardMaterial3D.new()
-			mat.albedo_color = Color("#666666")
-			fallback.material_override = mat
-			fallback.name = "RecyclerModule"
-			fallback.position.y = 0.7
-			_ship_interior.place_module_in_zone(zone_index, fallback)
-			Global.log("TestWorld: placed recycler fallback mesh in zone %d" % zone_index)
+			_place_module_fallback("RecyclerModule", Vector3(1.8, 1.4, 1.2), zone_index)
+	elif module_id == "fabricator":
+		var fabricator_scene: Resource = load("res://assets/meshes/machines/mesh_fabricator_module.glb")
+		if fabricator_scene and fabricator_scene is PackedScene:
+			var mesh_node: Node3D = (fabricator_scene as PackedScene).instantiate()
+			mesh_node.name = "FabricatorModule"
+			_add_interaction_area(mesh_node, Vector3(2.0, 1.2, 1.0))
+			_ship_interior.place_module_in_zone(zone_index, mesh_node)
+			Global.log("TestWorld: placed fabricator mesh in zone %d" % zone_index)
+		else:
+			_place_module_fallback("FabricatorModule", Vector3(2.0, 1.2, 1.0), zone_index)
+
+func _place_module_fallback(module_name: String, size: Vector3, zone_index: int) -> void:
+	var fallback := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = size
+	fallback.mesh = box
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color("#666666")
+	fallback.material_override = mat
+	fallback.name = module_name
+	fallback.position.y = size.y / 2.0
+	_ship_interior.place_module_in_zone(zone_index, fallback)
+	Global.log("TestWorld: placed %s fallback mesh in zone %d" % [module_name, zone_index])
+
+func _add_interaction_area(parent: Node3D, size: Vector3) -> void:
+	var area := Area3D.new()
+	area.name = "InteractionArea"
+	area.collision_layer = 1 << 3
+	area.collision_mask = 1 << 0
+	var col := CollisionShape3D.new()
+	col.name = "InteractionShape"
+	var shape := BoxShape3D.new()
+	shape.size = size + Vector3(0.5, 0.5, 0.5)
+	col.shape = shape
+	col.position = Vector3(0, size.y / 2.0, 0)
+	area.add_child(col)
+	parent.add_child(area)
 
 func _on_ship_enter_zone_entered(body: Node3D) -> void:
 	if body == _first_person:

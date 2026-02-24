@@ -11,7 +11,7 @@ updated_at: 2026-02-24
 milestone: "M5"
 milestone_gate: "M4"
 phase: "QA"
-depends_on: [TICKET-0068, TICKET-0069, TICKET-0070, TICKET-0071, TICKET-0072, TICKET-0073, TICKET-0074, TICKET-0077]
+depends_on: [TICKET-0068, TICKET-0069, TICKET-0070, TICKET-0071, TICKET-0072, TICKET-0073, TICKET-0074, TICKET-0077, TICKET-0082]
 blocks: [TICKET-0076]
 tags: [code-review, qa]
 ---
@@ -32,6 +32,7 @@ Systems Programmer reviews all M5 implementation code for correctness, coding st
 - [ ] Automation Hub + drone system (TICKET-0072) reviewed
 - [ ] Spare Battery mechanic (TICKET-0073) reviewed
 - [ ] Head Lamp mechanic (TICKET-0074) reviewed
+- [ ] Ship entry bugfix (TICKET-0082) reviewed
 - [ ] All findings documented as BUGFIX tickets (P2) with clear reproduction steps
 - [ ] Review summary posted in Activity Log
 
@@ -47,3 +48,4 @@ Systems Programmer reviews all M5 implementation code for correctness, coding st
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
 - 2026-02-24 [producer] Added TICKET-0077 to depends_on — pause compliance fix must be implemented before code review runs (DEC-0001)
+- 2026-02-25 [producer] Added TICKET-0082 to depends_on — ship entry bugfix must be resolved before code review runs

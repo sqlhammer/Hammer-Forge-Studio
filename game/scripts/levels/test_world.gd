@@ -493,6 +493,7 @@ func _setup_ship_ui() -> void:
 	_automation_hub_panel = AutomationHubPanel.new()
 	_automation_hub_panel.name = "AutomationHubPanel"
 	add_child(_automation_hub_panel)
+	_automation_hub_panel.setup(Vector3.ZERO)  # Ship position for deposit distance calculations
 	_automation_hub_panel.drone_deployed.connect(_on_drone_deployed)
 	_automation_hub_panel.drones_recalled.connect(_on_drones_recalled)
 

@@ -76,6 +76,9 @@ var _drone_status_container: VBoxContainer = null
 var _active_drones_label: Label = null
 var _deactivate_button: Button = null
 
+## Hub/ship position for distance calculations
+var _hub_position: Vector3 = Vector3.ZERO
+
 ## Focus tracking
 var _focused_row: int = 0
 const FOCUS_ROW_COUNT: int = 6  # 5 filters + activate button
@@ -160,6 +163,10 @@ func close() -> void:
 ## Returns true if the panel is open.
 func is_open() -> bool:
 	return _is_open
+
+## Sets the hub/ship position used for deposit distance calculations.
+func setup(hub_position: Vector3) -> void:
+	_hub_position = hub_position
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -461,7 +468,7 @@ func _refresh_pool_stats() -> void:
 		if deposit.is_analyzed() and not deposit.is_depleted():
 			analyzed_count += 1
 			if program.accepts_deposit(deposit):
-				var dist: float = Vector3.ZERO.distance_to(deposit.global_position)
+				var dist: float = _hub_position.distance_to(deposit.global_position)
 				if dist <= _extraction_radius:
 					matching_count += 1
 

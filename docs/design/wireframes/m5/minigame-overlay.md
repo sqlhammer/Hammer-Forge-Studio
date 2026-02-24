@@ -20,7 +20,7 @@ This overlay must work within the existing first-person HUD without obscuring cr
 
 1. Phase 2 Analysis completes: mining pattern lines illuminate on deposit geometry (3D world space, not HUD)
 2. Player holds extract input — mining begins, mining progress bar shows as normal
-3. The minigame overlay appears simultaneously when extraction starts (if a pattern was revealed)
+3. The minigame overlay appears immediately after scan is complete (if a pattern was revealed)
 4. Player traces each line by moving their crosshair over the lit segment (while still holding extract)
 5. Each traced line turns Green (confirmed); an untraced line turns Red when the extraction completes
 6. On extraction complete:

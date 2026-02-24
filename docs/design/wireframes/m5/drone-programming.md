@@ -19,7 +19,7 @@ The Drone Programming UI lets the player configure and monitor automated mining 
 ## Interaction Model
 
 1. Player interacts with the Automation Hub module in the ship
-2. Drone Programming screen opens as a full-screen overlay (game paused)
+2. Drone Programming screen opens as a full-screen overlay (game not paused)
 3. Player reviews the current program (or creates one if none exists)
 4. Player adjusts filter criteria: deposit type, minimum purity, tool tier, extraction radius, priority
 5. Player activates the program — drones deploy and begin operating

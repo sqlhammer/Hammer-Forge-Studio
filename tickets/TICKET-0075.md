@@ -11,7 +11,7 @@ updated_at: 2026-02-24
 milestone: "M5"
 milestone_gate: "M4"
 phase: "QA"
-depends_on: [TICKET-0068, TICKET-0069, TICKET-0070, TICKET-0071, TICKET-0072, TICKET-0073, TICKET-0074]
+depends_on: [TICKET-0068, TICKET-0069, TICKET-0070, TICKET-0071, TICKET-0072, TICKET-0073, TICKET-0074, TICKET-0077]
 blocks: [TICKET-0076]
 tags: [code-review, qa]
 ---
@@ -46,3 +46,4 @@ Systems Programmer reviews all M5 implementation code for correctness, coding st
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-24 [producer] Added TICKET-0077 to depends_on — pause compliance fix must be implemented before code review runs (DEC-0001)

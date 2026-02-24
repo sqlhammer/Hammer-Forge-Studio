@@ -11,7 +11,7 @@ updated_at: 2026-02-24
 milestone: "M5"
 milestone_gate: "M4"
 phase: "Gameplay"
-depends_on: [TICKET-0064, TICKET-0065]
+depends_on: [TICKET-0064, TICKET-0065, TICKET-0078]
 blocks: [TICKET-0075]
 tags: [drones, automation, automation-hub, gameplay]
 ---
@@ -45,3 +45,4 @@ Implement the Automation Hub ship module and its mining drone system. The Automa
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-24 [producer] Added TICKET-0078 to depends_on — wireframes must be updated for non-pause model (DEC-0001) before implementation begins

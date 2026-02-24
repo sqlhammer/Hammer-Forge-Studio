@@ -11,7 +11,7 @@ updated_at: 2026-02-24
 milestone: "M5"
 milestone_gate: "M4"
 phase: "Gameplay"
-depends_on: [TICKET-0061, TICKET-0065, TICKET-0067]
+depends_on: [TICKET-0061, TICKET-0065, TICKET-0067, TICKET-0078]
 blocks: [TICKET-0075]
 tags: [fabricator, ui, gameplay, interaction-panel]
 ---
@@ -44,3 +44,4 @@ Implement the Fabricator interaction panel — the in-world UI the player opens 
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-24 [producer] Added TICKET-0078 to depends_on — wireframes must be updated for non-pause model (DEC-0001) before implementation begins

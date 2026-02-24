@@ -10,6 +10,10 @@ const GRID_ROWS: int = 3
 const PANEL_WIDTH: float = 580.0
 const PANEL_HEIGHT: float = 480.0
 
+## Sidebar width for combined centering
+const SIDEBAR_WIDTH: float = 180.0
+const COMBINED_WIDTH: float = PANEL_WIDTH + SIDEBAR_WIDTH
+
 ## Style colors matching UI style guide
 const COLOR_SURFACE := Color("#0A0F18", 0.95)
 const COLOR_BORDER := Color("#007A63")
@@ -34,6 +38,8 @@ var _detail_stars_container: HBoxContainer = null
 var _detail_quantity_label: Label = null
 var _dim_rect: ColorRect = null
 var _main_panel: PanelContainer = null
+var _combined_container: HBoxContainer = null
+var _ship_sidebar: ShipStatsSidebar = null
 var _font: Font = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
@@ -92,15 +98,18 @@ func open_inventory() -> void:
 	_update_detail_area()
 	get_tree().paused = true
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	# Refresh sidebar values
+	if _ship_sidebar:
+		_ship_sidebar.refresh()
 	# Appear animation
 	_dim_rect.modulate.a = 0.0
-	_main_panel.modulate.a = 0.0
-	_main_panel.scale = Vector2(0.95, 0.95)
+	_combined_container.modulate.a = 0.0
+	_combined_container.scale = Vector2(0.95, 0.95)
 	var tween: Tween = create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(_dim_rect, "modulate:a", 1.0, 0.15)
-	tween.tween_property(_main_panel, "modulate:a", 1.0, 0.2)
-	tween.tween_property(_main_panel, "scale", Vector2.ONE, 0.2).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_combined_container, "modulate:a", 1.0, 0.2)
+	tween.tween_property(_combined_container, "scale", Vector2.ONE, 0.2).set_ease(Tween.EASE_OUT)
 
 ## Closes the inventory.
 func close_inventory() -> void:
@@ -111,7 +120,7 @@ func close_inventory() -> void:
 	var tween: Tween = create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(_dim_rect, "modulate:a", 0.0, 0.15)
-	tween.tween_property(_main_panel, "modulate:a", 0.0, 0.15)
+	tween.tween_property(_combined_container, "modulate:a", 0.0, 0.15)
 	tween.tween_callback(func() -> void: visible = false)
 
 ## Returns true if the inventory is currently open.
@@ -138,18 +147,31 @@ func _build_ui() -> void:
 	center.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	dim_layer.add_child(center)
 
-	# Main panel
+	# Combined container for inventory + sidebar
+	_combined_container = HBoxContainer.new()
+	_combined_container.add_theme_constant_override("separation", 0)
+	_combined_container.pivot_offset = Vector2(COMBINED_WIDTH / 2.0, PANEL_HEIGHT / 2.0)
+	center.add_child(_combined_container)
+
+	# Main panel (left side — inventory grid)
 	_main_panel = PanelContainer.new()
 	_main_panel.custom_minimum_size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_SURFACE
 	panel_style.border_color = COLOR_BORDER
 	panel_style.set_border_width_all(1)
-	panel_style.set_corner_radius_all(8)
+	panel_style.corner_radius_top_left = 8
+	panel_style.corner_radius_bottom_left = 8
+	panel_style.corner_radius_top_right = 0
+	panel_style.corner_radius_bottom_right = 0
 	panel_style.set_content_margin_all(24)
 	_main_panel.add_theme_stylebox_override("panel", panel_style)
-	_main_panel.pivot_offset = Vector2(PANEL_WIDTH / 2.0, PANEL_HEIGHT / 2.0)
-	center.add_child(_main_panel)
+	_combined_container.add_child(_main_panel)
+
+	# Ship stats sidebar (right side)
+	_ship_sidebar = ShipStatsSidebar.new()
+	_ship_sidebar.name = "ShipStatsSidebar"
+	_combined_container.add_child(_ship_sidebar)
 
 	# Main vertical layout
 	var vbox := VBoxContainer.new()

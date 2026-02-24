@@ -1,4 +1,4 @@
-## M3 greybox test world: bounded play area with ship, deposits, and all gameplay systems.
+## M4 greybox test world: bounded play area with ship interior, deposits, and all gameplay systems.
 class_name TestWorld
 extends Node3D
 
@@ -8,6 +8,9 @@ const WALL_HEIGHT: float = 8.0
 const DEPOSIT_SPREAD: float = 60.0
 const DEPOSIT_VISUAL_SCALE := Vector3(3.2, 3.2, 3.2)
 const DEPOSIT_COLLISION_RADIUS: float = 1.5
+
+## Ship interior is placed underground to isolate it from the exterior world.
+const INTERIOR_Y_OFFSET: float = -50.0
 
 ## Physics layers
 const LAYER_PLAYER: int = 1 << 0  # Layer 1
@@ -24,6 +27,10 @@ var _hud: GameHUD = null
 var _inventory_screen: InventoryScreen = null
 var _recharge_zone: Area3D = null
 var _deposit_container: Node3D = null
+var _ship_interior: Node3D = null
+var _ship_enter_zone: Area3D = null
+var _player_near_ship_entrance: bool = false
+var _transitioning: bool = false
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -36,12 +43,14 @@ func _ready() -> void:
 	_spawn_player()
 	_generate_deposits()
 	_setup_gameplay_systems()
+	_setup_ship_interior()
 	_setup_hud()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	Global.log("TestWorld: initialization complete")
 
 func _process(delta: float) -> void:
 	_update_recharge(delta)
+	_update_ship_interact()
 
 func _input(event: InputEvent) -> void:
 	# Toggle mouse capture with Escape
@@ -290,3 +299,86 @@ func _on_recharge_zone_exited(body: Node3D) -> void:
 	if body == _first_person:
 		Global.log("TestWorld: player exited recharge zone")
 		SuitBattery.stop_recharge()
+
+func _setup_ship_interior() -> void:
+	# Load and instance ship interior scene underground
+	var interior_scene: PackedScene = load("res://scenes/gameplay/ship_interior.tscn") as PackedScene
+	if not interior_scene:
+		push_error("TestWorld: Could not load ship interior scene!")
+		return
+	_ship_interior = interior_scene.instantiate()
+	_ship_interior.name = "ShipInterior"
+	_ship_interior.position = Vector3(0, INTERIOR_Y_OFFSET, 0)
+	add_child(_ship_interior)
+
+	if _first_person:
+		_ship_interior.setup(_first_person)
+
+	# Set the exterior exit position to just outside the ship ramp
+	_ship_interior.set_exterior_position(Vector3(0, 0.9, 6))
+
+	# Connect ship interior signals
+	_ship_interior.player_entered_ship.connect(_on_player_entered_ship)
+	_ship_interior.player_exited_ship.connect(_on_player_exited_ship)
+
+	# Create an enter-ship interaction zone near the ship exterior
+	_ship_enter_zone = Area3D.new()
+	_ship_enter_zone.name = "ShipEnterZone"
+	_ship_enter_zone.collision_layer = 0
+	_ship_enter_zone.collision_mask = LAYER_PLAYER
+	var enter_col := CollisionShape3D.new()
+	var enter_shape := BoxShape3D.new()
+	enter_shape.size = Vector3(3.0, 3.0, 2.0)
+	enter_col.shape = enter_shape
+	enter_col.position = Vector3(0, 1.5, 4.5)
+	_ship_enter_zone.add_child(enter_col)
+	add_child(_ship_enter_zone)
+
+	_ship_enter_zone.body_entered.connect(_on_ship_enter_zone_entered)
+	_ship_enter_zone.body_exited.connect(_on_ship_enter_zone_exited)
+	Global.log("TestWorld: ship interior ready")
+
+func _update_ship_interact() -> void:
+	if _transitioning or not _ship_interior:
+		return
+
+	# Enter ship from exterior
+	if _player_near_ship_entrance and not _ship_interior.is_player_inside():
+		if InputManager.is_action_just_pressed("interact"):
+			_begin_enter_ship()
+			return
+
+	# Exit ship from interior exit zone
+	if _ship_interior.is_player_inside() and _ship_interior.is_player_in_exit_zone():
+		if InputManager.is_action_just_pressed("interact"):
+			_begin_exit_ship()
+			return
+
+func _begin_enter_ship() -> void:
+	_transitioning = true
+	await _ship_interior.enter_ship(_first_person)
+	_transitioning = false
+
+func _begin_exit_ship() -> void:
+	_transitioning = true
+	await _ship_interior.exit_ship()
+	_transitioning = false
+
+func _on_ship_enter_zone_entered(body: Node3D) -> void:
+	if body == _first_person:
+		_player_near_ship_entrance = true
+		Global.log("TestWorld: player near ship entrance")
+
+func _on_ship_enter_zone_exited(body: Node3D) -> void:
+	if body == _first_person:
+		_player_near_ship_entrance = false
+
+func _on_player_entered_ship() -> void:
+	Global.log("TestWorld: player entered ship — activating ship HUD")
+	if _hud:
+		_hud.show_ship_globals(true)
+
+func _on_player_exited_ship() -> void:
+	Global.log("TestWorld: player exited ship — deactivating ship HUD")
+	if _hud:
+		_hud.show_ship_globals(false)

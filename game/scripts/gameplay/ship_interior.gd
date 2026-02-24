@@ -1,5 +1,6 @@
 ## Greybox ship interior: walkable bay with module placement zones and entry/exit transition.
 ## Instanced by the test world when the player enters the ship. Independently testable.
+class_name ShipInterior
 extends Node3D
 
 # ── Signals ──────────────────────────────────────────────
@@ -49,6 +50,7 @@ var _fade_rect: ColorRect = null
 var _fade_layer: CanvasLayer = null
 var _player_ref: CharacterBody3D = null
 var _is_player_inside: bool = false
+var _player_in_exit_zone: bool = false
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -150,6 +152,20 @@ func get_zone_count() -> int:
 func get_first_empty_zone() -> int:
 	for i: int in range(_zone_occupied.size()):
 		if not _zone_occupied[i]:
+			return i
+	return -1
+
+## Returns true if the player is standing in the exit zone.
+func is_player_in_exit_zone() -> bool:
+	return _player_in_exit_zone
+
+## Returns true if the player is near a placement zone. Returns the zone index or -1.
+func get_nearby_zone_index() -> int:
+	if not _player_ref:
+		return -1
+	for i: int in range(_zone_areas.size()):
+		var zone: Area3D = _zone_areas[i]
+		if zone.get_overlapping_bodies().has(_player_ref):
 			return i
 	return -1
 
@@ -368,8 +384,6 @@ func _fade_in() -> Signal:
 	tween.tween_property(_fade_rect, "modulate:a", 0.0, FADE_DURATION)
 	return tween.finished
 
-var _player_in_exit_zone: bool = false
-
 func _on_exit_zone_entered(body: Node3D) -> void:
 	if body == _player_ref:
 		_player_in_exit_zone = true
@@ -379,17 +393,3 @@ func _on_exit_zone_exited(body: Node3D) -> void:
 	if body == _player_ref:
 		_player_in_exit_zone = false
 		Global.log("ShipInterior: player left exit zone")
-
-## Returns true if the player is standing in the exit zone.
-func is_player_in_exit_zone() -> bool:
-	return _player_in_exit_zone
-
-## Returns true if the player is near a placement zone. Returns the zone index or -1.
-func get_nearby_zone_index() -> int:
-	if not _player_ref:
-		return -1
-	for i: int in range(_zone_areas.size()):
-		var zone: Area3D = _zone_areas[i]
-		if zone.get_overlapping_bodies().has(_player_ref):
-			return i
-	return -1

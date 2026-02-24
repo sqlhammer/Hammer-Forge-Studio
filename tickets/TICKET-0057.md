@@ -2,7 +2,7 @@
 id: TICKET-0057
 title: "FIX: threshold inconsistency between ShipGlobalsHUD and ShipStatsSidebar"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: systems-programmer
@@ -41,3 +41,4 @@ Both UIs should agree on state boundaries: Power critical 0-19%, low 20-49%, hea
 
 ## Activity Log
 - 2026-02-23 [systems-programmer] Created from TICKET-0048 code review (P2)
+- 2026-02-23 [gameplay-programmer] Unified sidebar thresholds with HUD: constants (19.0/29.0/76.0/19.0), operators (<=/>= matching HUD), replaced hardcoded values with named constants. DONE

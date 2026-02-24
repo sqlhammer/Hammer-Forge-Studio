@@ -2,7 +2,7 @@
 id: TICKET-0059
 title: "FIX: ship_globals_hud.gd — remove unused _font variable"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: systems-programmer
@@ -25,3 +25,4 @@ tags: [coding-standards, dead-code, hud]
 
 ## Activity Log
 - 2026-02-23 [systems-programmer] Created from TICKET-0048 code review (P2)
+- 2026-02-23 [gameplay-programmer] Removed _font declaration and ThemeDB.fallback_font assignment. DONE

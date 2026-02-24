@@ -21,11 +21,15 @@ const COLOR_TEXT_PRIMARY := Color("#F1F5F9")
 const COLOR_TEXT_SECONDARY := Color("#94A3B8")
 const COLOR_NEUTRAL := Color("#94A3B8")
 
-## Alert thresholds (same as HUD)
-const POWER_CRITICAL: float = 20.0
-const INTEGRITY_CRITICAL: float = 30.0
-const HEAT_HOT: float = 75.0
-const OXYGEN_CRITICAL: float = 20.0
+## State thresholds (matches ShipGlobalsHUD)
+const POWER_LOW: float = 49.0
+const POWER_CRITICAL: float = 19.0
+const INTEGRITY_DAMAGED: float = 74.0
+const INTEGRITY_CRITICAL: float = 29.0
+const HEAT_COLD: float = 24.0
+const HEAT_HOT: float = 76.0
+const OXYGEN_LOW: float = 49.0
+const OXYGEN_CRITICAL: float = 19.0
 
 # ── Private Variables ─────────────────────────────────────
 var _bars: Array[ProgressBar] = []
@@ -34,6 +38,7 @@ var _labels: Array[Label] = []
 var _values: Array[float] = [100.0, 100.0, 50.0, 100.0]
 var _alerts_container: VBoxContainer = null
 var _alert_labels: Array[Label] = []
+var _current_alert_keys: Array[String] = []
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -216,30 +221,30 @@ func _apply_color(index: int, color: Color) -> void:
 	_icons[index].color = color
 
 func _get_power_color(value: float) -> Color:
-	if value < POWER_CRITICAL:
+	if value <= POWER_CRITICAL:
 		return COLOR_CORAL
-	elif value < 50.0:
+	elif value <= POWER_LOW:
 		return COLOR_AMBER
 	return COLOR_TEAL
 
 func _get_integrity_color(value: float) -> Color:
-	if value < INTEGRITY_CRITICAL:
+	if value <= INTEGRITY_CRITICAL:
 		return COLOR_CORAL
-	elif value < 75.0:
+	elif value <= INTEGRITY_DAMAGED:
 		return COLOR_AMBER
 	return COLOR_TEAL
 
 func _get_heat_color(value: float) -> Color:
-	if value < 25.0:
+	if value <= HEAT_COLD:
 		return COLOR_ICE_BLUE
-	elif value > HEAT_HOT:
+	elif value >= HEAT_HOT:
 		return COLOR_CORAL
 	return COLOR_TEAL
 
 func _get_oxygen_color(value: float) -> Color:
-	if value < OXYGEN_CRITICAL:
+	if value <= OXYGEN_CRITICAL:
 		return COLOR_CORAL
-	elif value < 50.0:
+	elif value <= OXYGEN_LOW:
 		return COLOR_AMBER
 	return COLOR_TEAL
 
@@ -248,27 +253,36 @@ func _update_alerts() -> void:
 	for child: Node in _alerts_container.get_children():
 		child.queue_free()
 
-	var has_alerts: bool = false
+	var new_alerts: Array[String] = []
 
-	if _values[0] < POWER_CRITICAL:
+	if _values[0] <= POWER_CRITICAL:
 		_add_alert("LOW POWER")
-		has_alerts = true
-	if _values[1] < INTEGRITY_CRITICAL:
+		new_alerts.append("LOW POWER")
+	if _values[1] <= INTEGRITY_CRITICAL:
 		_add_alert("HULL CRITICAL")
-		has_alerts = true
-	if _values[2] > HEAT_HOT:
+		new_alerts.append("HULL CRITICAL")
+	if _values[2] >= HEAT_HOT:
 		_add_alert("OVERHEATING")
-		has_alerts = true
-	if _values[3] < OXYGEN_CRITICAL:
+		new_alerts.append("OVERHEATING")
+	if _values[3] <= OXYGEN_CRITICAL:
 		_add_alert("LOW OXYGEN")
-		has_alerts = true
+		new_alerts.append("LOW OXYGEN")
 
-	if not has_alerts:
+	if new_alerts.is_empty():
 		var none_label := Label.new()
 		none_label.text = "(none)"
 		none_label.add_theme_font_size_override("font_size", 14)
 		none_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 		_alerts_container.add_child(none_label)
+
+	# Log alert changes
+	if new_alerts != _current_alert_keys:
+		if new_alerts.is_empty():
+			Global.log("ShipStatsSidebar: alerts cleared")
+		else:
+			var joined: String = ", ".join(new_alerts)
+			Global.log("ShipStatsSidebar: active alerts — %s" % joined)
+		_current_alert_keys = new_alerts
 
 func _add_alert(text: String) -> void:
 	var alert := Label.new()

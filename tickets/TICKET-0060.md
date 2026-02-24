@@ -2,7 +2,7 @@
 id: TICKET-0060
 title: "Tech tree — data layer"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -40,3 +40,5 @@ Define the data layer for the M5 tech tree — the system through which players 
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-24 [systems-programmer] Started implementation
+- 2026-02-24 [systems-programmer] Implemented TechTreeDefs (scripts/data/tech_tree_defs.gd) and TechTree autoload (autoloads/tech_tree.gd). Fabricator and Automation Hub nodes defined. Registered TechTree in project.godot. All scripts load clean.

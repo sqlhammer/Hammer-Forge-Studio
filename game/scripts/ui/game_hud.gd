@@ -72,6 +72,11 @@ func show_notification(text: String, accent_color: Color) -> void:
 	if _pickup_notifications:
 		_pickup_notifications.show_message(text, accent_color)
 
+## Shows or hides the crosshair (hidden in third-person).
+func set_crosshair_visible(is_visible: bool) -> void:
+	if _crosshair:
+		_crosshair.visible = is_visible
+
 ## Shows or hides the ship globals HUD panel.
 func show_ship_globals(show: bool) -> void:
 	if _ship_globals:

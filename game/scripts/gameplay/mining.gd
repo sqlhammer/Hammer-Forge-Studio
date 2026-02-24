@@ -82,6 +82,10 @@ func setup(camera: Camera3D, player: CharacterBody3D, scanner: Scanner) -> void:
 	_scanner = scanner
 	_setup_drill_viewmodel()
 
+## Updates the active camera reference (used on view mode switch).
+func set_camera(camera: Camera3D) -> void:
+	_camera = camera
+
 ## Returns the current mining progress (0.0 to 1.0).
 func get_mining_progress() -> float:
 	return _mining_progress

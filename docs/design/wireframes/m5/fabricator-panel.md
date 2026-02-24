@@ -9,18 +9,20 @@
 
 ## Purpose
 
-The Fabricator is the second installable ship module, producing craftable items (Spare Battery, Head Lamp) from raw materials. This panel is the interaction UI for selecting a recipe, queuing a job, monitoring progress, and collecting output. It extends the Recycler panel pattern from M4 — the design language is intentionally consistent to minimize player learning overhead.
+The Fabricator is the second installable ship module, producing craftable items (Spare Battery, Head Lamp) from raw materials. This panel is the interaction UI for browsing available recipes, starting a job, monitoring progress, and collecting output.
+
+**Layout approach — split-screen:** The panel is divided into two columns. The right column is a scrollable recipe list. The left column is the job detail view showing the currently selected recipe's input/output, progress, and action buttons. This design scales to dozens of recipes without any UI surgery.
 
 **Key differences from the Recycler panel:**
-- Multiple recipes available (recipe selection row added above input/output slots)
-- Fixed input/output per recipe — no inventory picker for input (recipe defines what goes in)
-- Job queue: player can view the active job and one pending slot (M5 scope — one active, no queue management)
+- Split-screen: recipe list (right) + job detail (left), vs Recycler's single-column layout
+- No recipe selector widget — recipe selection happens in the list, not the detail view
+- Fixed input/output per recipe — no inventory picker (recipe defines what goes in)
 
 ---
 
 ## Relationship to Physical Machine
 
-The Fabricator machine has a built-in display screen (see `docs/design/wireframes/m5/` — cross-reference the Fabricator 3D asset spec from TICKET-0067). The panel renders as a full-screen overlay when the player interacts at close range, narratively reading the machine's built-in display. The machine screen glows active Teal when the panel is open.
+The Fabricator machine has a built-in display screen. The panel renders as a full-screen overlay when the player interacts at close range, narratively reading the machine's built-in display. The machine screen glows active Teal when the panel is open.
 
 ---
 
@@ -28,19 +30,19 @@ The Fabricator machine has a built-in display screen (see `docs/design/wireframe
 
 1. Player walks toward the placed Fabricator inside the ship
 2. At 2m: interact prompt appears ("Press [E] to use Fabricator")
-3. Player presses interact — panel opens as screen-space overlay
-4. Player selects a recipe using the recipe selector
-5. Input slot auto-populates from inventory (if resources available)
-6. Player confirms and starts the job
+3. Player presses interact — panel opens, focus starts in the recipe list
+4. Player navigates the recipe list (D-pad up/down); left detail panel updates live
+5. Player presses Confirm or D-pad left to shift focus to the detail panel
+6. Player presses START — job begins; recipe list locks during processing
 7. Player can close panel and return when done — job continues in background
-8. When done, status light on machine turns Green — player reopens and collects output
-9. Close with Cancel/Back
+8. When done, machine status light turns Green; player reopens and presses COLLECT
+9. Close with Cancel/Back at any time
 
 ---
 
 ## Screen Region & Anchoring
 
-- **Position:** Centered on screen (full overlay, same layer as Recycler panel)
+- **Position:** Centered on screen (full overlay)
 - **Anchor:** `center`
 - **Background dim:** Screen Dim (`#000000` at 50%)
 - **CanvasLayer:** Layer 2
@@ -51,97 +53,92 @@ The Fabricator machine has a built-in display screen (see `docs/design/wireframe
 
 | Property | Value |
 |----------|-------|
-| **Panel width** | 520px |
-| **Panel height** | 500px |
-| **Recipe row height** | 48px |
+| **Total panel width** | 860px |
+| **Total panel height** | 560px |
+| **Left column width (detail)** | 480px |
+| **Right column width (recipe list)** | 340px |
+| **Column divider** | 1px solid `#1A2736`, `sp-4` margin each side |
 | **Slot size** | 72x72px |
-| **Progress bar width** | 220px |
+| **Progress bar width** | 340px |
 | **Progress bar height** | 16px (prominent) |
+| **Recipe list row height** | 56px |
 
 ---
 
 ## Layout Diagram
 
 ```
-    ┌──────────────────────── Full Screen ─────────────────────────────┐
-    │                                                                   │
-    │       ┌──────────────────────────────────────────────────┐        │
-    │       │  FABRICATOR                                      │        │
-    │       │  ──────────────────────────────────────────      │        │
-    │       │                                                  │        │
-    │       │  RECIPE                                          │        │
-    │       │  ┌────────────────────────────────────────────┐  │        │
-    │       │  │  ◄  [ Spare Battery ]  ►                   │  │        │
-    │       │  └────────────────────────────────────────────┘  │        │
-    │       │                                                  │        │
-    │       │  ──────────────────────────────────────────      │        │
-    │       │                                                  │        │
-    │       │   ┌────────┐         ┌────────┐                  │        │
-    │       │   │  INPUT │   ───►  │ OUTPUT │                  │        │
-    │       │   │        │         │        │                  │        │
-    │       │   │ [icon] │         │ [icon] │                  │        │
-    │       │   │  x 2   │         │  x 1   │                  │        │
-    │       │   └────────┘         └────────┘                  │        │
-    │       │    Metal x2           Spare Battery               │        │
-    │       │                                                  │        │
-    │       │   Have: 87 Metal  ◄── resource check label       │        │
-    │       │                                                  │        │
-    │       │  ──────────────────────────────────────────      │        │
-    │       │                                                  │        │
-    │       │       PROCESSING                                 │        │
-    │       │  ┌────────────────────────────────────────────┐  │        │
-    │       │  │███████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░│  │        │
-    │       │  └────────────────────────────────────────────┘  │        │
-    │       │        62%  ·  5s remaining                      │        │
-    │       │                                                  │        │
-    │       │  ──────────────────────────────────────────      │        │
-    │       │                                                  │        │
-    │       │   [ START ]               [ COLLECT ]            │        │
-    │       │                                                  │        │
-    │       └──────────────────────────────────────────────────┘        │
-    │                                                                   │
-    └───────────────────────────────────────────────────────────────────┘
+    ┌─────────────────────────────────── Full Screen ────────────────────────────────────┐
+    │                                                                                     │
+    │  ┌──────────────────────────────────────────────────────────────────────────────┐   │
+    │  │  FABRICATOR                                                                  │   │
+    │  │  ────────────────────────────────────────────────────────────────────────    │   │
+    │  │                                                                              │   │
+    │  │  ┌──── JOB DETAIL (480px) ─────────────────┐ │ ┌──── RECIPES (340px) ─────┐ │   │
+    │  │  │                                          │ │ │                          │ │   │
+    │  │  │  Spare Battery                           │ │ │  COMPONENTS              │ │   │
+    │  │  │  ↑ selected recipe label (hud-lg, teal)  │ │ │  ──────────────────      │ │   │
+    │  │  │                                          │ │ │  ▶ [i] Spare Battery ●   │ │   │
+    │  │  │  ──────────────────────────────────────  │ │ │    [i] Head Lamp     ●   │ │   │
+    │  │  │                                          │ │ │                          │ │   │
+    │  │  │   ┌────────┐         ┌────────┐          │ │ │  EQUIPMENT               │ │   │
+    │  │  │   │ INPUT  │   ───►  │ OUTPUT │          │ │ │  ──────────────────      │ │   │
+    │  │  │   │        │         │        │          │ │ │    [i] (future)      ◌   │ │   │
+    │  │  │   │ [icon] │         │ [icon] │          │ │ │                          │ │   │
+    │  │  │   │  x 2   │         │  x 1   │          │ │ │                          │ │   │
+    │  │  │   └────────┘         └────────┘          │ │ │                          │ │   │
+    │  │  │    Metal x2           Spare Battery       │ │ │                          │ │   │
+    │  │  │                                          │ │ │                          │ │   │
+    │  │  │   Have: 87 Metal  ← Green if sufficient  │ │ │                          │ │   │
+    │  │  │                                          │ │ │                          │ │   │
+    │  │  │  ──────────────────────────────────────  │ │ └──────────────────────────┘ │   │
+    │  │  │                                          │ │                              │   │
+    │  │  │  PROCESSING                              │ │                              │   │
+    │  │  │  ┌──────────────────────────────────┐   │ │                              │   │
+    │  │  │  │███████████████░░░░░░░░░░░░░░░░░░░│   │ │                              │   │
+    │  │  │  └──────────────────────────────────┘   │ │                              │   │
+    │  │  │       62%  ·  5s remaining               │ │                              │   │
+    │  │  │                                          │ │                              │   │
+    │  │  │  ──────────────────────────────────────  │ │                              │   │
+    │  │  │                                          │ │                              │   │
+    │  │  │   [ START ]           [ COLLECT ]        │ │                              │   │
+    │  │  │                                          │ │                              │   │
+    │  │  └──────────────────────────────────────────┘ │                              │   │
+    │  │                                                                              │   │
+    │  └──────────────────────────────────────────────────────────────────────────────┘   │
+    │                                                                                     │
+    └─────────────────────────────────────────────────────────────────────────────────────┘
 
     Screen dim (#000 50%) behind panel
+    ● = craftable (Green dot)   ◌ = insufficient resources (Amber dot)
 ```
 
 ---
 
-## Component Specification
+## Left Column: Job Detail
 
 ### Container Panel
 
 - **Background:** Surface (`#0A0F18` at 95%)
-- **Border:** 1px solid Primary Dim (`#007A63`)
-- **Border radius:** 8px
 - **Padding:** `sp-6` (24px) all sides
 
-### Title
+### Title (Panel-level)
 
 - **Text:** "FABRICATOR"
 - **Font:** `hud-xl` (32px) Bold
 - **Color:** Text Primary (`#F1F5F9`)
 - **Divider:** 1px horizontal line, Neutral at 40% opacity, `sp-4` margin below
+- Spans the full panel width (above both columns)
 
----
+### Selected Recipe Label
 
-### Recipe Selector
+Replaces the recipe selector widget. This is a display label only — recipe selection happens in the right column.
 
-A horizontally scrollable (or paginated) selector for the available recipes. M5 has two recipes: Spare Battery and Head Lamp.
-
-```
-    ◄  [ Recipe Name ]  ►
-
-    Left/Right arrows navigate recipes
-    Center shows the currently selected recipe name
-```
-
-- **Layout:** `HBoxContainer` — left arrow button + recipe label (centered) + right arrow button
-- **Arrow buttons:** 48x48px (minimum gamepad target), label `hud-lg` (24px) `<` / `>`
-- **Recipe label:** `hud-md` (20px) Bold, Text Highlight (`#00D4AA`), centered
-- **Background:** Panel BG Light (`#1A2736` at 90%), border radius 4px
-- **Focus:** Left or right arrow button focused; D-pad left/right switches recipe
-- **When only one recipe available:** Arrows disabled (40% opacity)
+- **Text:** Currently selected recipe name (e.g., "Spare Battery")
+- **Font:** `hud-lg` (24px) Bold
+- **Color:** Text Highlight (`#00D4AA`)
+- **Alignment:** Left-aligned
+- **Empty state:** "Select a recipe →" in Text Secondary (`#94A3B8`), pointing toward recipe list
 
 ---
 
@@ -152,155 +149,233 @@ Two slots arranged horizontally with an arrow between them. Identical spec to Re
 #### Input Slot
 
 - **Size:** 72x72px
-- **Background (empty/no resources):** `#1A2736` at 60% opacity
+- **Background (no resources):** `#1A2736` at 60% opacity
 - **Background (stocked):** `#1A2736` at 80% opacity
 - **Border (stocked):** Primary Dim `#007A63`
-- **Border (insufficient):** Coral `#FF6B5A` — signals player doesn't have enough resources
+- **Border (insufficient):** Coral `#FF6B5A`
 - **Icon:** 48x48px item icon, centered
 - **Stack count:** `hud-xs` (14px) Mono, bottom-right
 - **Label below slot:** Input item name + quantity required (e.g., "Metal x2"), `hud-sm` (16px) Text Secondary
 
-Input slot is **display-only** (no picker) — the recipe defines what goes in. The panel reads from inventory automatically to populate the slot. If inventory has insufficient resources, the slot shows the resource icon at 40% opacity with a Coral border.
+Input slot is **display-only** — recipe defines what goes in. Panel reads inventory to set state.
 
 #### Arrow
 
-- Identical to Recycler panel arrow spec
 - `>>>` symbol, `hud-lg` (24px), Primary Dim `#007A63`, vertically centered
 
 #### Output Slot
 
 - Identical spec to Recycler panel output slot
-- Label below: Output item name + quantity (e.g., "Spare Battery x1"), `hud-sm` Text Secondary
+- Label below: Output item name + quantity, `hud-sm` Text Secondary
 
 ---
 
 ### Resource Availability Row
 
-A single line below the slot area showing inventory quantities for the required input material.
-
 ```
-    Have: [Y] [Resource]  ◄── color-coded
+    Have: [Y] [Resource]
 ```
 
 - **Font:** `data` (18px) Mono
-- **Color:** Positive Green (`#4ADE80`) if Y ≥ required; Amber (`#FFB830`) if Y < required
-- **Alignment:** Left-aligned, `sp-3` from slot area
+- **Color:** Positive Green (`#4ADE80`) if Y ≥ required; Amber (`#FFB830`) if insufficient
+- **Alignment:** Left-aligned, `sp-3` below slot area
 
 ---
 
 ### Progress Section
 
-Identical spec to Recycler panel progress section.
-
-- **Section title:** "PROCESSING", `hud-sm` Bold, Text Secondary
-- **Progress bar:** 220px wide, 16px tall, Primary Teal fill, `#1A2736` background, 4px border radius
-- **Progress label:** `XX% · Xs remaining`, `data` (18px) Mono, Text Secondary, centered
+- **Section title:** "PROCESSING", `hud-sm` (16px) Bold, Text Secondary
+- **Progress bar:** 340px wide (full column), 16px tall, Teal fill, `#1A2736` background, 4px border radius
+- **Progress label:** `XX% · Xs remaining`, `data` (18px) Mono, Text Secondary, centered below bar
+- **Hidden** when no job is running
 
 ---
 
 ### Action Buttons
 
-Identical spec to Recycler panel action buttons.
-
 #### START Button
 
 - **Text:** "START"
 - **Size:** Min 120x48px
-- **Normal:** Available when input slot has sufficient resources and no job running
-- **Disabled:** When insufficient resources, or job already running, or output slot full
+- **Enabled:** Input slot stocked with sufficient resources and no active job
+- **Disabled:** Insufficient resources, job running, or output slot full
 - **Focused:** Teal outline (2px)
 
 #### COLLECT Button
 
 - **Text:** "COLLECT"
 - **Size:** Min 120x48px
-- **Ready state:** Positive Green border + text
-- **Disabled:** Greyed out when no output available
+- **Ready state:** Positive Green border + text; focused by default when output ready
+- **Disabled:** No output available
 - **Focused:** Teal outline (2px)
+
+---
+
+## Right Column: Recipe List
+
+A vertically scrollable list of all unlocked recipes, organized by category. Selecting a row updates the left detail panel reactively.
+
+### Recipe List Container
+
+- **Background:** Panel BG (`#0F1923` at 85%)
+- **Border-left:** 1px solid `#1A2736` (the column divider)
+- **Padding:** `sp-3` (12px) horizontal, `sp-2` (8px) vertical
+
+### Category Header
+
+Groups recipes by type. M5 has two categories: **COMPONENTS** (Spare Battery) and **EQUIPMENT** (Head Lamp).
+
+- **Text:** Category name in ALL CAPS
+- **Font:** `hud-xs` (14px) Bold
+- **Color:** Text Secondary (`#94A3B8`)
+- **Divider:** 1px solid `#1A2736` below, `sp-1` (4px) padding
+- **Not focusable** — D-pad navigation skips headers
+
+### Recipe Row
+
+One row per unlocked recipe.
+
+```
+    ▶ [icon]  Recipe Name              ●
+       Input cost secondary info
+```
+
+- **Height:** 56px
+- **Layout:** `HBoxContainer` — selection indicator (8px) + icon (32px) + `sp-2` + text block (flex) + affordability dot (16px)
+
+#### Selection Indicator
+
+- **Size:** 4px × 40px vertical bar, left edge of row
+- **Color:** Primary Teal `#00D4AA` when this row is selected; transparent otherwise
+- **Replaces** the teal left-border focus pattern from the style guide component standards
+
+#### Recipe Icon
+
+- **Size:** 32x32px
+- **Style:** Item icon, same asset used in the output slot
+
+#### Text Block (`VBoxContainer`)
+
+- **Top line:** Recipe name, `hud-md` (20px), Text Primary
+- **Bottom line:** Input cost summary, `hud-xs` (14px), Text Secondary — e.g., "2 Metal"
+- **Line height:** 1.2x
+
+#### Affordability Dot
+
+A 12px circle indicating at a glance whether the player can craft this recipe.
+
+| State | Color | Meaning |
+|-------|-------|---------|
+| Filled Green ● | `#4ADE80` | Sufficient resources in inventory |
+| Filled Amber ● | `#FFB830` | Insufficient resources |
+| Empty ◌ | `#94A3B8` at 40% | No recipe data (placeholder; should not appear in normal play) |
+
+Color-blind safety: the dot pairs with the affordability color in the detail panel's "Have:" row — two separate affordability signals reinforce each other.
+
+#### Row States
+
+| State | Background | Name Color | Indicator |
+|-------|------------|------------|-----------|
+| **Normal** | Transparent | Text Primary | None |
+| **Focused** | Panel BG Light `#1A2736` at 60% | Text Primary | Teal left bar |
+| **Selected** | Panel BG Light `#1A2736` at 80% | Text Highlight `#00D4AA` | Teal left bar (persistent) |
+| **Locked during job** | 40% opacity | Text Secondary | — |
+
+"Focused" = gamepad cursor is on the row. "Selected" = this recipe's details are shown in the left panel. A row can be Selected without being Focused (e.g., player has moved focus to the action buttons).
+
+### Scroll Behavior
+
+- Vertical scroll only
+- Scroll bar: 4px right-edge, `#1A2736` track, `#00D4AA` thumb — visible when list overflows
+- D-pad up/down scrolls through rows; list auto-scrolls to keep focused row visible
+- Keyboard: arrow keys, Page Up/Down supported
 
 ---
 
 ## Panel States
 
-### Idle — Recipe Selected, Sufficient Resources
+### No Recipe Selected (on open)
 
 ```
-    Recipe:   [Spare Battery]
-    Input:    [Metal x2] (stocked, standard border)
-    Output:   [empty]
-    Have:     87 Metal  (Green)
-    Progress: Hidden
-    START:    Enabled
-    COLLECT:  Disabled
+    Left:  "Select a recipe →" label; slots empty; START and COLLECT disabled
+    Right: Recipe list, no row selected; first unlockable row auto-focused
 ```
 
-### Idle — Insufficient Resources
+### Recipe Selected, Sufficient Resources
 
 ```
-    Recipe:   [Spare Battery]
-    Input:    [Metal icon, 40% opacity] (Coral border)
-    Output:   [empty]
-    Have:     1 Metal  (Amber) — need 2
-    Progress: Hidden
-    START:    Disabled
-    COLLECT:  Disabled
+    Left:  Recipe name (Teal); slots stocked; Have: X (Green); START enabled
+    Right: Selected row highlighted (Teal bar + Text Highlight)
+```
+
+### Recipe Selected, Insufficient Resources
+
+```
+    Left:  Recipe name (Teal); input slot Coral border; Have: X (Amber); START disabled
+    Right: Selected row highlighted; affordability dot Amber
 ```
 
 ### Processing
 
 ```
-    Recipe:   [Spare Battery] (locked during processing)
-    Input:    [Metal x2] (consumed display — shows cost)
-    Output:   [ghost icon at 30% opacity — expected output]
-    Have:     [updated inventory count]
-    Progress: Visible, filling
-    START:    Disabled ("PROCESSING...")
-    COLLECT:  Disabled
+    Left:  Recipe label locked; slots locked; progress bar filling; START disabled
+    Right: Recipe list at 40% opacity (locked — cannot change recipe during processing)
 ```
 
 ### Complete
 
 ```
-    Recipe:   [Spare Battery] (unlocked)
-    Input:    [empty]
-    Output:   [Spare Battery x1] (Teal glow border)
-    Progress: 100%, "COMPLETE" in Positive Green
-    START:    Disabled (output slot full)
-    COLLECT:  Enabled, Positive Green highlight, focused by default
+    Left:  Output slot with Teal glow; progress "COMPLETE" Green; COLLECT enabled, focused
+    Right: Recipe list still locked
 ```
 
 ---
 
 ## Open / Close Behavior
 
-Identical to Recycler panel: 150ms screen dim + 200ms panel scale-in on open; 150ms fade on close.
+- **Open:** Screen dim fades in 150ms; panel scales 0.95→1.0 + fades in, 200ms ease-out
+- **Focus on open:** First row of recipe list (auto-selects first craftable recipe if any; falls back to first row)
+- **Close (Cancel/Back):** Panel fades out 150ms; screen dim fades out 150ms
 
 ---
 
 ## Gamepad Navigation
 
 ```
-    Focus order:
+    Right column (recipe list):
+    D-pad up/down ──► navigate recipe rows
+    Confirm (A)   ──► select recipe AND shift focus to left detail panel (START button)
+    D-pad left    ──► shift focus to left detail panel without confirming
 
-    [Recipe ◄]  [Recipe ►]
-         │
-         ▼
-    [START]  ──►  [COLLECT]
+    Left column (detail):
+    D-pad up/down ──► navigate START → COLLECT
+    D-pad right   ──► shift focus back to recipe list
+    Cancel (B)    ──► close panel (from either column)
 
-    Cancel/Back always closes panel
-    Recipe arrows focusable with D-pad up/back from slots
+    Focus order summary:
+    [Recipe List] ←──► [START] ──► [COLLECT]
+                              ↑
+                        Cancel always closes
 ```
+
+- Focus starts in the recipe list on open
+- During processing: recipe list is non-focusable; focus stays in left column on COLLECT
+- COLLECT becomes focused automatically when output is ready (same as Recycler panel)
 
 ---
 
 ## Implementation Notes
 
-- Reuse Recycler slot scene (`game/scenes/ui/`) — identical visual spec
-- Recipe selector: `HBoxContainer` with two `Button` nodes + `Label`; driven by `Fabricator.get_recipes()` list
-- Input slot: Display-only; read `Fabricator.get_selected_recipe().input` for item + quantity; check inventory to set availability state
-- Progress bar: Bind to `Fabricator.job_progress` signal
-- Recipe change: Emit `recipe_changed(recipe_id)` signal for gameplay-programmer; update slot display reactively
-- Game pause: Same as Recycler — `get_tree().paused = true` when open
+- Root: `CanvasLayer` layer 2
+- Panel structure: `VBoxContainer` (title + divider + `HBoxContainer` (left column + right column))
+- Left column: `VBoxContainer` — recipe label + slot area + resource row + progress + buttons
+- Right column: `VBoxContainer` — scrollable `ItemList` or custom `VBoxContainer` of recipe row scenes; `ScrollContainer` wrapper
+- Recipe rows: One `Control` scene per recipe, instantiated from `Fabricator.get_unlocked_recipes()`; reactive to `Fabricator.recipe_unlocked(recipe_id)` signal
+- Recipe selection: Emitting `recipe_selected(recipe_id)` from the list scene; left column binds to this signal and updates all display elements
+- Slot states: same binding pattern as Recycler panel — read inventory at panel open and on `Inventory.item_changed` signal
+- List lock during processing: Set `mouse_filter = MOUSE_FILTER_IGNORE` and `focus_mode = FOCUS_NONE` on each row node; restore on job complete
+- Reuse Recycler slot scene — identical visual spec
+- Game pause: `get_tree().paused = true` when panel opens; panel root in `PROCESS_MODE_WHEN_PAUSED`
 
 ---
 
@@ -312,4 +387,4 @@ Identical to Recycler panel: 150ms screen dim + 200ms panel scale-in on open; 15
 | `@export var inventory: Inventory` | Node ref | For reading available material quantities |
 | `signal start_requested(recipe_id: String)` | Signal | Emitted when player presses START |
 | `signal collect_requested()` | Signal | Emitted when player presses COLLECT |
-| `func refresh_display()` | Method | Force-refresh all slot/button states |
+| `func refresh_display()` | Method | Force-refresh all slot/button/list states |

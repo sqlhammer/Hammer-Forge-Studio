@@ -31,6 +31,8 @@ var _ship_interior: Node3D = null
 var _ship_enter_zone: Area3D = null
 var _player_near_ship_entrance: bool = false
 var _transitioning: bool = false
+var _module_placement_ui: ModulePlacementUI = null
+var _recycler_panel: RecyclerPanel = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -45,6 +47,7 @@ func _ready() -> void:
 	_setup_gameplay_systems()
 	_setup_ship_interior()
 	_setup_hud()
+	_setup_ship_ui()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	Global.log("TestWorld: initialization complete")
 
@@ -342,6 +345,14 @@ func _update_ship_interact() -> void:
 	if _transitioning or not _ship_interior:
 		return
 
+	# Don't process interact while a UI panel is open
+	if _module_placement_ui and _module_placement_ui.is_open():
+		return
+	if _recycler_panel and _recycler_panel.is_open():
+		return
+	if _inventory_screen and _inventory_screen.is_open():
+		return
+
 	# Enter ship from exterior
 	if _player_near_ship_entrance and not _ship_interior.is_player_inside():
 		if InputManager.is_action_just_pressed("interact"):
@@ -354,6 +365,16 @@ func _update_ship_interact() -> void:
 			_begin_exit_ship()
 			return
 
+	# Interact with placement zones when inside ship
+	if _ship_interior.is_player_inside():
+		if InputManager.is_action_just_pressed("interact"):
+			var zone_index: int = _ship_interior.get_nearby_zone_index()
+			if zone_index >= 0:
+				if _ship_interior.is_zone_occupied(zone_index):
+					_recycler_panel.open()
+				else:
+					_module_placement_ui.open(zone_index)
+
 func _begin_enter_ship() -> void:
 	_transitioning = true
 	await _ship_interior.enter_ship(_first_person)
@@ -363,6 +384,57 @@ func _begin_exit_ship() -> void:
 	_transitioning = true
 	await _ship_interior.exit_ship()
 	_transitioning = false
+
+func _setup_ship_ui() -> void:
+	# Module placement UI
+	_module_placement_ui = ModulePlacementUI.new()
+	_module_placement_ui.name = "ModulePlacementUI"
+	add_child(_module_placement_ui)
+	_module_placement_ui.module_installed.connect(_on_module_installed)
+
+	# Recycler interaction panel
+	_recycler_panel = RecyclerPanel.new()
+	_recycler_panel.name = "RecyclerPanel"
+	add_child(_recycler_panel)
+
+	# Allow Recycler to process while game is paused (so jobs progress during panel view)
+	Recycler.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# Restore any modules already installed (e.g., from autoload state after scene reload)
+	_restore_installed_modules()
+	Global.log("TestWorld: ship UI ready")
+
+func _restore_installed_modules() -> void:
+	var installed_ids: Array[String] = ModuleManager.get_installed_module_ids()
+	for module_id: String in installed_ids:
+		var zone_index: int = _ship_interior.get_first_empty_zone()
+		if zone_index >= 0:
+			_place_module_visual(module_id, zone_index)
+
+func _on_module_installed(module_id: String, zone_index: int) -> void:
+	_place_module_visual(module_id, zone_index)
+
+func _place_module_visual(module_id: String, zone_index: int) -> void:
+	if module_id == "recycler":
+		var recycler_scene: Resource = load("res://assets/meshes/machines/mesh_recycler_module.glb")
+		if recycler_scene and recycler_scene is PackedScene:
+			var mesh_node: Node3D = (recycler_scene as PackedScene).instantiate()
+			mesh_node.name = "RecyclerModule"
+			_ship_interior.place_module_in_zone(zone_index, mesh_node)
+			Global.log("TestWorld: placed recycler mesh in zone %d" % zone_index)
+		else:
+			# Fallback: greybox placeholder
+			var fallback := MeshInstance3D.new()
+			var box := BoxMesh.new()
+			box.size = Vector3(1.8, 1.4, 1.2)
+			fallback.mesh = box
+			var mat := StandardMaterial3D.new()
+			mat.albedo_color = Color("#666666")
+			fallback.material_override = mat
+			fallback.name = "RecyclerModule"
+			fallback.position.y = 0.7
+			_ship_interior.place_module_in_zone(zone_index, fallback)
+			Global.log("TestWorld: placed recycler fallback mesh in zone %d" % zone_index)
 
 func _on_ship_enter_zone_entered(body: Node3D) -> void:
 	if body == _first_person:
@@ -382,3 +454,8 @@ func _on_player_exited_ship() -> void:
 	Global.log("TestWorld: player exited ship — deactivating ship HUD")
 	if _hud:
 		_hud.show_ship_globals(false)
+	# Close any open ship UI panels
+	if _recycler_panel and _recycler_panel.is_open():
+		_recycler_panel.close()
+	if _module_placement_ui and _module_placement_ui.is_open():
+		_module_placement_ui.close()

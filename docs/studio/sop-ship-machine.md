@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Active
-**Last Updated:** 2026-02-24
+**Last Updated:** 2026-02-24 (TICKET-0080 — DEC-0001 compliance update)
 
 > Standard Operating Procedure for introducing any new ship machine to Hammer Forge Studio. Follow this process every milestone that adds a new installable machine. Use the M5 Fabricator as the canonical reference example, with M4 Recycler notes where the processes diverged.
 
@@ -13,8 +13,10 @@
 A "ship machine" is an installable module that the player purchases through the tech tree, places in the ship interior, and operates via an interaction panel. Every ship machine requires coordinated work across five agents: systems-programmer, ui-ux-designer, technical-artist, gameplay-programmer, and qa-engineer.
 
 **Reference machines:**
-- **Recycler** (M4) — first machine, established the baseline pattern
-- **Fabricator** (M5) — second machine, introduced tech tree gating and recipe output modes
+- **Recycler** (M4) — first machine; established the baseline pattern but was built under the old pause model — see DEC-0001 note in Step 7
+- **Fabricator** (M5) — canonical reference for all future machines; first machine built to the correct non-pause model (DEC-0001, `docs/studio/decision-log.md`)
+
+> **Panel Interaction Model (DEC-0001):** Machine interaction panels do **not** pause the game. When a panel is open: player movement and action inputs are suppressed via `InputManager`; all game systems and machines continue running; mouse mode switches to `MOUSE_MODE_VISIBLE`. Machines run at default `PROCESS_MODE_INHERIT`. Do **not** use `get_tree().paused` or `PROCESS_MODE_ALWAYS` for machine panels. See `docs/studio/decision-log.md` (DEC-0001) for the authoritative decision.
 
 ---
 
@@ -164,7 +166,7 @@ Wire the machine's interaction panel into the game world.
 Checklist:
 - [ ] Panel scene created at `game/scenes/ui/panels/<machine_name>_panel.tscn`
 - [ ] Panel opens on interact input when player is in range of the machine's `InteractionArea`
-- [ ] Input context switches correctly — game input suppressed while panel is open
+- [ ] Panel opens without pausing the game; player movement and action inputs suppressed via `InputManager`; game world and all machines continue running at default `PROCESS_MODE_INHERIT` (DEC-0001)
 - [ ] Input slot: player selects recipe/input from inventory; invalid recipes grayed out
 - [ ] Active job display: progress bar updates live while panel is open
 - [ ] Output slot: result appears on `job_completed`; player collects manually
@@ -174,9 +176,9 @@ Checklist:
 - [ ] Follows wireframe from Step 3 and M3 UI style guide
 - [ ] No Godot editor errors or warnings
 
-> **Recycler (M4):** TICKET-0045. `RecyclerPanel` scene. Integrated into `test_world.gd`. Recycler `process_mode` set to `ALWAYS` for paused-state processing — adopt this pattern for all machines.
+> **Recycler (M4):** TICKET-0045. `RecyclerPanel` scene. Integrated into `test_world.gd`. Originally called `get_tree().paused = true` and set `Recycler.process_mode = ALWAYS` as a workaround to keep the machine running through the pause — both are obsolete per DEC-0001 (`docs/studio/decision-log.md`). TICKET-0077 removed both; the Recycler now runs at default `PROCESS_MODE_INHERIT`. **Do not use `PROCESS_MODE_ALWAYS` or `get_tree().paused` for future machines.**
 >
-> **Fabricator (M5):** TICKET-0069. Panel adds recipe selector (multiple output types). All other patterns inherited from Recycler panel.
+> **Fabricator (M5):** TICKET-0069. Panel adds recipe selector (multiple output types). The Fabricator is the **canonical reference** for the correct model (DEC-0001): panel opens without pausing the game; player inputs suppressed via `InputManager`; machine runs at default `PROCESS_MODE_INHERIT`. Use the Fabricator, not the Recycler, as the reference for future machines.
 
 ---
 

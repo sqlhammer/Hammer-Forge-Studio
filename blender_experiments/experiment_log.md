@@ -91,3 +91,11 @@ Central log for all 3D generation attempts using `bpy`.
 - **Challenges/Fixes:** None
 
 ---
+
+### [2026-02-24 13:38:44] - Object: mesh_ship_exterior
+- **Original Prompt:** "Atmospheric research vessel, mobile base. Chunky utilitarian sci-fi, Outer Wilds aesthetic. Asymmetric hull with cargo pod, dual main engines, cockpit windshield, antenna array, landing gear deployed. ~45m long (3x original). Riveted plating, orange accent stripes."
+- **Output Files:** `C:\repos\Hammer-Forge-Studio\blender_experiments\mesh_ship_exterior\mesh_ship_exterior.blend`, `C:\repos\Hammer-Forge-Studio\blender_experiments\mesh_ship_exterior\mesh_ship_exterior.obj`, `C:\repos\Hammer-Forge-Studio\blender_experiments\mesh_ship_exterior\mesh_ship_exterior.glb`
+- **Technical Strategy:** Beveled box primitives for hull sections (main, fore, aft, cargo pod). Cylinders for engines and thruster nozzles. Asymmetric cargo pod on starboard. Hull detail via accent strips, panel seams, hatches. Antenna array with dish and mast. Three-point landing gear with strut + pad + hydraulic. 8 PBR materials. 3x uniform scale applied post-build and baked into mesh data (TICKET-0081).
+- **Challenges/Fixes:** None
+
+---

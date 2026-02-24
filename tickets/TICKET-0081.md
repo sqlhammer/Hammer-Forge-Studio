@@ -2,7 +2,7 @@
 id: TICKET-0081
 title: "Ship exterior — scale mesh to 3× current size"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: technical-artist
 created_by: producer
@@ -22,15 +22,15 @@ The ship exterior mesh is currently too small relative to the player and game wo
 
 ## Acceptance Criteria
 
-- [ ] Ship exterior mesh scaled to exactly 3× its current dimensions (uniform scale on all axes)
-- [ ] Transform applied in Blender before export — no non-uniform scale remaining on the root object
-- [ ] Mesh re-exported to `game/assets/meshes/vehicles/mesh_ship_exterior.glb` at the new size
-- [ ] Ship node in the test world scene (`game/scenes/gameplay/`) updated to display at the new scale with no in-engine scale override (scale = `(1, 1, 1)`)
-- [ ] Existing collision shape(s) on the ship updated to match the rescaled hull
-- [ ] Player recharge zone (suit battery recharge trigger area) repositioned to remain at the ship's entrance at the new scale
-- [ ] No z-fighting, mesh clipping, or visible seam artifacts introduced by the rescale
-- [ ] No Godot import errors or warnings
-- [ ] Scene saved and committed
+- [x] Ship exterior mesh scaled to exactly 3× its current dimensions (uniform scale on all axes)
+- [x] Transform applied in Blender before export — no non-uniform scale remaining on the root object
+- [x] Mesh re-exported to `game/assets/meshes/vehicles/mesh_ship_exterior.glb` at the new size
+- [x] Ship node in the test world scene (`game/scenes/gameplay/`) updated to display at the new scale with no in-engine scale override (scale = `(1, 1, 1)`)
+- [x] Existing collision shape(s) on the ship updated to match the rescaled hull
+- [x] Player recharge zone (suit battery recharge trigger area) repositioned to remain at the ship's entrance at the new scale
+- [x] No z-fighting, mesh clipping, or visible seam artifacts introduced by the rescale
+- [x] No Godot import errors or warnings
+- [x] Scene saved and committed
 
 ## Implementation Notes
 
@@ -42,8 +42,17 @@ The ship exterior mesh is currently too small relative to the player and game wo
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+- Ship exterior mesh re-exported at 3× native scale (~45m long, ~24m wide, ~15m tall)
+- Blender build script: 3× uniform scale applied post-build via `obj.scale *= 3` + `transform_apply(scale=True)`
+- GLB file: `game/assets/meshes/vehicles/mesh_ship_exterior.glb` (88 KB, same tri count)
+- In-engine scale override removed — mesh displays at (1,1,1)
+- Collision box: `Vector3(21.0, 12.0, 42.0)` matching 3× hull envelope
+- Recharge zone: `Vector3(24.0, 15.0, 30.0)` repositioned at ship entrance
+- Ship enter zone: `Vector3(9.0, 6.0, 6.0)` at position `(0, 3.0, 13.5)`
+- Player spawn and exterior exit positions scaled to match new hull
+- Ship interior at `INTERIOR_Y_OFFSET = -50.0` — no clipping with rescaled exterior
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket
+- 2026-02-25 [technical-artist] Implemented: mesh scaled 3× in Blender pipeline, GLB re-exported, test_world.gd updated with matching collision/zone shapes, in-engine scale override removed. Status → DONE.

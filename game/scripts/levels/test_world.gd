@@ -153,38 +153,37 @@ func _build_ship() -> void:
 	ship.position = Vector3.ZERO
 	add_child(ship)
 
-	# Ship mesh
+	# Ship mesh (3× native scale per TICKET-0081 — no in-engine scale override)
 	var ship_scene: Resource = load("res://assets/meshes/vehicles/mesh_ship_exterior.glb")
 	if ship_scene and ship_scene is PackedScene:
 		var ship_mesh: Node3D = (ship_scene as PackedScene).instantiate()
 		ship_mesh.name = "ShipMesh"
-		ship_mesh.scale = Vector3(4, 4, 4)
-		ship_mesh.position.y = 1.1
+		ship_mesh.position.y = 3.3
 		ship.add_child(ship_mesh)
 
-	# Ship collision (approximate with a box)
+	# Ship collision (approximate with a box matching 3× hull)
 	var ship_body := StaticBody3D.new()
 	ship_body.name = "ShipBody"
 	ship_body.collision_layer = LAYER_ENVIRONMENT
 	ship_body.collision_mask = 0
 	var ship_col := CollisionShape3D.new()
 	var ship_shape := BoxShape3D.new()
-	ship_shape.size = Vector3(3.5, 2.2, 4.0)
+	ship_shape.size = Vector3(21.0, 12.0, 42.0)
 	ship_col.shape = ship_shape
-	ship_col.position.y = 1.1
+	ship_col.position.y = 6.0
 	ship_body.add_child(ship_col)
 	ship.add_child(ship_body)
 
-	# Recharge zone (larger area around ship)
+	# Recharge zone (larger area around ship entrance)
 	_recharge_zone = Area3D.new()
 	_recharge_zone.name = "RechargeZone"
 	_recharge_zone.collision_layer = 0
 	_recharge_zone.collision_mask = LAYER_PLAYER
 	var recharge_col := CollisionShape3D.new()
 	var recharge_shape := BoxShape3D.new()
-	recharge_shape.size = Vector3(8.0, 5.0, 10.0)
+	recharge_shape.size = Vector3(24.0, 15.0, 30.0)
 	recharge_col.shape = recharge_shape
-	recharge_col.position.y = 1.5
+	recharge_col.position.y = 4.5
 	_recharge_zone.add_child(recharge_col)
 	ship.add_child(_recharge_zone)
 
@@ -198,7 +197,7 @@ func _spawn_player() -> void:
 		return
 	_player = player_scene.instantiate()
 	_player.name = "Player"
-	_player.position = Vector3(0, 0.9, 8)  # Spawn near ship, Y=0.9 to rest capsule on ground
+	_player.position = Vector3(0, 0.9, 24)  # Spawn near ship entrance (3× hull), Y=0.9 to rest capsule on ground
 	add_child(_player)
 
 	# Get first-person controller and camera
@@ -317,23 +316,23 @@ func _setup_ship_interior() -> void:
 	if _first_person:
 		_ship_interior.setup(_first_person)
 
-	# Set the exterior exit position to just outside the ship ramp
-	_ship_interior.set_exterior_position(Vector3(0, 0.9, 6))
+	# Set the exterior exit position to just outside the ship ramp (scaled for 3× hull)
+	_ship_interior.set_exterior_position(Vector3(0, 0.9, 18))
 
 	# Connect ship interior signals
 	_ship_interior.player_entered_ship.connect(_on_player_entered_ship)
 	_ship_interior.player_exited_ship.connect(_on_player_exited_ship)
 
-	# Create an enter-ship interaction zone near the ship exterior
+	# Create an enter-ship interaction zone near the ship exterior (scaled for 3× hull)
 	_ship_enter_zone = Area3D.new()
 	_ship_enter_zone.name = "ShipEnterZone"
 	_ship_enter_zone.collision_layer = 0
 	_ship_enter_zone.collision_mask = LAYER_PLAYER
 	var enter_col := CollisionShape3D.new()
 	var enter_shape := BoxShape3D.new()
-	enter_shape.size = Vector3(3.0, 3.0, 2.0)
+	enter_shape.size = Vector3(9.0, 6.0, 6.0)
 	enter_col.shape = enter_shape
-	enter_col.position = Vector3(0, 1.5, 4.5)
+	enter_col.position = Vector3(0, 3.0, 13.5)
 	_ship_enter_zone.add_child(enter_col)
 	add_child(_ship_enter_zone)
 

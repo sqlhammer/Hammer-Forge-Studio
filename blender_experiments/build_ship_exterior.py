@@ -4,7 +4,7 @@ Ship Exterior - Blender Generation Script
 Atmospheric vessel / mobile base.
 - Utilitarian, asymmetric research vessel (Outer Wilds reference)
 - Riveted plating, engine housings, cargo hatches, antenna arrays
-- ~15m long, ~8m wide, ~5m tall
+- ~45m long, ~24m wide, ~15m tall (3× original M2 dimensions)
 - Target: 8,000-15,000 triangles
 """
 
@@ -348,6 +348,16 @@ def build_ship_exterior():
     build_antenna_array(M)
     build_landing_gear(M)
 
+    # TICKET-0081: Scale entire ship to 3× and apply transforms so the
+    # exported GLB is natively 3× the original M2 dimensions.
+    # This eliminates the need for any in-engine scale override.
+    SCALE_FACTOR = 3.0
+    for obj in bpy.data.objects:
+        obj.location *= SCALE_FACTOR
+        obj.scale *= SCALE_FACTOR
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+
 
 # ================================================================
 # ENTRY POINT
@@ -356,13 +366,14 @@ if __name__ == "__main__":
     PROMPT = (
         "Atmospheric research vessel, mobile base. Chunky utilitarian sci-fi, Outer Wilds aesthetic. "
         "Asymmetric hull with cargo pod, dual main engines, cockpit windshield, antenna array, "
-        "landing gear deployed. ~15m long. Riveted plating, orange accent stripes."
+        "landing gear deployed. ~45m long (3x original). Riveted plating, orange accent stripes."
     )
     STRATEGY = (
         "Beveled box primitives for hull sections (main, fore, aft, cargo pod). "
         "Cylinders for engines and thruster nozzles. Asymmetric cargo pod on starboard. "
         "Hull detail via accent strips, panel seams, hatches. Antenna array with dish and mast. "
-        "Three-point landing gear with strut + pad + hydraulic. 8 PBR materials."
+        "Three-point landing gear with strut + pad + hydraulic. 8 PBR materials. "
+        "3x uniform scale applied post-build and baked into mesh data (TICKET-0081)."
     )
     generate_and_export(
         object_name="mesh_ship_exterior",

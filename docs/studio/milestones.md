@@ -29,7 +29,7 @@
 | M1 | Core Game Architecture — Player controller, input system, view modes | 2026-02-21 | Complete | 7 | 0 | 7 | 2026-02-21 |
 | M2 | 3D Asset Pipeline — PoC evaluation, pipeline SOP, M3-ready assets | 2026-02-22 | Complete | 10 | 0 | 10 | 2026-02-22 |
 | M3 | First Playable — Minimal ship in world, scan/mine loop | — | Complete | 13 | 0 | 13 | 2026-02-23 |
-| M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Active | 11 | 11 | 0 | — |
+| M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Complete | 21 | 0 | 21 | 2026-02-24 |
 | M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Planning | — | — | — | — |
 | M6 | Ship Interior — Cockpit and machine room buildout | — | Planning | — | — | — | — |
 | M7 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |
@@ -201,6 +201,8 @@
 **Deferred Items scheduled in M4:** D-003 (ship global variables → TICKET-0039)
 
 **Dependencies:** M3 (first playable world and inventory system required)
+
+**Closed:** 2026-02-24 — QA sign-off by qa-engineer (284/284 tests passing). Studio Head approved.
 
 ---
 

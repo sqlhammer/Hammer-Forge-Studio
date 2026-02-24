@@ -51,17 +51,17 @@ func _ready() -> void:
 	_font = ThemeDB.fallback_font
 	_build_ui()
 	PlayerInventory.slot_changed.connect(_on_slot_changed)
+	Global.log("InventoryScreen: ready")
+
+func _process(_delta: float) -> void:
+	if Input.is_action_just_pressed("inventory_toggle"):
+		toggle()
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("inventory_toggle"):
-		toggle()
-		get_viewport().set_input_as_handled()
-		return
-
 	if not _is_open:
 		return
 
-	# Navigation
+	# Navigation (only when inventory is open)
 	if event.is_action_pressed("ui_right"):
 		_move_focus(1, 0)
 		get_viewport().set_input_as_handled()

@@ -2,7 +2,7 @@
 id: TICKET-0065
 title: "UI/UX — tech tree, Fabricator panel, minigame overlay, drone programming UI, third-person HUD"
 type: DESIGN
-status: IN_REVIEW
+status: DONE
 priority: P1
 owner: ui-ux-designer
 created_by: producer
@@ -61,3 +61,4 @@ Produce all UI/UX wireframes and style-compliant designs for M5's new screens an
 - 2026-02-24 [producer] Created ticket
 - 2026-02-24 [ui-ux-designer] Status → IN_PROGRESS. Beginning wireframe production for all 5 M5 UI deliverables.
 - 2026-02-24 [ui-ux-designer] All 5 wireframes complete. Status → IN_REVIEW. Submitted to game-designer for approval. Files: docs/design/wireframes/m5/
+- 2026-02-24 [ui-ux-designer] Status → DONE. Merged via PR #33. Commit: 502cc364. Wireframes delivered; awaiting game-designer approval to unblock TICKET-0068–0072.

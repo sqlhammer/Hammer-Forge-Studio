@@ -2,7 +2,7 @@
 id: TICKET-0066
 title: "Ship machine process flow — SOP"
 type: TASK
-status: OPEN
+status: DONE
 priority: P2
 owner: producer
 created_by: producer
@@ -42,5 +42,9 @@ Document a reusable standard operating procedure (SOP) for introducing any new s
 ## Handoff Notes
 (Leave blank until handoff occurs.)
 
+## Handoff Notes
+SOP created at `docs/studio/sop-ship-machine.md`. Covers all 8 steps with Fabricator (M5) as primary reference and Recycler (M4) as comparison case. Known gaps from M4 retrofitted in the final section.
+
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-24 [producer] Implemented SOP at docs/studio/sop-ship-machine.md. Reviewed M4 Recycler and M5 Fabricator implementations. 8-step process documented with agent matrix, handoff points, file naming conventions, and M4 gap analysis. Status → DONE.

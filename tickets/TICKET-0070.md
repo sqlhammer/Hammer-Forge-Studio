@@ -2,7 +2,7 @@
 id: TICKET-0070
 title: "Mining minigame — line tracing for yield bonus"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -43,3 +43,4 @@ Implement the mining minigame: after Phase 2 Analysis reveals the deposit's mini
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-25 [gameplay-programmer] DONE — commit 088d947, PR #46 merged. Mining minigame with 3D line tracing, HUD overlay pips, +50% bonus yield on full trace.

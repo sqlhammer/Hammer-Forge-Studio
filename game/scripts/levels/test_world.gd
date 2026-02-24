@@ -33,9 +33,14 @@ var _player_near_ship_entrance: bool = false
 var _transitioning: bool = false
 var _module_placement_ui: ModulePlacementUI = null
 var _recycler_panel: RecyclerPanel = null
+var _tech_tree_panel: TechTreePanel = null
+var _fabricator_panel: FabricatorPanel = null
+var _automation_hub_panel: AutomationHubPanel = null
 var _head_lamp_light: SpotLight3D = null
 var _third_person: PlayerThirdPerson = null
 var _player_manager: PlayerManager = null
+var _drone_manager: DroneManager = null
+var _zone_module_ids: Dictionary = {}
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -52,6 +57,7 @@ func _ready() -> void:
 	_setup_hud()
 	_setup_ship_ui()
 	_setup_head_lamp()
+	_setup_drone_manager()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	Global.log("TestWorld: initialization complete")
 
@@ -362,6 +368,12 @@ func _update_ship_interact() -> void:
 		return
 	if _recycler_panel and _recycler_panel.is_open():
 		return
+	if _tech_tree_panel and _tech_tree_panel.is_open():
+		return
+	if _fabricator_panel and _fabricator_panel.is_open():
+		return
+	if _automation_hub_panel and _automation_hub_panel.is_open():
+		return
 	if _inventory_screen and _inventory_screen.is_open():
 		return
 
@@ -377,13 +389,18 @@ func _update_ship_interact() -> void:
 			_begin_exit_ship()
 			return
 
-	# Interact with placement zones when inside ship
+	# Interact with ship interior objects when inside
 	if _ship_interior.is_player_inside():
 		if InputManager.is_action_just_pressed("interact"):
+			# Check terminal first
+			if _ship_interior.is_player_near_terminal():
+				_tech_tree_panel.open()
+				return
+			# Check placement zones
 			var zone_index: int = _ship_interior.get_nearby_zone_index()
 			if zone_index >= 0:
 				if _ship_interior.is_zone_occupied(zone_index):
-					_recycler_panel.open()
+					_open_module_panel(zone_index)
 				else:
 					_module_placement_ui.open(zone_index)
 
@@ -462,6 +479,23 @@ func _setup_ship_ui() -> void:
 	_recycler_panel.name = "RecyclerPanel"
 	add_child(_recycler_panel)
 
+	# Tech tree panel
+	_tech_tree_panel = TechTreePanel.new()
+	_tech_tree_panel.name = "TechTreePanel"
+	add_child(_tech_tree_panel)
+
+	# Fabricator interaction panel
+	_fabricator_panel = FabricatorPanel.new()
+	_fabricator_panel.name = "FabricatorPanel"
+	add_child(_fabricator_panel)
+
+	# Automation Hub panel
+	_automation_hub_panel = AutomationHubPanel.new()
+	_automation_hub_panel.name = "AutomationHubPanel"
+	add_child(_automation_hub_panel)
+	_automation_hub_panel.drone_deployed.connect(_on_drone_deployed)
+	_automation_hub_panel.drones_recalled.connect(_on_drones_recalled)
+
 	# Restore any modules already installed (e.g., from autoload state after scene reload)
 	_restore_installed_modules()
 	Global.log("TestWorld: ship UI ready")
@@ -471,9 +505,11 @@ func _restore_installed_modules() -> void:
 	for module_id: String in installed_ids:
 		var zone_index: int = _ship_interior.get_first_empty_zone()
 		if zone_index >= 0:
+			_zone_module_ids[zone_index] = module_id
 			_place_module_visual(module_id, zone_index)
 
 func _on_module_installed(module_id: String, zone_index: int) -> void:
+	_zone_module_ids[zone_index] = module_id
 	_place_module_visual(module_id, zone_index)
 
 func _place_module_visual(module_id: String, zone_index: int) -> void:
@@ -496,6 +532,16 @@ func _place_module_visual(module_id: String, zone_index: int) -> void:
 			Global.log("TestWorld: placed fabricator mesh in zone %d" % zone_index)
 		else:
 			_place_module_fallback("FabricatorModule", Vector3(2.0, 1.2, 1.0), zone_index)
+	elif module_id == "automation_hub":
+		var hub_scene: Resource = load("res://assets/meshes/machines/mesh_automation_hub_module.glb")
+		if hub_scene and hub_scene is PackedScene:
+			var mesh_node: Node3D = (hub_scene as PackedScene).instantiate()
+			mesh_node.name = "AutomationHubModule"
+			_add_interaction_area(mesh_node, Vector3(2.2, 1.4, 1.2))
+			_ship_interior.place_module_in_zone(zone_index, mesh_node)
+			Global.log("TestWorld: placed automation hub mesh in zone %d" % zone_index)
+		else:
+			_place_module_fallback("AutomationHubModule", Vector3(2.2, 1.4, 1.2), zone_index)
 
 func _place_module_fallback(module_name: String, size: Vector3, zone_index: int) -> void:
 	var fallback := MeshInstance3D.new()
@@ -509,6 +555,33 @@ func _place_module_fallback(module_name: String, size: Vector3, zone_index: int)
 	fallback.position.y = size.y / 2.0
 	_ship_interior.place_module_in_zone(zone_index, fallback)
 	Global.log("TestWorld: placed %s fallback mesh in zone %d" % [module_name, zone_index])
+
+func _open_module_panel(zone_index: int) -> void:
+	var module_id: String = _zone_module_ids.get(zone_index, "") as String
+	match module_id:
+		"recycler":
+			_recycler_panel.open()
+		"fabricator":
+			_fabricator_panel.open()
+		"automation_hub":
+			_automation_hub_panel.open()
+		_:
+			Global.log("TestWorld: no panel for module '%s' at zone %d" % [module_id, zone_index])
+
+func _setup_drone_manager() -> void:
+	_drone_manager = DroneManager.new()
+	_drone_manager.name = "DroneManager"
+	add_child(_drone_manager)
+	_drone_manager.setup(Vector3.ZERO)
+	Global.log("TestWorld: drone manager ready")
+
+func _on_drone_deployed(drone_id: int, program: DroneProgram) -> void:
+	if _drone_manager:
+		_drone_manager.spawn_drone(drone_id, program)
+
+func _on_drones_recalled() -> void:
+	if _drone_manager:
+		_drone_manager.recall_all_drones()
 
 func _add_interaction_area(parent: Node3D, size: Vector3) -> void:
 	var area := Area3D.new()
@@ -547,6 +620,12 @@ func _on_player_exited_ship() -> void:
 		_recycler_panel.close()
 	if _module_placement_ui and _module_placement_ui.is_open():
 		_module_placement_ui.close()
+	if _tech_tree_panel and _tech_tree_panel.is_open():
+		_tech_tree_panel.close()
+	if _fabricator_panel and _fabricator_panel.is_open():
+		_fabricator_panel.close()
+	if _automation_hub_panel and _automation_hub_panel.is_open():
+		_automation_hub_panel.close()
 
 func _on_view_mode_changed(mode: String) -> void:
 	Global.log("TestWorld: view mode changed to %s" % mode)

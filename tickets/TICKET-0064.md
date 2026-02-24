@@ -2,7 +2,7 @@
 id: TICKET-0064
 title: "Mining drone system — data layer and Automation Hub"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -42,3 +42,5 @@ Define the data layer for the mining drone system and its host module, the Autom
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-24 [systems-programmer] Started implementation
+- 2026-02-24 [systems-programmer] Implemented DroneProgram Resource (scripts/data/drone_program.gd) with deposit filters (resource type, purity, tool tier, radius, priority) and accepts_deposit() enforcing Phase 2 Analysis constraint. Implemented DroneAgent data class (scripts/data/drone_agent.gd) with IDLE/TRAVELING/EXTRACTING/RETURNING state machine. Created AutomationHub autoload (scripts/systems/automation_hub.gd) with deploy_drone(), assign_target(), recall_drone(), notify_extraction_complete(), notify_drone_returned(). Max 2 drones (Tier 1 placeholder). Ship power drawn during extraction. Registered AutomationHub in project.godot.

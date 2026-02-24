@@ -46,7 +46,7 @@ var _font: Font = null
 
 func _ready() -> void:
 	layer = 2
-	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_INHERIT
 	visible = false
 	_font = ThemeDB.fallback_font
 	_build_ui()
@@ -54,8 +54,13 @@ func _ready() -> void:
 	Global.log("InventoryScreen: ready")
 
 func _process(_delta: float) -> void:
-	if Input.is_action_just_pressed("inventory_toggle"):
-		toggle()
+	if _is_open:
+		# Closing must bypass InputManager suppression so the toggle key always works
+		if Input.is_action_just_pressed("inventory_toggle"):
+			close_inventory()
+	else:
+		if InputManager.is_action_just_pressed("inventory_toggle"):
+			open_inventory()
 
 func _input(event: InputEvent) -> void:
 	if not _is_open:
@@ -96,7 +101,7 @@ func open_inventory() -> void:
 	_refresh_all_slots()
 	_update_focus_visual()
 	_update_detail_area()
-	get_tree().paused = true
+	InputManager.set_gameplay_inputs_enabled(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	# Refresh sidebar values
 	if _ship_sidebar:
@@ -115,7 +120,7 @@ func open_inventory() -> void:
 func close_inventory() -> void:
 	Global.log("InventoryScreen: closed")
 	_is_open = false
-	get_tree().paused = false
+	InputManager.set_gameplay_inputs_enabled(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	var tween: Tween = create_tween()
 	tween.set_parallel(true)
@@ -144,7 +149,6 @@ func _build_ui() -> void:
 	# Center container
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	center.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	dim_layer.add_child(center)
 
 	# Combined container for inventory + sidebar

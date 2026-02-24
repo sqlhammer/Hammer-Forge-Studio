@@ -396,9 +396,6 @@ func _setup_ship_ui() -> void:
 	_recycler_panel.name = "RecyclerPanel"
 	add_child(_recycler_panel)
 
-	# Allow Recycler to process while game is paused (so jobs progress during panel view)
-	Recycler.process_mode = Node.PROCESS_MODE_ALWAYS
-
 	# Restore any modules already installed (e.g., from autoload state after scene reload)
 	_restore_installed_modules()
 	Global.log("TestWorld: ship UI ready")

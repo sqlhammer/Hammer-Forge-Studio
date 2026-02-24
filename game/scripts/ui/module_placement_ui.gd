@@ -42,7 +42,7 @@ var _empty_label: Label = null
 
 func _ready() -> void:
 	layer = 3
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	process_mode = Node.PROCESS_MODE_INHERIT
 	visible = false
 	_build_ui()
 
@@ -74,7 +74,7 @@ func open(zone_index: int) -> void:
 	_selected_index = 0
 	_build_available_module_list()
 	_feedback_label.text = ""
-	get_tree().paused = true
+	InputManager.set_gameplay_inputs_enabled(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	_animate_open()
 	Global.log("ModulePlacementUI: opened for zone %d" % zone_index)
@@ -84,7 +84,7 @@ func close() -> void:
 	if not _is_open:
 		return
 	_is_open = false
-	get_tree().paused = false
+	InputManager.set_gameplay_inputs_enabled(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_animate_close()
 	closed.emit()
@@ -110,7 +110,6 @@ func _build_ui() -> void:
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	center.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	dim_layer.add_child(center)
 
 	# Main panel
@@ -320,7 +319,7 @@ func _attempt_install() -> void:
 	if success:
 		Global.log("ModulePlacementUI: installed '%s' in zone %d" % [module_id, _zone_index])
 		_is_open = false
-		get_tree().paused = false
+		InputManager.set_gameplay_inputs_enabled(true)
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		_animate_close()
 		module_installed.emit(module_id, _zone_index)

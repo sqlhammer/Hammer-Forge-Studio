@@ -44,7 +44,7 @@ var _available_label: Label = null
 
 func _ready() -> void:
 	layer = 3
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	process_mode = Node.PROCESS_MODE_INHERIT
 	visible = false
 	_build_ui()
 	_connect_signals()
@@ -65,7 +65,7 @@ func open() -> void:
 	_is_open = true
 	visible = true
 	_refresh_ui()
-	get_tree().paused = true
+	InputManager.set_gameplay_inputs_enabled(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	_animate_open()
 	Global.log("RecyclerPanel: opened")
@@ -75,7 +75,7 @@ func close() -> void:
 	if not _is_open:
 		return
 	_is_open = false
-	get_tree().paused = false
+	InputManager.set_gameplay_inputs_enabled(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_animate_close()
 	closed.emit()
@@ -101,7 +101,6 @@ func _build_ui() -> void:
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	center.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	dim_layer.add_child(center)
 
 	# Main panel

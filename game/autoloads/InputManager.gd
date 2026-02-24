@@ -18,12 +18,22 @@ signal input_device_changed(device: String)  # "keyboard" or "gamepad"
 @export var gamepad_sensitivity_y: float = 1.0
 @export var invert_gamepad_look_y: bool = false
 
+# ── Constants (gameplay actions suppressed when UI is open) ─
+const GAMEPLAY_ACTIONS: Array[String] = [
+	"move_forward", "move_backward", "move_left", "move_right",
+	"interact", "scan", "use_tool", "switch_view", "jump",
+	"inventory_toggle",
+	"ship_forward", "ship_backward", "ship_left", "ship_right",
+	"ship_accelerate", "ship_emergency_stop",
+]
+
 # ── Private Variables ─────────────────────────────────────
 var _current_input_device: String = "keyboard"  # "keyboard" or "gamepad"
 var _device_switch_timer: float = 0.0
 var _gamepad_index: int = 0
 var _last_keyboard_activity: float = 0.0
 var _last_gamepad_activity: float = 0.0
+var _gameplay_inputs_enabled: bool = true
 
 # ── Onready Variables ─────────────────────────────────────
 # (None)
@@ -48,24 +58,41 @@ func _process(delta: float) -> void:
 	_device_switch_timer += delta
 
 # ── Public Methods ────────────────────────────────────────
+## Enables or disables gameplay input processing.
+## When disabled, gameplay actions return false/zero; UI actions (ui_*) still work.
+func set_gameplay_inputs_enabled(enabled: bool) -> void:
+	_gameplay_inputs_enabled = enabled
+
+## Returns true if gameplay inputs are currently enabled.
+func is_gameplay_inputs_enabled() -> bool:
+	return _gameplay_inputs_enabled
+
 ## Returns true if the specified action is currently pressed.
 func is_action_pressed(action: String) -> bool:
+	if not _gameplay_inputs_enabled and action in GAMEPLAY_ACTIONS:
+		return false
 	return Input.is_action_pressed(action)
 
 ## Returns true if the specified action was just pressed this frame.
 func is_action_just_pressed(action: String) -> bool:
+	if not _gameplay_inputs_enabled and action in GAMEPLAY_ACTIONS:
+		return false
 	return Input.is_action_just_pressed(action)
 
 ## Returns the analog strength (0.0 - 1.0) of the specified action.
 func get_action_strength(action: String) -> float:
+	if not _gameplay_inputs_enabled and action in GAMEPLAY_ACTIONS:
+		return 0.0
 	return Input.get_action_strength(action)
 
 ## Returns analog input from left or right stick with dead zone applied.
 ## stick: "left" or "right"
 ## Returns a Vector2 with x/y in range [-1.0, 1.0]
 func get_analog_input(stick: String) -> Vector2:
+	if not _gameplay_inputs_enabled:
+		return Vector2.ZERO
 	var raw_input: Vector2 = Vector2.ZERO
-	
+
 	match stick:
 		"left":
 			raw_input.x = Input.get_joy_axis(_gamepad_index, JOY_AXIS_LEFT_X)

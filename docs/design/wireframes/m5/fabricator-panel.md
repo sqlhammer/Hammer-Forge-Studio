@@ -375,7 +375,7 @@ Color-blind safety: the dot pairs with the affordability color in the detail pan
 - Slot states: same binding pattern as Recycler panel — read inventory at panel open and on `Inventory.item_changed` signal
 - List lock during processing: Set `mouse_filter = MOUSE_FILTER_IGNORE` and `focus_mode = FOCUS_NONE` on each row node; restore on job complete
 - Reuse Recycler slot scene — identical visual spec
-- Game pause: `get_tree().paused = true` when panel opens; panel root in `PROCESS_MODE_WHEN_PAUSED`
+- Input handling: On open, call InputManager to suppress gameplay inputs and set `MOUSE_MODE_VISIBLE`; on close, restore gameplay inputs and set `MOUSE_MODE_CAPTURED`. UI navigation handled within the panel via `set_input_as_handled()`. No `get_tree().paused`, no `PROCESS_MODE_WHEN_PAUSED`. Game time continues while the panel is open.
 
 ---
 

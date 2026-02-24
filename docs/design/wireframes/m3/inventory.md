@@ -1,6 +1,6 @@
 # Wireframe: Inventory Screen
 
-**Component:** Inventory Overlay (Pause Screen)
+**Component:** Inventory Overlay (Non-Pause Overlay)
 **Ticket:** TICKET-0019
 **Blocks:** TICKET-0028 (Inventory UI)
 **Last Updated:** 2026-02-22
@@ -9,7 +9,7 @@
 
 ## Purpose
 
-Full-screen overlay displaying the player's 15-slot inventory grid. Shows item icons, names, and stack counts. Opened/closed via toggle input. Pauses (or slows) gameplay while open.
+Full-screen overlay displaying the player's 15-slot inventory grid. Shows item icons, names, and stack counts. Opened/closed via toggle input. Game time continues while open; player movement and action inputs are suppressed via InputManager.
 
 ---
 
@@ -215,4 +215,4 @@ Displayed below the grid when a slot is focused/selected:
 - Gamepad focus: Use Godot's built-in `focus_neighbor_*` properties on each slot, configured to wrap at edges
 - Bind to inventory system's `inventory_changed` signal to update slot display
 - The inventory screen does NOT handle item movement, splitting, or dropping in M3 — it is read-only display. Interaction features are deferred
-- Game pause behavior: Set `get_tree().paused = true` when inventory opens; inventory UI must be in `process_mode = PROCESS_MODE_WHEN_PAUSED`
+- Input handling: On open, call InputManager to suppress gameplay inputs and set `MOUSE_MODE_VISIBLE`; on close, restore gameplay inputs and set `MOUSE_MODE_CAPTURED`. UI navigation (ui_up/down/left/right, ui_accept, ui_cancel) handled within the panel via `set_input_as_handled()`. No `get_tree().paused`, no `PROCESS_MODE_WHEN_PAUSED`. Game time continues while the inventory is open.

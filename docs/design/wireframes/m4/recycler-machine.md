@@ -236,7 +236,7 @@ These are the elements that give the machine visual identity and communicate its
    - Camera does NOT lock or reposition (stays in first-person, player retains control)
    - The Recycler panel UI opens as a screen-space overlay (see `recycler-panel.md`)
    - The physical screen on the machine brightens to full teal
-4. **While panel is open:** Player is stationary (game paused), interacting with the 2D panel overlay
+4. **While panel is open:** Player is stationary (movement inputs suppressed), interacting with the 2D panel overlay
 5. **Close panel:** Screen dims back to idle glow, player regains movement
 
 **Why overlay instead of in-world screen:** At 40cm x 30cm, a physical in-world screen is too small for the UI detail needed (slots, progress bar, buttons) at comfortable viewing distance. The overlay panel *represents* what's on the machine screen — the physical screen provides the narrative anchor ("I'm reading the machine's display") while the overlay provides the usability.

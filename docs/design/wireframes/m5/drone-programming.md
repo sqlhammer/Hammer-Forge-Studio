@@ -19,7 +19,7 @@ The Drone Programming UI lets the player configure and monitor automated mining 
 ## Interaction Model
 
 1. Player interacts with the Automation Hub module in the ship
-2. Drone Programming screen opens as a full-screen overlay (game not paused)
+2. Drone Programming screen opens as a full-screen overlay; game time continues, player movement and action inputs are suppressed via InputManager, active drones continue operating
 3. Player reviews the current program (or creates one if none exists)
 4. Player adjusts filter criteria: deposit type, minimum purity, tool tier, extraction radius, priority
 5. Player activates the program — drones deploy and begin operating
@@ -305,6 +305,7 @@ Dropdown defining which matching deposit the drones prefer when multiple valid t
 - Slider: `HSlider` node with custom theme (Teal thumb/fill per style guide)
 - Drone status cards: Dynamically instantiated; bind to `DroneSystem.drone_state_changed(drone_id, state)` signal
 - Pool stats: Bind to `DroneSystem.analyzed_pool_updated()` + recalculate matching count based on current filter values
+- Input handling: On open, call InputManager to suppress gameplay inputs and set `MOUSE_MODE_VISIBLE`; on close, restore gameplay inputs and set `MOUSE_MODE_CAPTURED`. UI navigation handled within the panel via `set_input_as_handled()`. No `get_tree().paused`, no `PROCESS_MODE_WHEN_PAUSED`. Active drones continue operating while the UI is open — drone status cards update live.
 
 ---
 

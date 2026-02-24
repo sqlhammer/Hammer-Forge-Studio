@@ -30,7 +30,7 @@ The tech tree is the player's strategic planning interface. It communicates what
 - **Position:** Full-screen overlay (centered)
 - **Background dim:** Screen Dim (`#000000` at 50%)
 - **CanvasLayer:** Layer 2 (above HUD)
-- **Pause:** `get_tree().paused = true` when open; root node in `PROCESS_MODE_WHEN_PAUSED`
+- **Input handling:** On open, call InputManager to suppress gameplay inputs and set `MOUSE_MODE_VISIBLE`; on close, restore gameplay inputs and set `MOUSE_MODE_CAPTURED`. UI navigation handled within the overlay via `set_input_as_handled()`. No `get_tree().paused`, no `PROCESS_MODE_WHEN_PAUSED`. Game time continues while the tech tree is open.
 
 ---
 

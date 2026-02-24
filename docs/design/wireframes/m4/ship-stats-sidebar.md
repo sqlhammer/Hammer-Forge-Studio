@@ -201,4 +201,4 @@ The existing inventory panel needs these minor adjustments:
 - All four rows inside a `VBoxContainer`
 - Bind to the same `ShipState` signals as the in-ship HUD
 - Alerts section: `VBoxContainer` below a divider, populated by checking each variable against its warning threshold
-- The sidebar should update in real-time even while the inventory is open (variables can change if the game is not fully paused, or to reflect pre-pause state accurately)
+- The sidebar should update in real-time while any overlay is open (game time continues during in-world overlays; ship variables continue changing)

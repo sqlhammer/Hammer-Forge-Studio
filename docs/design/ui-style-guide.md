@@ -39,7 +39,7 @@ All colors are defined as hex values. Godot `Color` equivalents use `Color("hex"
 |------|------|-------------|-------|
 | **Panel BG** | Dark Slate | `#0F1923` at 85% opacity | HUD panels, inventory background, modal overlays |
 | **Panel BG Light** | Slate Blue | `#1A2736` at 90% opacity | Nested panels, hover highlight areas |
-| **Surface** | Deep Navy | `#0A0F18` at 95% opacity | Full-screen overlays (inventory, pause) |
+| **Surface** | Deep Navy | `#0A0F18` at 95% opacity | Full-screen overlays — two categories: (1) in-world non-pause overlays (inventory, Recycler, Fabricator, Tech Tree, Drone Programming — game time continues, inputs suppressed via InputManager); (2) true pause overlays (save game, keybindings, system settings — separate category, not to be conflated with in-world panels) |
 | **Screen Dim** | Black | `#000000` at 50% opacity | Background dim behind overlay screens |
 
 ### Text Colors

@@ -307,6 +307,6 @@ Two buttons at the bottom of the panel, separated by a divider above.
 - Progress: `ProgressBar` with custom theme, bound to `Recycler.progress_changed` signal
 - Buttons: `Button` nodes with custom `StyleBoxFlat` per style guide
 - Mini-picker: Separate `PanelContainer` overlay, populated from `Inventory` filtered by `Recycler.get_valid_inputs()`
-- Game pause: Set `get_tree().paused = true` when panel opens; panel in `PROCESS_MODE_WHEN_PAUSED`
-- The Recycler module processes in real-time (not paused time) — progress continues while panel is closed
+- Input handling: On open, call InputManager to suppress gameplay inputs and set `MOUSE_MODE_VISIBLE`; on close, restore gameplay inputs and set `MOUSE_MODE_CAPTURED`. UI navigation handled within the panel via `set_input_as_handled()`. No `get_tree().paused`, no `PROCESS_MODE_WHEN_PAUSED`. Game time continues while the panel is open.
+- The Recycler module processes in real-time — progress continues while panel is closed
 - Bind to signals: `Recycler.job_started`, `Recycler.job_progress`, `Recycler.job_completed`

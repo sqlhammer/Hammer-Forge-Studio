@@ -56,6 +56,11 @@ func get_compass_bar() -> CompassBar:
 func get_scanner_readout() -> ScannerReadout:
 	return _scanner_readout
 
+## Shows a text notification toast with an accent color.
+func show_notification(text: String, accent_color: Color) -> void:
+	if _pickup_notifications:
+		_pickup_notifications.show_message(text, accent_color)
+
 ## Shows or hides the ship globals HUD panel.
 func show_ship_globals(show: bool) -> void:
 	if _ship_globals:

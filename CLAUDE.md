@@ -27,9 +27,10 @@ Refer to `docs/engineering/coding-standards.md` for all naming conventions, form
 #### Working directly on `main`
 1. Agent completes ticket implementation
 2. Agent commits to `main` (references ticket ID in message)
-3. Agent pushes to remote
-4. Agent marks ticket `DONE` in Activity Log with commit hash
-5. Code review happens via separate `REVIEW` ticket (does NOT gate commits)
+3. If any new `.gd` scripts were created, follow the **GDScript UID Commit** procedure below
+4. Agent pushes to remote
+5. Agent marks ticket `DONE` in Activity Log with commit hash
+6. Code review happens via separate `REVIEW` ticket (does NOT gate commits)
 
 #### Working in a worktree (separate branch)
 1. Agent completes ticket implementation on the worktree branch
@@ -37,10 +38,43 @@ Refer to `docs/engineering/coding-standards.md` for all naming conventions, form
 3. Agent pushes the branch to remote
 4. Agent creates a PR from the worktree branch targeting `main`
 5. Agent self-merges the PR immediately
-6. Agent marks ticket `DONE` in Activity Log with commit hash and PR link
-7. Code review happens post-merge via a separate `REVIEW` ticket (does NOT gate the merge)
+6. If any new `.gd` scripts were created, follow the **GDScript UID Commit** procedure below
+7. Agent marks ticket `DONE` in Activity Log with commit hash and PR link
+8. Code review happens post-merge via a separate `REVIEW` ticket (does NOT gate the merge)
 
 This ensures `main` is always in a working, committed state and tickets are closed without waiting on a separate agent.
+
+### GDScript UID Commit
+
+Godot auto-generates a `.gd.uid` sidecar file for every new `.gd` script. These files **must be committed** alongside the scripts. Godot generates them asynchronously after detecting new files in the main repo directory — they will not exist in the worktree, only on the main working tree after the files land there.
+
+**Whenever new `.gd` files are created as part of a ticket**, after those files are on the `main` branch:
+
+1. Pull the latest `main` into the main repository (always required when working from a worktree):
+   ```bash
+   git -C /c/repos/Hammer-Forge-Studio pull
+   ```
+2. Trigger Godot's filesystem scan via the MCP `execute_editor_script` tool:
+   ```gdscript
+   func run():
+       EditorInterface.get_resource_filesystem().scan()
+   ```
+3. Wait for Godot to process the new scripts:
+   ```bash
+   sleep 5
+   ```
+4. Check for newly generated UID files in the main repository:
+   ```bash
+   git -C /c/repos/Hammer-Forge-Studio ls-files --others --exclude-standard -- '*.gd.uid'
+   ```
+5. If any exist, commit and push them to `main`:
+   ```bash
+   git -C /c/repos/Hammer-Forge-Studio add -- '*.gd.uid'
+   git -C /c/repos/Hammer-Forge-Studio commit -m "chore: commit Godot-generated UIDs (TICKET-XXXX)"
+   git -C /c/repos/Hammer-Forge-Studio push
+   ```
+
+This step must complete before marking the ticket `DONE`.
 
 ### Commits
 - Write summarized commit messages that reference the ticket ID (e.g., "TICKET-0003: Feature name")

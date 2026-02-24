@@ -26,6 +26,7 @@ signal depleted
 # ── Private Variables ─────────────────────────────────────
 var _remaining_quantity: int = 0
 var _scan_state: ScanState = ScanState.UNDISCOVERED
+var _pattern_line_count: int = 0
 
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
@@ -63,10 +64,15 @@ func ping() -> void:
 		_scan_state = ScanState.PINGED
 		scan_state_changed.emit(_scan_state)
 
+## Returns the number of minigame pattern lines for this deposit.
+func get_pattern_line_count() -> int:
+	return _pattern_line_count
+
 ## Marks this deposit as fully analyzed by scanner Phase 2.
 func mark_analyzed() -> void:
 	if _scan_state < ScanState.ANALYZED:
 		_scan_state = ScanState.ANALYZED
+		_pattern_line_count = _calculate_pattern_lines()
 		scan_state_changed.emit(_scan_state)
 
 ## Extracts up to `amount` units from the deposit.
@@ -147,6 +153,8 @@ func deserialize(data: Dictionary) -> void:
 		_scan_state = ScanState.ANALYZED
 	else:
 		_scan_state = ScanState.UNDISCOVERED
+	if _scan_state == ScanState.ANALYZED:
+		_pattern_line_count = _calculate_pattern_lines()
 	var pos: Dictionary = data.get("position", {})
 	if not pos.is_empty():
 		global_position = Vector3(
@@ -154,3 +162,12 @@ func deserialize(data: Dictionary) -> void:
 			pos.get("y", 0.0) as float,
 			pos.get("z", 0.0) as float,
 		)
+
+func _calculate_pattern_lines() -> int:
+	match deposit_tier:
+		ResourceDefs.DepositTier.TIER_1:
+			return 2 if purity >= ResourceDefs.Purity.THREE_STAR else 1
+		ResourceDefs.DepositTier.TIER_2:
+			return 3 if purity >= ResourceDefs.Purity.THREE_STAR else 2
+		_:
+			return 4 if purity >= ResourceDefs.Purity.THREE_STAR else 3

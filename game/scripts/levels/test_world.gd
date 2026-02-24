@@ -327,16 +327,17 @@ func _setup_ship_interior() -> void:
 	_ship_interior.player_entered_ship.connect(_on_player_entered_ship)
 	_ship_interior.player_exited_ship.connect(_on_player_exited_ship)
 
-	# Create an enter-ship interaction zone near the ship exterior (scaled for 3× hull)
+	# Create an enter-ship interaction zone that straddles the hull edge (3× hull Z-edge = 21)
+	# Zone must extend outside the hull so the player can reach it without clipping through
 	_ship_enter_zone = Area3D.new()
 	_ship_enter_zone.name = "ShipEnterZone"
 	_ship_enter_zone.collision_layer = 0
 	_ship_enter_zone.collision_mask = LAYER_PLAYER
 	var enter_col := CollisionShape3D.new()
 	var enter_shape := BoxShape3D.new()
-	enter_shape.size = Vector3(9.0, 6.0, 6.0)
+	enter_shape.size = Vector3(12.0, 6.0, 10.0)
 	enter_col.shape = enter_shape
-	enter_col.position = Vector3(0, 3.0, 13.5)
+	enter_col.position = Vector3(0, 3.0, 23.0)
 	_ship_enter_zone.add_child(enter_col)
 	add_child(_ship_enter_zone)
 

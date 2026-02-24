@@ -46,7 +46,7 @@ var _font: Font = null
 
 func _ready() -> void:
 	layer = 2
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	_font = ThemeDB.fallback_font
 	_build_ui()

@@ -2,7 +2,7 @@
 id: TICKET-0073
 title: "Spare Battery — field carry and use mechanic"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -39,3 +39,4 @@ Implement the player-facing mechanic for carrying and using Spare Batteries in t
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket
+- 2026-02-25 [gameplay-programmer] DONE — commit f05d446, PR #40 merged. Added use_item action (G key), field use validation (not in ship, not full, has battery), toast notifications.

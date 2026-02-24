@@ -2,7 +2,7 @@
 id: TICKET-0077
 title: "Compliance — remove game pause from in-world UI panels"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -53,3 +53,4 @@ Per DEC-0001 (decision log), in-world UI menus do not pause the game. Three impl
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket — compliance with DEC-0001
+- 2026-02-25 [gameplay-programmer] DONE — commit 8aef9b4, PR #38 merged. Added set_gameplay_inputs_enabled() to InputManager; removed all get_tree().paused calls and PROCESS_MODE overrides from UI panels and test_world.

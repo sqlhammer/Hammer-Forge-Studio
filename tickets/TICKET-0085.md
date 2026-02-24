@@ -2,7 +2,7 @@
 id: TICKET-0085
 title: "Bugfix — AutomationHubPanel pool stats measure distance from world origin"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: systems-programmer
@@ -43,3 +43,4 @@ Replace `Vector3.ZERO` with the ship/hub position. The panel does not have direc
 
 ## Activity Log
 - 2026-02-24 [systems-programmer] Created during M5 code review (TICKET-0075). Display-only bug; drone deployment logic is correct.
+- 2026-02-25 [gameplay-programmer] DONE — commit 0549179, PR #52 merged. Added setup(hub_position) method; replaced Vector3.ZERO with _hub_position in _refresh_pool_stats().

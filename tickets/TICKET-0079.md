@@ -2,7 +2,7 @@
 id: TICKET-0079
 title: "Compliance — update input system design doc for non-pause model"
 type: TASK
-status: OPEN
+status: DONE
 priority: P2
 owner: systems-programmer
 created_by: producer
@@ -28,12 +28,12 @@ Per DEC-0001 (decision log), in-world UI menus do not pause the game. The input 
 
 ## Acceptance Criteria
 
-- [ ] "Pause State" section updated — no longer states "game is paused" when a menu opens
-- [ ] Updated section describes the two-tier model:
+- [x] "Pause State" section updated — no longer states "game is paused" when a menu opens
+- [x] Updated section describes the two-tier model:
   - **In-world menus** (inventory, machine panels, drone programming, ship management, tech tree): game time continues; player inputs suppressed via InputManager; automated systems run
   - **Abstract menus** (save game, keybindings, system settings): `get_tree().paused = true` is valid here
-- [ ] If InputManager does not yet document a `set_gameplay_inputs_enabled(bool)` API, add a placeholder noting it will be added in TICKET-0077
-- [ ] No remaining contradictions between this document and DEC-0001
+- [x] If InputManager does not yet document a `set_gameplay_inputs_enabled(bool)` API, add a placeholder noting it will be added in TICKET-0077
+- [x] No remaining contradictions between this document and DEC-0001
 
 ## Implementation Notes
 
@@ -46,3 +46,4 @@ Per DEC-0001 (decision log), in-world UI menus do not pause the game. The input 
 
 ## Activity Log
 - 2026-02-24 [producer] Created ticket — compliance with DEC-0001
+- 2026-02-24 [systems-programmer] Updated Pause State section to two-tier model per DEC-0001; added `set_gameplay_inputs_enabled(bool)` placeholder referencing TICKET-0077; verified no stray contradictions remain

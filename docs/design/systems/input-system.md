@@ -2,7 +2,7 @@
 
 **Owner:** game-designer
 **Status:** Draft
-**Last Updated:** 2026-02-21
+**Last Updated:** 2026-02-24
 **References:** GDD (`docs/design/gdd.md`), Coding Standards (`docs/engineering/coding-standards.md`)
 
 ---
@@ -204,10 +204,30 @@ Per the GDD, gamepad is a **first-class input device**. It must not feel like an
 - **Stick drift:** Dead zone (0.15) absorbs minor drifts; larger drifts are treated as intended input
 - **Trigger pressure:** Analog triggers are read as [0.0 — 1.0] values; threshold for "pressed" is 0.5
 
-### Pause State
-- When menu is open, game is paused; input flows to the menu system, not active controllers
-- First-person and third-person controllers remain loaded but dormant
-- Resuming game returns to the same context
+### Pause State (Two-Tier Model)
+
+The game uses a **two-tier model** for menu interactions, distinguishing between in-world menus and abstract system menus.
+
+**Tier 1 — In-World Menus (no game pause):**
+Applies to: inventory, machine interaction panels (Fabricator, Recycler, Module Placement), drone programming UI, ship management, tech tree.
+
+When one of these menus opens:
+- Gameplay inputs are suppressed via `InputManager.set_gameplay_inputs_enabled(false)` — the player cannot walk, scan, mine, or interact with the world
+- Game time continues; all automated systems run (drones travel, Recycler jobs progress, Fabricator jobs progress, ship globals tick)
+- Mouse mode switches to `MOUSE_MODE_VISIBLE` for menu interaction
+- Controllers remain loaded but receive no gameplay input
+
+When the menu closes:
+- `InputManager.set_gameplay_inputs_enabled(true)` restores player control
+- Mouse mode returns to `MOUSE_MODE_CAPTURED`
+- Game resumes from the same context — no state reset
+
+**`set_gameplay_inputs_enabled(bool)` API:** This method will be added to InputManager in TICKET-0077. It gates all gameplay action queries (movement, interaction, scanning, mining) without affecting UI or abstract menu input.
+
+**Tier 2 — Abstract System Menus (valid game pause):**
+Applies to: save game, key bindings, system/graphics settings, quit confirmation.
+
+`get_tree().paused = true` is appropriate here. These menus have no diegetic relationship to the game world and players expect time to freeze while adjusting settings.
 
 ---
 

@@ -11,6 +11,8 @@ var _pickup_notifications: PickupNotificationManager = null
 var _crosshair: Control = null
 var _scanner: Scanner = null
 var _ship_globals: ShipGlobalsHUD = null
+var _minigame_overlay: MiningMinigameOverlay = null
+var _mining_ref: Mining = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -25,6 +27,11 @@ func _process(_delta: float) -> void:
 		if aimed and aimed.is_analyzed() and not aimed.is_depleted():
 			if _scanner_readout.get_current_deposit() != aimed:
 				_scanner_readout.show_readout(aimed)
+
+	# Update minigame active-line indicator
+	if _mining_ref and _mining_ref.is_minigame_active() and _minigame_overlay:
+		var hovered: int = _mining_ref.get_hovered_line_index()
+		_minigame_overlay.mark_line_active(hovered)
 
 # ── Public Methods ────────────────────────────────────────
 
@@ -42,11 +49,15 @@ func setup(camera: Camera3D, player: CharacterBody3D, scanner: Scanner, mining: 
 	scanner.analysis_progress_changed.connect(_on_analysis_progress)
 
 	# Connect mining signals
+	_mining_ref = mining
 	mining.mining_started.connect(_on_mining_started)
 	mining.mining_progress_changed.connect(_on_mining_progress)
 	mining.mining_completed.connect(_on_mining_completed)
 	mining.mining_cancelled.connect(_on_mining_cancelled)
 	mining.mining_failed.connect(_on_mining_failed)
+	mining.minigame_started.connect(_on_minigame_started)
+	mining.line_traced.connect(_on_line_traced)
+	mining.minigame_completed.connect(_on_minigame_completed)
 
 ## Returns the compass bar for external access.
 func get_compass_bar() -> CompassBar:
@@ -117,6 +128,12 @@ func _build_hud() -> void:
 	_pickup_notifications.position = Vector2(-PickupNotificationManager.TOAST_WIDTH - 32, 0)
 	root.add_child(_pickup_notifications)
 
+	# Minigame overlay — center, between crosshair and mining progress
+	_minigame_overlay = MiningMinigameOverlay.new()
+	_minigame_overlay.set_anchors_preset(Control.PRESET_CENTER)
+	_minigame_overlay.position = Vector2(-MiningMinigameOverlay.OVERLAY_WIDTH / 2.0, 10)
+	root.add_child(_minigame_overlay)
+
 	# Ship globals — bottom-right (hidden by default, shown when inside ship)
 	_ship_globals = ShipGlobalsHUD.new()
 	_ship_globals.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
@@ -163,7 +180,24 @@ func _on_mining_completed(_deposit: Deposit, _resource_type: ResourceDefs.Resour
 
 func _on_mining_cancelled() -> void:
 	_mining_progress.hide_progress()
+	if _minigame_overlay:
+		_minigame_overlay.dismiss()
 
 func _on_mining_failed(reason: String) -> void:
 	Global.log("HUD: mining failed — %s" % reason)
 	_mining_progress.show_failed(reason)
+
+func _on_minigame_started(line_count: int) -> void:
+	Global.log("HUD: minigame started — %d lines" % line_count)
+	if _minigame_overlay:
+		_minigame_overlay.show_minigame(line_count)
+
+func _on_line_traced(line_index: int) -> void:
+	Global.log("HUD: minigame line %d traced" % line_index)
+	if _minigame_overlay:
+		_minigame_overlay.mark_line_traced(line_index)
+
+func _on_minigame_completed(all_traced: bool, bonus_quantity: int) -> void:
+	Global.log("HUD: minigame completed — success=%s, bonus=%d" % [str(all_traced), bonus_quantity])
+	if _minigame_overlay:
+		_minigame_overlay.show_result(all_traced, bonus_quantity)

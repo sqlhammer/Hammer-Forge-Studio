@@ -33,6 +33,7 @@ var _player_near_ship_entrance: bool = false
 var _transitioning: bool = false
 var _module_placement_ui: ModulePlacementUI = null
 var _recycler_panel: RecyclerPanel = null
+var _head_lamp_light: SpotLight3D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -48,6 +49,7 @@ func _ready() -> void:
 	_setup_ship_interior()
 	_setup_hud()
 	_setup_ship_ui()
+	_setup_head_lamp()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	Global.log("TestWorld: initialization complete")
 
@@ -55,6 +57,7 @@ func _process(delta: float) -> void:
 	_update_recharge(delta)
 	_update_ship_interact()
 	_update_use_item()
+	_update_head_lamp_toggle()
 
 func _input(event: InputEvent) -> void:
 	# Toggle mouse capture with Escape
@@ -407,6 +410,36 @@ func _update_use_item() -> void:
 	else:
 		if _hud:
 			_hud.show_notification("No Spare Batteries", Color("#FF6B5A"))
+
+func _setup_head_lamp() -> void:
+	if not _camera:
+		return
+	# Create a SpotLight3D parented to the camera for head-lamp illumination
+	_head_lamp_light = SpotLight3D.new()
+	_head_lamp_light.name = "HeadLampLight"
+	_head_lamp_light.light_color = Color("#FFFBE6")
+	_head_lamp_light.light_energy = 3.0
+	_head_lamp_light.spot_range = 30.0
+	_head_lamp_light.spot_angle = 35.0
+	_head_lamp_light.spot_attenuation = 0.8
+	_head_lamp_light.shadow_enabled = true
+	_head_lamp_light.visible = false
+	_camera.add_child(_head_lamp_light)
+	# Connect to HeadLamp signals
+	HeadLamp.head_lamp_toggled.connect(_on_head_lamp_toggled)
+	# Restore visual state if lamp was already equipped and active
+	if HeadLamp.is_equipped() and HeadLamp.is_active():
+		_head_lamp_light.visible = true
+	Global.log("TestWorld: head lamp visual ready")
+
+func _update_head_lamp_toggle() -> void:
+	if not InputManager.is_action_just_pressed("toggle_head_lamp"):
+		return
+	HeadLamp.toggle()
+
+func _on_head_lamp_toggled(active: bool) -> void:
+	if _head_lamp_light:
+		_head_lamp_light.visible = active
 
 func _setup_ship_ui() -> void:
 	# Module placement UI

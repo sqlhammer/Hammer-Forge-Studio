@@ -2,7 +2,7 @@
 id: TICKET-0084
 title: "Gameplay phase gate — regression test suite"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: qa-engineer
 created_by: producer
@@ -22,13 +22,13 @@ Run the full regression test suite once all Gameplay phase tickets are DONE. Thi
 
 ## Acceptance Criteria
 
-- [ ] All Gameplay phase tickets (TICKET-0068–0074, TICKET-0082) are DONE before this ticket begins
-- [ ] Full test suite executed via `res://addons/hammer_forge_tests/test_runner.tscn`
-- [ ] Zero test failures
-- [ ] Prior baseline of 284 tests (M4 close) holds — no tests removed or skipped
-- [ ] New unit tests added by gameplay-programmer (if any) pass
-- [ ] Any failures investigated and a P0/P1 BLOCKER ticket opened before marking this DONE
-- [ ] Pass result and test count posted in Activity Log
+- [x] All Gameplay phase tickets (TICKET-0068–0074, TICKET-0082) are DONE before this ticket begins
+- [x] Full test suite executed via `res://addons/hammer_forge_tests/test_runner.tscn`
+- [x] Zero test failures
+- [x] Prior baseline of 284 tests (M4 close) holds — no tests removed or skipped (286 >= 284, 0 skipped)
+- [x] New unit tests added by gameplay-programmer (if any) pass (no new tests added — regression check only)
+- [x] Any failures investigated and a P0/P1 BLOCKER ticket opened before marking this DONE (N/A — zero failures)
+- [x] Pass result and test count posted in Activity Log
 
 ## Implementation Notes
 
@@ -43,3 +43,4 @@ Run the full regression test suite once all Gameplay phase tickets are DONE. Thi
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket — phase gate test verification was missing from original M5 ticket set
+- 2026-02-24 [qa-engineer] All 8 Gameplay dependencies verified DONE. Full test suite run via editor test runner: **286 passed, 0 failed, 0 skipped**. Baseline held (286 >= 284). No cross-milestone bleed. No regressions from Gameplay phase systems (tech tree, Fabricator, minigame, third-person scan/mine, drones, Spare Battery, Head Lamp, ship entry bugfix). DONE.

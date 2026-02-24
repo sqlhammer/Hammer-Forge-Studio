@@ -11,7 +11,7 @@ updated_at: 2026-02-24
 milestone: "M5"
 milestone_gate: "M4"
 phase: "Gameplay"
-depends_on: [TICKET-0062]
+depends_on: [TICKET-0062, TICKET-0083]
 blocks: [TICKET-0075]
 tags: [spare-battery, gameplay, player-suit, inventory]
 ---

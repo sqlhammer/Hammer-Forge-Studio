@@ -40,18 +40,18 @@ func install_module(module_id: String) -> bool:
 		Global.log("ModuleManager: install failed — '%s' would overload power (draw=%.1f)" % [module_id, power_draw])
 		return false
 
-	# Validate and deduct resource cost
+	# Validate and deduct resource cost (any purity accepted, lowest consumed first)
 	var cost: Dictionary = entry.get("install_cost", {})
 	if not cost.is_empty():
 		var resource_type: ResourceDefs.ResourceType = cost.get("resource_type", ResourceDefs.ResourceType.NONE) as ResourceDefs.ResourceType
-		var purity: ResourceDefs.Purity = cost.get("purity", ResourceDefs.Purity.ONE_STAR) as ResourceDefs.Purity
 		var quantity: int = cost.get("quantity", 0) as int
-		if not PlayerInventory.has_item(resource_type, purity, quantity):
+		var total_available: int = PlayerInventory.get_total_count(resource_type)
+		if total_available < quantity:
 			var resource_name: String = ResourceDefs.get_resource_name(resource_type)
 			install_failed.emit(module_id, "INSUFFICIENT_RESOURCES")
-			Global.log("ModuleManager: install failed — need %d %s for '%s'" % [quantity, resource_name, module_id])
+			Global.log("ModuleManager: install failed — need %d %s for '%s' (have %d)" % [quantity, resource_name, module_id, total_available])
 			return false
-		PlayerInventory.remove_item(resource_type, purity, quantity)
+		_remove_any_purity(resource_type, quantity)
 
 	# Register power draw with ShipState
 	if not ShipState.register_module_draw(power_draw):
@@ -103,3 +103,19 @@ func get_installed_count() -> int:
 ## Returns the install data for a module, or empty dict if not installed.
 func get_module_data(module_id: String) -> Dictionary:
 	return _installed_modules.get(module_id, {})
+
+# ── Private Methods ───────────────────────────────────────
+
+## Removes resources across any purity level, consuming lowest purity first.
+func _remove_any_purity(resource_type: ResourceDefs.ResourceType, quantity: int) -> int:
+	var remaining: int = quantity
+	for purity_value: int in ResourceDefs.Purity.values():
+		if remaining <= 0:
+			break
+		var purity: ResourceDefs.Purity = purity_value as ResourceDefs.Purity
+		var available: int = PlayerInventory.get_count(resource_type, purity)
+		if available > 0:
+			var to_remove: int = mini(remaining, available)
+			var removed: int = PlayerInventory.remove_item(resource_type, purity, to_remove)
+			remaining -= removed
+	return quantity - remaining

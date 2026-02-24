@@ -2,7 +2,7 @@
 id: TICKET-0058
 title: "FIX: missing debug logging in ShipGlobalsHUD and ShipStatsSidebar"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: systems-programmer
@@ -37,3 +37,4 @@ tags: [coding-standards, logging, hud, inventory]
 
 ## Activity Log
 - 2026-02-23 [systems-programmer] Created from TICKET-0048 code review (P2)
+- 2026-02-23 [gameplay-programmer] Added Global.log() to HUD set_ship_visible show/hide, HUD signal handlers for critical state transitions, sidebar _update_alerts with change detection. DONE

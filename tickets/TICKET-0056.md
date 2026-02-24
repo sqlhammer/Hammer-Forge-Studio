@@ -2,7 +2,7 @@
 id: TICKET-0056
 title: "FIX: ship_interior.gd — missing class_name and section ordering violations"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: systems-programmer
@@ -31,3 +31,4 @@ tags: [coding-standards, ship-interior]
 
 ## Activity Log
 - 2026-02-23 [systems-programmer] Created from TICKET-0048 code review (P2)
+- 2026-02-23 [gameplay-programmer] Added class_name ShipInterior, moved _player_in_exit_zone to Private Variables section, moved is_player_in_exit_zone() and get_nearby_zone_index() to Public Methods section. DONE

@@ -1,4 +1,5 @@
 ## Canonical data definitions for all ship module types, tiers, and catalog entries.
+## tech_tree_gate field: if present, the named TechTree node must be unlocked before installation.
 class_name ModuleDefs
 extends RefCounted
 
@@ -43,6 +44,36 @@ const MODULE_CATALOG: Dictionary = {
 			"purity": ResourceDefs.Purity.ONE_STAR,
 			"quantity": 20,
 		},
+	},
+	"fabricator": {
+		"name": "Fabricator",
+		"description": "Crafts equipment and components from refined materials. Produces Spare Batteries, Head Lamps, and more.",
+		"module_type": ModuleType.EXTRACTION_BAY,
+		"tier": ModuleTier.TIER_1,
+		# Placeholder — same power draw as Recycler; confirm with Studio Head.
+		"power_draw": 10.0,
+		"install_cost": {
+			"resource_type": ResourceDefs.ResourceType.METAL,
+			"purity": ResourceDefs.Purity.ONE_STAR,
+			"quantity": 20,
+		},
+		# Requires the fabricator_module tech tree node to be unlocked before installation.
+		"tech_tree_gate": "fabricator_module",
+	},
+	"automation_hub": {
+		"name": "Automation Hub",
+		"description": "Deploys mining drones to autonomously extract from analyzed deposits.",
+		"module_type": ModuleType.AUTOMATION_HUB,
+		"tier": ModuleTier.TIER_1,
+		# Placeholder — confirm power draw with Studio Head.
+		"power_draw": 15.0,
+		"install_cost": {
+			"resource_type": ResourceDefs.ResourceType.METAL,
+			"purity": ResourceDefs.Purity.ONE_STAR,
+			"quantity": 30,
+		},
+		# Requires the automation_hub tech tree node to be unlocked before installation.
+		"tech_tree_gate": "automation_hub",
 	},
 }
 
@@ -108,3 +139,8 @@ static func get_all_module_ids() -> Array[String]:
 ## Returns the display name for a module type enum value.
 static func get_type_name(module_type: ModuleType) -> String:
 	return MODULE_TYPE_NAMES.get(module_type, "Unknown") as String
+
+## Returns the tech tree gate node ID for a module ID, or empty string if none required.
+static func get_tech_tree_gate(module_id: String) -> String:
+	var entry: Dictionary = MODULE_CATALOG.get(module_id, {})
+	return entry.get("tech_tree_gate", "") as String

@@ -2,7 +2,7 @@
 id: TICKET-0087
 title: "Asset folder structure — define permanent, temp, and archive paths"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: producer
 created_by: producer
@@ -22,13 +22,13 @@ Before experiments begin, the three asset locations used in this milestone must 
 
 ## Acceptance Criteria
 
-- [ ] The following three directory paths are created in the repository (empty `.gitkeep` files used to commit empty dirs):
+- [x] The following three directory paths are created in the repository (empty `.gitkeep` files used to commit empty dirs):
   - `game/assets/icons/` — permanent approved icons; these ship with the game
   - `game/assets/icons/temp/` — integration test assets placed here during TICKET-0099/0100; promoted or deleted after QA sign-off
   - `docs/art/icon-experiments/` — archive location for all experiment outputs (non-winning sets moved here after method selection in TICKET-0096/0097)
-- [ ] A `docs/art/icon-experiments/README.md` is created explaining the archive structure: one subfolder per method (e.g., `method-a/`, `method-b/`, `method-c/`), each containing `item-icons/` and `hud-icons/` subfolders plus an `iteration-log.md`
-- [ ] A `game/assets/icons/README.md` is created explaining: icons in root are permanent/approved; `temp/` contains integration-test assets under review; nothing in `temp/` is referenced by released code
-- [ ] All created paths and their purposes are committed to `main`
+- [x] A `docs/art/icon-experiments/README.md` is created explaining the archive structure: one subfolder per method (e.g., `method-a/`, `method-b/`, `method-c/`), each containing `item-icons/` and `hud-icons/` subfolders plus an `iteration-log.md`
+- [x] A `game/assets/icons/README.md` is created explaining: icons in root are permanent/approved; `temp/` contains integration-test assets under review; nothing in `temp/` is referenced by released code
+- [x] All created paths and their purposes are committed to `main`
 
 ## Implementation Notes
 
@@ -38,8 +38,9 @@ Before experiments begin, the three asset locations used in this milestone must 
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+Directories created: `game/assets/icons/`, `game/assets/icons/temp/`, `docs/art/icon-experiments/`. READMEs document lifecycle and structure. Experiment subfolders (`method-a/`, etc.) are created per experiment ticket by technical-artist.
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket for M6 Foundation phase
+- 2026-02-25 [producer] Created .gitkeep placeholders and README files for all three paths; ticket DONE

@@ -174,15 +174,16 @@ func _build_ship() -> void:
 		ship_mesh.position.y = 6.5
 		ship.add_child(ship_mesh)
 
-		# Generate trimesh collision directly from the mesh geometry.
-		# This matches the visual hull exactly — no clipping gaps.
+		# Generate convex decomposition collision from the mesh geometry.
+		# Uses VHACD to split the mesh into solid convex hulls — much more
+		# reliable than trimesh (surface-only) for CharacterBody3D collision.
 		for child: Node in ship_mesh.get_children():
 			if child is MeshInstance3D:
-				(child as MeshInstance3D).create_trimesh_collision()
-				var body: StaticBody3D = child.get_child(child.get_child_count() - 1) as StaticBody3D
-				if body:
-					body.collision_layer = LAYER_ENVIRONMENT
-					body.collision_mask = 0
+				(child as MeshInstance3D).create_multiple_convex_collisions()
+				for body_child: Node in child.get_children():
+					if body_child is StaticBody3D:
+						(body_child as StaticBody3D).collision_layer = LAYER_ENVIRONMENT
+						(body_child as StaticBody3D).collision_mask = 0
 				break
 
 	# Recharge zone (larger area around ship entrance)

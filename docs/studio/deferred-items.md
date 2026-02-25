@@ -1,7 +1,7 @@
 # Deferred Work Items
 
 **Owner:** producer
-**Last Updated:** 2026-02-25
+**Last Updated:** 2026-02-25 (D-016 added)
 
 > Tracks gameplay features and systems that were intentionally descoped from a milestone during planning. Each item references the design spec it originates from and the milestone where it was deferred. These items MUST be revisited and scheduled into a future milestone — they are not optional cuts, they are postponed work.
 
@@ -42,6 +42,7 @@
 | D-013 | Scanner tier upgrades via Scanner Array ship module | `docs/design/systems/meaningful-mining.md` | M3 scanner has a single fixed range — tiered detection requires ship module system | M4 (Ship Systems) | Open | — |
 | D-014 | Third-person camera scan/mine gameplay | N/A (planning decision) | M3 uses first-person only for scan/mine loop — third-person integration deferred to keep scope tight | M4 or M5 | Scheduled | TICKET-0071 |
 | D-015 | Animated scanner ping propagation — ping front expands outward at a fixed speed with a 1000 m hard range limit; compass markers appear only as the ping front reaches each deposit (not all at once); a visual expanding ring originates at the player and grows at the same rate as the ping, giving the player a spatial reference for why markers appear progressively over several seconds | `docs/design/systems/meaningful-mining.md` | M3 ping is instantaneous — animated propagation requires a ring VFX, a ping-front timer/radius system, and deferred marker reveal logic; adds significant feel to the scanner but is not required for loop validation | M9 (Movement & Usability Refinement) | Open | — |
+| D-016 | Interaction prompt HUD — contextual action hints centered at screen bottom (key badge + descriptor, thicker border for hold actions) and persistent controls panel in bottom-right (Q ping, I inventory) with device-aware input glyphs | N/A (Studio Head request) | Not yet assigned to a milestone; backlogged pending M5 planning | M5 or M6 | Scheduled | TICKET-0120 |
 
 ---
 

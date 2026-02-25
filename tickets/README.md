@@ -7,10 +7,10 @@ This directory contains all active work tickets for the Hammer Forge Studio proj
 ## Ticket File Naming
 
 ```
-tickets/TICKET-NNNN.md
+tickets/<milestone>/TICKET-NNNN.md
 ```
 
-IDs are zero-padded sequential integers starting at `0001`. Never reuse an ID. The Producer agent is responsible for assigning new IDs.
+Active tickets are organized into milestone subdirectories (e.g., `tickets/m5/`, `tickets/m6/`). The subdirectory name is the lowercase milestone ID. IDs are zero-padded sequential integers starting at `0001`. Never reuse an ID. The Producer agent is responsible for assigning new IDs.
 
 ---
 
@@ -155,7 +155,7 @@ The **Producer** is responsible for archiving completed tickets. This is an expl
 3. **Process:**
    - Review all tickets in `tickets/` with `status: DONE` or `CANCELLED`
    - For each eligible ticket:
-     - Move the file to `tickets/_archive/TICKET-NNNN.md`
+     - Move the file from `tickets/<milestone>/TICKET-NNNN.md` to `tickets/_archive/<milestone>/TICKET-NNNN.md` (use `git mv` to preserve history)
      - Add a final Activity Log entry: `YYYY-MM-DD [producer] Archived`
    - Commit the archival batch as a single commit: `"Archive: Move completed tickets to _archive (TICKET-NNNN, TICKET-NNNN, ...)"`
 

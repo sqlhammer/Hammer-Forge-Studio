@@ -532,11 +532,11 @@ func _place_module_visual(module_id: String, zone_index: int) -> void:
 		if fabricator_scene and fabricator_scene is PackedScene:
 			var mesh_node: Node3D = (fabricator_scene as PackedScene).instantiate()
 			mesh_node.name = "FabricatorModule"
-			_add_interaction_area(mesh_node, Vector3(2.0, 1.2, 1.0))
+			_add_interaction_area(mesh_node, Vector3(2.0, 1.2, 1.2))
 			_ship_interior.place_module_in_zone(zone_index, mesh_node)
 			Global.log("TestWorld: placed fabricator mesh in zone %d" % zone_index)
 		else:
-			_place_module_fallback("FabricatorModule", Vector3(2.0, 1.2, 1.0), zone_index)
+			_place_module_fallback("FabricatorModule", Vector3(2.0, 1.2, 1.2), zone_index)
 	elif module_id == "automation_hub":
 		var hub_scene: Resource = load("res://assets/meshes/machines/mesh_automation_hub_module.glb")
 		if hub_scene and hub_scene is PackedScene:

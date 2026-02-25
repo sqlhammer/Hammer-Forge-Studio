@@ -161,7 +161,10 @@ func _draw_ping_markers(player_yaw: float) -> void:
 
 	# Find nearest pinged deposit
 	for marker: Dictionary in _ping_markers:
-		var deposit: Deposit = marker.get("deposit") as Deposit
+		var raw_near: Variant = marker.get("deposit")
+		if not is_instance_valid(raw_near):
+			continue
+		var deposit: Deposit = raw_near as Deposit
 		if not deposit or deposit.is_depleted():
 			continue
 		var dist: float = player_pos.distance_to(deposit.global_position)
@@ -170,7 +173,10 @@ func _draw_ping_markers(player_yaw: float) -> void:
 			nearest_deposit = deposit
 
 	for marker: Dictionary in _ping_markers:
-		var deposit: Deposit = marker.get("deposit") as Deposit
+		var raw_draw: Variant = marker.get("deposit")
+		if not is_instance_valid(raw_draw):
+			continue
+		var deposit: Deposit = raw_draw as Deposit
 		if not deposit or deposit.is_depleted():
 			continue
 
@@ -217,6 +223,10 @@ func _draw_ping_markers(player_yaw: float) -> void:
 func _clean_expired_markers() -> void:
 	# Remove markers for depleted deposits
 	for i: int in range(_ping_markers.size() - 1, -1, -1):
-		var deposit: Deposit = _ping_markers[i].get("deposit") as Deposit
-		if not deposit or not is_instance_valid(deposit) or deposit.is_depleted():
+		var raw: Variant = _ping_markers[i].get("deposit")
+		if not is_instance_valid(raw):
+			_ping_markers.remove_at(i)
+			continue
+		var deposit: Deposit = raw as Deposit
+		if not deposit or deposit.is_depleted():
 			_ping_markers.remove_at(i)

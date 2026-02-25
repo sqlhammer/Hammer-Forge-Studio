@@ -2,12 +2,13 @@
 id: TICKET-0089
 title: "Icon evaluation criteria — adapt M2 POC framework for 2D icons"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: producer
 created_by: producer
 created_at: 2026-02-25
 updated_at: 2026-02-25
+completed_at: 2026-02-25
 milestone: "M6"
 milestone_gate: "M5"
 phase: "Foundation"
@@ -24,9 +25,9 @@ The output document (`docs/art/icon-evaluation-criteria.md`) is used by TICKET-0
 
 ## Acceptance Criteria
 
-- [ ] `docs/art/icon-evaluation-criteria.md` created and committed
-- [ ] The document defines the same structural elements as the M2 criteria doc: scoring scale (1–5), dimension table with weights, per-dimension rubric with explicit score anchors, scoring template, and additional evaluation notes
-- [ ] The following 7 dimensions are included with the specified weights (must sum to 100%):
+- [x] `docs/art/icon-evaluation-criteria.md` created and committed
+- [x] The document defines the same structural elements as the M2 criteria doc: scoring scale (1–5), dimension table with weights, per-dimension rubric with explicit score anchors, scoring template, and additional evaluation notes
+- [x] The following 7 dimensions are included with the specified weights (must sum to 100%):
 
 | # | Dimension | Weight |
 |---|-----------|--------|
@@ -38,7 +39,7 @@ The output document (`docs/art/icon-evaluation-criteria.md`) is used by TICKET-0
 | 6 | Godot Compatibility | 5% |
 | 7 | Maintainability | 5% |
 
-- [ ] **Per-dimension rubrics** are defined with score anchors (1–5) appropriate for 2D icons. Key rubric notes:
+- [x] **Per-dimension rubrics** are defined with score anchors (1–5) appropriate for 2D icons. Key rubric notes:
   - **Visual Quality:** evaluated against the relevant style guide (item guide for item icons, HUD guide for HUD icons). Score reflects match to stylized sci-fi aesthetic defined in the style guide.
   - **Human Effort:** score 5 = fully automated (agent prompt in, icon file out, no human steps); score 1 = requires a human artist for every icon.
   - **Financial Cost:** define score anchors in dollar terms based on a full set (~20 icons). Score 5 = free or negligible cost; score 1 = unacceptably expensive.
@@ -46,9 +47,9 @@ The output document (`docs/art/icon-evaluation-criteria.md`) is used by TICKET-0
   - **Scalability:** icons must be legible at 16px (smallest HUD use) through 48px (inventory slot). Score 5 = crisp at all sizes with no rework; score 1 = only usable at one size.
   - **Godot Compatibility:** clean import as SVG or PNG with correct transparency, scale, and no import warnings.
   - **Maintainability:** can another agent produce additional icons (beyond the experiment set) by following the documented SOP? Score 5 = reproducible with SOP alone; score 1 = only the original operator can replicate the results.
-- [ ] Scoring template table included (one column per experiment method, populated by TICKET-0095)
-- [ ] Recommendation threshold rule included: if top two methods score within 0.3 weighted points, recommend a hybrid approach; if one leads by > 0.3, recommend it as primary
-- [ ] Document notes that **each icon is scored individually**, then averaged to the method-level dimension score (same methodology as M2)
+- [x] Scoring template table included (one column per experiment method, populated by TICKET-0095)
+- [x] Recommendation threshold rule included: if top two methods score within 0.3 weighted points, recommend a hybrid approach; if one leads by > 0.3, recommend it as primary
+- [x] Document notes that **each icon is scored individually**, then averaged to the method-level dimension score (same methodology as M2)
 
 ## Implementation Notes
 
@@ -58,8 +59,9 @@ The output document (`docs/art/icon-evaluation-criteria.md`) is used by TICKET-0
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+`docs/art/icon-evaluation-criteria.md` created and committed (6e231d1). Seven dimensions with specified weights (sum = 100%), per-dimension rubrics with 1–5 anchors, scoring template for 3 experiments, and recommendation threshold rule (0.3 gap). Financial Cost rubric anchored to full 29-icon set from TICKET-0086 audit (9 item + 20 HUD/functional). Structure mirrors M2 poc-evaluation-criteria.md. Ready for use by TICKET-0092–0094 experiments and TICKET-0095 evaluation.
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket for M6 Foundation phase
+- 2026-02-25 [producer] DONE — criteria doc created and committed (6e231d1)

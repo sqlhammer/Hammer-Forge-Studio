@@ -12,7 +12,7 @@ func register_tests() -> void:
 	add_test("recycler_power_draw_is_10", _test_recycler_power_draw_is_10)
 	add_test("recycler_tier_is_tier_1", _test_recycler_tier_is_tier_1)
 	add_test("recycler_type_is_extraction_bay", _test_recycler_type_is_extraction_bay)
-	add_test("recycler_install_cost_is_20_scrap_metal", _test_recycler_install_cost_is_20_scrap_metal)
+	add_test("recycler_install_cost_is_2_scrap_metal", _test_recycler_install_cost_is_2_scrap_metal)
 	# Static helpers
 	add_test("get_module_entry_unknown_returns_empty", _test_get_module_entry_unknown_returns_empty)
 	add_test("get_module_name_returns_display_name", _test_get_module_name_returns_display_name)
@@ -52,14 +52,14 @@ func _test_recycler_type_is_extraction_bay() -> void:
 		"Recycler should be EXTRACTION_BAY type")
 
 
-func _test_recycler_install_cost_is_20_scrap_metal() -> void:
+func _test_recycler_install_cost_is_2_scrap_metal() -> void:
 	var cost: Dictionary = ModuleDefs.get_install_cost("recycler")
 	assert_false(cost.is_empty(), "Recycler should have an install cost")
 	assert_equal(cost.get("resource_type"), ResourceDefs.ResourceType.SCRAP_METAL,
 		"Install cost resource should be SCRAP_METAL")
 	assert_equal(cost.get("purity"), ResourceDefs.Purity.ONE_STAR,
 		"Install cost purity should be ONE_STAR")
-	assert_equal(cost.get("quantity"), 20, "Install cost quantity should be 20")
+	assert_equal(cost.get("quantity"), 2, "Install cost quantity should be 2")
 
 
 # -- Static helpers --

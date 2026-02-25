@@ -84,10 +84,10 @@ func register_tests() -> void:
 
 # ── Helpers ───────────────────────────────────────────────
 
-## Installs recycler via the autoload ModuleManager (seeds resources first).
+## Installs recycler via the autoload ModuleManager (seeds exact install cost).
 func _install_recycler() -> void:
 	PlayerInventory.add_item(
-		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 20)
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 2)
 	ModuleManager.install_module("recycler")
 
 

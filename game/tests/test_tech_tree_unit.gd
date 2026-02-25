@@ -73,7 +73,7 @@ func _seed_metal(quantity: int) -> void:
 
 
 func _unlock_fabricator() -> void:
-	_seed_metal(100)
+	_seed_metal(1)
 	TechTree.unlock_node("fabricator_module")
 
 
@@ -122,20 +122,20 @@ func _test_can_unlock_false_without_resources() -> void:
 # -- Unlock success --
 
 func _test_unlock_fabricator_succeeds_with_resources() -> void:
-	_seed_metal(100)
+	_seed_metal(1)
 	var result: bool = TechTree.unlock_node("fabricator_module")
 	assert_true(result, "Unlock should succeed with sufficient resources")
 
 
 func _test_unlock_deducts_resources() -> void:
-	_seed_metal(150)
+	_seed_metal(3)
 	TechTree.unlock_node("fabricator_module")
 	var remaining: int = PlayerInventory.get_total_count(ResourceDefs.ResourceType.METAL)
-	assert_equal(remaining, 50, "Should deduct 100 Metal, leaving 50")
+	assert_equal(remaining, 2, "Should deduct 1 Metal, leaving 2")
 
 
 func _test_unlock_emits_node_unlocked() -> void:
-	_seed_metal(100)
+	_seed_metal(1)
 	TechTree.unlock_node("fabricator_module")
 	assert_signal_emitted(_spy, "node_unlocked", "node_unlocked should be emitted on unlock")
 	var args: Array = _spy.get_emission_args("node_unlocked", 0)
@@ -157,20 +157,20 @@ func _test_unlock_fails_unknown_node() -> void:
 func _test_unlock_fails_already_unlocked() -> void:
 	_unlock_fabricator()
 	_spy.clear()
-	_seed_metal(100)
+	_seed_metal(1)
 	var result: bool = TechTree.unlock_node("fabricator_module")
 	assert_false(result, "Unlock should fail when node is already unlocked")
 
 
 func _test_unlock_fails_insufficient_resources() -> void:
-	_seed_metal(50)
+	# Cost is 1 Metal — seed 0 so player has nothing
 	var result: bool = TechTree.unlock_node("fabricator_module")
 	assert_false(result, "Unlock should fail with insufficient resources")
 	assert_false(TechTree.is_unlocked("fabricator_module"), "Node should remain locked")
 
 
 func _test_unlock_fails_missing_prerequisite() -> void:
-	_seed_metal(200)
+	_seed_metal(2)
 	var result: bool = TechTree.unlock_node("automation_hub")
 	assert_false(result, "Automation Hub unlock should fail without fabricator_module unlocked")
 
@@ -179,7 +179,7 @@ func _test_unlock_fails_missing_prerequisite() -> void:
 
 func _test_automation_hub_unlockable_after_fabricator() -> void:
 	_unlock_fabricator()
-	_seed_metal(200)
+	_seed_metal(2)
 	var result: bool = TechTree.unlock_node("automation_hub")
 	assert_true(result, "Automation Hub should unlock after fabricator_module is unlocked")
 	assert_true(TechTree.is_unlocked("automation_hub"), "automation_hub should be unlocked")
@@ -188,14 +188,14 @@ func _test_automation_hub_unlockable_after_fabricator() -> void:
 # -- can_unlock --
 
 func _test_can_unlock_true_with_resources_and_prereqs() -> void:
-	_seed_metal(100)
+	_seed_metal(1)
 	assert_true(TechTree.can_unlock("fabricator_module"), "can_unlock should return true with sufficient resources")
 
 
 # -- get_available_nodes --
 
 func _test_get_available_nodes_returns_fabricator_initially() -> void:
-	_seed_metal(100)
+	_seed_metal(1)
 	var available: Array[String] = TechTree.get_available_nodes()
 	assert_true(available.has("fabricator_module"), "Available nodes should include fabricator_module")
 	assert_false(available.has("automation_hub"), "Available nodes should not include automation_hub")
@@ -203,7 +203,7 @@ func _test_get_available_nodes_returns_fabricator_initially() -> void:
 
 func _test_get_available_nodes_returns_automation_hub_after_fabricator() -> void:
 	_unlock_fabricator()
-	_seed_metal(200)
+	_seed_metal(2)
 	var available: Array[String] = TechTree.get_available_nodes()
 	assert_true(available.has("automation_hub"), "Available nodes should include automation_hub after fabricator unlock")
 	assert_false(available.has("fabricator_module"), "fabricator_module should not appear (already unlocked)")

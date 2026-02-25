@@ -74,10 +74,10 @@ func register_tests() -> void:
 
 # ── Helpers ───────────────────────────────────────────────
 
-## Seeds PlayerInventory with enough Scrap Metal to install the recycler (20 @ 1-star).
+## Seeds PlayerInventory with enough Scrap Metal to install the recycler (matches ModuleDefs cost).
 func _seed_recycler_resources() -> void:
 	PlayerInventory.add_item(
-		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 20)
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 2)
 
 
 # ── Test Methods ──────────────────────────────────────────
@@ -115,34 +115,34 @@ func _test_install_deducts_resources_from_inventory() -> void:
 	_manager.install_module("recycler")
 	var remaining: int = PlayerInventory.get_count(
 		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR)
-	assert_equal(remaining, 0, "Install should deduct all 20 Scrap Metal from inventory")
+	assert_equal(remaining, 0, "Install should deduct all Scrap Metal from inventory")
 
 
 func _test_install_with_mixed_purities_succeeds() -> void:
-	# 10 @ 1-star + 10 @ 3-star = 20 total (need 20)
+	# 1 @ 1-star + 1 @ 3-star = 2 total (need 2)
 	PlayerInventory.add_item(
-		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 10)
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 1)
 	PlayerInventory.add_item(
-		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR, 10)
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR, 1)
 	var result: bool = _manager.install_module("recycler")
-	assert_true(result, "Install should succeed with mixed-purity resources totaling 20")
+	assert_true(result, "Install should succeed with mixed-purity resources totaling 2")
 	assert_true(_manager.is_installed("recycler"), "Recycler should be installed")
 
 
 func _test_install_consumes_lowest_purity_first() -> void:
-	# 15 @ 1-star + 10 @ 3-star = 25 total (need 20)
+	# 2 @ 1-star + 2 @ 3-star = 4 total (need 2)
 	PlayerInventory.add_item(
-		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 15)
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 2)
 	PlayerInventory.add_item(
-		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR, 10)
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR, 2)
 	_manager.install_module("recycler")
-	# Should consume all 15 @ 1-star, then 5 from 3-star
+	# Should consume all 2 @ 1-star, leaving 3-star untouched
 	var one_star: int = PlayerInventory.get_count(
 		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR)
 	var three_star: int = PlayerInventory.get_count(
 		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR)
 	assert_equal(one_star, 0, "All 1-star should be consumed first")
-	assert_equal(three_star, 5, "Only 5 of 10 three-star should be consumed")
+	assert_equal(three_star, 2, "3-star should remain untouched")
 
 
 func _test_install_registers_power_draw() -> void:
@@ -180,9 +180,9 @@ func _test_install_already_installed_fails() -> void:
 
 
 func _test_install_insufficient_resources_fails() -> void:
-	# Add only 5 Scrap Metal — need 20
+	# Add only 1 Scrap Metal — need 2
 	PlayerInventory.add_item(
-		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 5)
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR, 1)
 	var result: bool = _manager.install_module("recycler")
 	assert_false(result, "Install should fail with insufficient resources")
 	assert_signal_emitted(_spy, "install_failed", "install_failed should emit")
@@ -216,12 +216,12 @@ func _test_install_failure_does_not_deduct_resources() -> void:
 	# Resources should not be deducted since power check fails first
 	var remaining: int = PlayerInventory.get_count(
 		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR)
-	assert_equal(remaining, 20, "Resources should not be deducted on power failure")
+	assert_equal(remaining, 2, "Resources should not be deducted on power failure")
 
 
 func _test_install_tech_tree_locked_fails() -> void:
 	# Fabricator requires "fabricator_module" tech tree node — not unlocked after TechTree.reset()
-	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 20)
+	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 2)
 	var result: bool = _manager.install_module("fabricator")
 	assert_false(result, "Install should fail when tech tree gate is not unlocked")
 	assert_signal_emitted(_spy, "install_failed", "install_failed should emit")
@@ -230,8 +230,8 @@ func _test_install_tech_tree_locked_fails() -> void:
 
 
 func _test_install_with_tech_tree_unlocked_succeeds() -> void:
-	# Unlock the fabricator_module gate (costs 100 Metal), then install fabricator (costs 20 Metal)
-	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 120)
+	# Unlock the fabricator_module gate (costs 1 Metal), then install fabricator (costs 2 Metal)
+	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 3)
 	TechTree.unlock_node("fabricator_module")
 	var result: bool = _manager.install_module("fabricator")
 	assert_true(result, "Install should succeed when tech tree gate is unlocked and resources met")

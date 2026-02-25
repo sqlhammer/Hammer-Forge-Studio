@@ -101,8 +101,8 @@ func register_tests() -> void:
 # ── Helpers ───────────────────────────────────────────────
 
 func _setup_automation_hub() -> void:
-	# Unlock fabricator first (prerequisite for automation_hub)
-	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 500)
+	# Unlock fabricator (1 Metal) + automation_hub (2 Metal) + install module (2 Metal) = 5 total
+	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 5)
 	TechTree.unlock_node("fabricator_module")
 	TechTree.unlock_node("automation_hub")
 	ModuleManager.install_module("automation_hub")

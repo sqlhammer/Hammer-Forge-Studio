@@ -88,10 +88,9 @@ func register_tests() -> void:
 
 ## Unlocks fabricator_module in tech tree and installs the Fabricator module.
 func _setup_fabricator() -> void:
-	# Unlock tech tree node
-	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 200)
+	# Unlock tech tree node (costs 1 Metal) + install module (costs 2 Metal) = 3 total
+	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 3)
 	TechTree.unlock_node("fabricator_module")
-	# Install module (costs 20 Metal)
 	ModuleManager.install_module("fabricator")
 
 
@@ -153,7 +152,7 @@ func _test_queue_job_emits_job_started() -> void:
 
 func _test_queue_job_deducts_input_resources() -> void:
 	_setup_fabricator()
-	# After setup: 200 seeded - 100 unlock - 20 install = 80 remaining
+	# After setup: 3 seeded - 1 unlock - 2 install = 0 remaining
 	var before: int = PlayerInventory.get_total_count(ResourceDefs.ResourceType.METAL)
 	_seed_spare_battery_resources()
 	_fabricator.queue_job("spare_battery")
@@ -166,7 +165,7 @@ func _test_queue_job_deducts_input_resources() -> void:
 
 func _test_queue_job_fails_without_module() -> void:
 	# Tech tree unlocked but module not installed
-	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 200)
+	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 11)
 	TechTree.unlock_node("fabricator_module")
 	_seed_spare_battery_resources()
 	var result: bool = _fabricator.queue_job("spare_battery")

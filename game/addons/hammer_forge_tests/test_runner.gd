@@ -93,16 +93,23 @@ func _run_suite_from_path(script_path: String) -> void:
 
 	# Add to scene tree so Node lifecycle methods and groups work
 	add_child(suite_instance)
-	_print_suite_header(suite_instance.get_suite_name())
 	var results: Array[TestResult] = suite_instance.run_all_tests()
 
 	for result: TestResult in results:
-		_print_test_result(result)
 		_all_results.append(result)
 
-	_total_passed += suite_instance.get_pass_count()
-	_total_failed += suite_instance.get_fail_count()
-	_total_skipped += suite_instance.get_skip_count()
+	var suite_passed: int = suite_instance.get_pass_count()
+	var suite_failed: int = suite_instance.get_fail_count()
+	var suite_skipped: int = suite_instance.get_skip_count()
+	_total_passed += suite_passed
+	_total_failed += suite_failed
+	_total_skipped += suite_skipped
+
+	# Print suite header with summary, then only FAIL/SKIP details
+	_print_suite_header(suite_instance.get_suite_name(), suite_passed, suite_failed, suite_skipped)
+	for result: TestResult in results:
+		if result.status != TestResult.Status.PASSED:
+			_print_test_result(result)
 
 	remove_child(suite_instance)
 	suite_instance.queue_free()
@@ -114,8 +121,9 @@ func _print_header() -> void:
 	Global.log("==============================================")
 
 
-func _print_suite_header(suite_name: String) -> void:
-	Global.log("--- Suite: %s ---" % suite_name)
+func _print_suite_header(suite_name: String, passed: int, failed: int, skipped: int) -> void:
+	var total: int = passed + failed + skipped
+	Global.log("--- Suite: %s --- %d/%d passed" % [suite_name, passed, total])
 
 
 func _print_test_result(result: TestResult) -> void:

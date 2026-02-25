@@ -2,7 +2,7 @@
 id: TICKET-0121
 title: "Bugfix — compass_bar.gd crashes with 'Trying to cast a freed object' on line 220"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -70,3 +70,4 @@ Apply the same pattern to the two `as Deposit` casts inside that method's loops.
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket — crash reproducible when deposit node is freed while compass marker is active
+- 2026-02-25 [gameplay-programmer] DONE — added is_instance_valid() guard before `as Deposit` cast in _clean_expired_markers() and both loops in _draw_ping_markers(). Commit c535d25, PR #57.

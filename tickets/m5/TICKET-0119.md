@@ -2,7 +2,7 @@
 id: TICKET-0119
 title: "Bugfix — Fabricator module collision box undersized on Z-axis (fails AABB coverage)"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: qa-engineer
@@ -54,3 +54,4 @@ Both the game code and test harness must use the same dimensions.
 
 ## Activity Log
 - 2026-02-25 [qa-engineer] Created ticket from collision test run — 15/16 passed, fabricator Z-axis coverage 0.83 < 0.85
+- 2026-02-25 [gameplay-programmer] DONE — increased fabricator collision Z from 1.0 to 1.2 in test_world.gd and test_collision_coverage_unit.gd, restored coverage_threshold to DEFAULT_COVERAGE_THRESHOLD (0.85). Commit c535d25, PR #57.

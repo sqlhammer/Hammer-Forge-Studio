@@ -245,14 +245,12 @@ func _create_pattern_lines(deposit: Deposit) -> void:
 		var line_pos: Vector3 = deposit_center + world_offset
 		_line_world_positions.append(line_pos)
 
-		# Visual mesh
+		# Visual mesh — add to tree before setting global transforms
 		var mesh_inst := MeshInstance3D.new()
 		mesh_inst.name = "PatternLine%d" % i
 		var box := BoxMesh.new()
 		box.size = Vector3(LINE_MESH_LENGTH, LINE_MESH_HEIGHT, LINE_MESH_DEPTH)
 		mesh_inst.mesh = box
-		mesh_inst.global_position = line_pos
-		mesh_inst.look_at(line_pos + to_player, Vector3.UP)
 
 		var mat := StandardMaterial3D.new()
 		mat.albedo_color = COLOR_LINE_PENDING
@@ -263,6 +261,8 @@ func _create_pattern_lines(deposit: Deposit) -> void:
 		mesh_inst.material_override = mat
 
 		deposit.add_child(mesh_inst)
+		mesh_inst.global_position = line_pos
+		mesh_inst.look_at(line_pos + to_player, Vector3.UP)
 		_line_meshes.append(mesh_inst)
 		_line_materials.append(mat)
 

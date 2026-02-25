@@ -93,6 +93,7 @@ func exit_ship() -> void:
 		return
 	Global.log("ShipInterior: player exiting ship")
 	await _fade_out()
+	_player_ref.velocity = Vector3.ZERO
 	_player_ref.global_position = _exterior_marker.global_position
 	_is_player_inside = false
 	player_exited_ship.emit()

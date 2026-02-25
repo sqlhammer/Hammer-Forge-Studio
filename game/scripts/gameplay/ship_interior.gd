@@ -16,8 +16,9 @@ const CORRIDOR_DEPTH: float = 3.0
 const CEILING_HEIGHT: float = 3.0
 
 const ZONE_SIZE: float = 3.0
-const ZONE_A_CENTER := Vector3(-2.5, 0.0, -1.0)
-const ZONE_B_CENTER := Vector3(2.5, 0.0, -1.0)
+const ZONE_A_CENTER := Vector3(-3.0, 0.0, -1.0)
+const ZONE_B_CENTER := Vector3(0.0, 0.0, -1.0)
+const ZONE_C_CENTER := Vector3(3.0, 0.0, -1.0)
 const ZONE_INTERACT_OFFSET: float = 0.5
 const INTERACT_RANGE: float = 2.0
 
@@ -44,8 +45,8 @@ var _exit_marker: Marker3D = null
 var _exterior_marker: Marker3D = null
 var _zone_areas: Array[Area3D] = []
 var _zone_floor_markers: Array[MeshInstance3D] = []
-var _zone_occupied: Array[bool] = [false, false]
-var _zone_module_nodes: Array[Node3D] = [null, null]
+var _zone_occupied: Array[bool] = [false, false, false]
+var _zone_module_nodes: Array[Node3D] = [null, null, null]
 var _fade_rect: ColorRect = null
 var _fade_layer: CanvasLayer = null
 var _player_ref: CharacterBody3D = null
@@ -123,8 +124,8 @@ func place_module_in_zone(zone_index: int, module_mesh: Node3D) -> void:
 	if zone_index < 0 or zone_index >= _zone_occupied.size():
 		return
 	_zone_occupied[zone_index] = true
-	var zone_center: Vector3 = ZONE_A_CENTER if zone_index == 0 else ZONE_B_CENTER
-	module_mesh.position = zone_center
+	var zone_centers: Array[Vector3] = [ZONE_A_CENTER, ZONE_B_CENTER, ZONE_C_CENTER]
+	module_mesh.position = zone_centers[zone_index]
 	add_child(module_mesh)
 	_zone_module_nodes[zone_index] = module_mesh
 	_update_zone_visual(zone_index)
@@ -244,8 +245,8 @@ func _build_geometry() -> void:
 	_create_static_surface("CorridorBack", Vector3(CORRIDOR_WIDTH, wall_h, 0.2), Vector3(0, wall_y, corr_end_z), COLOR_WALLS, 0.9)
 
 func _build_module_zones() -> void:
-	var zone_centers: Array[Vector3] = [ZONE_A_CENTER, ZONE_B_CENTER]
-	for i: int in range(2):
+	var zone_centers: Array[Vector3] = [ZONE_A_CENTER, ZONE_B_CENTER, ZONE_C_CENTER]
+	for i: int in range(3):
 		var center: Vector3 = zone_centers[i]
 
 		# Floor marking (emissive teal overlay)

@@ -64,8 +64,8 @@ Four distinct generation approaches were evaluated. Each is meaningfully differe
 
 **Estimated cost:**
 - API units: ~$0.01 per image generation (vectorization endpoint)
-- Full set (29 icons): ~$0.29 — well within free-tier credit allocation
-- Free tier provides sufficient credits for a full 29-icon experiment set; no paid plan required for the experiment
+- Full set (29 icons): ~$0.29
+- **Actual cost incurred:** 1,000 API credits purchased for $1.00 (free tier was insufficient; paid credit top-up required before experiment could begin)
 
 **Output format:** SVG natively (via `recraft-v3-svg` model). No conversion required for Godot. Post-processing a color/stroke normalization pass in Python is recommended (~10 lines of XML string replacement) to enforce style guide compliance.
 
@@ -136,7 +136,7 @@ Four distinct generation approaches were evaluated. Each is meaningfully differe
 | Dimension | Method 1: Programmatic SVG | Method 2: Recraft.ai API | Method 3: Blender Render | Method 4: game-icons.net |
 |-----------|---------------------------|--------------------------|--------------------------|--------------------------|
 | Human effort | None | One-time API setup | None | Optional gap review |
-| Financial cost | $0 | ~$0.29 (free tier) | $0 | $0 (attribution) |
+| Financial cost | $0 | $1.00 (1,000 credits; free tier insufficient) | $0 | $0 (attribution) |
 | Output format | SVG (native) | SVG (native) | PNG (format mismatch) | SVG (native) |
 | Agent operability | Full | Full (post-setup) | Full | Mostly full |
 | Visual quality ceiling | Medium (design-limited) | High (AI-generated) | High (render quality) | Medium (library-limited) |

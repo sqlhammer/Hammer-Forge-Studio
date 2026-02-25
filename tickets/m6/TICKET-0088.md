@@ -47,7 +47,7 @@ Before style guides or experiments can begin, we need to know which generation m
 4 methods evaluated; 3 selected as experiment finalists:
 
 - **Experiment A:** Programmatic SVG (Python svgwrite) — zero cost, zero human effort, SVG-native, deterministic
-- **Experiment B:** Recraft.ai API (AI vector generation) — highest quality ceiling, ~$0.29 for full set, SVG-native
+- **Experiment B:** Recraft.ai API (AI vector generation) — highest quality ceiling, SVG-native; free tier insufficient — 1,000 credits purchased for $1.00 before experiment can begin
 - **Experiment C:** game-icons.net library + scripted customization — zero cost, SVG-native, strong baseline for common symbols; gap-fill via Method A for project-specific icons
 
 **Eliminated:** Blender Python renders — PNG format mismatch vs. SVG preference; no quality advantage over Method A for 2D line icons.

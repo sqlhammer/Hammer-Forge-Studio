@@ -177,13 +177,25 @@ func _build_ui() -> void:
 	_available_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(_available_label)
 
-	# Instructions
+	# Footer row: instructions + close button
+	var footer := HBoxContainer.new()
+	footer.alignment = BoxContainer.ALIGNMENT_CENTER
+	footer.add_theme_constant_override("separation", 16)
+	vbox.add_child(footer)
+
 	var instructions := Label.new()
 	instructions.text = "[Esc] Close"
 	instructions.add_theme_font_size_override("font_size", 14)
 	instructions.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	instructions.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(instructions)
+	footer.add_child(instructions)
+
+	var close_button := Button.new()
+	close_button.text = "Close"
+	close_button.custom_minimum_size = Vector2(80, 32)
+	close_button.add_theme_font_size_override("font_size", 14)
+	_style_button(close_button, COLOR_NEUTRAL)
+	close_button.pressed.connect(close)
+	footer.add_child(close_button)
 
 func _build_slot_row() -> CenterContainer:
 	var center := CenterContainer.new()

@@ -193,13 +193,25 @@ func _build_ui() -> void:
 	var detail_panel := _build_detail_panel()
 	hbox.add_child(detail_panel)
 
-	# Instructions
+	# Footer row: instructions + close button
+	var footer := HBoxContainer.new()
+	footer.alignment = BoxContainer.ALIGNMENT_CENTER
+	footer.add_theme_constant_override("separation", 16)
+	vbox.add_child(footer)
+
 	var instructions := Label.new()
 	instructions.text = "[Up/Down] Navigate  [Enter] Unlock  [Esc] Close"
 	instructions.add_theme_font_size_override("font_size", 14)
 	instructions.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	instructions.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(instructions)
+	footer.add_child(instructions)
+
+	var close_button := Button.new()
+	close_button.text = "Close"
+	close_button.custom_minimum_size = Vector2(80, 32)
+	close_button.add_theme_font_size_override("font_size", 14)
+	_style_close_button(close_button)
+	close_button.pressed.connect(close)
+	footer.add_child(close_button)
 
 	# Confirmation dialog (hidden)
 	_build_confirm_dialog(dim_layer)
@@ -588,6 +600,21 @@ func _style_button(button: Button, accent_color: Color) -> void:
 	button.add_theme_color_override("font_color", accent_color)
 	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
 	button.add_theme_color_override("font_disabled_color", Color(accent_color, 0.3))
+
+func _style_close_button(button: Button) -> void:
+	var normal_style := StyleBoxFlat.new()
+	normal_style.bg_color = Color(COLOR_NEUTRAL, 0.2)
+	normal_style.border_color = COLOR_NEUTRAL
+	normal_style.set_border_width_all(1)
+	normal_style.set_corner_radius_all(4)
+	normal_style.set_content_margin_all(8)
+	button.add_theme_stylebox_override("normal", normal_style)
+	button.add_theme_stylebox_override("hover", normal_style)
+	var pressed_style: StyleBoxFlat = normal_style.duplicate() as StyleBoxFlat
+	pressed_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
+	button.add_theme_stylebox_override("pressed", pressed_style)
+	button.add_theme_color_override("font_color", COLOR_NEUTRAL)
+	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
 
 func _add_divider(parent: Node) -> void:
 	var divider := HSeparator.new()

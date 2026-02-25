@@ -39,9 +39,10 @@ func _process(delta: float) -> void:
 	_apply_movement()
 
 func _input(event: InputEvent) -> void:
-	# Only handle mouse look input
+	# Only handle mouse look when cursor is captured (not while a UI panel is open)
 	if event is InputEventMouseMotion:
-		# warning-ignore:unsafe_method_access
+		if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
+			return
 		if InputManager.get_current_input_device() == "keyboard":
 			var mouse_delta: Vector2 = event.relative
 			_apply_mouse_look(mouse_delta)

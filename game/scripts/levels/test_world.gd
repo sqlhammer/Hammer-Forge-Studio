@@ -194,7 +194,7 @@ func _build_ship() -> void:
 	_recharge_zone.collision_mask = LAYER_PLAYER
 	var recharge_col := CollisionShape3D.new()
 	var recharge_shape := BoxShape3D.new()
-	recharge_shape.size = Vector3(24.0, 15.0, 30.0)
+	recharge_shape.size = Vector3(32.0, 15.0, 52.0)
 	recharge_col.shape = recharge_shape
 	recharge_col.position.y = 4.5
 	_recharge_zone.add_child(recharge_col)
@@ -335,8 +335,8 @@ func _setup_ship_interior() -> void:
 	if _first_person:
 		_ship_interior.setup(_first_person)
 
-	# Set the exterior exit position to just outside the ship ramp (scaled for 3× hull)
-	_ship_interior.set_exterior_position(Vector3(0, 0.9, 18))
+	# Set the exterior exit position outside the ship hull (3× hull Z-edge = 21, exit beyond it)
+	_ship_interior.set_exterior_position(Vector3(0, 0.9, 24))
 
 	# Connect ship interior signals
 	_ship_interior.player_entered_ship.connect(_on_player_entered_ship)

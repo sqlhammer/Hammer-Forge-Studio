@@ -22,6 +22,11 @@ const LAYER_ENVIRONMENT: int = 1 << 2  # Layer 3
 const LAYER_INTERACTABLE: int = 1 << 3  # Layer 4
 const INTERACTION_RAY_LENGTH: float = 6.0
 
+## Ping ring visual
+const PING_RING_DURATION: float = 2.0
+const PING_RING_COLOR := Color("#00D4AA", 0.8)
+const PING_RING_Y_OFFSET: float = 0.2
+
 # ── Private Variables ─────────────────────────────────────
 var _camera: Camera3D = null
 var _player: CharacterBody3D = null
@@ -90,6 +95,7 @@ func _do_ping() -> void:
 	for deposit: Deposit in deposits:
 		if not deposit.is_pinged():
 			deposit.ping()
+	_spawn_ping_ring()
 	ping_completed.emit(deposits)
 
 func _update_analysis(delta: float) -> void:
@@ -167,3 +173,38 @@ func _cast_interaction_ray() -> Dictionary:
 	var query := PhysicsRayQueryParameters3D.create(from, to)
 	query.collision_mask = LAYER_INTERACTABLE
 	return space_state.intersect_ray(query)
+
+func _spawn_ping_ring() -> void:
+	var ring := MeshInstance3D.new()
+	ring.name = "PingRing"
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.48
+	torus.outer_radius = 0.5
+	torus.rings = 64
+	torus.ring_segments = 6
+	ring.mesh = torus
+
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = PING_RING_COLOR
+	mat.emission_enabled = true
+	mat.emission = Color("#00D4AA")
+	mat.emission_energy_multiplier = 2.0
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.no_depth_test = true
+	ring.material_override = mat
+
+	var ring_pos := Vector3(_player.global_position.x, PING_RING_Y_OFFSET, _player.global_position.z)
+	_player.get_parent().add_child(ring)
+	ring.global_position = ring_pos
+	ring.scale = Vector3.ONE
+
+	# Torus outer_radius is 0.5, so scale factor = PING_RANGE / 0.5 = PING_RANGE * 2
+	var final_scale: float = PING_RANGE * 2.0
+	var tween: Tween = ring.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(ring, "scale", Vector3(final_scale, 1.0, final_scale), PING_RING_DURATION).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tween.tween_property(mat, "albedo_color:a", 0.0, PING_RING_DURATION).set_ease(Tween.EASE_IN)
+	tween.tween_property(mat, "emission_energy_multiplier", 0.0, PING_RING_DURATION)
+	tween.set_parallel(false)
+	tween.tween_callback(ring.queue_free)
+	Global.log("Scanner: ping ring spawned")

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """milestone_status.py — Fast replacement for milestone_status.sh.
 
-Usage: python tools/milestone_status.py [M#]
+Usage: python tools/milestone_status.py [--brief] [M#]
+  --brief  Only show OPEN/IN_PROGRESS tickets; collapse DONE into a count.
+           Use this for the milestone-summary skill to minimise output tokens.
 Accepts "M5", "5", "m5". Defaults to auto-detecting the active milestone.
 Scans only active ticket dirs (skips _archive/ entirely).
 """
@@ -68,9 +70,14 @@ def parse_depends(raw: str) -> list[str]:
 
 
 def main():
+    # Parse flags and positional args
+    args = sys.argv[1:]
+    brief = "--brief" in args
+    args = [a for a in args if a != "--brief"]
+
     # Determine target milestone
-    if len(sys.argv) >= 2:
-        target = normalize_milestone(sys.argv[1])
+    if args:
+        target = normalize_milestone(args[0])
     else:
         target = auto_detect_milestone()
 
@@ -131,17 +138,24 @@ def main():
     # Output table
     print(f"## {target} Milestone Status")
     print()
-    print("| Ticket | Title | Status | Owner | Phase | Dependencies |")
-    print("|--------|-------|--------|-------|-------|--------------|")
-
-    for t_id, t_title, t_status, t_owner, t_phase, t_deps in rows:
-        if len(t_title) > 50:
-            t_title = t_title[:47] + "..."
-        deps_col = t_deps if t_deps else "-"
-        print(f"| {t_id} | {t_title} | {t_status} | {t_owner} | {t_phase} | {deps_col} |")
-
-    print()
     print(f"**Stats:** {done_count}/{total} DONE, {in_progress_count} IN_PROGRESS, {open_count} OPEN")
+
+    if brief and done_count == total:
+        print()
+        print(f"All {total} tickets DONE. No open or in-progress work.")
+    else:
+        # In brief mode, only show non-DONE rows
+        display_rows = [r for r in rows if r[2] != "DONE"] if brief else rows
+        if brief and display_rows:
+            print(f"({done_count} DONE tickets omitted — showing {len(display_rows)} actionable)")
+        print()
+        print("| Ticket | Title | Status | Owner | Phase | Dependencies |")
+        print("|--------|-------|--------|-------|-------|--------------|")
+        for t_id, t_title, t_status, t_owner, t_phase, t_deps in display_rows:
+            if len(t_title) > 50:
+                t_title = t_title[:47] + "..."
+            deps_col = t_deps if t_deps else "-"
+            print(f"| {t_id} | {t_title} | {t_status} | {t_owner} | {t_phase} | {deps_col} |")
 
     # Check dependency violations
     # Archive invariant: any dep not in status_map is archived → treat as DONE

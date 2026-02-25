@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://jpgu150dmyh8" path="res://assets/meshes/tools/mesh_hand_drill.glb" id="1_rhf70"]
 [ext_resource type="PackedScene" uid="uid://bdaj5sjxc870k" path="res://assets/meshes/characters/mesh_player_character.glb" id="2_kermr"]
-[ext_resource type="PackedScene" uid="uid://4d7wey6cpxgi" path="res://assets/meshes/vehicles/mesh_ship_exterior.glb" id="3_nqfol"]
+[ext_resource type="PackedScene" uid="uid://cawcd10a5hvt8" path="res://scenes/objects/ship_exterior.tscn" id="3_nqfol"]
 [ext_resource type="PackedScene" uid="uid://pb0blxdrx6ys" path="res://assets/meshes/props/mesh_resource_node_scrap.glb" id="4_q17av"]
 
 [node name="TestM2Assets" type="Node3D"]

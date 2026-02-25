@@ -25,7 +25,7 @@ var _scanner: Scanner = null
 var _mining: Mining = null
 var _hud: GameHUD = null
 var _inventory_screen: InventoryScreen = null
-var _recharge_zone: Area3D = null
+var _ship_exterior: ShipExterior = null
 var _deposit_container: Node3D = null
 var _ship_interior: Node3D = null
 var _ship_enter_zone: Area3D = null
@@ -160,51 +160,17 @@ func _build_boundaries() -> void:
 		boundaries.add_child(wall)
 
 func _build_ship() -> void:
-	var ship := Node3D.new()
-	ship.name = "Ship"
-	ship.position = Vector3.ZERO
-	add_child(ship)
+	var ship_scene: PackedScene = load("res://scenes/objects/ship_exterior.tscn") as PackedScene
+	if not ship_scene:
+		push_error("TestWorld: Could not load ship exterior scene!")
+		return
+	_ship_exterior = ship_scene.instantiate() as ShipExterior
+	_ship_exterior.name = "Ship"
+	_ship_exterior.position = Vector3.ZERO
+	add_child(_ship_exterior)
 
-	# Ship mesh (original M2 AI-generated asset, scaled to match collision envelope)
-	var ship_scene: Resource = load("res://assets/meshes/vehicles/mesh_ship_exterior.glb")
-	if ship_scene and ship_scene is PackedScene:
-		var ship_mesh: Node3D = (ship_scene as PackedScene).instantiate()
-		ship_mesh.name = "ShipMesh"
-		ship_mesh.scale = Vector3(24.0, 24.0, 24.0)
-		ship_mesh.position.y = 6.5
-		ship.add_child(ship_mesh)
-
-		# Generate convex decomposition collision from the mesh geometry.
-		# Higher max_convex_hulls and resolution ensure thin parts (wings,
-		# struts) get proper solid collision coverage.
-		var decomp := MeshConvexDecompositionSettings.new()
-		decomp.max_convex_hulls = 64
-		decomp.resolution = 100000
-		decomp.max_num_vertices_per_convex_hull = 64
-		for child: Node in ship_mesh.get_children():
-			if child is MeshInstance3D:
-				(child as MeshInstance3D).create_multiple_convex_collisions(decomp)
-				for body_child: Node in child.get_children():
-					if body_child is StaticBody3D:
-						(body_child as StaticBody3D).collision_layer = LAYER_ENVIRONMENT
-						(body_child as StaticBody3D).collision_mask = 0
-				break
-
-	# Recharge zone (larger area around ship entrance)
-	_recharge_zone = Area3D.new()
-	_recharge_zone.name = "RechargeZone"
-	_recharge_zone.collision_layer = 0
-	_recharge_zone.collision_mask = LAYER_PLAYER
-	var recharge_col := CollisionShape3D.new()
-	var recharge_shape := BoxShape3D.new()
-	recharge_shape.size = Vector3(32.0, 15.0, 52.0)
-	recharge_col.shape = recharge_shape
-	recharge_col.position.y = 4.5
-	_recharge_zone.add_child(recharge_col)
-	ship.add_child(_recharge_zone)
-
-	_recharge_zone.body_entered.connect(_on_recharge_zone_entered)
-	_recharge_zone.body_exited.connect(_on_recharge_zone_exited)
+	_ship_exterior.recharge_zone_entered.connect(_on_recharge_zone_entered)
+	_ship_exterior.recharge_zone_exited.connect(_on_recharge_zone_exited)
 
 func _spawn_player() -> void:
 	var player_scene: PackedScene = load("res://player/player.tscn") as PackedScene

@@ -175,17 +175,39 @@ func _build_ship() -> void:
 		ship_mesh.position.y = 6.5
 		ship.add_child(ship_mesh)
 
-	# Ship collision (approximate with a box matching 3× hull)
+	# Ship collision — compound shape: central hull + wing boxes with walkable gaps
 	var ship_body := StaticBody3D.new()
 	ship_body.name = "ShipBody"
 	ship_body.collision_layer = LAYER_ENVIRONMENT
 	ship_body.collision_mask = 0
-	var ship_col := CollisionShape3D.new()
-	var ship_shape := BoxShape3D.new()
-	ship_shape.size = Vector3(21.0, 12.0, 42.0)
-	ship_col.shape = ship_shape
-	ship_col.position.y = 6.0
-	ship_body.add_child(ship_col)
+
+	# Central hull spine (narrow, full height, full length)
+	var hull_col := CollisionShape3D.new()
+	hull_col.name = "HullCollision"
+	var hull_shape := BoxShape3D.new()
+	hull_shape.size = Vector3(10.0, 13.0, 24.0)
+	hull_col.shape = hull_shape
+	hull_col.position = Vector3(0, 6.5, 0)
+	ship_body.add_child(hull_col)
+
+	# Port (left) wing — offset with gap from hull so player can walk between
+	var port_col := CollisionShape3D.new()
+	port_col.name = "PortWingCollision"
+	var port_shape := BoxShape3D.new()
+	port_shape.size = Vector3(4.0, 5.0, 10.0)
+	port_col.shape = port_shape
+	port_col.position = Vector3(-8.5, 4.0, -1.5)
+	ship_body.add_child(port_col)
+
+	# Starboard (right) wing — mirror of port wing
+	var star_col := CollisionShape3D.new()
+	star_col.name = "StarboardWingCollision"
+	var star_shape := BoxShape3D.new()
+	star_shape.size = Vector3(4.0, 5.0, 10.0)
+	star_col.shape = star_shape
+	star_col.position = Vector3(8.5, 4.0, -1.5)
+	ship_body.add_child(star_col)
+
 	ship.add_child(ship_body)
 
 	# Recharge zone (larger area around ship entrance)

@@ -243,8 +243,7 @@ func _build_model_configs() -> void:
 		)
 	_configs.append(recycler)
 
-	# Fabricator module — BoxShape3D matching SOP dimensions (2.0m x 1.2m x 1.0m)
-	# Z-axis mesh extends slightly beyond the 1.0m collision box (~0.83 coverage)
+	# Fabricator module — BoxShape3D matching SOP dimensions (2.0m x 1.2m x 1.2m)
 	var fabricator := ModelConfig.new()
 	fabricator.label = "fabricator_module"
 	fabricator.scene_path = "res://assets/meshes/machines/mesh_fabricator_module.glb"
@@ -253,10 +252,10 @@ func _build_model_configs() -> void:
 	fabricator.collision_mask = LAYER_ENVIRONMENT
 	fabricator.expect_solid = true
 	fabricator.max_allowed_gaps = 0
-	fabricator.coverage_threshold = 0.80
+	fabricator.coverage_threshold = DEFAULT_COVERAGE_THRESHOLD
 	fabricator.collision_setup = func(root: Node3D) -> StaticBody3D:
 		return _create_box_collision(
-			root, Vector3(2.0, 1.2, 1.0), Vector3(0.0, 0.6, 0.0), LAYER_ENVIRONMENT
+			root, Vector3(2.0, 1.2, 1.2), Vector3(0.0, 0.6, 0.0), LAYER_ENVIRONMENT
 		)
 	_configs.append(fabricator)
 

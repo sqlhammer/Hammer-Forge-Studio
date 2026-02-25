@@ -31,15 +31,16 @@
 | M3 | First Playable — Minimal ship in world, scan/mine loop | — | Complete | 13 | 0 | 13 | 2026-02-23 |
 | M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Complete | 21 | 0 | 21 | 2026-02-24 |
 | M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Active | 25 | 25 | 0 | — |
-| M6 | Ship Interior — Cockpit and machine room buildout | — | Planning | — | — | — | — |
-| M7 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |
-| M8 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
-| M9 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
-| M10 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
-| M11 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
-| M12 | Mega-Project Arc — Full tech tree, endgame sequence | — | Planning | — | — | — | — |
-| M13 | Alpha — Full playthrough possible | — | Planning | — | — | — | — |
-| M14 | Beta — External testing | — | Planning | — | — | — | — |
+| M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Planning | 17 | 17 | 0 | — |
+| M7 | Ship Interior — Cockpit and machine room buildout | — | Planning | — | — | — | — |
+| M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |
+| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
+| M10 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
+| M11 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
+| M12 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
+| M13 | Mega-Project Arc — Full tech tree, endgame sequence | — | Planning | — | — | — | — |
+| M14 | Alpha — Full playthrough possible | — | Planning | — | — | — | — |
+| M15 | Beta — External testing | — | Planning | — | — | — | — |
 
 ---
 
@@ -261,21 +262,66 @@
 
 ---
 
-### M6 — Ship Interior
+### M6 — Icon Generation Pipeline
 
-**Goal:** The ship interior is fully realized. Player has a defined cockpit and a large machine room for placing modules.
+**Goal:** Establish the authoritative icon production pipeline through competitive PoC evaluation. Close with two approved icon style guides (item icons and HUD/functional icons), a documented production SOP, and a complete set of game-ready icons integrated into every applicable UI location.
 
-**Scope:** TBD — to be defined after M5 closes.
+**Scope:**
+- Icon needs audit: catalog every UI location and icon slot in the game
+- Asset folder structure: define permanent (`game/assets/icons/`), temp-test (`game/assets/icons/temp/`), and archive (`docs/art/icon-experiments/`) paths
+- Generation method research: identify and select 3+ candidate tools/approaches with cost and human-effort analysis
+- Icon evaluation criteria: adapted from M2 POC scoring framework; adds human effort and financial cost as weighted dimensions
+- Item icon style guide: aesthetic brief, format, size constraints, mood for inventory/tech tree/machine panel icons (48×48px primary)
+- HUD/functional icon style guide: aesthetic brief, format, size constraints for status/notification/compass icons (16–32px primary)
+- Experiments A, B, C: each produces the **full icon set** (all items + all HUD icons, per both style guides) using one generation method; includes iteration logs and cost records
+- Evaluation report: scores all methods against criteria; produces ranked recommendation
+- Studio Head method approval (mid-milestone gate): Studio Head selects winning method before production begins
+- Promote winning icons to permanent location; archive non-winning sets to `docs/art/icon-experiments/`
+- Update UI style guide icon section: approved direction replaces current single-standard entry
+- Integrate item icons into all game UI (inventory, tech tree, all machine panels, module catalog)
+- Integrate HUD/functional icons into all HUD areas (battery, compass, ship globals, notifications, mining progress, tech tree status indicators)
+- QA integration testing and Studio Head final sign-off
 
-**Phases:** To be defined at M6 kickoff — requires Studio Head approval before agents begin work.
+**Phases:**
+- **Foundation** (TICKET-0086–TICKET-0091): Audit, folder structure, method research, eval criteria, two style guides
+- **Experiments** (TICKET-0092–TICKET-0094): 3 full-set icon generation experiments
+- **Evaluation & Selection** (TICKET-0095–TICKET-0096): Scoring, recommendation report, Studio Head method approval
+- **Integration & QA** (TICKET-0097–TICKET-0102): Promote/archive, style guide update, game integration, code review, QA sign-off
 
-**Dependencies:** M5
+**Tickets:** TICKET-0086 through TICKET-0102
+
+| Phase | Ticket | Title | Type | Owner |
+|-------|--------|-------|------|-------|
+| Foundation | TICKET-0086 | Icon needs audit — catalog every icon location in the game | TASK | ui-ux-designer |
+| Foundation | TICKET-0087 | Asset folder structure — define permanent, temp, and archive paths | TASK | producer |
+| Foundation | TICKET-0088 | Generation method research — evaluate 3+ tools, select experiment finalists | RESEARCH | technical-artist |
+| Foundation | TICKET-0089 | Icon evaluation criteria — adapt M2 POC framework for 2D icons | TASK | producer |
+| Foundation | TICKET-0090 | Item icon style guide — aesthetic brief, format, size, mood | DESIGN | ui-ux-designer |
+| Foundation | TICKET-0091 | HUD/functional icon style guide — aesthetic brief, format, size, mood | DESIGN | ui-ux-designer |
+| Experiments | TICKET-0092 | Experiment A — [Method TBD]: full icon set, both style guides | TASK | technical-artist |
+| Experiments | TICKET-0093 | Experiment B — [Method TBD]: full icon set, both style guides | TASK | technical-artist |
+| Experiments | TICKET-0094 | Experiment C — [Method TBD]: full icon set, both style guides | TASK | technical-artist |
+| Evaluation & Selection | TICKET-0095 | Evaluate experiments — score all methods, produce recommendation report | TASK | technical-artist |
+| Evaluation & Selection | TICKET-0096 | Studio Head method approval — present recommendation, receive method selection | TASK | producer |
+| Integration & QA | TICKET-0097 | Promote winning icons and archive experiments | TASK | technical-artist |
+| Integration & QA | TICKET-0098 | Update UI style guide — replace icon section with approved direction | TASK | ui-ux-designer |
+| Integration & QA | TICKET-0099 | Integrate item icons — inventory, tech tree, all machine panels | FEATURE | gameplay-programmer |
+| Integration & QA | TICKET-0100 | Integrate HUD/functional icons — HUD, ship globals, notifications | FEATURE | gameplay-programmer |
+| Integration & QA | TICKET-0101 | Code review — icon integration | REVIEW | systems-programmer |
+| Integration & QA | TICKET-0102 | QA — icon integration and Studio Head final sign-off | TASK | qa-engineer |
+
+**Studio Head touchpoints (milestone-specific, approved at kickoff):**
+1. **Milestone Kickoff** — approves scope and phase definitions before agents begin work
+2. **Method Approval** (Phase 3 gate) — reviews evaluation report and selects winning method; Phase 4 does not open without explicit approval
+3. **Milestone QA Close** — grants final sign-off on TICKET-0102 icon integration test
+
+**Dependencies:** M5 (provides the complete set of in-game systems, UI panels, and HUD elements whose icons are required)
 
 ---
 
-### M7 — Ship Navigation
+### M7 — Ship Interior
 
-**Goal:** Player can navigate the ship between biomes. Travel consumes fuel based on distance and ship weight.
+**Goal:** The ship interior is fully realized. Player has a defined cockpit and a large machine room for placing modules.
 
 **Scope:** TBD — to be defined after M6 closes.
 
@@ -285,9 +331,9 @@
 
 ---
 
-### M8 — Visual Asset Refinement
+### M8 — Ship Navigation
 
-**Goal:** Polished art pass on all existing game assets.
+**Goal:** Player can navigate the ship between biomes. Travel consumes fuel based on distance and ship weight.
 
 **Scope:** TBD — to be defined after M7 closes.
 
@@ -297,9 +343,9 @@
 
 ---
 
-### M9 — Movement & Usability Refinement
+### M9 — Visual Asset Refinement
 
-**Goal:** Game feel, first-person controls, and HUD/UX tuning pass.
+**Goal:** Polished art pass on all existing game assets.
 
 **Scope:** TBD — to be defined after M8 closes.
 
@@ -309,9 +355,9 @@
 
 ---
 
-### M10 — Content Expansion
+### M10 — Movement & Usability Refinement
 
-**Goal:** Additional material resources, crafting recipes, and tech tree depth.
+**Goal:** Game feel, first-person controls, and HUD/UX tuning pass.
 
 **Scope:** TBD — to be defined after M9 closes.
 
@@ -321,9 +367,9 @@
 
 ---
 
-### M11 — Biome Progression
+### M11 — Content Expansion
 
-**Goal:** Full Tier 1–3 biome progression with escalating threats and resource gates.
+**Goal:** Additional material resources, crafting recipes, and tech tree depth.
 
 **Scope:** TBD — to be defined after M10 closes.
 
@@ -333,11 +379,11 @@
 
 ---
 
-### M12 — Mega-Project Arc
+### M12 — Biome Progression
 
-**Goal:** Complete tech tree and endgame sequence playable end-to-end.
+**Goal:** Full Tier 1–3 biome progression with escalating threats and resource gates.
 
-**Scope:** TBD
+**Scope:** TBD — to be defined after M11 closes.
 
 **Phases:** To be defined at M12 kickoff — requires Studio Head approval before agents begin work.
 
@@ -345,9 +391,9 @@
 
 ---
 
-### M13 — Alpha
+### M13 — Mega-Project Arc
 
-**Goal:** Full playthrough from ship start to Naer-Reth activation is possible.
+**Goal:** Complete tech tree and endgame sequence playable end-to-end.
 
 **Scope:** TBD
 
@@ -357,15 +403,27 @@
 
 ---
 
-### M14 — Beta / External Testing
+### M14 — Alpha
 
-**Goal:** External testers can complete the game. Polish and bug-fix pass.
+**Goal:** Full playthrough from ship start to Naer-Reth activation is possible.
 
 **Scope:** TBD
 
 **Phases:** To be defined at M14 kickoff — requires Studio Head approval before agents begin work.
 
 **Dependencies:** M13
+
+---
+
+### M15 — Beta / External Testing
+
+**Goal:** External testers can complete the game. Polish and bug-fix pass.
+
+**Scope:** TBD
+
+**Phases:** To be defined at M15 kickoff — requires Studio Head approval before agents begin work.
+
+**Dependencies:** M14
 
 ---
 

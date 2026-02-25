@@ -165,13 +165,14 @@ func _build_ship() -> void:
 	ship.position = Vector3.ZERO
 	add_child(ship)
 
-	# Ship mesh (original M2 asset, scaled 3× in-engine per TICKET-0081 / TICKET-0103)
+	# Ship mesh (original M2 AI-generated asset, scaled to match collision envelope)
+	# AI mesh AABB is ~0.88×0.53×1.0m; scale 24 gives ~21×13×24m matching collision width/height
 	var ship_scene: Resource = load("res://assets/meshes/vehicles/mesh_ship_exterior.glb")
 	if ship_scene and ship_scene is PackedScene:
 		var ship_mesh: Node3D = (ship_scene as PackedScene).instantiate()
 		ship_mesh.name = "ShipMesh"
-		ship_mesh.scale = Vector3(3.0, 3.0, 3.0)
-		ship_mesh.position.y = 3.3
+		ship_mesh.scale = Vector3(24.0, 24.0, 24.0)
+		ship_mesh.position.y = 6.5
 		ship.add_child(ship_mesh)
 
 	# Ship collision (approximate with a box matching 3× hull)

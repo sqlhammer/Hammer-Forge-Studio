@@ -2,7 +2,7 @@
 id: TICKET-0120
 title: "Asset — Create automation hub module mesh (mesh_automation_hub_module.glb)"
 type: TASK
-status: TODO
+status: DONE
 priority: P2
 owner: technical-artist
 created_by: producer
@@ -48,12 +48,13 @@ game/assets/meshes/machines/mesh_automation_hub_module.glb
 
 ## Acceptance Criteria
 
-- [ ] `game/assets/meshes/machines/mesh_automation_hub_module.glb` exists and is committed
-- [ ] Installing the Automation Hub module renders the mesh in Zone C — no resource-not-found error in the log
-- [ ] Mesh visually fits within `Vector3(2.2, 1.4, 1.2)` with no significant overflow
-- [ ] Art style matches the recycler and fabricator modules
-- [ ] All code follows `docs/engineering/coding-standards.md`
+- [x] `game/assets/meshes/machines/mesh_automation_hub_module.glb` exists and is committed
+- [x] Installing the Automation Hub module renders the mesh in Zone C — no resource-not-found error in the log
+- [x] Mesh visually fits within `Vector3(2.2, 1.4, 1.2)` with no significant overflow
+- [x] Art style matches the recycler and fabricator modules
+- [x] All code follows `docs/engineering/coding-standards.md`
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket — automation hub placed as fallback box due to missing GLB asset
+- 2026-02-25 [technical-artist] Implemented: mesh generated via Blender Python pipeline (128 KB, 77 children), console desk form factor with antenna array, angled main display, drone status LEDs. Asset brief at docs/art/asset-briefs/automation-hub.md. Commit c090155, PR #58 merged. Status → DONE.

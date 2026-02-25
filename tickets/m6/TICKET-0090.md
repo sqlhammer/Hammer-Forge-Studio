@@ -2,7 +2,7 @@
 id: TICKET-0090
 title: "Item icon style guide — aesthetic brief, format, size, mood"
 type: DESIGN
-status: OPEN
+status: DONE
 priority: P1
 owner: ui-ux-designer
 created_by: producer
@@ -65,8 +65,9 @@ This style guide is the brief that all icon generation experiments (TICKET-0092�
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+`docs/art/icon-style-guide-items.md` created and committed. Covers all required sections: aesthetic direction (Outer Wilds / Hades / Dead Cells references, 3 anti-examples), size/grid (48×48px primary, 32×32px secondary, 28×28px compact; 24-unit canvas with 2-unit safe area), color usage (stroke inherits `currentColor`, optional one-flat-fill palette defined, transparent background), style constraints (2px stroke, rounded caps/joins, isometric/3-4 view for 3D objects, 8–12 path budget), output format (SVG primary, PNG fallback at 256px, naming convention, full 9-filename list), and Godot integration (SVG importer settings, TextureRect pattern, atlas deferred, slot-size mismatch documented). All 9 item icon file names listed. Consistent with `docs/design/ui-style-guide.md` and informed by icon method research (TICKET-0088).
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket for M6 Foundation phase
+- 2026-02-25 [ui-ux-designer] DONE — docs/art/icon-style-guide-items.md created and committed. All acceptance criteria met.

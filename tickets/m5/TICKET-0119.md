@@ -8,8 +8,8 @@ owner: gameplay-programmer
 created_by: qa-engineer
 created_at: 2026-02-25
 updated_at: 2026-02-25
-milestone: ""
-phase: ""
+milestone: "M5"
+phase: "QA"
 depends_on: []
 blocks: []
 tags: [bugfix, collision, fabricator, test-failure]

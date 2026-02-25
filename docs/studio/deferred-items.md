@@ -1,7 +1,7 @@
 # Deferred Work Items
 
 **Owner:** producer
-**Last Updated:** 2026-02-25 (D-016 added)
+**Last Updated:** 2026-02-25 (D-017–D-023 added)
 
 > Tracks gameplay features and systems that were intentionally descoped from a milestone during planning. Each item references the design spec it originates from and the milestone where it was deferred. These items MUST be revisited and scheduled into a future milestone — they are not optional cuts, they are postponed work.
 
@@ -43,6 +43,18 @@
 | D-014 | Third-person camera scan/mine gameplay | N/A (planning decision) | M3 uses first-person only for scan/mine loop — third-person integration deferred to keep scope tight | M4 or M5 | Scheduled | TICKET-0071 |
 | D-015 | Animated scanner ping propagation — ping front expands outward at a fixed speed with a 1000 m hard range limit; compass markers appear only as the ping front reaches each deposit (not all at once); a visual expanding ring originates at the player and grows at the same rate as the ping, giving the player a spatial reference for why markers appear progressively over several seconds | `docs/design/systems/meaningful-mining.md` | M3 ping is instantaneous — animated propagation requires a ring VFX, a ping-front timer/radius system, and deferred marker reveal logic; adds significant feel to the scanner but is not required for loop validation | M9 (Movement & Usability Refinement) | Open | — |
 | D-016 | Interaction prompt HUD — contextual action hints centered at screen bottom (key badge + descriptor, thicker border for hold actions) and persistent controls panel in bottom-right (Q ping, I inventory) with device-aware input glyphs | N/A (Studio Head request) | Not yet assigned to a milestone; backlogged pending M5 planning | M5 or M6 | Scheduled | TICKET-0120 |
+
+### From M5 — Processing & Crafting
+
+| ID | Description | Design Ref | Reason Deferred | Suggested Milestone | Status | Scheduled In |
+|----|-------------|------------|-----------------|---------------------|--------|--------------|
+| D-017 | Ship exterior refactor — extract as a standalone instanced scene | N/A (scene architecture standards) | Scene was embedded during M4/M5 greybox; instancing deferred to keep scope on gameplay features | M6 or later | Open | — |
+| D-018 | Resource deposit refactor — extract as a standalone instanced scene with per-type subscenes | N/A (scene architecture standards) | Deposit was embedded during M3 greybox; instancing deferred to keep M3/M5 scope tight | M6 or later | Open | — |
+| D-019 | Ship machines refactor — extract Recycler, Fabricator, and Automation Hub as standalone instanced scenes | N/A (scene architecture standards) | Machines were embedded during M4/M5 implementation; instancing deferred to avoid mid-milestone churn | M6 or later | Open | — |
+| D-020 | Tools refactor — extract Hand Drill and Scanner as standalone instanced scenes | N/A (scene architecture standards) | Tools were embedded during M3; instancing deferred to keep M3 scope tight | M6 or later | Open | — |
+| D-021 | Carriable items refactor — extract Spare Battery and Head Lamp as standalone instanced scenes | N/A (scene architecture standards) | Items were implemented inline during M5; instancing deferred to avoid scope creep | M6 or later | Open | — |
+| D-022 | Mining drone refactor — extract as a standalone instanced scene | N/A (scene architecture standards) | Drone was implemented inline during M5; instancing deferred to avoid scope creep | M6 or later | Open | — |
+| D-023 | UI panels and HUD refactor — extract all panels and HUD elements as standalone instanced subscenes | N/A (scene architecture standards) | UI was built inline during M4/M5; instancing deferred to keep gameplay features prioritised | M6 or later | Open | — |
 
 ---
 

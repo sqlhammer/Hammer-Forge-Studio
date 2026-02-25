@@ -192,10 +192,10 @@ func _test_install_insufficient_resources_fails() -> void:
 
 func _test_install_power_overload_fails() -> void:
 	_seed_recycler_resources()
-	# Saturate power capacity: baseline is 30, register 25 draw
-	ShipState.register_module_draw(25.0)
+	# Saturate power capacity: baseline is 50, register 45 draw
+	ShipState.register_module_draw(45.0)
 	var result: bool = _manager.install_module("recycler")
-	assert_false(result, "Install should fail when power would be overloaded (25+10>30)")
+	assert_false(result, "Install should fail when power would be overloaded (45+10>50)")
 	assert_signal_emitted(_spy, "install_failed", "install_failed should emit")
 	var args: Array = _spy.get_emission_args("install_failed", 0)
 	assert_equal(args[1], "POWER_OVERLOAD", "Reason should be POWER_OVERLOAD")
@@ -211,7 +211,7 @@ func _test_install_failure_emits_install_failed() -> void:
 func _test_install_failure_does_not_deduct_resources() -> void:
 	# Add resources, but block on power
 	_seed_recycler_resources()
-	ShipState.register_module_draw(25.0)
+	ShipState.register_module_draw(45.0)
 	_manager.install_module("recycler")
 	# Resources should not be deducted since power check fails first
 	var remaining: int = PlayerInventory.get_count(

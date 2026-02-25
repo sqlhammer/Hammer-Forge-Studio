@@ -2,12 +2,12 @@
 id: TICKET-0092
 title: "Experiment A — Programmatic SVG (Python svgwrite): full icon set, both style guides"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: technical-artist
 created_by: producer
 created_at: 2026-02-25
-updated_at: 2026-02-25
+updated_at: 2026-02-25 (DONE)
 milestone: "M6"
 milestone_gate: "M5"
 phase: "Experiments"
@@ -46,8 +46,9 @@ Run the first icon generation experiment using Method A (to be determined by TIC
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+All 29 icons generated via Python script (`scripts/generate_method_a_icons.py`) using direct SVG XML construction. Zero cost, zero human effort, fully deterministic. 9 item icons in `docs/art/icon-experiments/method-a/item-icons/`, 20 HUD icons in `docs/art/icon-experiments/method-a/hud-icons/`. Iteration log at `docs/art/icon-experiments/method-a/iteration-log.md`. 3 minor style guide deviations documented (reduced stroke-width on module detail elements and drone rotors; fill on thermometer bulb per icon list recommendation). No icons skipped. Ready for TICKET-0095 evaluation.
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket for M6 Experiments phase
+- 2026-02-25 [technical-artist] DONE — 29 SVG icons generated and committed (PR #62, merge commit 29e352a). Iteration log created. All acceptance criteria met.

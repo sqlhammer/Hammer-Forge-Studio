@@ -40,7 +40,7 @@ func register_tests() -> void:
 	# Constants
 	add_test("min_value_is_zero", _test_min_value_is_zero)
 	add_test("max_value_is_100", _test_max_value_is_100)
-	add_test("baseline_power_is_30", _test_baseline_power_is_30)
+	add_test("baseline_power_is_50", _test_baseline_power_is_50)
 	# Setters and clamping
 	add_test("set_power_clamps_to_range", _test_set_power_clamps_to_range)
 	add_test("set_integrity_clamps_to_range", _test_set_integrity_clamps_to_range)
@@ -104,9 +104,9 @@ func _test_max_value_is_100() -> void:
 	assert_equal(ShipStateType.MAX_VALUE, 100.0, "MAX_VALUE should be 100.0")
 
 
-func _test_baseline_power_is_30() -> void:
-	assert_equal(ShipStateType.BASELINE_POWER, 30.0, "BASELINE_POWER should be 30.0")
-	assert_equal(_ship.get_baseline_power(), 30.0, "get_baseline_power() should return 30.0")
+func _test_baseline_power_is_50() -> void:
+	assert_equal(ShipStateType.BASELINE_POWER, 50.0, "BASELINE_POWER should be 50.0")
+	assert_equal(_ship.get_baseline_power(), 50.0, "get_baseline_power() should return 50.0")
 
 
 # -- Setters and clamping --
@@ -213,13 +213,13 @@ func _test_adjust_oxygen_clamps_at_zero() -> void:
 
 func _test_register_module_draw_succeeds() -> void:
 	var result: bool = _ship.register_module_draw(10.0)
-	assert_true(result, "Register 10.0 draw should succeed (baseline=30)")
+	assert_true(result, "Register 10.0 draw should succeed (baseline=50)")
 	assert_equal(_ship.get_total_module_draw(), 10.0, "Total draw should be 10.0")
 
 
 func _test_register_module_draw_fails_on_overload() -> void:
-	var result: bool = _ship.register_module_draw(31.0)
-	assert_false(result, "Register 31.0 draw should fail (exceeds baseline=30)")
+	var result: bool = _ship.register_module_draw(51.0)
+	assert_false(result, "Register 51.0 draw should fail (exceeds baseline=50)")
 	assert_equal(_ship.get_total_module_draw(), 0.0, "Total draw should remain 0 on failure")
 
 
@@ -236,16 +236,16 @@ func _test_deregister_draw_clamps_at_zero() -> void:
 
 
 func _test_available_capacity_reflects_draw() -> void:
-	assert_equal(_ship.get_available_power_capacity(), 30.0, "Available should equal baseline with no draw")
+	assert_equal(_ship.get_available_power_capacity(), 50.0, "Available should equal baseline with no draw")
 	_ship.register_module_draw(10.0)
-	assert_equal(_ship.get_available_power_capacity(), 20.0, "Available should be 20 after 10 draw")
+	assert_equal(_ship.get_available_power_capacity(), 40.0, "Available should be 40 after 10 draw")
 
 
 func _test_would_exceed_capacity_boundary() -> void:
 	# Exactly at capacity should not exceed
-	assert_false(_ship.would_exceed_capacity(30.0), "Exactly 30.0 should not exceed baseline=30")
+	assert_false(_ship.would_exceed_capacity(50.0), "Exactly 50.0 should not exceed baseline=50")
 	# Just over should exceed
-	assert_true(_ship.would_exceed_capacity(30.1), "30.1 should exceed baseline=30")
+	assert_true(_ship.would_exceed_capacity(50.1), "50.1 should exceed baseline=50")
 
 
 func _test_multiple_modules_accumulate_draw() -> void:
@@ -253,8 +253,8 @@ func _test_multiple_modules_accumulate_draw() -> void:
 	_ship.register_module_draw(10.0)
 	assert_equal(_ship.get_total_module_draw(), 20.0, "Two 10.0 draws should total 20.0")
 	# Third would exceed
-	var result: bool = _ship.register_module_draw(11.0)
-	assert_false(result, "Third 11.0 draw would exceed capacity (20+11>30)")
+	var result: bool = _ship.register_module_draw(31.0)
+	assert_false(result, "Third 31.0 draw would exceed capacity (20+31>50)")
 	assert_equal(_ship.get_total_module_draw(), 20.0, "Failed register should not change total")
 
 
@@ -277,4 +277,4 @@ func _test_reset_clears_module_draw() -> void:
 	_ship.register_module_draw(15.0)
 	_ship.reset()
 	assert_equal(_ship.get_total_module_draw(), 0.0, "Reset should clear module draw")
-	assert_equal(_ship.get_available_power_capacity(), 30.0, "Available capacity should be full after reset")
+	assert_equal(_ship.get_available_power_capacity(), 50.0, "Available capacity should be full after reset")

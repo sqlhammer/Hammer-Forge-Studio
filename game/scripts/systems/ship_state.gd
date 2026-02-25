@@ -15,7 +15,7 @@ const MAX_VALUE: float = 100.0
 
 ## Baseline power output — always-on, sufficient to recharge player suit and run one Tier 1 module.
 ## This value represents the ship's innate power generation with no additional power modules installed.
-const BASELINE_POWER: float = 30.0
+const BASELINE_POWER: float = 50.0
 
 # ── Private Variables ─────────────────────────────────────
 var _power: float = MAX_VALUE

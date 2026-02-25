@@ -124,6 +124,16 @@ A gate **passes** only when ALL of the following are true:
 
 Producer posts a Phase Gate Summary (see `docs/studio/templates/phase-gate-summary.md`) and opens the next phase automatically. The Studio Head is **not** paged on a gate pass.
 
+### On Milestone Close (QA Gate PASS)
+
+When the QA phase gate passes and the Studio Head grants final sign-off, the Producer must complete the following before the milestone is considered closed:
+
+1. ✅ Mark all remaining tickets `DONE` and archive them to `tickets/_archive/<milestone>/` (e.g., `tickets/_archive/m4/` for M4 tickets — folder name is the lowercase milestone ID)
+2. ✅ Update the milestone row in `docs/studio/milestones.md` — set Status to `Complete` and record the QA sign-off date
+3. ✅ Update the **Release Goals** table in `docs/studio/prd.md` — set the milestone row to `Complete`, fill in the QA sign-off date, and confirm the description is accurate
+4. ✅ Post the final Phase Gate Summary report to `docs/studio/reports/`
+5. ✅ Commit and push all doc updates to `main`
+
 ### On Gate FAIL
 
 Producer pages the Studio Head immediately with the specific failure condition. No work on the next phase begins until the Studio Head resolves or explicitly overrides the failure.

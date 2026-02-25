@@ -2,12 +2,13 @@
 id: TICKET-0110
 title: "Bugfix — Fabricator and Automation Hub cannot be installed despite meeting resource and power requirements"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
 created_at: 2026-02-25
 updated_at: 2026-02-25
+completed_at: 2026-02-25
 milestone: "M5"
 phase: "QA"
 depends_on: []
@@ -44,10 +45,11 @@ The installation validation logic is likely checking a different condition than 
 - Ensure the UI error message accurately reflects the actual blocking condition
 
 ## Acceptance Criteria
-- [ ] Fabricator can be installed when the player has ≥ 20 Metal and sufficient power
-- [ ] Automation Hub can be installed when prerequisites are met
-- [ ] If a tech tree unlock is required, the UI displays that requirement clearly (not just "check resources and power")
-- [ ] No regression on modules that were previously installable
+- [x] Fabricator can be installed when the player has ≥ 20 Metal and sufficient power
+- [x] Automation Hub can be installed when prerequisites are met
+- [x] If a tech tree unlock is required, the UI displays that requirement clearly (not just "check resources and power")
+- [x] No regression on modules that were previously installable
 
 ## Activity Log
 - 2026-02-25 [producer] Created from UAT feedback. Critical — blocks fabricator and drone automation progression entirely. Screenshots confirm displayed requirements are met but install is refused.
+- 2026-02-25 [systems-programmer] Root cause confirmed: both Fabricator and Automation Hub define `tech_tree_gate` in ModuleDefs. ModuleManager correctly fails with TECH_TREE_LOCKED but ModulePlacementUI showed the same generic message for all failure reasons. Fixed: (1) detail area now shows "Tech: <name> — Locked/Unlocked" for gated modules; (2) UI connects to install_failed signal and shows reason-specific messages including "Requires unlock: <name>" for TECH_TREE_LOCKED; (3) added TECH_TREE_LOCKED unit tests. Committed be28c73 to main.

@@ -165,11 +165,12 @@ func _build_ship() -> void:
 	ship.position = Vector3.ZERO
 	add_child(ship)
 
-	# Ship mesh (3× native scale per TICKET-0081 — no in-engine scale override)
+	# Ship mesh (original M2 asset, scaled 3× in-engine per TICKET-0081 / TICKET-0103)
 	var ship_scene: Resource = load("res://assets/meshes/vehicles/mesh_ship_exterior.glb")
 	if ship_scene and ship_scene is PackedScene:
 		var ship_mesh: Node3D = (ship_scene as PackedScene).instantiate()
 		ship_mesh.name = "ShipMesh"
+		ship_mesh.scale = Vector3(3.0, 3.0, 3.0)
 		ship_mesh.position.y = 3.3
 		ship.add_child(ship_mesh)
 

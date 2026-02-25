@@ -16,6 +16,7 @@ func before_each() -> void:
 	# Reset autoload state
 	ShipState.reset()
 	PlayerInventory.clear_all()
+	TechTree.reset()
 
 	_manager = ModuleManagerType.new()
 	add_child(_manager)
@@ -33,6 +34,7 @@ func after_each() -> void:
 	# Clean up autoloads
 	ShipState.reset()
 	PlayerInventory.clear_all()
+	TechTree.reset()
 
 
 # ── Test Registration ─────────────────────────────────────
@@ -56,6 +58,8 @@ func register_tests() -> void:
 	add_test("install_power_overload_fails", _test_install_power_overload_fails)
 	add_test("install_failure_emits_install_failed", _test_install_failure_emits_install_failed)
 	add_test("install_failure_does_not_deduct_resources", _test_install_failure_does_not_deduct_resources)
+	add_test("install_tech_tree_locked_fails", _test_install_tech_tree_locked_fails)
+	add_test("install_with_tech_tree_unlocked_succeeds", _test_install_with_tech_tree_unlocked_succeeds)
 	# Remove
 	add_test("remove_installed_module_succeeds", _test_remove_installed_module_succeeds)
 	add_test("remove_emits_module_removed", _test_remove_emits_module_removed)
@@ -213,6 +217,25 @@ func _test_install_failure_does_not_deduct_resources() -> void:
 	var remaining: int = PlayerInventory.get_count(
 		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.ONE_STAR)
 	assert_equal(remaining, 20, "Resources should not be deducted on power failure")
+
+
+func _test_install_tech_tree_locked_fails() -> void:
+	# Fabricator requires "fabricator_module" tech tree node — not unlocked after TechTree.reset()
+	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 20)
+	var result: bool = _manager.install_module("fabricator")
+	assert_false(result, "Install should fail when tech tree gate is not unlocked")
+	assert_signal_emitted(_spy, "install_failed", "install_failed should emit")
+	var args: Array = _spy.get_emission_args("install_failed", 0)
+	assert_equal(args[1], "TECH_TREE_LOCKED", "Reason should be TECH_TREE_LOCKED")
+
+
+func _test_install_with_tech_tree_unlocked_succeeds() -> void:
+	# Unlock the fabricator_module gate (costs 100 Metal), then install fabricator (costs 20 Metal)
+	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 120)
+	TechTree.unlock_node("fabricator_module")
+	var result: bool = _manager.install_module("fabricator")
+	assert_true(result, "Install should succeed when tech tree gate is unlocked and resources met")
+	assert_true(_manager.is_installed("fabricator"), "Fabricator should be installed")
 
 
 # -- Remove --

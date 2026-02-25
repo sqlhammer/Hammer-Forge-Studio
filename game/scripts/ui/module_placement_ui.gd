@@ -33,6 +33,7 @@ var _cost_label: Label = null
 var _power_label: Label = null
 var _description_label: Label = null
 var _feedback_label: Label = null
+var _tech_tree_label: Label = null
 var _dim_rect: ColorRect = null
 var _main_panel: PanelContainer = null
 var _module_list_container: VBoxContainer = null
@@ -45,6 +46,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_INHERIT
 	visible = false
 	_build_ui()
+	ModuleManager.install_failed.connect(_on_install_failed)
 
 func _input(event: InputEvent) -> void:
 	if not _is_open:
@@ -182,6 +184,12 @@ func _build_ui() -> void:
 	_power_label.add_theme_color_override("font_color", COLOR_AMBER)
 	detail_vbox.add_child(_power_label)
 
+	_tech_tree_label = Label.new()
+	_tech_tree_label.add_theme_font_size_override("font_size", 18)
+	_tech_tree_label.add_theme_color_override("font_color", COLOR_TEAL)
+	_tech_tree_label.visible = false
+	detail_vbox.add_child(_tech_tree_label)
+
 	# Feedback label
 	_feedback_label = Label.new()
 	_feedback_label.add_theme_font_size_override("font_size", 18)
@@ -301,6 +309,20 @@ func _update_detail_area() -> void:
 	_power_label.text = "Power: %.0f / %.0f available" % [power_draw, available_power]
 	_power_label.add_theme_color_override("font_color", power_color)
 
+	# Tech tree gate display
+	var tech_gate: String = ModuleDefs.get_tech_tree_gate(module_id)
+	if not tech_gate.is_empty():
+		var gate_name: String = TechTreeDefs.get_display_name(tech_gate)
+		if TechTree.is_unlocked(tech_gate):
+			_tech_tree_label.text = "Tech: %s — Unlocked" % gate_name
+			_tech_tree_label.add_theme_color_override("font_color", COLOR_TEAL)
+		else:
+			_tech_tree_label.text = "Tech: %s — Locked" % gate_name
+			_tech_tree_label.add_theme_color_override("font_color", COLOR_CORAL)
+		_tech_tree_label.visible = true
+	else:
+		_tech_tree_label.visible = false
+
 func _move_selection(direction: int) -> void:
 	if _module_ids.is_empty():
 		return
@@ -323,10 +345,24 @@ func _attempt_install() -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		_animate_close()
 		module_installed.emit(module_id, _zone_index)
-	else:
-		_feedback_label.text = "Cannot install — check resources and power"
-		_feedback_label.add_theme_color_override("font_color", COLOR_CORAL)
-		Global.log("ModulePlacementUI: install failed for '%s'" % module_id)
+	# Failure messaging handled by _on_install_failed via ModuleManager.install_failed signal
+
+func _on_install_failed(module_id: String, reason: String) -> void:
+	if not _is_open:
+		return
+	match reason:
+		"TECH_TREE_LOCKED":
+			var gate: String = ModuleDefs.get_tech_tree_gate(module_id)
+			var gate_name: String = TechTreeDefs.get_display_name(gate)
+			_feedback_label.text = "Requires unlock: %s" % gate_name
+		"POWER_OVERLOAD":
+			_feedback_label.text = "Cannot install — insufficient power"
+		"INSUFFICIENT_RESOURCES":
+			_feedback_label.text = "Cannot install — insufficient resources"
+		_:
+			_feedback_label.text = "Cannot install — check resources and power"
+	_feedback_label.add_theme_color_override("font_color", COLOR_CORAL)
+	Global.log("ModulePlacementUI: install failed for '%s' (%s)" % [module_id, reason])
 
 func _add_divider(parent: Node) -> void:
 	var divider := HSeparator.new()

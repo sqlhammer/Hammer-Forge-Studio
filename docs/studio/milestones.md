@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-02-23
+**Last Updated:** 2026-02-25
 
 > Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
@@ -31,7 +31,7 @@
 | M3 | First Playable — Minimal ship in world, scan/mine loop | — | Complete | 13 | 0 | 13 | 2026-02-23 |
 | M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Complete | 21 | 0 | 21 | 2026-02-24 |
 | M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Complete | 38 | 0 | 38 | 2026-02-25 |
-| M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Planning | 17 | 17 | 0 | — |
+| M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Active | 17 | 16 | 1 | — |
 | M7 | Ship Interior — Cockpit and machine room buildout | — | Planning | — | — | — | — |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |
 | M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |

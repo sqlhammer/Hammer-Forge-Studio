@@ -2,7 +2,7 @@
 id: TICKET-0118
 title: "Bugfix — Ship interior supports only 2 module zones; Automation Hub has nowhere to be placed"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -75,3 +75,4 @@ var zone_center: Vector3 = zone_centers[zone_index]
 
 ## Activity Log
 - 2026-02-25 [producer] Created ticket — blocking Automation Hub end-to-end QA
+- 2026-02-25 [gameplay-programmer] DONE — Added ZONE_C_CENTER, expanded zone arrays to 3, updated _build_module_zones() and place_module_in_zone() with array lookups, rebalanced zone positions to -3.0/0.0/+3.0. Added test_ship_interior_unit.gd with 15 unit tests. Commit 3cecac4, PR #55 merged.

@@ -2,7 +2,7 @@
 id: TICKET-0103
 title: "Bugfix — Ship model was replaced; restore original model at scaled-up size"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P2
 owner: technical-artist
 created_by: producer
@@ -33,9 +33,16 @@ The ship should use the same mesh that existed prior to M5 (the model produced i
 - Do not introduce any new mesh
 
 ## Acceptance Criteria
-- [ ] Ship uses the original M2 model mesh, not any replacement mesh introduced in M5
-- [ ] Ship is visibly larger than in M4 (scale-up intent is preserved)
-- [ ] No visual regressions on ship interior or collision shape
+- [x] Ship uses the original M2 model mesh, not any replacement mesh introduced in M5
+- [x] Ship is visibly larger than in M4 (scale-up intent is preserved)
+- [x] No visual regressions on ship interior or collision shape
+
+## Handoff Notes
+- Root cause: TICKET-0081 re-ran `build_ship_exterior.py` which regenerated a simple procedural mesh (89 KB) instead of the AI-generated M2 asset (1.4 MB, 12K tris, PBR textures from Tripo3D + Blender decimation pipeline)
+- Fix: restored original GLB from commit f217932, applied 3× scale in-engine via `ship_mesh.scale = Vector3(3.0, 3.0, 3.0)` in test_world.gd
+- Collision shapes, recharge zone, and enter zone unchanged (already sized for 3× hull from TICKET-0081)
+- Ship interior at `INTERIOR_Y_OFFSET = -50.0` unaffected
 
 ## Activity Log
 - 2026-02-25 [producer] Created from UAT feedback. Ship model was unintentionally replaced during M5 scale-up work.
+- 2026-02-25 [technical-artist] Implemented: restored original M2 GLB from git history, added 3× in-engine scale. Commit c66b408. Status → DONE.

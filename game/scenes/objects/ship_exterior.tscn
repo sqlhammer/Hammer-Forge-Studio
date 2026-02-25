@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cawcd10a5hvt8"]
+
+[ext_resource type="Script" uid="uid://crd5bd3wuejku" path="res://scripts/objects/ship_exterior.gd" id="1_w5gf8"]
+
+[node name="ShipExterior" type="Node3D"]
+script = ExtResource("1_w5gf8")

@@ -39,7 +39,7 @@ declare -a ROWS=()
 DONE=0; IN_PROGRESS=0; OPEN=0; TOTAL=0
 declare -A STATUS_MAP=()  # ticket_id -> status (for dependency checking)
 
-for ticket_file in "$TICKETS_DIR"/TICKET-*.md; do
+for ticket_file in "$TICKETS_DIR"/TICKET-*.md "$TICKETS_DIR"/*/TICKET-*.md; do
     [[ -f "$ticket_file" ]] || continue
 
     # Extract frontmatter (between first --- and second ---)

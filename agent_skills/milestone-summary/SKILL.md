@@ -3,6 +3,8 @@ name: milestone-summary
 description: Use this when the user wants a summary of a milestone.
 ---
 
+# ROLE: PRODUCER
+
 # Milestone Summary Instructions
 When this skill is active, follow these rules:
 - Always git pull first before reporting any status

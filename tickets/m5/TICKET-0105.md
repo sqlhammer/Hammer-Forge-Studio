@@ -2,7 +2,7 @@
 id: TICKET-0105
 title: "Bugfix — Player falls through world after exiting the ship"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -42,3 +42,4 @@ Likely one of:
 
 ## Activity Log
 - 2026-02-25 [producer] Created from UAT feedback. Critical — blocks all surface gameplay post-disembark.
+- 2026-02-25 [gameplay-programmer] DONE — moved exit position from Z=18 (inside hull collision) to Z=24 (outside hull), added velocity reset on exit teleport. Commit 9b6e53d, PR #53.

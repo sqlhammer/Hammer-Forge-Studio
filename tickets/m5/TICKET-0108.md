@@ -2,7 +2,7 @@
 id: TICKET-0108
 title: "Bugfix — Energy recharge area too small to reach around scaled-up ship"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -39,3 +39,4 @@ The player should be able to recharge their suit energy anywhere within a reason
 
 ## Activity Log
 - 2026-02-25 [producer] Created from UAT feedback. Recharge zone was not updated to match M5 ship scale-up. Depends on TICKET-0103 to establish correct ship scale first.
+- 2026-02-25 [gameplay-programmer] DONE — expanded recharge collision from 24x30 to 32x52, covering full 3x hull perimeter with margin. Commit 9b6e53d, PR #53.

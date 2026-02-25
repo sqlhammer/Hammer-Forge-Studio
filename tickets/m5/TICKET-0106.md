@@ -2,7 +2,7 @@
 id: TICKET-0106
 title: "Bugfix — Scan ring visual effect missing when pressing Q to locate resources"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -40,3 +40,4 @@ A visible ring (pulse/wave) must expand outward from the player when Q is presse
 
 ## Activity Log
 - 2026-02-25 [producer] Created from UAT feedback. Scan ring is a required visual; currently absent entirely.
+- 2026-02-25 [gameplay-programmer] DONE — added expanding torus ring VFX to scanner._do_ping() with teal glow and fade-out animation. Commit 9b6e53d, PR #53.

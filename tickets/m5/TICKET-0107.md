@@ -2,7 +2,7 @@
 id: TICKET-0107
 title: "Bugfix — Mining minigame pattern overlay missing and causes node-not-in-tree errors"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -62,3 +62,4 @@ E 0:00:08:359   mining.gd:255 @ _create_pattern_lines(): Node not inside tree. U
 
 ## Activity Log
 - 2026-02-25 [producer] Created from UAT feedback. Pattern overlay is a required feature; errors confirm the root cause is premature node access before tree insertion.
+- 2026-02-25 [gameplay-programmer] DONE — reordered _create_pattern_lines() to call deposit.add_child(mesh_inst) before setting global_position and look_at. Commit 9b6e53d, PR #53.

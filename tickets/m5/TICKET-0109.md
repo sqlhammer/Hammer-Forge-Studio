@@ -2,7 +2,7 @@
 id: TICKET-0109
 title: "Bugfix — Player camera moves when mousing over recycler panel"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -41,3 +41,4 @@ The recycler panel likely does not set `Input.mouse_mode = Input.MOUSE_MODE_VISI
 
 ## Activity Log
 - 2026-02-25 [producer] Created from UAT feedback. Mouse not locked when recycler panel is open, causing camera to move.
+- 2026-02-25 [gameplay-programmer] DONE — added MOUSE_MODE_CAPTURED check in player_first_person._input() to suppress mouse look when any panel sets MOUSE_MODE_VISIBLE. Commit 9b6e53d, PR #53.

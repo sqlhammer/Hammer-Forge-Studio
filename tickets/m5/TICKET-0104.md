@@ -2,7 +2,7 @@
 id: TICKET-0104
 title: "Bugfix — Add clickable close buttons to all UI menus that show 'ESC to close'"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P3
 owner: gameplay-programmer
 created_by: producer
@@ -40,3 +40,4 @@ Every panel that shows "ESC to close" or "[Esc] Cancel" must also display a clic
 
 ## Activity Log
 - 2026-02-25 [producer] Created from UAT feedback. Keyboard-only close is not sufficient; mouse users need a clickable target.
+- 2026-02-25 [gameplay-programmer] DONE — added Close/Cancel buttons to RecyclerPanel, ModulePlacementUI, TechTreePanel, FabricatorPanel, AutomationHubPanel. ESC still works. Commit 9b6e53d, PR #53.

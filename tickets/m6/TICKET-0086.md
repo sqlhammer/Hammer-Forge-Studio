@@ -2,12 +2,12 @@
 id: TICKET-0086
 title: "Icon needs audit — catalog every icon location in the game"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: ui-ux-designer
 created_by: producer
 created_at: 2026-02-25
-updated_at: 2026-02-25
+updated_at: 2026-02-25 (DONE)
 milestone: "M6"
 milestone_gate: "M5"
 phase: "Foundation"
@@ -40,8 +40,9 @@ Before any icon can be designed or generated, we need an authoritative, exhausti
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+`docs/art/icon-needs.md` created and committed (f317dc4). 29 icons total: 9 item icons, 20 HUD/functional icons. All slots are currently placeholder — no production texture assets exist. Three scene-level flags raised (slot size mismatch in recycler/fabricator panels, missing notification badge icon wireframe, undefined scan ping and mining active icons). Document is ready for use as production manifest by TICKET-0092–0094.
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket for M6 Foundation phase
+- 2026-02-25 [ui-ux-designer] DONE — docs/art/icon-needs.md created and pushed (commit f317dc4). 29 icons cataloged (9 item, 20 HUD). All acceptance criteria met.

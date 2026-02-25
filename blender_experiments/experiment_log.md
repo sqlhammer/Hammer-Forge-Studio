@@ -99,3 +99,11 @@ Central log for all 3D generation attempts using `bpy`.
 - **Challenges/Fixes:** None
 
 ---
+
+### [2026-02-25 17:02:27] - Object: mesh_automation_hub_module
+- **Original Prompt:** "Automation Hub module machine — a console desk drone command station for a ship interior. Large angled main display screen on front, recessed control panel with button array, antenna array on top (key silhouette), drone status LED panel on right side, ventilation grilles on left and back. 2.2m wide x 1.2m deep x 1.4m tall. Greybox quality with flat PBR materials. Command console aesthetic, visually distinct from both the Recycler and Fabricator."
+- **Output Files:** `C:\repos\Hammer-Forge-Studio\.claude\worktrees\parsed-finding-sketch\blender_experiments\mesh_automation_hub_module\mesh_automation_hub_module.blend`, `C:\repos\Hammer-Forge-Studio\.claude\worktrees\parsed-finding-sketch\blender_experiments\mesh_automation_hub_module\mesh_automation_hub_module.obj`, `C:\repos\Hammer-Forge-Studio\.claude\worktrees\parsed-finding-sketch\blender_experiments\mesh_automation_hub_module\mesh_automation_hub_module.glb`
+- **Technical Strategy:** Beveled boxes for console body, base, and panel details. Cylinders for antenna masts and cable conduits. Torus for conduit clamps. Flat plane for emissive screen. UV spheres for status/power/drone lights. Cone not used — antennas use cylinders with cross-bars. 10 PBR materials covering body, seams, base, console surface, antenna metal, vent interior, emissive screen, status/power lights, and drone amber.
+- **Challenges/Fixes:** None
+
+---

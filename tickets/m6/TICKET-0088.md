@@ -2,7 +2,7 @@
 id: TICKET-0088
 title: "Generation method research — evaluate 3+ tools, select experiment finalists"
 type: RESEARCH
-status: OPEN
+status: DONE
 priority: P1
 owner: technical-artist
 created_by: producer
@@ -22,9 +22,9 @@ Before style guides or experiments can begin, we need to know which generation m
 
 ## Acceptance Criteria
 
-- [ ] `docs/art/icon-method-research.md` created and committed
-- [ ] At least 3 distinct generation methods are evaluated. Methods must meaningfully differ (e.g., two AI image generators count as two methods only if they have substantially different workflows, cost structures, or output characteristics)
-- [ ] For each evaluated method, the document covers:
+- [x] `docs/art/icon-method-research.md` created and committed
+- [x] At least 3 distinct generation methods are evaluated. Methods must meaningfully differ (e.g., two AI image generators count as two methods only if they have substantially different workflows, cost structures, or output characteristics)
+- [x] For each evaluated method, the document covers:
   - **Tool / approach name** and version or access URL
   - **Generation workflow** — step-by-step summary of how an agent produces one icon from a brief
   - **Human steps required** — enumerate every step that requires a human (or cannot be scripted/automated)
@@ -32,8 +32,8 @@ Before style guides or experiments can begin, we need to know which generation m
   - **Output format** — what format the tool natively produces (SVG, PNG, sprite sheet, etc.) and any conversion required for Godot
   - **Preliminary quality assessment** — 1–2 sentence qualitative take on fit for stylized sci-fi aesthetic
   - **Agent operability** — can an AI agent operate this tool end-to-end without a human GUI? If not, what is the minimum human involvement?
-- [ ] The document ends with a **Selected Methods** section listing exactly the 3+ methods approved for experiments, with a 1-sentence rationale for each selection
-- [ ] Experiment tickets (TICKET-0092, TICKET-0093, TICKET-0094) are updated with the actual method name in their titles after this ticket is DONE
+- [x] The document ends with a **Selected Methods** section listing exactly the 3+ methods approved for experiments, with a 1-sentence rationale for each selection
+- [x] Experiment tickets (TICKET-0092, TICKET-0093, TICKET-0094) are updated with the actual method name in their titles after this ticket is DONE
 
 ## Implementation Notes
 
@@ -44,8 +44,20 @@ Before style guides or experiments can begin, we need to know which generation m
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+4 methods evaluated; 3 selected as experiment finalists:
+
+- **Experiment A:** Programmatic SVG (Python svgwrite) — zero cost, zero human effort, SVG-native, deterministic
+- **Experiment B:** Recraft.ai API (AI vector generation) — highest quality ceiling, ~$0.29 for full set, SVG-native
+- **Experiment C:** game-icons.net library + scripted customization — zero cost, SVG-native, strong baseline for common symbols; gap-fill via Method A for project-specific icons
+
+**Eliminated:** Blender Python renders — PNG format mismatch vs. SVG preference; no quality advantage over Method A for 2D line icons.
+
+Style guide recommendation appended to research doc: SVG with `currentColor`, `stroke-width="2"`, `stroke-linecap="round"`.
+
+TICKET-0092, TICKET-0093, TICKET-0094 titles updated with method names.
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket for M6 Foundation phase
+- 2026-02-25 [technical-artist] Started research — evaluating programmatic SVG, Recraft.ai, Blender Python, and game-icons.net library
+- 2026-02-25 [technical-artist] Research complete — `docs/art/icon-method-research.md` committed; 3 finalists selected; experiment ticket titles updated; ticket DONE

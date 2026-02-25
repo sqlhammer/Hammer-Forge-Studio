@@ -1,6 +1,6 @@
 ---
 id: TICKET-0093
-title: "Experiment B — [Method TBD]: full icon set, both style guides"
+title: "Experiment B — Recraft.ai API (AI Vector Generation): full icon set, both style guides"
 type: TASK
 status: OPEN
 priority: P1

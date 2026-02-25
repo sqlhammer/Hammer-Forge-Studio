@@ -1,6 +1,6 @@
 ---
 id: TICKET-0092
-title: "Experiment A — [Method TBD]: full icon set, both style guides"
+title: "Experiment A — Programmatic SVG (Python svgwrite): full icon set, both style guides"
 type: TASK
 status: OPEN
 priority: P1

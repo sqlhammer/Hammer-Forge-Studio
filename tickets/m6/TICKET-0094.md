@@ -1,6 +1,6 @@
 ---
 id: TICKET-0094
-title: "Experiment C — [Method TBD]: full icon set, both style guides"
+title: "Experiment C — game-icons.net Library + Scripted Customization: full icon set, both style guides"
 type: TASK
 status: OPEN
 priority: P1

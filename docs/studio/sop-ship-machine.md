@@ -56,6 +56,7 @@ Checklist:
 - [ ] Mesh imported into Godot with no import errors or warnings
 - [ ] Mesh placed in greybox ship interior scene (`game/scenes/gameplay/`)
 - [ ] `InteractionArea` (Area3D) attached to mesh — collision Layer 4 (interactable), Mask Layer 1 (player)
+- [ ] Collision coverage tests pass — `ModelConfig` entry updated and all 4 generated tests pass
 - [ ] Scene saved and committed
 
 > **Recycler (M4):** No Blender build script — mesh produced manually. retroactive build script not created. **Gap noted for future machines.**
@@ -192,6 +193,7 @@ End-to-end loop test for every new ship machine:
 |---|------|----------------|
 | 1 | Tech tree unlock | Player can spend required resources to unlock the machine's tech tree node |
 | 2 | Install — insufficient resources | Install blocked when player lacks required install cost items |
+| 2.5 | Collision coverage tests | All `test_collision_coverage_unit` tests for this machine's mesh pass with zero failures |
 | 3 | Install — success | Machine installs when player has sufficient resources; items deducted from inventory |
 | 4 | Power overload | Install blocked if machine power draw would exceed available ship power |
 | 5 | Panel open | Interact with installed machine opens panel; game input suppressed |

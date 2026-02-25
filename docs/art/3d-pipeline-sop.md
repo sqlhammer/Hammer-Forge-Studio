@@ -22,6 +22,7 @@ Brief → Generate → Validate → Optimize → Import → Verify → Ship
 | 5. Export GLB | Blender | 5s |
 | 6. Import to Godot | Godot editor | Auto |
 | 7. Verify in-engine | Godot editor | Manual check |
+| 7.5. Run collision tests | Godot editor | ~10s |
 | 8. Place in asset directory | File system | 5s |
 
 ---
@@ -218,6 +219,10 @@ Godot will auto-import when the file appears in the project directory.
 3. Double-click GLB to open import settings — verify defaults match tech-specs
 4. Drag into a 3D scene to visually inspect
 5. Check: correct scale, materials display, no visual artifacts
+
+### Step 7.5: Run Collision Coverage Tests
+
+If the asset has collision (StaticBody3D in-scene), update the `ModelConfig` entry in `game/tests/test_collision_coverage_unit.gd` → `_build_model_configs()`, then run `test_runner.tscn`. All `test_collision_coverage_unit` tests must pass. **A mesh is NOT ready to ship if collision tests fail.**
 
 ---
 

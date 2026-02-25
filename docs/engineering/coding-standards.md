@@ -2,7 +2,7 @@
 
 **Owner:** systems-programmer
 **Status:** Active
-**Last Updated:** 2026-02-23
+**Last Updated:** 2026-02-25
 **Sources:** Hammer Forge Studio standards + [Godot GDScript Style Guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
 
 > All GDScript produced by any agent must follow these standards. Systems Programmer enforces via code review. The official Godot style guide applies as a baseline; the rules below take precedence wherever they differ.
@@ -97,6 +97,29 @@ func _helper() -> void:
 - Purpose-specific configuration files (`.tres` resources or `.cfg`) are used to keep game configuration abstracted away from scene code — do not hardcode tunable values in scripts
 
 ### Scene Design
+
+#### Self-Contained Scene Rule
+
+**Every conceptual game object must be its own self-contained `.tscn` scene.** A "conceptual object" is any entity that has independent identity, behavior, or state in the game world.
+
+Examples of objects that must each be a scene:
+- Ship (exterior), ship interior
+- Player (and its sub-controllers)
+- Resource deposits — base `deposit.tscn` plus subscenes per resource class (e.g., `deposit_scrap_metal.tscn`)
+- Each ship machine (Recycler, Fabricator, Automation Hub — one scene each)
+- Each carriable item (Spare Battery, Head Lamp)
+- Each tool (Hand Drill, Scanner)
+- Autonomous agents (Mining Drone)
+- Each UI panel, HUD element, or overlay (Tech Tree Panel, Fabricator Panel, Inventory Screen, etc.)
+
+**Rules:**
+- Scripts are attached to scenes — a `.gd` file that defines a game object must have a corresponding `.tscn`
+- Raw mesh files (`.glb`) are **not** scenes; wrap them in a `.tscn` with a proper root node, script, collision shape, and any required children
+- Parent scenes instantiate child object scenes — never define a child object's node tree inline inside a parent scene
+- Subscenes for type variants are allowed (e.g., `deposit_scrap_metal.tscn` inherits from `deposit.tscn`), but the base type must itself be a scene
+- Each scene must be independently openable and runnable in the Godot editor
+
+#### General Scene Guidelines
 
 - **Break scenes into independently runnable and testable units** — each scene should be playable in isolation where possible
 - Minimize coupling and direct dependencies between scenes

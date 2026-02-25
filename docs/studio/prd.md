@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-02-21
+**Last Updated:** 2026-02-25
 
 > This document defines the product — what we are building, who we are building it for, and what success looks like. It is distinct from the GDD (which defines *how* the game plays). Agents should reference the GDD for gameplay specifications; this document provides the business and product context.
 
@@ -150,22 +150,26 @@ The following are explicitly **not** being built and should not be scoped into a
 
 ## Release Goals
 
-**TBD — pending milestone planning by producer**
+*Last updated: 2026-02-25. See `docs/studio/milestones.md` for the authoritative milestone roadmap; this table is a product-level summary kept in sync at each milestone close.*
 
-Placeholder milestone structure:
-
-| Milestone | Target | Description |
-|---|---|---|
-| M0 | Complete | Studio setup, documentation, agent configuration |
-| M1 | Complete (2026-02-21) | Core game architecture: player controller, input system, view modes |
-| M2 | Active | 3D asset pipeline: PoC evaluation, pipeline SOP, M3-ready assets |
-| M3 | Planning | First playable: minimal ship in world, scan/mine loop |
-| M4 | Planning | Ship systems: navigation, global variables, module system |
-| M5 | Planning | Full biome progression: Tier 1–3 with escalating threats |
-| M6 | Planning | Mega-Project arc: complete tech tree + endgame sequence |
-| M7 | Planning | Alpha: full playthrough possible |
-| M8 | Planning | Beta / external testing |
-| Launch | TBD | Steam release |
+| Milestone | Status | QA Sign-off | Description |
+|---|---|---|---|
+| M0 | **Complete** | — | Studio setup, documentation, agent configuration |
+| M1 | **Complete** | 2026-02-21 | Core game architecture: player controller, input system, view modes |
+| M2 | **Complete** | 2026-02-22 | 3D asset pipeline: PoC evaluation, pipeline SOP, M3-ready assets |
+| M3 | **Complete** | 2026-02-23 | First playable: minimal ship in world, scan/mine loop |
+| M4 | **Complete** | 2026-02-24 | Ship infrastructure: ship globals, module system, Recycler, greybox interior |
+| M5 | **Active** | — | Processing & Crafting: smelting, components, tech tree, build/upgrade |
+| M6 | Planning | — | Ship Interior: cockpit and machine room buildout |
+| M7 | Planning | — | Ship Navigation: biome-to-biome travel, fuel system |
+| M8 | Planning | — | Visual Asset Refinement: polished art pass on existing assets |
+| M9 | Planning | — | Movement & Usability Refinement: game feel, controls, HUD/UX tuning |
+| M10 | Planning | — | Content Expansion: material resources, crafting recipes, tech tree depth |
+| M11 | Planning | — | Biome Progression: Tier 1–3 biomes, escalating threats |
+| M12 | Planning | — | Mega-Project Arc: full tech tree, endgame sequence |
+| M13 | Planning | — | Alpha: full playthrough possible |
+| M14 | Planning | — | Beta: external testing |
+| Launch | TBD | — | Steam release |
 
 ---
 

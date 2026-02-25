@@ -175,11 +175,15 @@ func _build_ship() -> void:
 		ship.add_child(ship_mesh)
 
 		# Generate convex decomposition collision from the mesh geometry.
-		# Uses VHACD to split the mesh into solid convex hulls — much more
-		# reliable than trimesh (surface-only) for CharacterBody3D collision.
+		# Higher max_convex_hulls and resolution ensure thin parts (wings,
+		# struts) get proper solid collision coverage.
+		var decomp := MeshConvexDecompositionSettings.new()
+		decomp.max_convex_hulls = 64
+		decomp.resolution = 100000
+		decomp.max_num_vertices_per_convex_hull = 64
 		for child: Node in ship_mesh.get_children():
 			if child is MeshInstance3D:
-				(child as MeshInstance3D).create_multiple_convex_collisions()
+				(child as MeshInstance3D).create_multiple_convex_collisions(decomp)
 				for body_child: Node in child.get_children():
 					if body_child is StaticBody3D:
 						(body_child as StaticBody3D).collision_layer = LAYER_ENVIRONMENT

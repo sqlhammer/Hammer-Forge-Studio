@@ -213,7 +213,7 @@ func _spawn_player() -> void:
 		return
 	_player = player_scene.instantiate()
 	_player.name = "Player"
-	_player.position = Vector3(0, 0.9, 24)  # Spawn near ship entrance (3× hull), Y=0.9 to rest capsule on ground
+	_player.position = Vector3(0, 0.0, 24)  # Spawn near ship entrance (3× hull), capsule bottom at local Y=0
 	add_child(_player)
 
 	# Get controllers and camera
@@ -339,7 +339,7 @@ func _setup_ship_interior() -> void:
 		_ship_interior.setup(_first_person)
 
 	# Set the exterior exit position outside the ship hull (3× hull Z-edge = 21, exit beyond it)
-	_ship_interior.set_exterior_position(Vector3(0, 0.9, 24))
+	_ship_interior.set_exterior_position(Vector3(0, 0.0, 24))
 
 	# Connect ship interior signals
 	_ship_interior.player_entered_ship.connect(_on_player_entered_ship)

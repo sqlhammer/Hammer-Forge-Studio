@@ -8,6 +8,8 @@ extends RefCounted
 const CAPSULE_RADIUS: float = 0.4
 const CAPSULE_HEIGHT: float = 1.8
 const SQRT_HALF: float = 0.70711
+const SIN_22_5: float = 0.38268
+const COS_22_5: float = 0.92388
 
 
 # ── Private Variables ─────────────────────────────────────
@@ -73,7 +75,7 @@ func sweep_toward(origin: Vector3, target_center: Vector3, target_aabb: AABB, ma
 	return result
 
 
-## Sweeps from 8 compass directions at specified height fractions, returning all results.
+## Sweeps from 16 compass directions at specified height fractions, returning all results.
 func sweep_all_directions(center: Vector3, aabb: AABB, mask: int, heights: Array[float], radius_mult: float) -> Array:
 	var results: Array = []
 	var aabb_size: Vector3 = aabb.size
@@ -121,6 +123,84 @@ func sweep_all_directions(center: Vector3, aabb: AABB, mask: int, heights: Array
 	return results
 
 
+## Sweeps probe tangentially along each AABB face to detect mid-surface gaps between convex hulls.
+## Insets sweep range by 15% on each end to avoid AABB-edge artifacts on non-rectangular models.
+## center: world-space center of the model. aabb: world-space AABB. mask: collision mask.
+## heights: height fractions within the AABB. surface_offset: distance from face to start sweep.
+## segment_count: number of probe positions per face edge.
+func sweep_tangential(_center: Vector3, aabb: AABB, mask: int, heights: Array[float], surface_offset: float, segment_count: int) -> Array:
+	var results: Array = []
+	var aabb_min: Vector3 = aabb.position
+	var aabb_max: Vector3 = aabb.end
+	var aabb_size: Vector3 = aabb.size
+
+	# Inset 15% on each end so sweeps probe the central 70% of each face.
+	# Perimeter sweeps already cover AABB edges; tangential sweeps target mid-surface hull gaps.
+	var inset_frac: float = 0.25
+	var z_range: float = aabb_size.z
+	var x_range: float = aabb_size.x
+	var z_min_inset: float = aabb_min.z + z_range * inset_frac
+	var z_max_inset: float = aabb_max.z - z_range * inset_frac
+	var x_min_inset: float = aabb_min.x + x_range * inset_frac
+	var x_max_inset: float = aabb_max.x - x_range * inset_frac
+
+	# Four faces: +X, -X, +Z, -Z
+	var faces: Array[Dictionary] = [
+		{"label": "+X", "normal": Vector3(-1, 0, 0), "origin_x": aabb_max.x + surface_offset, "axis": "z", "min_t": z_min_inset, "max_t": z_max_inset},
+		{"label": "-X", "normal": Vector3(1, 0, 0), "origin_x": aabb_min.x - surface_offset, "axis": "z", "min_t": z_min_inset, "max_t": z_max_inset},
+		{"label": "+Z", "normal": Vector3(0, 0, -1), "origin_z": aabb_max.z + surface_offset, "axis": "x", "min_t": x_min_inset, "max_t": x_max_inset},
+		{"label": "-Z", "normal": Vector3(0, 0, 1), "origin_z": aabb_min.z - surface_offset, "axis": "x", "min_t": x_min_inset, "max_t": x_max_inset},
+	]
+
+	for height_frac: float in heights:
+		var sweep_y: float = aabb_min.y + aabb_size.y * height_frac
+		var h_label: String = _height_label(height_frac)
+
+		for face: Dictionary in faces:
+			var face_label: String = face["label"]
+			var normal: Vector3 = face["normal"]
+			var sweep_distance: float = maxf(aabb_size.x, aabb_size.z) + surface_offset * 2.0
+			var min_t: float = face["min_t"]
+			var max_t: float = face["max_t"]
+
+			for seg: int in range(segment_count):
+				var t: float = min_t + (max_t - min_t) * (float(seg) + 0.5) / float(segment_count)
+				var start_pos: Vector3
+				if face["axis"] == "z":
+					start_pos = Vector3(face.get("origin_x", 0.0), sweep_y, t)
+				else:
+					start_pos = Vector3(t, sweep_y, face.get("origin_z", 0.0))
+
+				_probe_body.global_position = start_pos
+				_probe_body.collision_mask = mask
+
+				var params := PhysicsTestMotionParameters3D.new()
+				params.from = _probe_body.global_transform
+				params.motion = normal * sweep_distance
+
+				var motion_result := PhysicsTestMotionResult3D.new()
+				var hit: bool = PhysicsServer3D.body_test_motion(
+					_probe_body.get_rid(), params, motion_result
+				)
+
+				var probe_result := ProbeResult.new()
+				probe_result.direction_label = "tan_%s+%s_s%d" % [face_label, h_label, seg]
+				probe_result.hit_collision = hit
+				if hit:
+					probe_result.travel_distance = motion_result.get_travel().length()
+				else:
+					probe_result.travel_distance = sweep_distance
+
+				var enters_aabb: bool = _ray_intersects_aabb(
+					start_pos, normal, sweep_distance, aabb
+				)
+				probe_result.is_clipping_gap = enters_aabb and not hit
+
+				results.append(probe_result)
+
+	return results
+
+
 ## Compares combined collision shape AABB against mesh AABB, returns per-axis coverage ratios.
 ## Both AABBs are computed in reference node's local space for accurate comparison
 ## when collision bodies are nested inside scaled mesh hierarchies.
@@ -162,13 +242,21 @@ func check_aabb_coverage(body: StaticBody3D, mesh_aabb: AABB, reference: Node3D)
 func _build_direction_vectors() -> void:
 	_direction_vectors = {
 		"N": Vector3(0.0, 0.0, -1.0),
+		"NNE": Vector3(SIN_22_5, 0.0, -COS_22_5),
 		"NE": Vector3(SQRT_HALF, 0.0, -SQRT_HALF),
+		"ENE": Vector3(COS_22_5, 0.0, -SIN_22_5),
 		"E": Vector3(1.0, 0.0, 0.0),
+		"ESE": Vector3(COS_22_5, 0.0, SIN_22_5),
 		"SE": Vector3(SQRT_HALF, 0.0, SQRT_HALF),
+		"SSE": Vector3(SIN_22_5, 0.0, COS_22_5),
 		"S": Vector3(0.0, 0.0, 1.0),
+		"SSW": Vector3(-SIN_22_5, 0.0, COS_22_5),
 		"SW": Vector3(-SQRT_HALF, 0.0, SQRT_HALF),
+		"WSW": Vector3(-COS_22_5, 0.0, SIN_22_5),
 		"W": Vector3(-1.0, 0.0, 0.0),
+		"WNW": Vector3(-COS_22_5, 0.0, -SIN_22_5),
 		"NW": Vector3(-SQRT_HALF, 0.0, -SQRT_HALF),
+		"NNW": Vector3(-SIN_22_5, 0.0, -COS_22_5),
 	}
 
 

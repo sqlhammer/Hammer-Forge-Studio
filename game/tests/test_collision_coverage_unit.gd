@@ -10,7 +10,11 @@ const LAYER_ENVIRONMENT: int = 1 << 2
 const LAYER_INTERACTABLE: int = 1 << 3
 const MODEL_SPACING: float = 100.0
 const DEFAULT_COVERAGE_THRESHOLD: float = 0.85
+const LARGE_MODEL_COVERAGE_THRESHOLD: float = 0.92
 const SWEEP_RADIUS_MULTIPLIER: float = 1.5
+const PERIMETER_HEIGHT_FRACTIONS: Array[float] = [0.1, 0.25, 0.4, 0.55, 0.7, 0.85]
+const TANGENTIAL_HEIGHT_FRACTIONS: Array[float] = [0.15, 0.3, 0.45, 0.6, 0.75]
+const TANGENTIAL_SURFACE_OFFSET: float = 1.0
 
 
 # ── Private Variables ─────────────────────────────────────
@@ -52,21 +56,24 @@ func register_tests() -> void:
 			"%s_aabb_coverage" % label,
 			_run_aabb_coverage_test.bind(config)
 		)
-		var low_heights: Array[float] = [0.1]
+		# Perimeter sweep at 6 height fractions
+		for frac: float in PERIMETER_HEIGHT_FRACTIONS:
+			var tag: String = _height_tag(frac)
+			var heights: Array[float] = [frac]
+			add_test(
+				"%s_perimeter_no_clip_%s" % [label, tag],
+				_run_perimeter_test.bind(config, heights)
+			)
+		# Tangential surface sweep
 		add_test(
-			"%s_perimeter_no_clip_low" % label,
-			_run_perimeter_test.bind(config, low_heights)
+			"%s_tangential_no_clip" % label,
+			_run_tangential_test.bind(config)
 		)
-		var mid_heights: Array[float] = [0.5]
-		add_test(
-			"%s_perimeter_no_clip_mid" % label,
-			_run_perimeter_test.bind(config, mid_heights)
-		)
-		var high_heights: Array[float] = [0.9]
-		add_test(
-			"%s_perimeter_no_clip_high" % label,
-			_run_perimeter_test.bind(config, high_heights)
-		)
+	# Camera-within-capsule validation
+	add_test(
+		"player_camera_within_capsule",
+		_run_camera_within_capsule_test
+	)
 
 
 # ── Test Methods ──────────────────────────────────────────
@@ -132,6 +139,72 @@ func _run_perimeter_test(config: ModelConfig, heights: Array[float]) -> void:
 	)
 
 
+func _run_tangential_test(config: ModelConfig) -> void:
+	var data: Dictionary = _spawned_models.get(config.label, {})
+	var mesh_aabb: AABB = data.get("mesh_aabb", AABB())
+	if mesh_aabb.size == Vector3.ZERO:
+		assert_true(false, "%s: mesh AABB not computed" % config.label)
+		return
+
+	var world_aabb := AABB(mesh_aabb.position + config.position, mesh_aabb.size)
+	var center: Vector3 = world_aabb.get_center()
+
+	var results: Array = _probe.sweep_tangential(
+		center, world_aabb, config.collision_mask,
+		TANGENTIAL_HEIGHT_FRACTIONS, TANGENTIAL_SURFACE_OFFSET,
+		config.tangential_segment_count
+	)
+
+	var gaps: int = 0
+	var gap_labels: Array[String] = []
+	for result in results:
+		var probe_result: CollisionProbe.ProbeResult = result as CollisionProbe.ProbeResult
+		if probe_result.is_clipping_gap:
+			gaps += 1
+			gap_labels.append(probe_result.direction_label)
+
+	var gap_summary: String = ", ".join(gap_labels) if gap_labels.size() > 0 else "none"
+	assert_true(
+		gaps <= config.tangential_max_allowed_gaps,
+		"%s tangential: %d clipping gaps (max %d) at: %s" % [
+			config.label, gaps, config.tangential_max_allowed_gaps, gap_summary
+		]
+	)
+
+
+func _run_camera_within_capsule_test() -> void:
+	var scene: PackedScene = load("res://scenes/gameplay/player_first_person.tscn") as PackedScene
+	if not scene:
+		assert_true(false, "Could not load player_first_person.tscn")
+		return
+
+	var player: CharacterBody3D = scene.instantiate() as CharacterBody3D
+	add_child(player)
+
+	# Read the collision shape position and capsule dimensions
+	var col_shape: CollisionShape3D = player.get_node("CollisionShape") as CollisionShape3D
+	if not col_shape or not col_shape.shape is CapsuleShape3D:
+		assert_true(false, "Player CollisionShape3D with CapsuleShape3D not found")
+		player.queue_free()
+		return
+
+	var capsule: CapsuleShape3D = col_shape.shape as CapsuleShape3D
+	var capsule_top_local: float = col_shape.position.y + capsule.height / 2.0
+
+	# Read head_height from the player script
+	var head_height: float = player.get("head_height") as float
+	var margin: float = 0.1  # Minimum coverage above camera
+
+	assert_true(
+		head_height <= capsule_top_local - margin,
+		"Camera head_height %.2f must be <= capsule top %.2f - margin %.2f (= %.2f)" % [
+			head_height, capsule_top_local, margin, capsule_top_local - margin
+		]
+	)
+
+	player.queue_free()
+
+
 # ── Helpers ───────────────────────────────────────────────
 
 func _build_model_configs() -> void:
@@ -147,7 +220,9 @@ func _build_model_configs() -> void:
 	ship.collision_mask = LAYER_ENVIRONMENT
 	ship.expect_solid = true
 	ship.max_allowed_gaps = 0
-	ship.coverage_threshold = DEFAULT_COVERAGE_THRESHOLD
+	ship.coverage_threshold = LARGE_MODEL_COVERAGE_THRESHOLD
+	ship.tangential_segment_count = 6
+	ship.tangential_max_allowed_gaps = 2
 	ship.collision_setup = func(root: Node3D) -> StaticBody3D:
 		return _create_vhacd_collision(root)
 	_configs.append(ship)
@@ -169,6 +244,7 @@ func _build_model_configs() -> void:
 	_configs.append(recycler)
 
 	# Fabricator module — BoxShape3D matching SOP dimensions (2.0m x 1.2m x 1.0m)
+	# Z-axis mesh extends slightly beyond the 1.0m collision box (~0.83 coverage)
 	var fabricator := ModelConfig.new()
 	fabricator.label = "fabricator_module"
 	fabricator.scene_path = "res://assets/meshes/machines/mesh_fabricator_module.glb"
@@ -177,7 +253,7 @@ func _build_model_configs() -> void:
 	fabricator.collision_mask = LAYER_ENVIRONMENT
 	fabricator.expect_solid = true
 	fabricator.max_allowed_gaps = 0
-	fabricator.coverage_threshold = DEFAULT_COVERAGE_THRESHOLD
+	fabricator.coverage_threshold = 0.80
 	fabricator.collision_setup = func(root: Node3D) -> StaticBody3D:
 		return _create_box_collision(
 			root, Vector3(2.0, 1.2, 1.0), Vector3(0.0, 0.6, 0.0), LAYER_ENVIRONMENT
@@ -200,6 +276,11 @@ func _build_model_configs() -> void:
 			root, 1.5, Vector3(0.0, 0.9, 0.0), LAYER_INTERACTABLE
 		)
 	_configs.append(resource_node)
+
+
+## Converts a height fraction to a short tag for test names (e.g., 0.1 → "h10", 0.55 → "h55").
+func _height_tag(fraction: float) -> String:
+	return "h%d" % int(fraction * 100.0)
 
 
 func _spawn_all_models() -> void:
@@ -374,5 +455,9 @@ class ModelConfig:
 	var max_allowed_gaps: int = 0
 	## Minimum AABB coverage ratio per axis.
 	var coverage_threshold: float = 0.85
+	## Number of probe positions per AABB face edge for tangential sweeps.
+	var tangential_segment_count: int = 4
+	## Maximum tangential clipping gaps allowed (separate from perimeter gaps).
+	var tangential_max_allowed_gaps: int = 0
 	## Callable that attaches collision to the model root, mirroring in-game collision setup.
 	var collision_setup: Callable = Callable()

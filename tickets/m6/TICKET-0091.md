@@ -2,7 +2,7 @@
 id: TICKET-0091
 title: "HUD/functional icon style guide — aesthetic brief, format, size, mood"
 type: DESIGN
-status: OPEN
+status: DONE
 priority: P1
 owner: ui-ux-designer
 created_by: producer
@@ -70,8 +70,9 @@ This style guide is the brief that all icon generation experiments (TICKET-0092�
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+`docs/art/icon-style-guide-hud.md` created and committed. Covers all required sections: aesthetic direction (Outer Wilds / Alien Isolation / Dead Cells references, functional glyph distinction from item icons), size/grid (16px inline, 24px standard, 32px large; design master at 32px with mandatory 16px legibility check), color usage (all icons use `stroke="currentColor"` inherited via GDScript `modulate`; full state-color table for all 20 icons; fixed-color exceptions documented; no-color-alone accessibility rule confirmed), style constraints (stroke-only `fill="none"` confirmed; symbol vs. pictographic guidance; 3–8 path complexity ceiling; minimum 2-unit gap between strokes), output format (SVG primary, PNG 72px minimum fallback, full 20-filename list), icon list coverage (all 20 icons from audit with recommended symbol shapes and any fill exceptions noted), Godot integration (`modulate` tinting pattern with GDScript example; battery bar procedural draw migration note; tech tree Label-to-TextureRect migration note). Confirms existing style guide stroke/size grid is maintained.
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket for M6 Foundation phase
+- 2026-02-25 [ui-ux-designer] DONE — docs/art/icon-style-guide-hud.md created and committed. All acceptance criteria met.

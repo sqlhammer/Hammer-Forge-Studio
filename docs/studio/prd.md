@@ -159,7 +159,7 @@ The following are explicitly **not** being built and should not be scoped into a
 | M2 | **Complete** | 2026-02-22 | 3D asset pipeline: PoC evaluation, pipeline SOP, M3-ready assets |
 | M3 | **Complete** | 2026-02-23 | First playable: minimal ship in world, scan/mine loop |
 | M4 | **Complete** | 2026-02-24 | Ship infrastructure: ship globals, module system, Recycler, greybox interior |
-| M5 | **Active** | — | Processing & Crafting: smelting, components, tech tree, build/upgrade |
+| M5 | **Complete** | 2026-02-25 | Processing & Crafting: smelting, components, tech tree, build/upgrade |
 | M6 | Planning | — | Ship Interior: cockpit and machine room buildout |
 | M7 | Planning | — | Ship Navigation: biome-to-biome travel, fuel system |
 | M8 | Planning | — | Visual Asset Refinement: polished art pass on existing assets |

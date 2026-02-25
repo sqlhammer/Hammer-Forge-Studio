@@ -30,7 +30,7 @@
 | M2 | 3D Asset Pipeline — PoC evaluation, pipeline SOP, M3-ready assets | 2026-02-22 | Complete | 10 | 0 | 10 | 2026-02-22 |
 | M3 | First Playable — Minimal ship in world, scan/mine loop | — | Complete | 13 | 0 | 13 | 2026-02-23 |
 | M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Complete | 21 | 0 | 21 | 2026-02-24 |
-| M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Active | 25 | 25 | 0 | — |
+| M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Complete | 38 | 0 | 38 | 2026-02-25 |
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Planning | 17 | 17 | 0 | — |
 | M7 | Ship Interior — Cockpit and machine room buildout | — | Planning | — | — | — | — |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |

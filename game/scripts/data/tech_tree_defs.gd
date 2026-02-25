@@ -13,7 +13,7 @@ const TECH_TREE_CATALOG: Dictionary = {
 		"display_name": "Fabricator",
 		"unlock_cost": {
 			"resource_type": ResourceDefs.ResourceType.METAL,
-			"quantity": 100,
+			"quantity": 1,
 		},
 		"prerequisites": [],
 	},
@@ -22,7 +22,7 @@ const TECH_TREE_CATALOG: Dictionary = {
 		# Placeholder — confirm unlock cost with Studio Head before TICKET-0064 implementation.
 		"unlock_cost": {
 			"resource_type": ResourceDefs.ResourceType.METAL,
-			"quantity": 200,
+			"quantity": 2,
 		},
 		"prerequisites": ["fabricator_module"],
 	},

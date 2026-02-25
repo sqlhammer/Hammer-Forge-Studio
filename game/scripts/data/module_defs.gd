@@ -42,7 +42,7 @@ const MODULE_CATALOG: Dictionary = {
 		"install_cost": {
 			"resource_type": ResourceDefs.ResourceType.SCRAP_METAL,
 			"purity": ResourceDefs.Purity.ONE_STAR,
-			"quantity": 20,
+			"quantity": 2,
 		},
 	},
 	"fabricator": {
@@ -55,7 +55,7 @@ const MODULE_CATALOG: Dictionary = {
 		"install_cost": {
 			"resource_type": ResourceDefs.ResourceType.METAL,
 			"purity": ResourceDefs.Purity.ONE_STAR,
-			"quantity": 20,
+			"quantity": 2,
 		},
 		# Requires the fabricator_module tech tree node to be unlocked before installation.
 		"tech_tree_gate": "fabricator_module",
@@ -70,7 +70,7 @@ const MODULE_CATALOG: Dictionary = {
 		"install_cost": {
 			"resource_type": ResourceDefs.ResourceType.METAL,
 			"purity": ResourceDefs.Purity.ONE_STAR,
-			"quantity": 30,
+			"quantity": 2,
 		},
 		# Requires the automation_hub tech tree node to be unlocked before installation.
 		"tech_tree_gate": "automation_hub",

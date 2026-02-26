@@ -2,7 +2,7 @@
 id: TICKET-0113
 title: "Refactor — Ship machines as standalone instanced scenes (Recycler, Fabricator, Automation Hub)"
 type: REFACTOR
-status: TODO
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -41,3 +41,4 @@ Per the updated Scene Design standard, every conceptual game object must be its 
 ## Activity Log
 - 2026-02-25 [producer] Created ticket — standards refactor, self-contained scene rule
 - 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone
+- 2026-02-26 [gameplay-programmer] Starting work — creating standalone machine scenes

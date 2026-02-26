@@ -1,6 +1,18 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/ship_interior.gd" id="1_rhr8w"]
+[ext_resource type="PackedScene" path="res://scenes/objects/recycler.tscn" id="2_recycler"]
+[ext_resource type="PackedScene" path="res://scenes/objects/fabricator.tscn" id="3_fabricator"]
+[ext_resource type="PackedScene" path="res://scenes/objects/automation_hub.tscn" id="4_automation_hub"]
 
 [node name="ShipInterior" type="Node3D"]
 script = ExtResource("1_rhr8w")
+
+[node name="Recycler" parent="." instance=ExtResource("2_recycler")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -1)
+
+[node name="Fabricator" parent="." instance=ExtResource("3_fabricator")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+
+[node name="AutomationHub" parent="." instance=ExtResource("4_automation_hub")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -1)

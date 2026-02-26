@@ -3,6 +3,9 @@
 class_name DroneManager
 extends Node3D
 
+# ── Constants ─────────────────────────────────────────────
+const MINING_DRONE_SCENE: String = "res://scenes/objects/mining_drone.tscn"
+
 # ── Private Variables ─────────────────────────────────────
 var _home_position: Vector3 = Vector3.ZERO
 var _drones: Dictionary = {}  # drone_id (int) → DroneController
@@ -19,7 +22,8 @@ func spawn_drone(drone_id: int, program: DroneProgram) -> void:
 	if _drones.has(drone_id):
 		Global.log("DroneManager: drone %d already exists, skipping spawn" % drone_id)
 		return
-	var controller := DroneController.new()
+	var drone_scene: PackedScene = load(MINING_DRONE_SCENE) as PackedScene
+	var controller: DroneController = drone_scene.instantiate() as DroneController
 	controller.setup(drone_id, _home_position, program)
 	add_child(controller)
 	_drones[drone_id] = controller

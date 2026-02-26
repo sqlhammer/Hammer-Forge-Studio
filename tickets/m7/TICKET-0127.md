@@ -2,7 +2,7 @@
 id: TICKET-0127
 title: "Cockpit diegetic status displays — ship globals on wall"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -60,13 +60,13 @@ Choose whichever approach the wireframe spec recommends, or default to Option A 
 
 ## Acceptance Criteria
 
-- [ ] 4 diegetic displays exist in the cockpit showing Power, Integrity, Heat, Oxygen
-- [ ] Displays update in real-time from `ShipState` signals
-- [ ] Values match the existing HUD ship globals display exactly
-- [ ] Displays are readable from the player's standing position in the cockpit
-- [ ] Emissive material ensures readability in any lighting condition
-- [ ] Scene is independently testable (displays work when cockpit is loaded)
-- [ ] All code follows `docs/engineering/coding-standards.md`
+- [x] 4 diegetic displays exist in the cockpit showing Power, Integrity, Heat, Oxygen
+- [x] Displays update in real-time from `ShipState` signals
+- [x] Values match the existing HUD ship globals display exactly
+- [x] Displays are readable from the player's standing position in the cockpit
+- [x] Emissive material ensures readability in any lighting condition
+- [x] Scene is independently testable (displays work when cockpit is loaded)
+- [x] All code follows `docs/engineering/coding-standards.md`
 
 ## Implementation Notes
 
@@ -75,8 +75,16 @@ Choose whichever approach the wireframe spec recommends, or default to Option A 
 - The existing `ShipState` autoload already emits signals for all 4 globals — connect to those
 
 ## Handoff Notes
-(Leave blank until handoff occurs.)
+- Used Option A (SubViewport) for full UI toolkit: each display renders a 256x128 SubViewport onto a QuadMesh with emissive unshaded material
+- Created reusable `ship_status_display.tscn` subscene, instanced 4 times in `ship_interior.tscn` with exported `variable_name` and `variable_type` properties
+- Display positions: horizontal row at StatusDisplayArea (Y=1.5, Z=-9), X offsets: -0.825, -0.275, +0.275, +0.825
+- Each display: 0.5m × 0.25m with dark grey (#333333) frame and emissive screen (emission_energy=1.5, SHADING_MODE_UNSHADED)
+- Colors, thresholds, pulse animation, and percentage format match `ShipGlobalsHUD` exactly
+- Signal connections: power_changed, integrity_changed, heat_changed, oxygen_changed from ShipState autoload
+- No changes to ship_interior.gd — StatusDisplayArea Marker3D preserved as reference point
+- Note: `.gd.uid` for `ship_status_display.gd` pending Godot editor filesystem scan
 
 ## Activity Log
 - 2026-02-26 [producer] Created ticket — cockpit diegetic ship status displays
 - 2026-02-26 [gameplay-programmer] Starting work — implementing diegetic status displays in cockpit
+- 2026-02-26 [gameplay-programmer] Completed — commit 7222a65, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/96 (merged)

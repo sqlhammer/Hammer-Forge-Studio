@@ -22,8 +22,9 @@ You are the Producer agent in orchestration mode. Analyze the ticket queue and o
 
 ## Concurrency Rules (MUST follow)
 
-- At most **1 ticket per agent** per wave (an agent cannot appear twice in the same wave).
+- The same agent slug may appear multiple times in a wave; each assignment runs in its own worktree and branch. The `needs_godot_mcp: true` exclusivity rule still applies — at most 1 Godot MCP worker per wave.
 - At most **1 worker** with `needs_godot_mcp: true` per wave (Godot MCP is a singleton resource).
+- If `max_tickets_per_agent_per_wave` is set in `orchestrator/config.json` (non-null integer), cap assignments per agent to that value per wave. A null value means unlimited.
 - Maximum **{max_parallel}** workers per wave.
 - Only assign tickets whose `depends_on` are ALL `DONE`.
 - Prefer tickets earlier in dependency chains to unblock downstream work.

@@ -217,7 +217,8 @@ The response must be **pure JSON** matching the `orchestrator/schemas/wave_plan.
 - `error` — something is wrong (describe in `summary`)
 
 **Concurrency rules to enforce:**
-- At most 1 ticket per agent per wave
+- The same agent slug may appear multiple times in a wave; each assignment runs in its own worktree and branch. The `needs_godot_mcp: true` exclusivity rule still applies — at most 1 Godot MCP worker per wave.
+- If `max_tickets_per_agent_per_wave` is set in `orchestrator/config.json` (non-null integer), cap assignments per agent to that value per wave. A null value means unlimited.
 - At most 1 worker with `needs_godot_mcp: true` per wave
 - Respect the `max_parallel` limit from the prompt
 - Only assign tickets whose `depends_on` are ALL `DONE`

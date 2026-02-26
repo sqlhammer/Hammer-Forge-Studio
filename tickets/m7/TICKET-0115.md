@@ -2,7 +2,7 @@
 id: TICKET-0115
 title: "Refactor — Carriable items (Spare Battery, Head Lamp) as standalone instanced scenes"
 type: REFACTOR
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -47,3 +47,4 @@ Per the updated Scene Design standard, every conceptual game object must be its 
 - 2026-02-25 [producer] Created ticket — standards refactor, self-contained scene rule
 - 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone
 - 2026-02-26 [gameplay-programmer] Starting work — creating standalone scene wrappers for Spare Battery and Head Lamp
+- 2026-02-26 [gameplay-programmer] DONE — commit a7246a7, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/87 (merged). Created spare_battery.tscn and head_lamp.tscn. Documented architectural limitations: spare_battery.gd extends RefCounted (cannot attach to Node), head_lamp.gd is autoload singleton (instancing in player deferred). No new .gd scripts created.

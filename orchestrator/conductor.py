@@ -626,7 +626,7 @@ class Conductor:
         if action == "spawn_agents":
             # Accept "wave" or "workers" (LLM sometimes uses the wrong key)
             wave = plan.get("wave") or plan.get("workers") or []
-            # Normalize item keys: "ticket_id" → "ticket"
+            # Normalize item keys: "ticket_id" -> "ticket"
             for item in wave:
                 if "ticket_id" in item and "ticket" not in item:
                     item["ticket"] = item.pop("ticket_id")
@@ -637,7 +637,7 @@ class Conductor:
             # Store wave plan for dispatching
             self.state["_pending_wave"] = wave
             assignments = ", ".join(
-                f"{a['ticket']}→{a['agent']}" for a in wave
+                f"{a['ticket']}->{a['agent']}" for a in wave
             )
             self.logger.log("PLAN",
                 f"Wave {wave_num}: {len(wave)} assignments [{assignments}]")

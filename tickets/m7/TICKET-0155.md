@@ -2,7 +2,7 @@
 id: TICKET-0155
 title: "Bugfix — missing interaction prompt at ship interior exit"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: studio-head
@@ -44,12 +44,12 @@ No interaction prompt is shown near the ship exit. The player has no contextual 
 
 ## Acceptance Criteria
 
-- [ ] Ship interior exit trigger zone is wired to the interaction prompt system — entering the zone shows the prompt, leaving hides it
-- [ ] Prompt text reads "Exit Ship" (or equivalent per design) with the correct mapped key displayed dynamically via `InputManager`
-- [ ] Key label updates correctly if the player remaps the interact action mid-session
-- [ ] Prompt does not appear outside the trigger zone boundary
-- [ ] Behavior is consistent with other interaction prompts in the game (e.g., deposit scan prompt)
-- [ ] Full test suite passes after fix
+- [x] Ship interior exit trigger zone is wired to the interaction prompt system — entering the zone shows the prompt, leaving hides it
+- [x] Prompt text reads "Exit Ship" (or equivalent per design) with the correct mapped key displayed dynamically via `InputManager`
+- [x] Key label updates correctly if the player remaps the interact action mid-session
+- [x] Prompt does not appear outside the trigger zone boundary
+- [x] Behavior is consistent with other interaction prompts in the game (e.g., deposit scan prompt)
+- [x] Full test suite passes after fix
 
 ## Implementation Notes
 
@@ -62,3 +62,4 @@ No interaction prompt is shown near the ship exit. The player has no contextual 
 
 - 2026-02-26 [studio-head] Created — missing prompt observed during post-M7 playtesting before QA sign-off
 - 2026-02-26 [gameplay-programmer] Starting work — exit trigger Area3D exists but is not wired to interaction prompt system
+- 2026-02-26 [gameplay-programmer] DONE — commit c0a72da, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/120 (merged). Created ShipExitZone script, wired exit trigger to interaction_prompt_source group, dynamic key resolution via InputMap.

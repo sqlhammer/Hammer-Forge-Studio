@@ -2,7 +2,7 @@
 id: TICKET-0128
 title: "Cockpit exterior viewport/window"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -83,3 +83,4 @@ The cockpit window is a key immersion element. It connects the interior space to
 ## Activity Log
 - 2026-02-26 [producer] Created ticket — cockpit exterior viewport/window
 - 2026-02-26 [gameplay-programmer] Starting work — implementing Option C (static sky gradient shader) at ViewportArea anchor
+- 2026-02-26 [gameplay-programmer] Completed — commit 80a9df8, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/99 (merged)

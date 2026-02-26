@@ -56,6 +56,9 @@ var _cancel_button: Button = null
 var _confirm_visible: bool = false
 var _graph_container: Control = null
 var _pulse_tween: Tween = null
+var _lock_tex: Texture2D = null
+var _unlock_check_tex: Texture2D = null
+var _unlock_chevron_tex: Texture2D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -186,6 +189,11 @@ func _build_ui() -> void:
 	_graph_container = Control.new()
 	_graph_container.custom_minimum_size = Vector2(GRAPH_WIDTH, 420.0)
 	hbox.add_child(_graph_container)
+
+	# Cache state indicator textures (loaded once, used in every _refresh_card call)
+	_lock_tex = load("res://assets/icons/hud/icon_hud_lock.svg") as Texture2D
+	_unlock_check_tex = load("res://assets/icons/hud/icon_hud_unlock_check.svg") as Texture2D
+	_unlock_chevron_tex = load("res://assets/icons/hud/icon_hud_unlock_chevron.svg") as Texture2D
 
 	_build_node_cards()
 	_build_connector()
@@ -446,7 +454,7 @@ func _refresh_card(index: int) -> void:
 		name_label.add_theme_color_override("font_color", COLOR_GREEN)
 		state_label.text = "UNLOCKED"
 		state_label.add_theme_color_override("font_color", COLOR_GREEN)
-		state_icon.texture = load("res://assets/icons/hud/icon_hud_unlock_check.svg") as Texture2D
+		state_icon.texture = _unlock_check_tex
 		state_icon.modulate = COLOR_GREEN
 		card.modulate = Color.WHITE
 	elif TechTree.can_unlock(node_id):
@@ -457,7 +465,7 @@ func _refresh_card(index: int) -> void:
 		name_label.add_theme_color_override("font_color", COLOR_TEAL)
 		state_label.text = "UNLOCKABLE"
 		state_label.add_theme_color_override("font_color", COLOR_TEAL)
-		state_icon.texture = load("res://assets/icons/hud/icon_hud_unlock_chevron.svg") as Texture2D
+		state_icon.texture = _unlock_chevron_tex
 		state_icon.modulate = COLOR_TEAL
 		card.modulate = Color.WHITE
 		if index == _focused_index:
@@ -470,7 +478,7 @@ func _refresh_card(index: int) -> void:
 		name_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 		state_label.text = "LOCKED"
 		state_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-		state_icon.texture = load("res://assets/icons/hud/icon_hud_lock.svg") as Texture2D
+		state_icon.texture = _lock_tex
 		state_icon.modulate = COLOR_TEXT_SECONDARY
 		card.modulate = Color(1, 1, 1, 0.6)
 

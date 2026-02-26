@@ -65,6 +65,9 @@ var _recipe_row_labels: Array[Label] = []
 var _recipe_row_indicators: Array[ColorRect] = []
 var _recipe_row_dots: Array[ColorRect] = []
 var _list_scroll: ScrollContainer = null
+var _last_detail_recipe_id: String = ""
+var _cached_input_tex: Texture2D = null
+var _cached_output_tex: Texture2D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -117,6 +120,7 @@ func open() -> void:
 	_focus_on_list = true
 	_selected_index = -1
 	_selected_recipe_id = ""
+	_last_detail_recipe_id = ""
 	# Auto-select first recipe if available
 	if _recipe_ids.size() > 0:
 		_selected_index = 0
@@ -574,6 +578,13 @@ func _refresh_detail() -> void:
 	_recipe_name_label.text = FabricatorDefs.get_recipe_name(recipe_id)
 	_recipe_name_label.add_theme_color_override("font_color", COLOR_TEAL)
 
+	# Reload icon textures only when the selected recipe changes
+	var recipe_changed: bool = recipe_id != _last_detail_recipe_id
+	if recipe_changed:
+		_last_detail_recipe_id = recipe_id
+		_cached_input_tex = null
+		_cached_output_tex = null
+
 	# Input slot
 	var inputs: Array = FabricatorDefs.get_inputs(recipe_id)
 	if inputs.size() > 0:
@@ -584,9 +595,12 @@ func _refresh_detail() -> void:
 		var available: int = PlayerInventory.get_total_count(resource_type)
 
 		_input_slot_icon.visible = true
-		var input_icon_path: String = ResourceDefs.get_icon_path(resource_type)
-		if not input_icon_path.is_empty():
-			_input_slot_icon.texture = load(input_icon_path) as Texture2D
+		if recipe_changed:
+			var input_icon_path: String = ResourceDefs.get_icon_path(resource_type)
+			if not input_icon_path.is_empty():
+				_cached_input_tex = load(input_icon_path) as Texture2D
+		if _cached_input_tex:
+			_input_slot_icon.texture = _cached_input_tex
 		_input_slot_label.visible = true
 		_input_slot_label.text = "x%d" % quantity
 		_input_desc_label.text = "%s x%d" % [resource_name, quantity]
@@ -609,17 +623,23 @@ func _refresh_detail() -> void:
 		var out_type: ResourceDefs.ResourceType = output.get("resource_type", ResourceDefs.ResourceType.NONE) as ResourceDefs.ResourceType
 		var out_qty: int = output.get("quantity", 0) as int
 		_output_slot_icon.visible = true
-		var out_icon_path: String = ResourceDefs.get_icon_path(out_type)
-		if not out_icon_path.is_empty():
-			_output_slot_icon.texture = load(out_icon_path) as Texture2D
+		if recipe_changed:
+			var out_icon_path: String = ResourceDefs.get_icon_path(out_type)
+			if not out_icon_path.is_empty():
+				_cached_output_tex = load(out_icon_path) as Texture2D
+		if _cached_output_tex:
+			_output_slot_icon.texture = _cached_output_tex
 		_output_slot_label.visible = true
 		_output_slot_label.text = "x%d" % out_qty
 		_output_desc_label.text = ResourceDefs.get_resource_name(out_type)
 	elif output_mode == FabricatorDefs.OUTPUT_MODE_EQUIP_HEAD_LAMP:
 		_output_slot_icon.visible = true
-		var lamp_icon_path: String = FabricatorDefs.get_icon_path(recipe_id)
-		if not lamp_icon_path.is_empty():
-			_output_slot_icon.texture = load(lamp_icon_path) as Texture2D
+		if recipe_changed:
+			var lamp_icon_path: String = FabricatorDefs.get_icon_path(recipe_id)
+			if not lamp_icon_path.is_empty():
+				_cached_output_tex = load(lamp_icon_path) as Texture2D
+		if _cached_output_tex:
+			_output_slot_icon.texture = _cached_output_tex
 		_output_slot_label.visible = false
 		_output_desc_label.text = "Head Lamp (Equip)"
 	else:

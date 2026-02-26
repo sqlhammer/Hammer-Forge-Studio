@@ -2,12 +2,13 @@
 id: TICKET-0107
 title: "BUGFIX: scanner_readout.gd loads star textures twice"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P3
 owner: gameplay-programmer
 created_by: systems-programmer
 created_at: 2026-02-25
-updated_at: 2026-02-25
+updated_at: 2026-02-26
+completed_at: 2026-02-26
 milestone: "M6"
 phase: "Integration & QA"
 depends_on: []
@@ -38,11 +39,12 @@ Load them once in `_build_ui()` and store to these members. Replace the redundan
 
 ## Acceptance Criteria
 
-- [ ] `_star_filled_tex` and `_star_empty_tex` declared as member variables in `ScannerReadout`
-- [ ] Loaded once in `_build_ui()` and stored to member variables
-- [ ] `_update_readout_data()` references members — no `load()` calls for star textures inside it
-- [ ] No functional change to star display behavior
+- [x] `_star_filled_tex` and `_star_empty_tex` declared as member variables in `ScannerReadout`
+- [x] Loaded once in `_build_ui()` and stored to member variables
+- [x] `_update_readout_data()` references members — no `load()` calls for star textures inside it
+- [x] No functional change to star display behavior
 
 ## Activity Log
 
 - 2026-02-25 [systems-programmer] Filed during code review TICKET-0101
+- 2026-02-26 [gameplay-programmer] Fixed — added _star_filled_tex and _star_empty_tex member vars, loaded once in _build_ui(), removed redundant load() calls from _update_readout_data().

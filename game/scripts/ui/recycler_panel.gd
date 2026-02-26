@@ -39,6 +39,8 @@ var _collect_button: Button = null
 var _status_label: Label = null
 var _feedback_label: Label = null
 var _available_label: Label = null
+var _input_icon_tex: Texture2D = null
+var _output_icon_tex: Texture2D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -196,6 +198,14 @@ func _build_ui() -> void:
 	_style_button(close_button, COLOR_NEUTRAL)
 	close_button.pressed.connect(close)
 	footer.add_child(close_button)
+
+	# Cache slot icon textures (resource types are constants, textures never change)
+	var input_icon_path: String = ResourceDefs.get_icon_path(Recycler.RECIPE_INPUT_TYPE)
+	if not input_icon_path.is_empty():
+		_input_icon_tex = load(input_icon_path) as Texture2D
+	var output_icon_path: String = ResourceDefs.get_icon_path(Recycler.RECIPE_OUTPUT_TYPE)
+	if not output_icon_path.is_empty():
+		_output_icon_tex = load(output_icon_path) as Texture2D
 
 func _build_slot_row() -> CenterContainer:
 	var center := CenterContainer.new()
@@ -373,18 +383,16 @@ func _refresh_ui() -> void:
 	# Update input slot
 	var has_input: bool = Recycler.is_job_active() or scrap_count >= Recycler.RECIPE_INPUT_QUANTITY
 	_input_slot_icon.visible = has_input
-	var input_icon_path: String = ResourceDefs.get_icon_path(Recycler.RECIPE_INPUT_TYPE)
-	if not input_icon_path.is_empty():
-		_input_slot_icon.texture = load(input_icon_path) as Texture2D
+	if _input_icon_tex:
+		_input_slot_icon.texture = _input_icon_tex
 	_input_slot_label.visible = has_input
 	_input_slot_label.text = "x%d" % Recycler.RECIPE_INPUT_QUANTITY
 
 	# Update output slot
 	var has_output: bool = Recycler.has_uncollected_output()
 	_output_slot_icon.visible = has_output
-	var output_icon_path: String = ResourceDefs.get_icon_path(Recycler.RECIPE_OUTPUT_TYPE)
-	if not output_icon_path.is_empty():
-		_output_slot_icon.texture = load(output_icon_path) as Texture2D
+	if _output_icon_tex:
+		_output_slot_icon.texture = _output_icon_tex
 	_output_slot_label.visible = has_output
 	_output_slot_label.text = "x%d" % Recycler.get_pending_output_quantity()
 

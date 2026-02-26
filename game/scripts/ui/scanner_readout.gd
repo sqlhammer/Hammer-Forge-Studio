@@ -31,6 +31,8 @@ var _purity_stars: HBoxContainer = null
 var _density_label: Label = null
 var _energy_label: Label = null
 var _content_container: VBoxContainer = null
+var _star_filled_tex: Texture2D = null
+var _star_empty_tex: Texture2D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -123,14 +125,14 @@ func _build_ui() -> void:
 	purity_row.add_child(purity_label)
 	_purity_stars = HBoxContainer.new()
 	_purity_stars.add_theme_constant_override("separation", 2)
-	var star_filled_tex: Texture2D = load("res://assets/icons/hud/icon_hud_star_filled.svg") as Texture2D
-	var star_empty_tex: Texture2D = load("res://assets/icons/hud/icon_hud_star_empty.svg") as Texture2D
+	_star_filled_tex = load("res://assets/icons/hud/icon_hud_star_filled.svg") as Texture2D
+	_star_empty_tex = load("res://assets/icons/hud/icon_hud_star_empty.svg") as Texture2D
 	for i: int in range(5):
 		var star := TextureRect.new()
 		star.custom_minimum_size = Vector2(20, 20)
 		star.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		star.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		star.texture = star_empty_tex
+		star.texture = _star_empty_tex
 		_purity_stars.add_child(star)
 	purity_row.add_child(_purity_stars)
 	_content_container.add_child(purity_row)
@@ -196,15 +198,13 @@ func _update_readout_data() -> void:
 
 	# Update purity stars
 	var purity_val: int = _current_deposit.purity as int
-	var filled_tex: Texture2D = load("res://assets/icons/hud/icon_hud_star_filled.svg") as Texture2D
-	var empty_tex: Texture2D = load("res://assets/icons/hud/icon_hud_star_empty.svg") as Texture2D
 	for i: int in range(5):
 		var star: TextureRect = _purity_stars.get_child(i) as TextureRect
 		if i < purity_val:
-			star.texture = filled_tex
+			star.texture = _star_filled_tex
 			star.modulate = COLOR_AMBER
 		else:
-			star.texture = empty_tex
+			star.texture = _star_empty_tex
 			star.modulate = COLOR_NEUTRAL
 
 	# Update density

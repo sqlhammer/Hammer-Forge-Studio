@@ -2,12 +2,13 @@
 id: TICKET-0108
 title: "BUGFIX: icon textures loaded on every refresh in recycler, fabricator, tech tree panels"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P3
 owner: gameplay-programmer
 created_by: systems-programmer
 created_at: 2026-02-25
-updated_at: 2026-02-25
+updated_at: 2026-02-26
+completed_at: 2026-02-26
 milestone: "M6"
 phase: "Integration & QA"
 depends_on: []
@@ -47,11 +48,12 @@ Load them once in `_build_ui()` (or `_ready()`). Replace the inline `load()` cal
 
 ## Acceptance Criteria
 
-- [ ] `recycler_panel.gd`: slot icon textures loaded once; `_refresh_ui()` uses cached textures
-- [ ] `tech_tree_panel.gd`: lock/unlock textures cached as member variables; `_refresh_card()` uses cached textures
-- [ ] `fabricator_panel.gd`: no repeated `load()` for the same path within a single `_refresh_detail()` call
-- [ ] No functional change to panel behavior
+- [x] `recycler_panel.gd`: slot icon textures loaded once; `_refresh_ui()` uses cached textures
+- [x] `tech_tree_panel.gd`: lock/unlock textures cached as member variables; `_refresh_card()` uses cached textures
+- [x] `fabricator_panel.gd`: no repeated `load()` for the same path within a single `_refresh_detail()` call
+- [x] No functional change to panel behavior
 
 ## Activity Log
 
 - 2026-02-25 [systems-programmer] Filed during code review TICKET-0101
+- 2026-02-26 [gameplay-programmer] Fixed — recycler_panel: cached _input_icon_tex/_output_icon_tex loaded once in _build_ui(); tech_tree_panel: cached _lock_tex/_unlock_check_tex/_unlock_chevron_tex loaded once in _build_ui(); fabricator_panel: added recipe-change guard with _last_detail_recipe_id to skip redundant load() calls when same recipe is selected.

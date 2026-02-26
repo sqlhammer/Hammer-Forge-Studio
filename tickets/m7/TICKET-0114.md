@@ -2,7 +2,7 @@
 id: TICKET-0114
 title: "Refactor — Tools (Hand Drill, Scanner) as standalone instanced scenes"
 type: REFACTOR
-status: TODO
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -39,3 +39,4 @@ Per the updated Scene Design standard, every conceptual game object must be its 
 ## Activity Log
 - 2026-02-25 [producer] Created ticket — standards refactor, self-contained scene rule
 - 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone
+- 2026-02-26 [gameplay-programmer] Starting work — creating standalone tool scenes for Hand Drill and Scanner

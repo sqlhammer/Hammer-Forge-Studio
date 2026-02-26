@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/mining.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/meshes/tools/mesh_hand_drill.glb" id="2_mesh"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_use"]
+radius = 5.0
+
+[node name="HandDrill" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Mesh" parent="." instance=ExtResource("2_mesh")]
+
+[node name="UseArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 8
+
+[node name="UseShape" type="CollisionShape3D" parent="UseArea"]
+shape = SubResource("SphereShape3D_use")

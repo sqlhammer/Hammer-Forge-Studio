@@ -2,7 +2,7 @@
 id: TICKET-0141
 title: "Bugfix — ship machines are pre-placed at game start; module zones should begin empty"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -51,3 +51,4 @@ The Recycler, Fabricator, and Automation Hub are already placed and visible on t
 ## Activity Log
 
 - 2026-02-26 [producer] Created — design finding during M7 QA review; supersedes M7 spec intent of pre-occupied zones
+- 2026-02-26 [gameplay-programmer] IN_PROGRESS — Starting work. Fix: remove Recycler, Fabricator, AutomationHub static instances from ship_interior.tscn so all 4 zones begin empty.

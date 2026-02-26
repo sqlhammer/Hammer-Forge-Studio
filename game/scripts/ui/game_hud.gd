@@ -22,6 +22,7 @@ var _mining_ref: Mining = null
 @onready var _tech_tree_panel: TechTreePanel = $TechTreePanel
 @onready var _automation_hub_panel: AutomationHubPanel = $AutomationHubPanel
 @onready var _module_placement_ui: ModulePlacementUI = $ModulePlacementUI
+@onready var _interaction_prompt_hud: InteractionPromptHUD = $InteractionPromptHUD
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -48,6 +49,7 @@ func _process(_delta: float) -> void:
 func setup(camera: Camera3D, player: CharacterBody3D, scanner: Scanner, mining: Mining) -> void:
 	_compass_bar.setup(camera, player)
 	_scanner_readout.setup(player)
+	_interaction_prompt_hud.setup(camera, player)
 	_scanner = scanner
 
 	# Connect scanner signals
@@ -114,6 +116,10 @@ func get_automation_hub_panel() -> AutomationHubPanel:
 ## Returns the module placement UI.
 func get_module_placement_ui() -> ModulePlacementUI:
 	return _module_placement_ui
+
+## Returns the interaction prompt HUD.
+func get_interaction_prompt_hud() -> InteractionPromptHUD:
+	return _interaction_prompt_hud
 
 # ── Private Methods ───────────────────────────────────────
 

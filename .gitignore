@@ -9,3 +9,6 @@ orchestrator/gate_response.json
 orchestrator/activity.log
 orchestrator/logs/
 orchestrator/results/
+
+# Test harness ephemeral tickets
+tickets/_test/

@@ -2,7 +2,7 @@
 id: TICKET-0145
 title: "Conductor — ticket locking to prevent duplicate concurrent dispatch"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: tools-devops-engineer
 created_by: systems-programmer
@@ -46,3 +46,4 @@ This ticket introduces a proper active-ticket lock set that the conductor mainta
 
 - 2026-02-26 [systems-programmer] Created ticket to address missing ticket-level locking in conductor
 - 2026-02-26 [tools-devops-engineer] Starting work — implementing ticket locking in conductor
+- 2026-02-26 [tools-devops-engineer] DONE — commit 0390978, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/110

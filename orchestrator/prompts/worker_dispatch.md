@@ -27,4 +27,37 @@ Execute **{ticket_id}**. Read the ticket file at `tickets/{milestone}/{ticket_id
 
 ## Output
 
-You MUST output a JSON result matching the worker_result schema as your FINAL response. No prose before or after the JSON.
+You MUST output a JSON result as your FINAL response. Output **raw JSON only** — no markdown code fences, no prose before or after.
+
+### Required outcome values
+
+Use exactly one of these strings for the `outcome` field:
+- `"done"` — work completed successfully and committed
+- `"blocked"` — a dependency is not DONE; you did not attempt the work
+- `"failed"` — you attempted the work but encountered an unresolvable error
+- `"partial"` — you made progress but did not complete all acceptance criteria
+
+### Schema
+
+```json
+{
+  "ticket": "TICKET-0099",
+  "outcome": "done",
+  "summary": "Brief description of what was done or why it failed.",
+  "commit_hash": "abc1234",
+  "pr_url": "https://github.com/sqlhammer/Hammer-Forge-Studio/pull/99",
+  "files_changed": ["path/to/file.gd", "tickets/m7/TICKET-0099.md"],
+  "new_gd_scripts": false,
+  "blockers": []
+}
+```
+
+Required fields: `ticket`, `outcome`, `summary`. All other fields are optional but include them when applicable.
+
+### Example (success)
+
+{"ticket": "TICKET-0099", "outcome": "done", "summary": "Implemented X and committed.", "commit_hash": "abc1234", "pr_url": "https://github.com/sqlhammer/Hammer-Forge-Studio/pull/99", "files_changed": ["game/scripts/foo.gd"], "new_gd_scripts": true, "blockers": []}
+
+### Example (blocked)
+
+{"ticket": "TICKET-0099", "outcome": "blocked", "summary": "TICKET-0098 is not DONE.", "blockers": ["TICKET-0098 is still TODO"]}

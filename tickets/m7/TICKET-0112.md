@@ -2,7 +2,7 @@
 id: TICKET-0112
 title: "Refactor — Resource deposit as a standalone instanced scene with type subscenes"
 type: REFACTOR
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -37,9 +37,15 @@ Additional deposit type subscenes (ore, etc.) should follow the same pattern in 
 - Reference `scripts/systems/deposit.gd` and `scripts/data/resource_defs.gd` for existing data contracts
 
 ## Handoff Notes
-(Leave blank until handoff occurs.)
+- Created `game/scenes/objects/deposit.tscn` — StaticBody3D root with `deposit.gd` attached, `DepositCollision` (BoxShape3D 1.5m), `ScanArea` (Area3D with SphereShape3D radius 8.0)
+- Created `game/scenes/objects/deposit_scrap_metal.tscn` — inherited scene from `deposit.tscn`, adds scrap metal GLB mesh, sets `resource_type = SCRAP_METAL`
+- Updated `game/scenes/test/test_m2_assets.tscn` — replaced raw `.glb` instance with `deposit_scrap_metal.tscn`
+- No new `.gd` scripts created — uses existing `deposit.gd` from Systems Programmer
+- Collision: StaticBody3D on Layer 3 (environment), ScanArea detects Layer 1 (player)
+- Future deposit types follow same pattern: inherit `deposit.tscn`, add type mesh, override exports
 
 ## Activity Log
 - 2026-02-25 [producer] Created ticket — standards refactor, self-contained scene rule
 - 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone
 - 2026-02-26 [gameplay-programmer] Starting work — IN_PROGRESS
+- 2026-02-26 [gameplay-programmer] Implementation complete — commit 6358de7, PR #82 (merged as b44265d) — DONE

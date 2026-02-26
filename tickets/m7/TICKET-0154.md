@@ -2,7 +2,7 @@
 id: TICKET-0154
 title: "Bugfix — ship exterior collision shapes regressed from polygon to box primitives"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: studio-head
@@ -55,3 +55,4 @@ Ship exterior `CollisionShape3D` nodes use polygon-based collision (trimesh or c
 ## Activity Log
 
 - 2026-02-26 [studio-head] Created — regression observed during post-M7 playtesting before QA sign-off
+- 2026-02-26 [gameplay-programmer] Starting work — regression traced to commit 27cd24d (TICKET-0111 scene refactor replaced VHACD convex decomposition with BoxShape3D)

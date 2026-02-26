@@ -1,13 +1,12 @@
 ## Physical drone entity: greybox mesh that travels to deposits, extracts resources, and returns.
 ## Managed by DroneManager. Drives the DroneAgent state machine in AutomationHub.
 class_name DroneController
-extends Node3D
+extends CharacterBody3D
 
 # ── Constants ─────────────────────────────────────────────
 const DRONE_SPEED: float = 8.0
 const ARRIVAL_THRESHOLD: float = 2.0
 const HOVER_HEIGHT: float = 3.0
-const MESH_SIZE := Vector3(0.8, 0.4, 1.2)
 
 # ── Private Variables ─────────────────────────────────────
 var _drone_id: int = -1
@@ -18,7 +17,6 @@ var _target_position: Vector3 = Vector3.ZERO
 var _state: DroneAgent.DroneState = DroneAgent.DroneState.IDLE
 var _extraction_accumulator: float = 0.0
 var _total_yield: int = 0
-var _mesh_instance: MeshInstance3D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -33,7 +31,7 @@ func _process(delta: float) -> void:
 
 # ── Public Methods ────────────────────────────────────────
 
-## Initializes the drone with an ID, home position, and program. Builds the visual mesh.
+## Initializes the drone with an ID, home position, and program.
 func setup(drone_id: int, home_position: Vector3, program: DroneProgram) -> void:
 	_drone_id = drone_id
 	_home_position = home_position
@@ -41,7 +39,6 @@ func setup(drone_id: int, home_position: Vector3, program: DroneProgram) -> void
 	_state = DroneAgent.DroneState.IDLE
 	name = "Drone_%d" % drone_id
 	global_position = Vector3(home_position.x, HOVER_HEIGHT, home_position.z)
-	_build_mesh()
 	Global.log("DroneController: drone %d initialized at home" % drone_id)
 
 ## Returns this drone's unique ID.
@@ -76,20 +73,6 @@ func recall() -> void:
 	Global.log("DroneController: drone %d recalled" % _drone_id)
 
 # ── Private Methods ───────────────────────────────────────
-
-func _build_mesh() -> void:
-	_mesh_instance = MeshInstance3D.new()
-	_mesh_instance.name = "DroneMesh"
-	var box := BoxMesh.new()
-	box.size = MESH_SIZE
-	_mesh_instance.mesh = box
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color("#00D4AA")
-	mat.emission_enabled = true
-	mat.emission = Color("#00D4AA")
-	mat.emission_energy_multiplier = 0.6
-	_mesh_instance.material_override = mat
-	add_child(_mesh_instance)
 
 func _process_traveling(delta: float) -> void:
 	global_position = global_position.move_toward(_target_position, DRONE_SPEED * delta)

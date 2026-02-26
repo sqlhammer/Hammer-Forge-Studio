@@ -126,6 +126,7 @@ Examples of objects that must each be a scene:
 - Export configuration variables where it improves editor usability and in-scene testing
 - Use `Marker2D` and `Marker3D` node types for spawn points and important positions — never use raw `Vector2`/`Vector3` constants for locations
 - Use `AnimationPlayer` for animations — never cycle frames in code
+- **Prefer adding nodes directly in scene (.tscn) files over programmatic creation in scripts** — declare node hierarchies and properties in the editor whenever possible. Setting node properties directly in the scene editor is preferred over setting them in code. Scripted node creation and configuration is not forbidden but is not preferred.
 
 ---
 

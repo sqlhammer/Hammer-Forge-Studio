@@ -347,32 +347,63 @@ async def run_claude(
 
 
 def extract_json_from_output(output: str) -> dict:
-    """Extract JSON from Claude output, handling potential wrapper text."""
+    """Extract JSON from Claude output, handling potential wrapper text.
+
+    Handles several output shapes:
+    - Plain JSON object string
+    - JSON object wrapped in markdown code fences
+    - ``--output-format json`` stream array (list of message dicts) where
+      the final element has ``type: "result"`` and ``result`` holds the
+      assistant's text response (which itself may be wrapped in fences).
+    """
     output = output.strip()
 
     # Try direct parse first
     try:
-        result = json.loads(output)
-        if isinstance(result, dict):
-            return result
-        # If parsed as list/other type, fall through to brace extraction
+        parsed = json.loads(output)
+        if isinstance(parsed, dict):
+            return parsed
+        # --output-format json produces a JSON array of message objects.
+        # Find the 'result' entry and extract the assistant text from it.
+        if isinstance(parsed, list):
+            for item in reversed(parsed):
+                if isinstance(item, dict) and item.get("type") == "result":
+                    inner = item.get("result", "")
+                    if isinstance(inner, dict):
+                        return inner
+                    if isinstance(inner, str):
+                        return _extract_dict_from_text(inner)
+            # No 'result' entry — fall through to brace extraction on raw text
     except json.JSONDecodeError:
         pass
 
-    # Try to find JSON object in output (Claude sometimes wraps in markdown
-    # or returns an array instead of an object)
+    return _extract_dict_from_text(output)
+
+
+def _extract_dict_from_text(text: str) -> dict:
+    """Extract a JSON object from free-form text (handles code fences, etc.)."""
+    text = text.strip()
+
+    # Direct parse
+    try:
+        result = json.loads(text)
+        if isinstance(result, dict):
+            return result
+    except json.JSONDecodeError:
+        pass
+
     # Look for the outermost { ... }
-    brace_start = output.find("{")
-    brace_end = output.rfind("}")
+    brace_start = text.find("{")
+    brace_end = text.rfind("}")
     if brace_start != -1 and brace_end != -1 and brace_end > brace_start:
         try:
-            result = json.loads(output[brace_start:brace_end + 1])
+            result = json.loads(text[brace_start:brace_end + 1])
             if isinstance(result, dict):
                 return result
         except json.JSONDecodeError:
             pass
 
-    raise ValueError(f"Could not extract JSON object from output: {output[:200]}...")
+    raise ValueError(f"Could not extract JSON object from output: {text[:200]}...")
 
 
 # ---------------------------------------------------------------------------
@@ -548,7 +579,12 @@ class Conductor:
         self.logger.log("PLAN", f"Wave {wave_num} action={action}: {summary}")
 
         if action == "spawn_agents":
-            wave = plan.get("wave", [])
+            # Accept "wave" or "workers" (LLM sometimes uses the wrong key)
+            wave = plan.get("wave") or plan.get("workers") or []
+            # Normalize item keys: "ticket_id" → "ticket"
+            for item in wave:
+                if "ticket_id" in item and "ticket" not in item:
+                    item["ticket"] = item.pop("ticket_id")
             if not wave:
                 self.logger.log("PLAN", "Empty wave — treating as no_work.")
                 self.state["status"] = "IDLE"

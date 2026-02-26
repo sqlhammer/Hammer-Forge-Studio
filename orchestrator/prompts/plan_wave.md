@@ -38,6 +38,34 @@ You are the Producer agent in orchestration mode. Analyze the ticket queue and o
 
 If `{retry_tickets}` is non-empty, these tickets previously failed and are being retried. Include them in this wave if their dependencies are still met. Note this in the `prompt_supplement`.
 
-## Output
+## Output Schema
 
-You MUST output ONLY valid JSON matching the wave_plan schema. No prose before or after the JSON.
+You MUST output ONLY valid JSON matching this exact schema. No prose, no markdown fences — raw JSON only.
+
+```json
+{
+  "action": "spawn_agents | gate_blocked | no_work | milestone_complete | error",
+  "summary": "Human-readable summary of the planning decision.",
+  "wave": [
+    {
+      "agent": "agent-slug",
+      "ticket": "TICKET-XXXX",
+      "budget_usd": 0.75,
+      "needs_worktree": true,
+      "needs_godot_mcp": false,
+      "prompt_supplement": "Optional extra instructions for the worker."
+    }
+  ],
+  "gate": {
+    "milestone": "M7",
+    "phase": "refactoring",
+    "next_phase": "build-features",
+    "summary": "All refactoring tickets are DONE."
+  }
+}
+```
+
+- `wave` is required when action = `spawn_agents` (array of worker assignments).
+- `gate` is required when action = `gate_blocked`.
+- Field names must match EXACTLY: `wave` (not `workers`), `ticket` (not `ticket_id`).
+- Do NOT wrap the JSON in markdown code fences.

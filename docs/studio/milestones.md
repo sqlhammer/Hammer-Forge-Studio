@@ -33,7 +33,7 @@
 | M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Complete | 38 | 0 | 38 | 2026-02-25 |
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Planning | 17 | 17 | 0 | — |
-| M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |
+| M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | 2* | 2 | 0 | — |
 | M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
 | M10 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
 | M11 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
@@ -373,13 +373,38 @@
 
 ### M8 — Ship Navigation
 
-**Goal:** Player can navigate the ship between biomes. Travel consumes fuel based on distance and ship weight.
+**Goal:** Player can navigate the ship between biomes using an expanded navigation console (M7 placeholder). Travel consumes fuel based on distance and ship weight. All work follows a Red/Green Test-Driven Development pattern to ensure code quality and edge-case coverage across the navigation and fuel systems.
 
-**Scope:** TBD — to be defined after M7 closes.
+**Scope:**
+- **Red/Green TDD Foundation (prerequisite to all other phases):** Establish TDD process guidelines, test infrastructure, and regression suite templates for M8
+- Navigation system: biome map, waypoint selection, navigation console interface, travel initiation
+- Fuel system: consumption tracking, fuel tank mechanics, distance/weight-based calculations, low-fuel warnings
+- Travel sequence: transition animations, biome loading, player respawn at destination
+- Greybox biome templates: 3 procedurally-laid out tier 1 biomes with distinct characteristics
+- Cross-milestone stability: ensure all M7 tests continue passing
 
-**Phases:** To be defined at M8 kickoff — requires Studio Head approval before agents begin work.
+**Phases (Sequential):**
+- **TDD Foundation** (TICKET-0131–TICKET-0132): Establish Red/Green TDD process, test infrastructure, regression suite template. **This phase must complete before any other M8 phase begins.**
+- **Navigation & Fuel** (TBD): Navigation system, fuel consumption logic, travel mechanics
+- **Integration** (TBD): Biome templates, travel sequences, console UI
+- **QA** (TBD): Code review and full loop QA
 
-**Dependencies:** M7
+**Tickets:** TICKET-0131 through TICKET-0132 (TDD Foundation phase); additional tickets TBD at M8 kickoff
+
+| Phase | Ticket | Title | Type | Owner |
+|-------|--------|-------|------|-------|
+| TDD Foundation | TICKET-0131 | Establish Red/Green TDD process — guidelines and conventions for M8 | TASK | producer |
+| TDD Foundation | TICKET-0132 | M8 test infrastructure — unified test suite and cross-milestone regression validation | TASK | qa-engineer |
+
+**Dependencies:** M7 (must complete before M8 kickoff)
+
+**Phase Gate Note:**
+- **TDD Foundation Gate:** Must pass before any Navigation & Fuel phase work begins. Producer confirms: (1) TDD process guidelines approved by systems-programmer and qa-engineer, (2) test infrastructure operational and all M7/M6 tests still passing, (3) regression test templates created and runnable.
+- All subsequent phase gates are **Red/Green validated:** every ticket in the phase must be test-first (RED tests written before code), passing code (GREEN), and refactored as needed.
+
+**Notes:**
+- M8 is the first milestone where TDD Foundation is established **before agent work begins**. M7 introduces TDD mid-milestone; M8 starts with TDD as day-one process.
+- Cross-milestone test stability is critical — M8 expands the game world significantly (navigation, fuel, biomes). Test suite must ensure no regression in prior systems.
 
 ---
 

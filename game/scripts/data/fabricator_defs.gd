@@ -16,6 +16,7 @@ const OUTPUT_MODE_EQUIP_HEAD_LAMP: String = "equip_head_lamp"  ## Directly equip
 const RECIPE_CATALOG: Dictionary = {
 	"spare_battery": {
 		"display_name": "Spare Battery",
+		"icon": "res://assets/icons/item/icon_item_spare_battery.svg",
 		"inputs": [
 			{
 				"resource_type": SpareBattery.RECIPE_INPUT_RESOURCE_TYPE,
@@ -31,6 +32,7 @@ const RECIPE_CATALOG: Dictionary = {
 	},
 	"head_lamp": {
 		"display_name": "Head Lamp",
+		"icon": "res://assets/icons/item/icon_item_head_lamp.svg",
 		"inputs": [
 			{
 				"resource_type": HeadLamp.RECIPE_INPUT_RESOURCE_TYPE,
@@ -74,6 +76,11 @@ static func get_output(recipe_id: String) -> Dictionary:
 static func get_duration(recipe_id: String) -> float:
 	var entry: Dictionary = RECIPE_CATALOG.get(recipe_id, {})
 	return entry.get("duration", 5.0) as float
+
+## Returns the icon path for a recipe ID, or empty string if none defined.
+static func get_icon_path(recipe_id: String) -> String:
+	var entry: Dictionary = RECIPE_CATALOG.get(recipe_id, {})
+	return entry.get("icon", "") as String
 
 ## Returns all recipe IDs in the catalog.
 static func get_all_recipe_ids() -> Array[String]:

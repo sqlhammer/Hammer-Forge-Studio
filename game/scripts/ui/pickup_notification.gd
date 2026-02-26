@@ -17,6 +17,7 @@ const STACK_GAP: int = 8
 const COLOR_BG := Color("#0F1923", 0.85)
 const COLOR_GREEN := Color("#4ADE80")
 const COLOR_CORAL := Color("#FF6B5A")
+const COLOR_AMBER := Color("#FFB830")
 const COLOR_TEXT_PRIMARY := Color("#F1F5F9")
 
 # ── Private Variables ─────────────────────────────────────
@@ -103,10 +104,14 @@ func _create_toast(key: String, resource_type: ResourceDefs.ResourceType, purity
 	hbox.add_theme_constant_override("separation", 8)
 	toast.add_child(hbox)
 
-	# Item icon placeholder (colored square)
-	var icon := ColorRect.new()
+	# Item icon
+	var icon := TextureRect.new()
 	icon.custom_minimum_size = Vector2(28, 28)
-	icon.color = Color("#00D4AA")
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var item_icon_path: String = ResourceDefs.get_icon_path(resource_type)
+	if not item_icon_path.is_empty():
+		icon.texture = load(item_icon_path) as Texture2D
 	hbox.add_child(icon)
 
 	# Item name
@@ -155,6 +160,17 @@ func _create_raw_toast(text: String, quantity_text: String, accent_color: Color)
 	hbox.add_theme_constant_override("separation", 8)
 	toast.add_child(hbox)
 
+	# Severity badge icon — differentiates notification type for color-blind safety
+	var badge_icon := TextureRect.new()
+	badge_icon.custom_minimum_size = Vector2(20, 20)
+	badge_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	badge_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var badge_path: String = _get_severity_icon_path(accent_color)
+	if not badge_path.is_empty():
+		badge_icon.texture = load(badge_path) as Texture2D
+	badge_icon.modulate = accent_color
+	hbox.add_child(badge_icon)
+
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", 20)
@@ -163,6 +179,13 @@ func _create_raw_toast(text: String, quantity_text: String, accent_color: Color)
 	hbox.add_child(label)
 
 	return toast
+
+func _get_severity_icon_path(accent_color: Color) -> String:
+	if accent_color == COLOR_CORAL:
+		return "res://assets/icons/hud/icon_hud_notification_critical.svg"
+	elif accent_color == COLOR_AMBER:
+		return "res://assets/icons/hud/icon_hud_notification_warning.svg"
+	return "res://assets/icons/hud/icon_hud_notification_info.svg"
 
 func _start_dismiss_timer(key: String, toast: PanelContainer) -> void:
 	var tween: Tween = create_tween()

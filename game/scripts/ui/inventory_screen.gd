@@ -31,8 +31,9 @@ const COLOR_DIM := Color("#000000", 0.5)
 var _is_open: bool = false
 var _focused_slot: int = 0
 var _slot_panels: Array[PanelContainer] = []
-var _slot_icons: Array[ColorRect] = []
+var _slot_icons: Array[TextureRect] = []
 var _slot_count_labels: Array[Label] = []
+var _detail_icon: TextureRect = null
 var _detail_name_label: Label = null
 var _detail_stars_container: HBoxContainer = null
 var _detail_quantity_label: Label = null
@@ -226,6 +227,14 @@ func _build_ui() -> void:
 	detail_hbox.add_theme_constant_override("separation", 12)
 	detail_panel.add_child(detail_hbox)
 
+	_detail_icon = TextureRect.new()
+	_detail_icon.custom_minimum_size = Vector2(32, 32)
+	_detail_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_detail_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_detail_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_detail_icon.visible = false
+	detail_hbox.add_child(_detail_icon)
+
 	_detail_name_label = Label.new()
 	_detail_name_label.add_theme_font_size_override("font_size", 20)
 	_detail_name_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
@@ -259,10 +268,11 @@ func _create_slot(index: int) -> PanelContainer:
 	style.set_content_margin_all(4)
 	slot.add_theme_stylebox_override("panel", style)
 
-	# Icon placeholder
-	var icon := ColorRect.new()
+	# Item icon
+	var icon := TextureRect.new()
 	icon.custom_minimum_size = Vector2(48, 48)
-	icon.set_anchors_preset(Control.PRESET_CENTER)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.visible = false
 	slot.add_child(icon)
 	_slot_icons.append(icon)
@@ -296,7 +306,12 @@ func _refresh_slot(index: int) -> void:
 	# Update icon
 	_slot_icons[index].visible = not is_empty
 	if not is_empty:
-		_slot_icons[index].color = COLOR_TEAL
+		var resource_type: ResourceDefs.ResourceType = slot_data.get("resource_type") as ResourceDefs.ResourceType
+		var icon_path: String = ResourceDefs.get_icon_path(resource_type)
+		if not icon_path.is_empty():
+			_slot_icons[index].texture = load(icon_path) as Texture2D
+		else:
+			_slot_icons[index].texture = null
 
 	# Update count
 	var quantity: int = slot_data.get("quantity", 0) as int
@@ -317,6 +332,7 @@ func _update_focus_visual() -> void:
 func _update_detail_area() -> void:
 	var slot_data: Dictionary = PlayerInventory.get_slot(_focused_slot)
 	if slot_data.is_empty():
+		_detail_icon.visible = false
 		_detail_name_label.text = "Empty Slot"
 		_detail_name_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 		_detail_quantity_label.text = ""
@@ -327,6 +343,14 @@ func _update_detail_area() -> void:
 	var resource_type: ResourceDefs.ResourceType = slot_data.get("resource_type") as ResourceDefs.ResourceType
 	var purity: ResourceDefs.Purity = slot_data.get("purity") as ResourceDefs.Purity
 	var quantity: int = slot_data.get("quantity", 0) as int
+
+	# Detail icon
+	var detail_icon_path: String = ResourceDefs.get_icon_path(resource_type)
+	if not detail_icon_path.is_empty():
+		_detail_icon.texture = load(detail_icon_path) as Texture2D
+		_detail_icon.visible = true
+	else:
+		_detail_icon.visible = false
 
 	_detail_name_label.text = ResourceDefs.get_resource_name(resource_type)
 	_detail_name_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)

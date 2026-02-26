@@ -86,12 +86,26 @@ func _build_ui() -> void:
 	_content_container.add_theme_constant_override("separation", 8)
 	add_child(_content_container)
 
-	# Header
+	# Header row with scanner icon
+	var header_row := HBoxContainer.new()
+	header_row.add_theme_constant_override("separation", 8)
+	_content_container.add_child(header_row)
+
+	var scan_icon := TextureRect.new()
+	scan_icon.custom_minimum_size = Vector2(20, 20)
+	scan_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	scan_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var scan_tex: Texture2D = load("res://assets/icons/hud/icon_hud_scan_ping.svg") as Texture2D
+	if scan_tex:
+		scan_icon.texture = scan_tex
+	scan_icon.modulate = COLOR_TEAL
+	header_row.add_child(scan_icon)
+
 	_header_label = Label.new()
 	_header_label.text = "SCAN RESULTS"
 	_header_label.add_theme_font_size_override("font_size", 20)
 	_header_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	_content_container.add_child(_header_label)
+	header_row.add_child(_header_label)
 
 	# Divider
 	var divider := HSeparator.new()
@@ -108,11 +122,15 @@ func _build_ui() -> void:
 	purity_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 	purity_row.add_child(purity_label)
 	_purity_stars = HBoxContainer.new()
-	_purity_stars.add_theme_constant_override("separation", 4)
+	_purity_stars.add_theme_constant_override("separation", 2)
+	var star_filled_tex: Texture2D = load("res://assets/icons/hud/icon_hud_star_filled.svg") as Texture2D
+	var star_empty_tex: Texture2D = load("res://assets/icons/hud/icon_hud_star_empty.svg") as Texture2D
 	for i: int in range(5):
-		var star := Label.new()
-		star.text = "★"
-		star.add_theme_font_size_override("font_size", 20)
+		var star := TextureRect.new()
+		star.custom_minimum_size = Vector2(20, 20)
+		star.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		star.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		star.texture = star_empty_tex
 		_purity_stars.add_child(star)
 	purity_row.add_child(_purity_stars)
 	_content_container.add_child(purity_row)
@@ -140,6 +158,15 @@ func _build_ui() -> void:
 	energy_title.add_theme_font_size_override("font_size", 16)
 	energy_title.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 	energy_row.add_child(energy_title)
+	var battery_micro_icon := TextureRect.new()
+	battery_micro_icon.custom_minimum_size = Vector2(16, 16)
+	battery_micro_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	battery_micro_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var battery_micro_tex: Texture2D = load("res://assets/icons/hud/icon_hud_battery_micro.svg") as Texture2D
+	if battery_micro_tex:
+		battery_micro_icon.texture = battery_micro_tex
+	battery_micro_icon.modulate = COLOR_AMBER
+	energy_row.add_child(battery_micro_icon)
 	_energy_label = Label.new()
 	_energy_label.add_theme_font_size_override("font_size", 22)
 	energy_row.add_child(_energy_label)
@@ -169,12 +196,16 @@ func _update_readout_data() -> void:
 
 	# Update purity stars
 	var purity_val: int = _current_deposit.purity as int
+	var filled_tex: Texture2D = load("res://assets/icons/hud/icon_hud_star_filled.svg") as Texture2D
+	var empty_tex: Texture2D = load("res://assets/icons/hud/icon_hud_star_empty.svg") as Texture2D
 	for i: int in range(5):
-		var star: Label = _purity_stars.get_child(i) as Label
+		var star: TextureRect = _purity_stars.get_child(i) as TextureRect
 		if i < purity_val:
-			star.add_theme_color_override("font_color", COLOR_AMBER)
+			star.texture = filled_tex
+			star.modulate = COLOR_AMBER
 		else:
-			star.add_theme_color_override("font_color", COLOR_NEUTRAL)
+			star.texture = empty_tex
+			star.modulate = COLOR_NEUTRAL
 
 	# Update density
 	var density_name: String = summary.get("density_name", "Unknown") as String

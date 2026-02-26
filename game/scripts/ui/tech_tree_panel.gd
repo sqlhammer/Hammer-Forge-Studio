@@ -40,6 +40,7 @@ var _node_cards: Array[PanelContainer] = []
 var _card_styles: Array[StyleBoxFlat] = []
 var _card_labels: Array[Label] = []
 var _card_state_labels: Array[Label] = []
+var _card_state_icons: Array[TextureRect] = []
 var _connector_line: Line2D = null
 var _detail_name_label: Label = null
 var _detail_desc_label: Label = null
@@ -241,11 +242,15 @@ func _build_node_cards() -> void:
 		card_vbox.add_theme_constant_override("separation", 4)
 		card.add_child(card_vbox)
 
-		# Icon placeholder
-		var icon_rect := ColorRect.new()
+		# Module icon
+		var icon_rect := TextureRect.new()
 		icon_rect.custom_minimum_size = Vector2(48, 48)
-		icon_rect.color = COLOR_TEAL
+		icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon_rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		var node_icon_path: String = TechTreeDefs.get_icon_path(_node_ids[i])
+		if not node_icon_path.is_empty():
+			icon_rect.texture = load(node_icon_path) as Texture2D
 		card_vbox.add_child(icon_rect)
 
 		# Node name
@@ -256,16 +261,29 @@ func _build_node_cards() -> void:
 		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		card_vbox.add_child(name_label)
 
-		# State icon label (padlock, chevron, checkmark)
+		# State row: icon + label
+		var state_row := HBoxContainer.new()
+		state_row.add_theme_constant_override("separation", 4)
+		state_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		card_vbox.add_child(state_row)
+
+		var state_icon := TextureRect.new()
+		state_icon.custom_minimum_size = Vector2(16, 16)
+		state_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		state_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		state_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		state_row.add_child(state_icon)
+
 		var state_label := Label.new()
 		state_label.add_theme_font_size_override("font_size", 14)
 		state_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		card_vbox.add_child(state_label)
+		state_row.add_child(state_label)
 
 		_node_cards.append(card)
 		_card_styles.append(style)
 		_card_labels.append(name_label)
 		_card_state_labels.append(state_label)
+		_card_state_icons.append(state_icon)
 
 func _build_connector() -> void:
 	_connector_line = Line2D.new()
@@ -417,6 +435,7 @@ func _refresh_card(index: int) -> void:
 	var style: StyleBoxFlat = _card_styles[index]
 	var name_label: Label = _card_labels[index]
 	var state_label: Label = _card_state_labels[index]
+	var state_icon: TextureRect = _card_state_icons[index]
 	var card: PanelContainer = _node_cards[index]
 
 	if TechTree.is_unlocked(node_id):
@@ -427,6 +446,8 @@ func _refresh_card(index: int) -> void:
 		name_label.add_theme_color_override("font_color", COLOR_GREEN)
 		state_label.text = "UNLOCKED"
 		state_label.add_theme_color_override("font_color", COLOR_GREEN)
+		state_icon.texture = load("res://assets/icons/hud/icon_hud_unlock_check.svg") as Texture2D
+		state_icon.modulate = COLOR_GREEN
 		card.modulate = Color.WHITE
 	elif TechTree.can_unlock(node_id):
 		# Unlockable state
@@ -436,6 +457,8 @@ func _refresh_card(index: int) -> void:
 		name_label.add_theme_color_override("font_color", COLOR_TEAL)
 		state_label.text = "UNLOCKABLE"
 		state_label.add_theme_color_override("font_color", COLOR_TEAL)
+		state_icon.texture = load("res://assets/icons/hud/icon_hud_unlock_chevron.svg") as Texture2D
+		state_icon.modulate = COLOR_TEAL
 		card.modulate = Color.WHITE
 		if index == _focused_index:
 			_start_pulse(index)
@@ -447,6 +470,8 @@ func _refresh_card(index: int) -> void:
 		name_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 		state_label.text = "LOCKED"
 		state_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
+		state_icon.texture = load("res://assets/icons/hud/icon_hud_lock.svg") as Texture2D
+		state_icon.modulate = COLOR_TEXT_SECONDARY
 		card.modulate = Color(1, 1, 1, 0.6)
 
 	# Focus highlight

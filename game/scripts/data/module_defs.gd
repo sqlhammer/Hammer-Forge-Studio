@@ -35,6 +35,7 @@ enum ModuleTier {
 const MODULE_CATALOG: Dictionary = {
 	"recycler": {
 		"name": "Recycler",
+		"icon": "res://assets/icons/item/icon_item_module_recycler.svg",
 		"description": "Converts raw Scrap Metal into refined Metal. Essential for crafting and upgrades.",
 		"module_type": ModuleType.EXTRACTION_BAY,
 		"tier": ModuleTier.TIER_1,
@@ -47,6 +48,7 @@ const MODULE_CATALOG: Dictionary = {
 	},
 	"fabricator": {
 		"name": "Fabricator",
+		"icon": "res://assets/icons/item/icon_item_module_fabricator.svg",
 		"description": "Crafts equipment and components from refined materials. Produces Spare Batteries, Head Lamps, and more.",
 		"module_type": ModuleType.EXTRACTION_BAY,
 		"tier": ModuleTier.TIER_1,
@@ -62,6 +64,7 @@ const MODULE_CATALOG: Dictionary = {
 	},
 	"automation_hub": {
 		"name": "Automation Hub",
+		"icon": "res://assets/icons/item/icon_item_module_automation_hub.svg",
 		"description": "Deploys mining drones to autonomously extract from analyzed deposits.",
 		"module_type": ModuleType.AUTOMATION_HUB,
 		"tier": ModuleTier.TIER_1,
@@ -144,3 +147,8 @@ static func get_type_name(module_type: ModuleType) -> String:
 static func get_tech_tree_gate(module_id: String) -> String:
 	var entry: Dictionary = MODULE_CATALOG.get(module_id, {})
 	return entry.get("tech_tree_gate", "") as String
+
+## Returns the icon path for a module ID, or empty string if none defined.
+static func get_icon_path(module_id: String) -> String:
+	var entry: Dictionary = MODULE_CATALOG.get(module_id, {})
+	return entry.get("icon", "") as String

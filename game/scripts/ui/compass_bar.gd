@@ -29,6 +29,8 @@ var _player: CharacterBody3D = null
 var _ping_markers: Array[Dictionary] = []  # { "deposit": Deposit, "time_added": float }
 var _font: Font = null
 var _font_mono: Font = null
+var _center_icon_tex: Texture2D = null
+var _ping_icon_tex: Texture2D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -36,6 +38,8 @@ func _ready() -> void:
 	custom_minimum_size = Vector2(COMPASS_WIDTH, 56)
 	_font = ThemeDB.fallback_font
 	_font_mono = ThemeDB.fallback_font
+	_center_icon_tex = load("res://assets/icons/hud/icon_hud_compass_center.svg") as Texture2D
+	_ping_icon_tex = load("res://assets/icons/hud/icon_hud_compass_ping.svg") as Texture2D
 
 func _process(_delta: float) -> void:
 	_clean_expired_markers()
@@ -54,14 +58,19 @@ func _draw() -> void:
 	# Draw cardinal labels and tick marks
 	_draw_cardinals(player_yaw)
 
-	# Draw center indicator
+	# Draw center indicator icon
 	var center_x: float = COMPASS_WIDTH / 2.0
-	var indicator_points: PackedVector2Array = PackedVector2Array([
-		Vector2(center_x - 4, COMPASS_HEIGHT + 2),
-		Vector2(center_x + 4, COMPASS_HEIGHT + 2),
-		Vector2(center_x, COMPASS_HEIGHT + 8),
-	])
-	draw_colored_polygon(indicator_points, COLOR_TEXT_PRIMARY)
+	if _center_icon_tex:
+		var icon_size: float = 16.0
+		var icon_rect := Rect2(center_x - icon_size / 2.0, COMPASS_HEIGHT + 1, icon_size, icon_size)
+		draw_texture_rect(_center_icon_tex, icon_rect, false, COLOR_TEXT_PRIMARY)
+	else:
+		var indicator_points: PackedVector2Array = PackedVector2Array([
+			Vector2(center_x - 4, COMPASS_HEIGHT + 2),
+			Vector2(center_x + 4, COMPASS_HEIGHT + 2),
+			Vector2(center_x, COMPASS_HEIGHT + 8),
+		])
+		draw_colored_polygon(indicator_points, COLOR_TEXT_PRIMARY)
 
 	# Draw ping markers
 	_draw_ping_markers(player_yaw)
@@ -194,13 +203,18 @@ func _draw_ping_markers(player_yaw: float) -> void:
 		var alpha: float = 1.0 if deposit == nearest_deposit else 0.7
 		var marker_color := Color(COLOR_TEAL, alpha)
 
-		# Draw marker triangle (pointing down from top of compass)
-		var tri_points: PackedVector2Array = PackedVector2Array([
-			Vector2(screen_x - 5, 0),
-			Vector2(screen_x + 5, 0),
-			Vector2(screen_x, 8),
-		])
-		draw_colored_polygon(tri_points, marker_color)
+		# Draw ping marker icon
+		if _ping_icon_tex:
+			var ping_size: float = 16.0
+			var ping_rect := Rect2(screen_x - ping_size / 2.0, 0, ping_size, ping_size)
+			draw_texture_rect(_ping_icon_tex, ping_rect, false, marker_color)
+		else:
+			var tri_points: PackedVector2Array = PackedVector2Array([
+				Vector2(screen_x - 5, 0),
+				Vector2(screen_x + 5, 0),
+				Vector2(screen_x, 8),
+			])
+			draw_colored_polygon(tri_points, marker_color)
 
 		# Show distance if facing within cone
 		var angle_diff: float = absf(bearing - player_yaw)

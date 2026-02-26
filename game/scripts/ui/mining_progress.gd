@@ -25,12 +25,14 @@ var _is_active: bool = false
 var _completion_timer: float = 0.0
 var _is_completing: bool = false
 var _font: Font = null
+var _mining_icon_tex: Texture2D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(BAR_WIDTH, TOTAL_HEIGHT)
 	_font = ThemeDB.fallback_font
+	_mining_icon_tex = load("res://assets/icons/hud/icon_hud_mining_active.svg") as Texture2D
 	visible = false
 
 func _process(delta: float) -> void:
@@ -47,11 +49,21 @@ func _draw() -> void:
 
 	var center_x: float = BAR_WIDTH / 2.0
 
-	# Draw status label
+	# Draw mining icon + status label
+	var icon_size: float = 16.0
+	var icon_gap: float = 4.0
 	var text_size: Vector2 = _font.get_string_size(_status_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 16)
+	var total_w: float = text_size.x
+	if _mining_icon_tex and _is_active:
+		total_w += icon_size + icon_gap
+	var start_x: float = center_x - total_w / 2.0
+	if _mining_icon_tex and _is_active:
+		var icon_rect := Rect2(start_x, 1, icon_size, icon_size)
+		draw_texture_rect(_mining_icon_tex, icon_rect, false, _status_color)
+		start_x += icon_size + icon_gap
 	draw_string(
 		_font,
-		Vector2(center_x - text_size.x / 2.0, 14),
+		Vector2(start_x, 14),
 		_status_text,
 		HORIZONTAL_ALIGNMENT_LEFT,
 		-1,

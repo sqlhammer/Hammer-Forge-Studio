@@ -1,5 +1,5 @@
-## Greybox ship interior: walkable bay with module placement zones and entry/exit transition.
-## Instanced by the test world when the player enters the ship. Independently testable.
+## Greybox ship interior: multi-room layout (24m×12m) with cockpit, machine room, corridor,
+## vestibule, four module zones, and entry/exit transition system.
 class_name ShipInterior
 extends Node3D
 
@@ -9,26 +9,33 @@ signal player_exited_ship
 signal placement_zone_interacted(zone_index: int)
 
 # ── Constants ─────────────────────────────────────────────
-const BAY_WIDTH: float = 10.0
-const BAY_DEPTH: float = 8.0
-const CORRIDOR_WIDTH: float = 2.0
-const CORRIDOR_DEPTH: float = 3.0
+## Room dimensions (per M7 wireframe TICKET-0123)
 const CEILING_HEIGHT: float = 3.0
+const CORRIDOR_WIDTH: float = 4.0
+const CORRIDOR_DEPTH: float = 2.0
+const VESTIBULE_WIDTH: float = 4.0
+const VESTIBULE_DEPTH: float = 4.0
 
+## Zone layout — 4 zones in 2×2 grid within machine room
 const ZONE_SIZE: float = 3.0
-const ZONE_A_CENTER := Vector3(-3.0, 0.0, -1.0)
-const ZONE_B_CENTER := Vector3(0.0, 0.0, -1.0)
-const ZONE_C_CENTER := Vector3(3.0, 0.0, -1.0)
+const ZONE_COUNT: int = 4
+const ZONE_A_CENTER := Vector3(-2.5, 0.0, 4.5)
+const ZONE_B_CENTER := Vector3(2.5, 0.0, 4.5)
+const ZONE_C_CENTER := Vector3(-2.5, 0.0, -0.5)
+const ZONE_D_CENTER := Vector3(2.5, 0.0, -0.5)
 const ZONE_INTERACT_OFFSET: float = 0.5
 const INTERACT_RANGE: float = 2.0
 
 ## Greybox materials
 const COLOR_FLOOR := Color("#4A4A4A")
-const COLOR_WALLS := Color("#333333")
+const COLOR_WALLS_MACHINE := Color("#333333")
+const COLOR_WALLS_COCKPIT := Color("#2A2A2A")
 const COLOR_CEILING := Color("#2A2A2A")
 const COLOR_CORRIDOR := Color("#555555")
+const COLOR_VESTIBULE := Color("#555555")
 const COLOR_ZONE_TEAL := Color("#00D4AA", 0.3)
 const COLOR_ZONE_TEAL_OCCUPIED := Color("#00D4AA", 0.15)
+const COLOR_VIEWPORT_FRAME := Color("#333333")
 const COLOR_LIGHT := Color("#E0E0E0")
 
 ## Physics layers
@@ -41,12 +48,11 @@ const FADE_DURATION: float = 0.3
 
 # ── Private Variables ─────────────────────────────────────
 var _enter_marker: Marker3D = null
-var _exit_marker: Marker3D = null
 var _exterior_marker: Marker3D = null
 var _zone_areas: Array[Area3D] = []
 var _zone_floor_markers: Array[MeshInstance3D] = []
-var _zone_occupied: Array[bool] = [false, false, false]
-var _zone_module_nodes: Array[Node3D] = [null, null, null]
+var _zone_occupied: Array[bool] = [false, false, false, false]
+var _zone_module_nodes: Array[Node3D] = [null, null, null, null]
 var _fade_rect: ColorRect = null
 var _fade_layer: CanvasLayer = null
 var _player_ref: CharacterBody3D = null
@@ -60,10 +66,11 @@ func _ready() -> void:
 	_build_geometry()
 	_build_module_zones()
 	_build_spawn_markers()
+	_build_cockpit_features()
 	_build_lighting()
 	_build_fade_overlay()
 	_build_terminal()
-	Global.log("ShipInterior: initialized")
+	Global.log("ShipInterior: initialized — 24m×12m multi-room layout")
 
 # ── Public Methods ────────────────────────────────────────
 
@@ -124,7 +131,7 @@ func place_module_in_zone(zone_index: int, module_mesh: Node3D) -> void:
 	if zone_index < 0 or zone_index >= _zone_occupied.size():
 		return
 	_zone_occupied[zone_index] = true
-	var zone_centers: Array[Vector3] = [ZONE_A_CENTER, ZONE_B_CENTER, ZONE_C_CENTER]
+	var zone_centers: Array[Vector3] = [ZONE_A_CENTER, ZONE_B_CENTER, ZONE_C_CENTER, ZONE_D_CENTER]
 	module_mesh.position = zone_centers[zone_index]
 	add_child(module_mesh)
 	_zone_module_nodes[zone_index] = module_mesh
@@ -163,7 +170,7 @@ func get_first_empty_zone() -> int:
 func is_player_in_exit_zone() -> bool:
 	return _player_in_exit_zone
 
-## Returns true if the player is near the tech tree terminal on the north wall.
+## Returns true if the player is near the tech tree terminal.
 func is_player_near_terminal() -> bool:
 	if not _player_ref or not _terminal_area:
 		return false
@@ -182,71 +189,150 @@ func get_nearby_zone_index() -> int:
 # ── Private Methods ───────────────────────────────────────
 
 func _build_geometry() -> void:
-	# Floor (main bay)
-	_create_static_surface(
-		"BayFloor",
-		Vector3(BAY_WIDTH, 0.1, BAY_DEPTH),
-		Vector3(0, -0.05, 0),
-		COLOR_FLOOR, 0.8
-	)
+	_build_floors()
+	_build_ceilings()
+	_build_machine_room_walls()
+	_build_cockpit_walls()
+	_build_corridor_walls()
+	_build_vestibule_walls()
+	_build_viewport_frame()
 
-	# Floor (corridor)
-	var corridor_z: float = BAY_DEPTH / 2.0 + CORRIDOR_DEPTH / 2.0
-	_create_static_surface(
-		"CorridorFloor",
-		Vector3(CORRIDOR_WIDTH, 0.1, CORRIDOR_DEPTH),
-		Vector3(0, -0.05, corridor_z),
-		COLOR_CORRIDOR, 0.8
-	)
+func _build_floors() -> void:
+	# Machine room: 12m × 12m, center at Z=+2 (Z range: -4 to +8)
+	_create_static_surface("MachineRoomFloor",
+		Vector3(12.0, 0.1, 12.0), Vector3(0.0, -0.05, 2.0), COLOR_FLOOR, 0.8)
+	# Cockpit: 12m × 6m, center at Z=-9 (Z range: -12 to -6)
+	_create_static_surface("CockpitFloor",
+		Vector3(12.0, 0.1, 6.0), Vector3(0.0, -0.05, -9.0), COLOR_FLOOR, 0.8)
+	# Corridor: 4m × 2m, center at Z=-5 (Z range: -6 to -4)
+	_create_static_surface("CorridorFloor",
+		Vector3(4.0, 0.1, 2.0), Vector3(0.0, -0.05, -5.0), COLOR_CORRIDOR, 0.8)
+	# Vestibule: 4m × 4m, center at Z=+10 (Z range: +8 to +12)
+	_create_static_surface("VestibuleFloor",
+		Vector3(4.0, 0.1, 4.0), Vector3(0.0, -0.05, 10.0), COLOR_VESTIBULE, 0.8)
 
-	# Ceiling (main bay)
-	_create_static_surface(
-		"BayCeiling",
-		Vector3(BAY_WIDTH, 0.1, BAY_DEPTH),
-		Vector3(0, CEILING_HEIGHT, 0),
-		COLOR_CEILING, 0.9
-	)
+func _build_ceilings() -> void:
+	_create_static_surface("MachineRoomCeiling",
+		Vector3(12.0, 0.1, 12.0), Vector3(0.0, 3.0, 2.0), COLOR_CEILING, 0.9)
+	_create_static_surface("CockpitCeiling",
+		Vector3(12.0, 0.1, 6.0), Vector3(0.0, 3.0, -9.0), COLOR_CEILING, 0.9)
+	_create_static_surface("CorridorCeiling",
+		Vector3(4.0, 0.1, 2.0), Vector3(0.0, 3.0, -5.0), COLOR_CEILING, 0.9)
+	_create_static_surface("VestibuleCeiling",
+		Vector3(4.0, 0.1, 4.0), Vector3(0.0, 3.0, 10.0), COLOR_CEILING, 0.9)
 
-	# Ceiling (corridor)
-	_create_static_surface(
-		"CorridorCeiling",
-		Vector3(CORRIDOR_WIDTH, 0.1, CORRIDOR_DEPTH),
-		Vector3(0, CEILING_HEIGHT, corridor_z),
-		COLOR_CEILING, 0.9
-	)
+func _build_machine_room_walls() -> void:
+	var wall_y: float = CEILING_HEIGHT / 2.0
+	# West wall: X=-6, Z:-4 to +8
+	_create_static_surface("MachineRoomWallWest",
+		Vector3(0.2, 3.0, 12.0), Vector3(-6.0, wall_y, 2.0), COLOR_WALLS_MACHINE, 0.9)
+	# East wall: X=+6, Z:-4 to +8
+	_create_static_surface("MachineRoomWallEast",
+		Vector3(0.2, 3.0, 12.0), Vector3(6.0, wall_y, 2.0), COLOR_WALLS_MACHINE, 0.9)
+	# North wall left section: X:-6 to -2 at Z=-4 (corridor opening X:-2 to +2)
+	_create_static_surface("MachineRoomWallNorthLeft",
+		Vector3(4.0, 3.0, 0.2), Vector3(-4.0, wall_y, -4.0), COLOR_WALLS_MACHINE, 0.9)
+	# North wall right section: X:+2 to +6 at Z=-4
+	_create_static_surface("MachineRoomWallNorthRight",
+		Vector3(4.0, 3.0, 0.2), Vector3(4.0, wall_y, -4.0), COLOR_WALLS_MACHINE, 0.9)
+	# South wall left section: X:-6 to -2 at Z=+8 (vestibule opening X:-2 to +2)
+	_create_static_surface("MachineRoomWallSouthLeft",
+		Vector3(4.0, 3.0, 0.2), Vector3(-4.0, wall_y, 8.0), COLOR_WALLS_MACHINE, 0.9)
+	# South wall right section: X:+2 to +6 at Z=+8
+	_create_static_surface("MachineRoomWallSouthRight",
+		Vector3(4.0, 3.0, 0.2), Vector3(4.0, wall_y, 8.0), COLOR_WALLS_MACHINE, 0.9)
 
-	# Walls — main bay
-	var half_w: float = BAY_WIDTH / 2.0
-	var half_d: float = BAY_DEPTH / 2.0
-	var wall_h: float = CEILING_HEIGHT
-	var wall_y: float = wall_h / 2.0
+func _build_cockpit_walls() -> void:
+	var wall_y: float = CEILING_HEIGHT / 2.0
+	# West wall: X=-6, Z:-12 to -6
+	_create_static_surface("CockpitWallWest",
+		Vector3(0.2, 3.0, 6.0), Vector3(-6.0, wall_y, -9.0), COLOR_WALLS_COCKPIT, 0.9)
+	# East wall: X=+6, Z:-12 to -6
+	_create_static_surface("CockpitWallEast",
+		Vector3(0.2, 3.0, 6.0), Vector3(6.0, wall_y, -9.0), COLOR_WALLS_COCKPIT, 0.9)
+	# North wall left section: X:-6 to -2 at Z=-12 (viewport opening X:-2 to +2, Y:1.5 to 3.0)
+	_create_static_surface("CockpitWallNorthLeft",
+		Vector3(4.0, 3.0, 0.2), Vector3(-4.0, wall_y, -12.0), COLOR_WALLS_COCKPIT, 0.9)
+	# North wall right section: X:+2 to +6 at Z=-12
+	_create_static_surface("CockpitWallNorthRight",
+		Vector3(4.0, 3.0, 0.2), Vector3(4.0, wall_y, -12.0), COLOR_WALLS_COCKPIT, 0.9)
+	# North wall below viewport: X:-2 to +2, Y:0 to 1.5 at Z=-12
+	_create_static_surface("CockpitWallNorthBelow",
+		Vector3(4.0, 1.5, 0.2), Vector3(0.0, 0.75, -12.0), COLOR_WALLS_COCKPIT, 0.9)
+	# South wall left section: X:-6 to -2 at Z=-6 (corridor opening X:-2 to +2)
+	_create_static_surface("CockpitWallSouthLeft",
+		Vector3(4.0, 3.0, 0.2), Vector3(-4.0, wall_y, -6.0), COLOR_WALLS_COCKPIT, 0.9)
+	# South wall right section: X:+2 to +6 at Z=-6
+	_create_static_surface("CockpitWallSouthRight",
+		Vector3(4.0, 3.0, 0.2), Vector3(4.0, wall_y, -6.0), COLOR_WALLS_COCKPIT, 0.9)
 
-	# West wall
-	_create_static_surface("WallWest", Vector3(0.2, wall_h, BAY_DEPTH), Vector3(-half_w, wall_y, 0), COLOR_WALLS, 0.9)
-	# East wall
-	_create_static_surface("WallEast", Vector3(0.2, wall_h, BAY_DEPTH), Vector3(half_w, wall_y, 0), COLOR_WALLS, 0.9)
-	# North wall
-	_create_static_surface("WallNorth", Vector3(BAY_WIDTH, wall_h, 0.2), Vector3(0, wall_y, -half_d), COLOR_WALLS, 0.9)
+func _build_corridor_walls() -> void:
+	var wall_y: float = CEILING_HEIGHT / 2.0
+	# West wall: X=-2, Z:-6 to -4
+	_create_static_surface("CorridorWallWest",
+		Vector3(0.2, 3.0, 2.0), Vector3(-2.0, wall_y, -5.0), COLOR_CORRIDOR, 0.9)
+	# East wall: X=+2, Z:-6 to -4
+	_create_static_surface("CorridorWallEast",
+		Vector3(0.2, 3.0, 2.0), Vector3(2.0, wall_y, -5.0), COLOR_CORRIDOR, 0.9)
+	# Solid fill walls flanking the corridor (seal gaps between machine room and cockpit)
+	# West fill: X:-6 to -2, Z:-6 to -4
+	_create_static_surface("CorridorFillWest",
+		Vector3(4.0, 3.0, 2.0), Vector3(-4.0, wall_y, -5.0), COLOR_WALLS_MACHINE, 0.9)
+	# East fill: X:+2 to +6, Z:-6 to -4
+	_create_static_surface("CorridorFillEast",
+		Vector3(4.0, 3.0, 2.0), Vector3(4.0, wall_y, -5.0), COLOR_WALLS_MACHINE, 0.9)
 
-	# South wall — two sections flanking the corridor opening
-	var corridor_half_w: float = CORRIDOR_WIDTH / 2.0
-	var south_section_width: float = (BAY_WIDTH - CORRIDOR_WIDTH) / 2.0
-	var south_left_x: float = -half_w + south_section_width / 2.0
-	var south_right_x: float = half_w - south_section_width / 2.0
-	_create_static_surface("WallSouthLeft", Vector3(south_section_width, wall_h, 0.2), Vector3(south_left_x, wall_y, half_d), COLOR_WALLS, 0.9)
-	_create_static_surface("WallSouthRight", Vector3(south_section_width, wall_h, 0.2), Vector3(south_right_x, wall_y, half_d), COLOR_WALLS, 0.9)
+func _build_vestibule_walls() -> void:
+	var wall_y: float = CEILING_HEIGHT / 2.0
+	# West wall: X=-2, Z:+8 to +12
+	_create_static_surface("VestibuleWallWest",
+		Vector3(0.2, 3.0, 4.0), Vector3(-2.0, wall_y, 10.0), COLOR_VESTIBULE, 0.9)
+	# East wall: X=+2, Z:+8 to +12
+	_create_static_surface("VestibuleWallEast",
+		Vector3(0.2, 3.0, 4.0), Vector3(2.0, wall_y, 10.0), COLOR_VESTIBULE, 0.9)
+	# South wall (back): X:-2 to +2 at Z=+12
+	_create_static_surface("VestibuleWallSouth",
+		Vector3(4.0, 3.0, 0.2), Vector3(0.0, wall_y, 12.0), COLOR_VESTIBULE, 0.9)
 
-	# Corridor walls
-	var corr_end_z: float = half_d + CORRIDOR_DEPTH
-	_create_static_surface("CorridorWallWest", Vector3(0.2, wall_h, CORRIDOR_DEPTH), Vector3(-corridor_half_w, wall_y, corridor_z), COLOR_WALLS, 0.9)
-	_create_static_surface("CorridorWallEast", Vector3(0.2, wall_h, CORRIDOR_DEPTH), Vector3(corridor_half_w, wall_y, corridor_z), COLOR_WALLS, 0.9)
+func _build_viewport_frame() -> void:
+	# Thin frame around cockpit viewport opening (X:-2 to +2, Y:1.5 to 3.0, Z=-12)
+	var frame_mat := StandardMaterial3D.new()
+	frame_mat.albedo_color = COLOR_VIEWPORT_FRAME
+	frame_mat.roughness = 0.9
 
-	# Corridor back wall (the exit end) — solid wall with exit trigger area
-	_create_static_surface("CorridorBack", Vector3(CORRIDOR_WIDTH, wall_h, 0.2), Vector3(0, wall_y, corr_end_z), COLOR_WALLS, 0.9)
+	# Bottom edge
+	var bottom_frame := MeshInstance3D.new()
+	bottom_frame.name = "ViewportFrameBottom"
+	var bottom_mesh := BoxMesh.new()
+	bottom_mesh.size = Vector3(4.2, 0.1, 0.1)
+	bottom_frame.mesh = bottom_mesh
+	bottom_frame.material_override = frame_mat
+	bottom_frame.position = Vector3(0.0, 1.5, -11.95)
+	add_child(bottom_frame)
+
+	# Left edge
+	var left_frame := MeshInstance3D.new()
+	left_frame.name = "ViewportFrameLeft"
+	var left_mesh := BoxMesh.new()
+	left_mesh.size = Vector3(0.1, 1.5, 0.1)
+	left_frame.mesh = left_mesh
+	left_frame.material_override = frame_mat
+	left_frame.position = Vector3(-2.0, 2.25, -11.95)
+	add_child(left_frame)
+
+	# Right edge
+	var right_frame := MeshInstance3D.new()
+	right_frame.name = "ViewportFrameRight"
+	var right_mesh := BoxMesh.new()
+	right_mesh.size = Vector3(0.1, 1.5, 0.1)
+	right_frame.mesh = right_mesh
+	right_frame.material_override = frame_mat
+	right_frame.position = Vector3(2.0, 2.25, -11.95)
+	add_child(right_frame)
 
 func _build_module_zones() -> void:
-	var zone_centers: Array[Vector3] = [ZONE_A_CENTER, ZONE_B_CENTER, ZONE_C_CENTER]
-	for i: int in range(3):
+	var zone_centers: Array[Vector3] = [ZONE_A_CENTER, ZONE_B_CENTER, ZONE_C_CENTER, ZONE_D_CENTER]
+	for i: int in range(ZONE_COUNT):
 		var center: Vector3 = zone_centers[i]
 
 		# Floor marking (emissive teal overlay)
@@ -282,57 +368,68 @@ func _build_module_zones() -> void:
 		_zone_areas.append(zone_area)
 
 func _build_spawn_markers() -> void:
-	# Interior entry point — just inside the corridor, facing north
+	# Interior entry point — inside vestibule, facing north (per wireframe: X=0, Y=0, Z=+10)
 	_enter_marker = Marker3D.new()
-	_enter_marker.name = "EnterMarker"
-	var corridor_z: float = BAY_DEPTH / 2.0 + CORRIDOR_DEPTH * 0.3
-	_enter_marker.position = Vector3(0, 0.9, corridor_z)
+	_enter_marker.name = "InteriorSpawn"
+	_enter_marker.position = Vector3(0.0, 0.0, 10.0)
 	add_child(_enter_marker)
 
-	# Exit trigger area — near the back of the corridor
+	# Exit trigger area — near the back of the vestibule (Z ≈ +11.5)
 	var exit_area := Area3D.new()
 	exit_area.name = "ExitTrigger"
 	exit_area.collision_layer = 0
 	exit_area.collision_mask = LAYER_PLAYER
 	var exit_col := CollisionShape3D.new()
 	var exit_shape := BoxShape3D.new()
-	exit_shape.size = Vector3(CORRIDOR_WIDTH, 2.0, 1.0)
+	exit_shape.size = Vector3(VESTIBULE_WIDTH, 2.0, 1.0)
 	exit_col.shape = exit_shape
-	var exit_z: float = BAY_DEPTH / 2.0 + CORRIDOR_DEPTH - 0.5
-	exit_col.position = Vector3(0, 1.0, exit_z)
+	exit_col.position = Vector3(0.0, 1.0, 11.5)
 	exit_area.add_child(exit_col)
 	add_child(exit_area)
 	exit_area.body_entered.connect(_on_exit_zone_entered)
 	exit_area.body_exited.connect(_on_exit_zone_exited)
 
-	# Exterior marker — set by the test world after instancing
+	# Exterior marker — default position, set by test world after instancing
 	_exterior_marker = Marker3D.new()
-	_exterior_marker.name = "ExteriorMarker"
-	_exterior_marker.position = Vector3(0, 0.9, 8)
+	_exterior_marker.name = "ExteriorSpawn"
+	_exterior_marker.position = Vector3(0.0, 0.0, 14.0)
 	add_child(_exterior_marker)
 
-func _build_lighting() -> void:
-	var light := OmniLight3D.new()
-	light.name = "InteriorLight"
-	light.light_color = COLOR_LIGHT
-	light.light_energy = 2.0
-	light.omni_range = 15.0
-	light.omni_attenuation = 0.5
-	light.shadow_enabled = false
-	light.position = Vector3(0, CEILING_HEIGHT - 0.3, 0)
-	add_child(light)
+func _build_cockpit_features() -> void:
+	# Marker3D placeholder for TICKET-0127 (Status Display Area)
+	var status_marker := Marker3D.new()
+	status_marker.name = "StatusDisplayArea"
+	status_marker.position = Vector3(0.0, 1.5, -9.0)
+	add_child(status_marker)
 
-	# Secondary light in corridor for even coverage
-	var corridor_light := OmniLight3D.new()
-	corridor_light.name = "CorridorLight"
-	corridor_light.light_color = COLOR_LIGHT
-	corridor_light.light_energy = 1.5
-	corridor_light.omni_range = 6.0
-	corridor_light.omni_attenuation = 0.5
-	corridor_light.shadow_enabled = false
-	var corridor_z: float = BAY_DEPTH / 2.0 + CORRIDOR_DEPTH / 2.0
-	corridor_light.position = Vector3(0, CEILING_HEIGHT - 0.3, corridor_z)
-	add_child(corridor_light)
+	# Marker3D placeholder for TICKET-0128 (Viewport Area)
+	var viewport_marker := Marker3D.new()
+	viewport_marker.name = "ViewportArea"
+	viewport_marker.position = Vector3(0.0, 2.25, -12.0)
+	add_child(viewport_marker)
+
+func _build_lighting() -> void:
+	# Machine room light — centered overhead at Y=2.8
+	var machine_light := OmniLight3D.new()
+	machine_light.name = "MachineRoomLight"
+	machine_light.light_color = COLOR_LIGHT
+	machine_light.light_energy = 2.0
+	machine_light.omni_range = 15.0
+	machine_light.omni_attenuation = 0.5
+	machine_light.shadow_enabled = false
+	machine_light.position = Vector3(0.0, 2.8, 2.0)
+	add_child(machine_light)
+
+	# Cockpit light — centered overhead
+	var cockpit_light := OmniLight3D.new()
+	cockpit_light.name = "CockpitLight"
+	cockpit_light.light_color = COLOR_LIGHT
+	cockpit_light.light_energy = 2.0
+	cockpit_light.omni_range = 12.0
+	cockpit_light.omni_attenuation = 0.5
+	cockpit_light.shadow_enabled = false
+	cockpit_light.position = Vector3(0.0, 2.8, -9.0)
+	add_child(cockpit_light)
 
 func _build_fade_overlay() -> void:
 	_fade_layer = CanvasLayer.new()
@@ -346,6 +443,37 @@ func _build_fade_overlay() -> void:
 	_fade_rect.modulate.a = 0.0
 	_fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fade_layer.add_child(_fade_rect)
+
+func _build_terminal() -> void:
+	# Tech tree terminal on machine room north wall (left of corridor opening)
+	var terminal_mesh := MeshInstance3D.new()
+	terminal_mesh.name = "TerminalMesh"
+	var box := BoxMesh.new()
+	box.size = Vector3(1.0, 1.5, 0.3)
+	terminal_mesh.mesh = box
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color("#2A4A4A")
+	mat.emission_enabled = true
+	mat.emission = Color("#00D4AA")
+	mat.emission_energy_multiplier = 0.4
+	terminal_mesh.material_override = mat
+	terminal_mesh.position = Vector3(-4.0, 0.75, -3.8)
+	add_child(terminal_mesh)
+
+	# Interaction area for terminal
+	_terminal_area = Area3D.new()
+	_terminal_area.name = "TerminalArea"
+	_terminal_area.collision_layer = 0
+	_terminal_area.collision_mask = LAYER_PLAYER
+	var col := CollisionShape3D.new()
+	col.name = "TerminalShape"
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(2.0, 2.0, 1.5)
+	col.shape = shape
+	col.position = Vector3(-4.0, 1.0, -3.0)
+	_terminal_area.add_child(col)
+	add_child(_terminal_area)
+	Global.log("ShipInterior: tech tree terminal built")
 
 func _create_static_surface(surface_name: String, size: Vector3, pos: Vector3, color: Color, roughness: float) -> void:
 	var body := StaticBody3D.new()
@@ -371,38 +499,6 @@ func _create_static_surface(surface_name: String, size: Vector3, pos: Vector3, c
 	body.add_child(col)
 
 	add_child(body)
-
-func _build_terminal() -> void:
-	var half_d: float = BAY_DEPTH / 2.0
-	# Greybox terminal mesh on the north wall
-	var terminal_mesh := MeshInstance3D.new()
-	terminal_mesh.name = "TerminalMesh"
-	var box := BoxMesh.new()
-	box.size = Vector3(1.0, 1.5, 0.3)
-	terminal_mesh.mesh = box
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color("#2A4A4A")
-	mat.emission_enabled = true
-	mat.emission = Color("#00D4AA")
-	mat.emission_energy_multiplier = 0.4
-	terminal_mesh.material_override = mat
-	terminal_mesh.position = Vector3(0, 0.75, -half_d + 0.25)
-	add_child(terminal_mesh)
-
-	# Interaction area for terminal
-	_terminal_area = Area3D.new()
-	_terminal_area.name = "TerminalArea"
-	_terminal_area.collision_layer = 0
-	_terminal_area.collision_mask = LAYER_PLAYER
-	var col := CollisionShape3D.new()
-	col.name = "TerminalShape"
-	var shape := BoxShape3D.new()
-	shape.size = Vector3(2.0, 2.0, 1.5)
-	col.shape = shape
-	col.position = Vector3(0, 1.0, -half_d + 0.75)
-	_terminal_area.add_child(col)
-	add_child(_terminal_area)
-	Global.log("ShipInterior: tech tree terminal built")
 
 func _update_zone_visual(zone_index: int) -> void:
 	if zone_index < 0 or zone_index >= _zone_floor_markers.size():

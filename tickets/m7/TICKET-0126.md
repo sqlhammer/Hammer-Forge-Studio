@@ -2,7 +2,7 @@
 id: TICKET-0126
 title: "Ship interior scene — 24m×12m layout with cockpit, machine room, corridors, vestibule, 4 module zones"
 type: FEATURE
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -99,3 +99,4 @@ Reuse the M4 entry/exit system with updated spawn positions:
 
 ## Activity Log
 - 2026-02-26 [producer] Created ticket — ship interior scene rebuild
+- 2026-02-26 [gameplay-programmer] Starting work — rebuilding ship interior to 24m×12m multi-room layout

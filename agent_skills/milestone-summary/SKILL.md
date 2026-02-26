@@ -11,7 +11,7 @@ When this skill is active, follow these rules:
 - Fetch the latest state from the filesystem after pulling — never rely on session memory alone
 - Always pull and read from the main repo (/c/repos/Hammer-Forge-Studio), not a worktree (may be stale)
 - Do not open the Godot editor for game-state info — obtain it from tickets and handoff notes only
-- Always end your summary with a bulleted list of agents who are unblocked and ready to take their next steps
+- Always end your summary with a bulleted list of agents who are unblocked and ready to take their next steps. Only list agents whose next ticket has all dependencies DONE — do NOT list agents who are waiting on an incomplete dependency.
 - **Output format: plain GitHub-flavored markdown only. Paste the script's pipe table verbatim. NEVER reformat it into a Unicode box-drawing grid table — this generates 5× more tokens and is the primary cause of slow responses.**
 
 # Workflow Steps (Ordered)

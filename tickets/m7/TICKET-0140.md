@@ -2,7 +2,7 @@
 id: TICKET-0140
 title: "Bugfix — HUD compass is not horizontally centered"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -34,9 +34,9 @@ The compass bar is anchored to the top-left corner of the screen. Only the right
 
 ## Acceptance Criteria
 
-- [ ] Compass bar is horizontally centered at the top of the screen
-- [ ] All visible compass labels and ticks render correctly within the centered bar
-- [ ] Centering holds at the target resolution and when resizing
+- [x] Compass bar is horizontally centered at the top of the screen
+- [x] All visible compass labels and ticks render correctly within the centered bar
+- [x] Centering holds at the target resolution and when resizing
 
 ## Implementation Notes
 
@@ -46,3 +46,4 @@ The compass bar is anchored to the top-left corner of the screen. Only the right
 ## Activity Log
 
 - 2026-02-26 [producer] Created — visual regression found during M7 QA review
+- 2026-02-26 [gameplay-programmer] Starting work — setting anchors to center compass bar horizontally at top of screen

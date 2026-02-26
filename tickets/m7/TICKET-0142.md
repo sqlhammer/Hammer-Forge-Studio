@@ -2,7 +2,7 @@
 id: TICKET-0142
 title: "Bugfix — cockpit status displays floating in center of room instead of wall-mounted"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -49,3 +49,4 @@ The status display panel is positioned in the center of the cockpit room, floati
 
 - 2026-02-26 [producer] Created — placement defect found during M7 QA review
 - 2026-02-26 [gameplay-programmer] IN_PROGRESS — Starting work. Displays at Z=-9 need to move to Z=-11.85 (back wall behind CockpitConsole).
+- 2026-02-26 [gameplay-programmer] DONE — Fixed all four display panel positions from Z=-9 to Z=-11.85 (back wall). Commit dca63f4, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/107 (merged as 4551af8).

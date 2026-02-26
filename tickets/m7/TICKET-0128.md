@@ -72,7 +72,13 @@ The cockpit window is a key immersion element. It connects the interior space to
 - If performance is not a concern and the wireframe recommends it, Option A (SubViewport) can be used directly
 
 ## Handoff Notes
-(Leave blank until handoff occurs.)
+- Added `_build_viewport_window()` to `ship_interior.gd` — creates a QuadMesh (4m×1.5m) with an emissive sky gradient ShaderMaterial (blue top, orange horizon)
+- Window positioned at (0, 2.25, -11.97), centered in the viewport frame opening
+- Shader uses standard spatial mode with emission (emission_strength=1.5) — window glows to simulate natural light
+- Added `ViewportFrameTop` edge to complete the dark grey frame (bottom/left/right already built by TICKET-0126)
+- `ViewportArea` Marker3D at (0, 2.25, -12) documented as M8 camera anchor with detailed TODO comment
+- TODO comment in `_build_viewport_window()` describes full M8 SubViewport upgrade path (Option A)
+- No new scripts created — all changes in existing `ship_interior.gd`
 
 ## Activity Log
 - 2026-02-26 [producer] Created ticket — cockpit exterior viewport/window

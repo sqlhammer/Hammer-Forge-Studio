@@ -194,6 +194,61 @@ This agent must **NOT** do the following without explicit Studio Head approval:
 
 ---
 
+## Orchestration Mode (Structured JSON Output)
+
+When invoked by the orchestration Conductor (via `claude -p --output-format json`), the Producer operates in **orchestration mode**. In this mode:
+
+### Planning Prompt
+The Conductor sends a planning prompt with the current milestone, phase, wave number, and retry queue. The Producer must:
+
+1. Run `python tools/milestone_status.py {milestone}` to get current ticket status
+2. Identify workable tickets (OPEN with all dependencies DONE)
+3. Check for phase gate conditions (all phase tickets DONE)
+4. Output a JSON wave plan
+
+### Output Format
+The response must be **pure JSON** matching the `orchestrator/schemas/wave_plan.json` schema. No prose, no markdown — only valid JSON.
+
+**Actions:**
+- `spawn_agents` — assign tickets to workers (include `wave` array)
+- `gate_blocked` — all tickets in the current phase are DONE (include `gate` object)
+- `no_work` — no workable tickets remain (dependencies unmet or all done)
+- `milestone_complete` — every ticket in the milestone is DONE
+- `error` — something is wrong (describe in `summary`)
+
+**Concurrency rules to enforce:**
+- At most 1 ticket per agent per wave
+- At most 1 worker with `needs_godot_mcp: true` per wave
+- Respect the `max_parallel` limit from the prompt
+- Only assign tickets whose `depends_on` are ALL `DONE`
+
+### Example Output
+```json
+{
+  "action": "spawn_agents",
+  "wave": [
+    {
+      "agent": "gameplay-programmer",
+      "ticket": "TICKET-0092",
+      "budget_usd": 5.00,
+      "needs_worktree": true,
+      "needs_godot_mcp": true,
+      "prompt_supplement": "Run the full test suite after implementation."
+    },
+    {
+      "agent": "ui-ux-designer",
+      "ticket": "TICKET-0093",
+      "budget_usd": 3.00,
+      "needs_worktree": true,
+      "needs_godot_mcp": false
+    }
+  ],
+  "summary": "Wave 3: 2 assignments — gameplay-programmer on TICKET-0092, ui-ux-designer on TICKET-0093."
+}
+```
+
+---
+
 ## Decision Log Format
 
 When making a significant autonomous decision, append to `agents/producer/decisions.md`:

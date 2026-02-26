@@ -72,5 +72,49 @@ You MUST output ONLY valid JSON matching this exact schema. No prose, no markdow
 
 - `wave` is required when action = `spawn_agents` (array of worker assignments).
 - `gate` is required when action = `gate_blocked`.
+- `new_tickets` is optional and may only be included when action = `spawn_agents`.
 - Field names must match EXACTLY: `wave` (not `workers`), `ticket` (not `ticket_id`).
 - Do NOT wrap the JSON in markdown code fences.
+
+## Autonomous Ticket Creation
+
+You may optionally include a `new_tickets` array in your wave plan when `action` is `"spawn_agents"`. The conductor will create these ticket files before dispatching workers. Tickets created in wave N are available for assignment in wave N+1 — they cannot be assigned in the same wave that creates them.
+
+### Determining the Next Ticket ID
+
+You MUST determine the next available ticket ID by examining the highest ticket ID visible in `completed_waves`, `retry_tickets`, and the current milestone's ticket files. Increment from the highest known ID. The conductor validates for collisions but does **not** auto-increment — you are responsible for picking a correct, non-colliding ID.
+
+### Permitted Ticket Types
+
+- `REVIEW` — code review after an implementation ticket is committed
+- `BUGFIX` — defect discovered during wave work
+- `TASK` — operational follow-up or gap identified by a worker
+- `BLOCKER` — routing a blocking issue to the appropriate agent
+- `SPIKE` — research or investigation needed before implementation
+
+### Valid Use Cases
+
+- Setting up a post-completion code review for a ticket that just finished
+- Filing a defect discovered by a worker during its execution
+- Creating follow-up tasks identified by workers in their result output
+- Routing blocking issues that need attention from a specific agent
+
+### Prohibited Use Cases (escalate to Studio Head instead)
+
+- Scope additions or new feature work not in the current milestone
+- Phase gate structure modifications
+- Milestone target changes
+- Anything that would require Studio Head approval per the project CLAUDE.md
+
+### new_tickets Entry Format
+
+Each entry in `new_tickets` must have:
+- `id` (string, required) — e.g. `"TICKET-0155"`
+- `title` (string, required)
+- `type` (string, required) — one of `TASK`, `BUGFIX`, `REVIEW`, `BLOCKER`, `SPIKE`
+- `owner` (string, required) — agent slug
+- `phase` (string, required) — milestone phase name
+- `priority` (string, required) — `P0`, `P1`, or `P2`
+- `depends_on` (array of strings, optional) — ticket IDs this depends on
+- `summary` (string, required) — one-sentence description
+- `acceptance_criteria` (array of strings, required) — each entry is one criterion line

@@ -238,6 +238,86 @@ def validate_dependencies(
     return (len(unmet) == 0, unmet)
 
 
+def write_ticket_file(
+    ticket_data: dict,
+    milestone: str,
+    wave_number: int,
+    logger: "ActivityLogger",
+) -> bool:
+    """Write a new ticket file from a new_tickets entry.
+
+    Returns True if the ticket was written, False if skipped.
+    Performs duplicate and collision checks before writing.
+    """
+    ticket_id = ticket_data["id"]
+    milestone_dir = REPO_ROOT / "tickets" / milestone.lower()
+    target_path = milestone_dir / f"{ticket_id}.md"
+
+    # Duplicate guard: exact file path
+    if target_path.exists():
+        logger.log("WARNING", f"{ticket_id} already exists — skipping ticket creation")
+        return False
+
+    # Next-ID collision: check all milestone directories
+    tickets_root = REPO_ROOT / "tickets"
+    for ticket_file in tickets_root.glob(f"**/{ticket_id}.md"):
+        logger.log("WARNING",
+            f"{ticket_id} collides with existing {ticket_file} — skipping ticket creation")
+        return False
+
+    # Ensure milestone directory exists
+    milestone_dir.mkdir(parents=True, exist_ok=True)
+
+    # Build frontmatter
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    depends_on = ticket_data.get("depends_on", [])
+    depends_str = ", ".join(depends_on) if depends_on else ""
+
+    frontmatter = f"""---
+id: {ticket_id}
+title: "{ticket_data['title']}"
+type: {ticket_data['type']}
+status: OPEN
+priority: {ticket_data['priority']}
+owner: {ticket_data['owner']}
+created_by: producer
+created_at: {today}
+updated_at: {today}
+milestone: "{milestone}"
+phase: "{ticket_data['phase']}"
+depends_on: [{depends_str}]
+blocks: []
+tags: [auto-created]
+---"""
+
+    # Build acceptance criteria
+    ac_lines = "\n".join(
+        f"- [ ] {criterion}" for criterion in ticket_data["acceptance_criteria"]
+    )
+
+    content = f"""{frontmatter}
+
+## Summary
+
+{ticket_data['summary']}
+
+## Acceptance Criteria
+
+{ac_lines}
+
+## Handoff Notes
+
+(Leave blank until handoff occurs.)
+
+## Activity Log
+
+- {today} [conductor] Created via orchestration wave {wave_number}
+"""
+
+    target_path.write_text(content, encoding="utf-8")
+    return True
+
+
 def get_blocked_tools(config: dict, agent_slug: str) -> list[str]:
     """Return list of Godot MCP tool names this agent is NOT allowed to use."""
     tiers = config.get("tool_tiers", {})
@@ -727,6 +807,10 @@ class Conductor:
                 return
             # Store wave plan for dispatching
             self.state["_pending_wave"] = wave
+            # Store any new tickets the producer wants to create
+            new_tickets = plan.get("new_tickets")
+            if new_tickets:
+                self.state["_pending_new_tickets"] = new_tickets
             assignments = ", ".join(
                 f"{a['ticket']}->{a['agent']}" for a in wave
             )
@@ -764,6 +848,20 @@ class Conductor:
         if not wave:
             self.state["status"] = "PLANNING"
             return
+
+        # Process pending new tickets before spawning workers
+        pending_tickets = self.state.pop("_pending_new_tickets", [])
+        for ticket_data in pending_tickets:
+            tid = ticket_data.get("id", "UNKNOWN")
+            title = ticket_data.get("title", "")
+            written = write_ticket_file(
+                ticket_data,
+                self.state["milestone"],
+                self.state["wave_number"],
+                self.logger,
+            )
+            if written:
+                self.logger.log("TICKET", f"Created {tid}: {title}")
 
         active_locks = self.state.get("active_ticket_ids", [])
 

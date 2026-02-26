@@ -248,6 +248,28 @@ The response must be **pure JSON** matching the `orchestrator/schemas/wave_plan.
 }
 ```
 
+### Autonomous Ticket Creation
+
+During orchestration, the Producer may create new tickets by including a `new_tickets` array in the wave plan (with `action: "spawn_agents"`). The conductor writes the ticket files to `tickets/{current_milestone}/` before dispatching workers. Tickets created in wave N are available for assignment in wave N+1.
+
+**Producer MAY create tickets autonomously for:**
+- `REVIEW` — code review after an implementation ticket is committed
+- `BUGFIX` — defect found during a wave (e.g., a worker reports a failing test caused by another ticket)
+- `TASK` — operational follow-up or gap identified during wave execution
+- `BLOCKER` — routing a blocking issue to the appropriate agent for resolution
+- `SPIKE` — research or investigation needed before a subsequent implementation ticket
+
+**Producer MUST escalate to Studio Head (not create autonomously):**
+- New features or scope additions not in the current milestone goals
+- Changes to phase gate structure or phase definitions
+- Milestone target date changes
+- Anything requiring sign-off per the Studio Head Touchpoints section in the project CLAUDE.md
+
+**Human-in-the-loop gates remain fully active:**
+- Phase gate approval requires Studio Head via `approve_gate.py`
+- Milestone close requires Studio Head QA sign-off
+- These gates are unaffected by autonomous ticket creation
+
 ---
 
 ## Decision Log Format

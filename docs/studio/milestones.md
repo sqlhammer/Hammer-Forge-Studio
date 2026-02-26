@@ -405,6 +405,7 @@
 **Notes:**
 - M8 is the first milestone where TDD Foundation is established **before agent work begins**. M7 introduces TDD mid-milestone; M8 starts with TDD as day-one process.
 - Cross-milestone test stability is critical — M8 expands the game world significantly (navigation, fuel, biomes). Test suite must ensure no regression in prior systems.
+- Switch game window mode to **fullscreen windowed** (borderless window) — the game currently runs in a small windowed mode and should default to fullscreen windowed at startup.
 
 ---
 

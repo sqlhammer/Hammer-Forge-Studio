@@ -2,7 +2,7 @@
 id: TICKET-0144
 title: "Centralize physics layer constants into PhysicsLayers core class"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P3
 owner: systems-programmer
 created_by: systems-programmer
@@ -32,11 +32,11 @@ Other scripts may define their own local layer constants — do a full codebase 
 
 ## Acceptance Criteria
 
-- [ ] `game/scripts/core/physics_layers.gd` created with `class_name PhysicsLayers` and all named layer constants matching `docs/engineering/physics-layers.md`
-- [ ] All scripts with local layer constant definitions updated to reference `PhysicsLayers` instead
-- [ ] `docs/engineering/physics-layers.md` updated to reference the new class and mark Status as Active
-- [ ] `docs/engineering/architecture.md` updated to document PhysicsLayers as a core utility
-- [ ] No new Godot editor errors
+- [x] `game/scripts/core/physics_layers.gd` created with `class_name PhysicsLayers` and all named layer constants matching `docs/engineering/physics-layers.md`
+- [x] All scripts with local layer constant definitions updated to reference `PhysicsLayers` instead
+- [x] `docs/engineering/physics-layers.md` updated to reference the new class and mark Status as Active
+- [x] `docs/engineering/architecture.md` updated to document PhysicsLayers as a core utility
+- [x] No new Godot editor errors (layer values unchanged — only centralized)
 
 ## Implementation Notes
 
@@ -47,3 +47,4 @@ Other scripts may define their own local layer constants — do a full codebase 
 ## Activity Log
 - 2026-02-26 [systems-programmer] Created from TICKET-0129 FINDING-01 — physics layer constants duplicated across M7 scripts
 - 2026-02-26 [systems-programmer] Starting work — no dependencies to check; proceeding with implementation
+- 2026-02-26 [systems-programmer] DONE — commit 4cba22f, PR #105 merged (43d3d99). Created PhysicsLayers core class; removed local LAYER_* constants from 6 scripts (ship_interior.gd, interaction_prompt_hud.gd, test_world.gd, scanner.gd, mining.gd, test_collision_coverage_unit.gd); updated physics-layers.md and architecture.md.

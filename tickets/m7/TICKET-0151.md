@@ -2,7 +2,7 @@
 id: TICKET-0151
 title: "Bugfix — test_scanner_unit.gd parse error: Scanner.LAYER_INTERACTABLE removed"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: qa-engineer
@@ -49,3 +49,4 @@ Single-line fix at `game/tests/test_scanner_unit.gd` line 101:
 
 ## Activity Log
 - 2026-02-26 [qa-engineer] Created — regression from TICKET-0144 (PhysicsLayers centralization) that was not caught during code review
+- 2026-02-26 [systems-programmer] Starting work — single-line fix in test_scanner_unit.gd line 101

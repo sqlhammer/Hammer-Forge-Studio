@@ -98,7 +98,7 @@ func _test_interaction_ray_length_is_6() -> void:
 
 
 func _test_layer_interactable_is_layer_4() -> void:
-	assert_equal(Scanner.LAYER_INTERACTABLE, 1 << 3,
+	assert_equal(PhysicsLayers.INTERACTABLE, 1 << 3,
 		"LAYER_INTERACTABLE should be bit 3 (Layer 4)")
 
 

@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/ship_interior.gd" id="1_rhr8w"]
 [ext_resource type="PackedScene" path="res://scenes/objects/recycler.tscn" id="2_recycler"]
 [ext_resource type="PackedScene" path="res://scenes/objects/fabricator.tscn" id="3_fabricator"]
 [ext_resource type="PackedScene" path="res://scenes/objects/automation_hub.tscn" id="4_automation_hub"]
 [ext_resource type="PackedScene" path="res://scenes/objects/cockpit_console.tscn" id="5_cockpit_console"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/ship_status_display.tscn" id="6_display"]
 
 [node name="ShipInterior" type="Node3D"]
 script = ExtResource("1_rhr8w")
@@ -20,3 +21,23 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, -0.5)
 
 [node name="CockpitConsole" parent="." instance=ExtResource("5_cockpit_console")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -11.5)
+
+[node name="PowerDisplay" parent="." instance=ExtResource("6_display")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.825, 1.5, -9)
+variable_name = "POWER"
+variable_type = "power"
+
+[node name="IntegrityDisplay" parent="." instance=ExtResource("6_display")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.275, 1.5, -9)
+variable_name = "INTEGRITY"
+variable_type = "integrity"
+
+[node name="HeatDisplay" parent="." instance=ExtResource("6_display")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.275, 1.5, -9)
+variable_name = "HEAT"
+variable_type = "heat"
+
+[node name="OxygenDisplay" parent="." instance=ExtResource("6_display")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.825, 1.5, -9)
+variable_name = "OXYGEN"
+variable_type = "oxygen"

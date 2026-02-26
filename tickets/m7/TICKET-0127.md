@@ -2,7 +2,7 @@
 id: TICKET-0127
 title: "Cockpit diegetic status displays — ship globals on wall"
 type: FEATURE
-status: TODO
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -79,3 +79,4 @@ Choose whichever approach the wireframe spec recommends, or default to Option A 
 
 ## Activity Log
 - 2026-02-26 [producer] Created ticket — cockpit diegetic ship status displays
+- 2026-02-26 [gameplay-programmer] Starting work — implementing diegetic status displays in cockpit

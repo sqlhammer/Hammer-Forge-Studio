@@ -7,9 +7,9 @@ priority: P2
 owner: technical-artist
 created_by: producer
 created_at: 2026-02-25
-updated_at: 2026-02-25
-milestone: ""
-phase: ""
+updated_at: 2026-02-26
+milestone: "M7"
+phase: "Refactoring"
 depends_on: []
 blocks: []
 tags: [scene-design, ship, refactor, standards]
@@ -37,3 +37,4 @@ Per the updated Scene Design standard in `docs/engineering/coding-standards.md`,
 
 ## Activity Log
 - 2026-02-25 [producer] Created ticket — standards refactor, self-contained scene rule
+- 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone

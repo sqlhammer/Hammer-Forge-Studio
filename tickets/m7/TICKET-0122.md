@@ -8,8 +8,8 @@ owner: ""
 created_by: qa-engineer
 created_at: 2026-02-26
 updated_at: 2026-02-26
-milestone: ""
-phase: ""
+milestone: "M7"
+phase: "Build & Features"
 depends_on: []
 blocks: []
 tags: [battery, hud, ui, icon-tinting, backlog]
@@ -36,3 +36,4 @@ The battery bar icon currently transitions directly from teal (normal, 26-99%) t
 ## Activity Log
 
 - 2026-02-26 [qa-engineer] Created from TICKET-0102 QA Finding 1 — battery amber warning tier missing. Studio Head directed: add to backlog.
+- 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone

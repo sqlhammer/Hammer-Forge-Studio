@@ -7,9 +7,9 @@ priority: P2
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-25
-updated_at: 2026-02-25
-milestone: ""
-phase: ""
+updated_at: 2026-02-26
+milestone: "M7"
+phase: "Build & Features"
 depends_on: [TICKET-0117]
 blocks: []
 tags: [ui, hud, interaction, input, ux]
@@ -159,3 +159,4 @@ Add `get_interaction_prompt()` to the relevant scripts. Do not change any existi
 
 ## Activity Log
 - 2026-02-25 [producer] Created ticket — contextual interaction prompt + persistent controls HUD
+- 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone

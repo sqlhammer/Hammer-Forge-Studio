@@ -32,7 +32,7 @@
 | M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Complete | 21 | 0 | 21 | 2026-02-24 |
 | M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Complete | 38 | 0 | 38 | 2026-02-25 |
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
-| M7 | Ship Interior — Cockpit and machine room buildout | — | Planning | — | — | — | — |
+| M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Planning | 17 | 17 | 0 | — |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |
 | M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
 | M10 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
@@ -321,15 +321,50 @@
 
 ---
 
-### M7 — Ship Interior
+### M7 — Ship Interior + Scene Architecture Overhaul
 
-**Goal:** The ship interior is fully realized. Player has a defined cockpit and a large machine room for placing modules.
+**Goal:** The ship interior is fully realized with a distinct cockpit (console placeholder, diegetic ship status displays, exterior viewport) and a machine room with 4 module placement zones. All major game objects are refactored into standalone instanced scenes per coding standards.
 
-**Scope:** TBD — to be defined after M6 closes.
+**Scope:**
+- Expanded ship interior (~24m × 12m): cockpit, machine room, connecting corridor, entry vestibule
+- Cockpit: navigation console placeholder (for M8), wall-mounted diegetic ship status displays (Power, Integrity, Heat, O2), exterior viewport/window
+- Machine room: 4 module placement zones (3 occupied by Recycler/Fabricator/Automation Hub, 1 spare)
+- Scene architecture overhaul: 7 refactors extracting embedded game objects into standalone instanced scenes (ship exterior, resource deposits, ship machines, tools, carriable items, mining drone, UI panels/HUD)
+- Interaction prompt HUD: contextual action hints and persistent controls panel
+- Battery bar amber warning tier
+- Still greybox (art pass is M9)
 
-**Phases:** To be defined at M7 kickoff — requires Studio Head approval before agents begin work.
+**Phases:**
+- **Foundation** (TICKET-0123–TICKET-0124): Ship interior wireframes, cockpit console mesh
+- **Refactoring** (TICKET-0111–TICKET-0117, TICKET-0125): 7 scene architecture refactors + regression test
+- **Build & Features** (TICKET-0126–TICKET-0128, TICKET-0120, TICKET-0122): Ship interior scene, cockpit features, interaction prompt HUD, battery amber warning
+- **QA** (TICKET-0129–TICKET-0130): Code review and full loop QA
 
-**Dependencies:** M6
+**Tickets:** TICKET-0111 through TICKET-0117, TICKET-0120, TICKET-0122 through TICKET-0130
+
+| Phase | Ticket | Title | Type | Owner |
+|-------|--------|-------|------|-------|
+| Foundation | TICKET-0123 | Ship interior wireframes — cockpit, machine room, corridors, vestibule, viewport | DESIGN | ui-ux-designer |
+| Foundation | TICKET-0124 | Cockpit console — greybox 3D mesh placeholder | TASK | technical-artist |
+| Refactoring | TICKET-0111 | Ship exterior → standalone instanced scene | REFACTOR | technical-artist |
+| Refactoring | TICKET-0112 | Resource deposits → standalone instanced scenes | REFACTOR | gameplay-programmer |
+| Refactoring | TICKET-0113 | Ship machines → standalone instanced scenes | REFACTOR | gameplay-programmer |
+| Refactoring | TICKET-0114 | Tools (Hand Drill, Scanner) → standalone scenes | REFACTOR | gameplay-programmer |
+| Refactoring | TICKET-0115 | Carriable items (Spare Battery, Head Lamp) → standalone scenes | REFACTOR | gameplay-programmer |
+| Refactoring | TICKET-0116 | Mining drone → standalone instanced scene | REFACTOR | gameplay-programmer |
+| Refactoring | TICKET-0117 | UI panels/HUD → standalone instanced subscenes | REFACTOR | gameplay-programmer |
+| Refactoring | TICKET-0125 | Refactoring phase gate — regression test suite | TASK | qa-engineer |
+| Build & Features | TICKET-0126 | Ship interior scene — 24m×12m layout, cockpit, machine room, 4 zones | FEATURE | gameplay-programmer |
+| Build & Features | TICKET-0127 | Cockpit diegetic status displays — ship globals on wall | FEATURE | gameplay-programmer |
+| Build & Features | TICKET-0128 | Cockpit exterior viewport/window | FEATURE | gameplay-programmer |
+| Build & Features | TICKET-0120 | Interaction prompt HUD — contextual action hints | FEATURE | gameplay-programmer |
+| Build & Features | TICKET-0122 | Battery bar amber warning tier | FEATURE | gameplay-programmer |
+| QA | TICKET-0129 | Code review — M7 systems | REVIEW | systems-programmer |
+| QA | TICKET-0130 | QA testing — M7 full loop | TASK | qa-engineer |
+
+**Deferred items resolved by M7:** D-016, D-017, D-018, D-019, D-020, D-021, D-022, D-023, D-024
+
+**Dependencies:** M6 (icon pipeline provides the complete icon set needed for refactored UI scenes)
 
 **Notes:**
 - M7 serves as a live proof-of-concept for the automated agent orchestration system. By this milestone, the full multi-agent pipeline (producer, gameplay-programmer, systems-programmer, ui-ux-designer, technical-artist, qa-engineer) has been operating across several milestones. M7 is an opportunity to evaluate whether the orchestration system is functioning as intended — ticket throughput, phase gate enforcement, agent handoffs, and cross-agent dependency management — and to identify any gaps before scaling further.

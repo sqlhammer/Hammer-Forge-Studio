@@ -7,9 +7,9 @@ priority: P2
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-25
-updated_at: 2026-02-25
-milestone: ""
-phase: ""
+updated_at: 2026-02-26
+milestone: "M7"
+phase: "Refactoring"
 depends_on: []
 blocks: []
 tags: [scene-design, tools, hand-drill, scanner, refactor, standards]
@@ -38,3 +38,4 @@ Per the updated Scene Design standard, every conceptual game object must be its 
 
 ## Activity Log
 - 2026-02-25 [producer] Created ticket — standards refactor, self-contained scene rule
+- 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone

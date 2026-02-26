@@ -91,6 +91,65 @@ Per the UI style guide accessibility rule, state must always be conveyed by at l
 
 ---
 
+## Contrast Requirements
+
+> Added by TICKET-0104 — post-integration QA identified readability failures against in-game panel backgrounds.
+
+### Known Background Colors
+
+HUD icons appear on the following in-game surfaces (hex values from `docs/design/ui-style-guide.md`):
+
+| Surface | Hex | Opacity | Usage |
+|---------|-----|---------|-------|
+| Panel Background | `#0F1923` | 85% | HUD overlay panels, suit status bar, Ship Stats Sidebar, notification toasts |
+| Panel Background Light | `#1A2736` | 90% | Nested HUD elements, active state backgrounds |
+| Surface (Full-screen Overlay) | `#0A0F18` | 95% | Tech tree panel, drone programming panel |
+
+The effective darkest background is **`#0A0F18`** (Surface Deep Navy). All contrast thresholds are measured against this value.
+
+### Minimum Contrast Threshold
+
+The icon's rendered stroke color must achieve a **minimum contrast ratio of 4.5:1** against `#0A0F18`. At 16×16px (the smallest HUD display size), reduced pixel count makes readability acutely sensitive to contrast — 4.5:1 is the minimum viable threshold.
+
+All state-based colors from the Color Usage table above meet this threshold **except**:
+- `#94A3B8` (Neutral Slate): ~5:1 — borderline pass; use only for locked/idle states where reduced salience is intentional
+- `#007A63` (Deep Teal): ~2.8:1 — **fails**; do not use as a HUD icon stroke or modulate color
+- `#000000` (Black / unset currentColor): 1:1 — **fails**; do not allow as an icon color
+
+### Stroke Color Rule (Critical Fix)
+
+**Do not use `stroke="currentColor"` in HUD icon SVG files.** In Godot's SVG renderer, `currentColor` resolves to **black (`#000000`)** when no CSS `color` is set by the parent — producing near-zero contrast against dark panel backgrounds.
+
+**Required base stroke color:** Replace `stroke="currentColor"` on the `<svg>` root element with `stroke="#FFFFFF"` (white).
+
+Use `#FFFFFF` — not `#F1F5F9` — for HUD icons. Godot's `modulate` tints icons by multiplying each color channel:
+- `modulate = Color("#00D4AA")` on **white stroke** → teal stroke ✅
+- `modulate = Color("#00D4AA")` on **`#F1F5F9` stroke** → desaturated, bluish-teal (incorrect hue) ❌
+- `modulate = Color("#00D4AA")` on **black stroke** → black (invisible) ❌
+
+White is the only base color that allows GDScript `modulate` to produce the exact intended hue for every state.
+
+**Fill paths** that currently use `fill="currentColor"` (`icon_hud_star_filled`, `icon_hud_compass_ping`, and any thermometer-bulb fill) must also change to `fill="#FFFFFF"` in the SVG so that `modulate` controls the fill color correctly at runtime.
+
+### Outline Rule
+
+HUD icons are stroke-only by specification — no fill-based outline rule applies in normal usage.
+
+If a future revision adds a background or drop-shadow to a HUD icon (e.g., for accessibility improvement at very small sizes), the background element must use `fill="#0A0F18"` at 80%+ opacity as a backing plate, and must not reduce the icon stroke's effective contrast ratio below 4.5:1.
+
+### Approved Modulate Colors (Runtime Stroke Palette)
+
+HUD icon SVG files use `stroke="#FFFFFF"`. The effective display color is set at runtime via GDScript `modulate`. The 4 approved `modulate` values that meet the contrast threshold:
+
+1. **`#F1F5F9`** — Text Primary; default/inherit state for icons without explicit state colors (~17:1)
+2. **`#00D4AA`** — Primary Teal; Normal/Active state for battery, power, heat, oxygen, drone (~9:1)
+3. **`#FFB830`** — Amber; Warning state and fixed colors for unlock_chevron, notification_warning (~9:1)
+4. **`#FF6B5A`** — Coral; Critical state and fixed color for notification_critical (~5.5:1)
+
+Additional approved modulate colors from the state table: `#4ADE80` (Green, ~7:1) for integrity/unlock_check/notification_info; `#94A3B8` (Neutral, ~5:1) for drone idle and lock. Do not use any color outside this set or the state table in Color Usage above.
+
+---
+
 ## Style Constraints
 
 ### Stroke Specification

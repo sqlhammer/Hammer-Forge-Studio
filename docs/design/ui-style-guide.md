@@ -214,6 +214,7 @@ Icon design is split into two categories with separate authoritative specificati
 - HUD icons: stroke-based (`stroke="currentColor"`, `fill="none"`), 2px stroke weight, rounded caps/joins — color inherited via Godot `modulate` on `TextureRect`
 - Item icons: 2px stroke weight, rounded caps/joins, isometric/3-quarter view perspective
 - Never convey state through color alone — pair with shape or label (see Accessibility section)
+- **Contrast requirements** (approved stroke/fill palette and minimum luminance threshold against in-game panel backgrounds) are defined in each category's style guide — see the **Contrast Requirements** section of `icon-style-guide-items.md` and `icon-style-guide-hud.md`
 
 ---
 

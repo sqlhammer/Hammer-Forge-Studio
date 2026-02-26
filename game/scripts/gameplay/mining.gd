@@ -18,8 +18,6 @@ const EXTRACTION_DURATION: float = 3.0
 const EXTRACTION_AMOUNT: int = 8
 const MINING_MAX_RANGE: float = 5.0
 
-## Physics layers for interaction raycast
-const LAYER_INTERACTABLE: int = 1 << 3  # Layer 4
 const MINING_RAY_LENGTH: float = 6.0
 
 ## Minigame tuning

@@ -12,11 +12,6 @@ const DEPOSIT_COLLISION_RADIUS: float = 1.5
 ## Ship interior is placed underground to isolate it from the exterior world.
 const INTERIOR_Y_OFFSET: float = -50.0
 
-## Physics layers
-const LAYER_PLAYER: int = 1 << 0  # Layer 1
-const LAYER_ENVIRONMENT: int = 1 << 2  # Layer 3
-const LAYER_INTERACTABLE: int = 1 << 3  # Layer 4
-
 # ── Private Variables ─────────────────────────────────────
 var _player: Node3D = null
 var _first_person: CharacterBody3D = null
@@ -101,7 +96,7 @@ func _build_environment() -> void:
 func _build_ground() -> void:
 	var ground := StaticBody3D.new()
 	ground.name = "Ground"
-	ground.collision_layer = LAYER_ENVIRONMENT
+	ground.collision_layer = PhysicsLayers.ENVIRONMENT
 	ground.collision_mask = 0
 
 	# Visual mesh
@@ -147,7 +142,7 @@ func _build_boundaries() -> void:
 	for i: int in range(4):
 		var wall := StaticBody3D.new()
 		wall.name = "Wall_%d" % i
-		wall.collision_layer = LAYER_ENVIRONMENT
+		wall.collision_layer = PhysicsLayers.ENVIRONMENT
 		wall.collision_mask = 0
 		wall.position = offsets[i]
 
@@ -195,8 +190,8 @@ func _spawn_player() -> void:
 
 	# Set player collision layer
 	if _first_person:
-		_first_person.collision_layer = LAYER_PLAYER
-		_first_person.collision_mask = LAYER_ENVIRONMENT | LAYER_INTERACTABLE
+		_first_person.collision_layer = PhysicsLayers.PLAYER
+		_first_person.collision_mask = PhysicsLayers.ENVIRONMENT | PhysicsLayers.INTERACTABLE
 
 func _generate_deposits() -> void:
 	_deposit_container = Node3D.new()
@@ -236,7 +231,7 @@ func _generate_deposits() -> void:
 		# Add collision body for raycast detection
 		var body := StaticBody3D.new()
 		body.name = "InteractBody"
-		body.collision_layer = LAYER_INTERACTABLE
+		body.collision_layer = PhysicsLayers.INTERACTABLE
 		body.collision_mask = 0
 		var col := CollisionShape3D.new()
 		var sphere := SphereShape3D.new()
@@ -326,7 +321,7 @@ func _setup_ship_interior() -> void:
 	_ship_enter_zone = ShipEnterZone.new()
 	_ship_enter_zone.name = "ShipEnterZone"
 	_ship_enter_zone.collision_layer = 0
-	_ship_enter_zone.collision_mask = LAYER_PLAYER
+	_ship_enter_zone.collision_mask = PhysicsLayers.PLAYER
 	var enter_col := CollisionShape3D.new()
 	var enter_shape := BoxShape3D.new()
 	enter_shape.size = Vector3(12.0, 6.0, 10.0)

@@ -6,8 +6,6 @@ extends TestSuite
 
 
 # ── Constants ─────────────────────────────────────────────
-const LAYER_ENVIRONMENT: int = 1 << 2
-const LAYER_INTERACTABLE: int = 1 << 3
 const MODEL_SPACING: float = 100.0
 const DEFAULT_COVERAGE_THRESHOLD: float = 0.85
 const LARGE_MODEL_COVERAGE_THRESHOLD: float = 0.92
@@ -217,7 +215,7 @@ func _build_model_configs() -> void:
 	ship.scale = Vector3(24.0, 24.0, 24.0)
 	ship.mesh_offset = Vector3(0.0, 6.5, 0.0)
 	ship.position = Vector3(0.0, 0.0, 0.0)
-	ship.collision_mask = LAYER_ENVIRONMENT
+	ship.collision_mask = PhysicsLayers.ENVIRONMENT
 	ship.expect_solid = true
 	ship.max_allowed_gaps = 0
 	ship.coverage_threshold = LARGE_MODEL_COVERAGE_THRESHOLD
@@ -233,13 +231,13 @@ func _build_model_configs() -> void:
 	recycler.scene_path = "res://assets/meshes/machines/mesh_recycler_module.glb"
 	recycler.scale = Vector3.ONE
 	recycler.position = Vector3(MODEL_SPACING, 0.0, 0.0)
-	recycler.collision_mask = LAYER_ENVIRONMENT
+	recycler.collision_mask = PhysicsLayers.ENVIRONMENT
 	recycler.expect_solid = true
 	recycler.max_allowed_gaps = 0
 	recycler.coverage_threshold = DEFAULT_COVERAGE_THRESHOLD
 	recycler.collision_setup = func(root: Node3D) -> StaticBody3D:
 		return _create_box_collision(
-			root, Vector3(1.8, 1.4, 1.2), Vector3(0.0, 0.7, 0.0), LAYER_ENVIRONMENT
+			root, Vector3(1.8, 1.4, 1.2), Vector3(0.0, 0.7, 0.0), PhysicsLayers.ENVIRONMENT
 		)
 	_configs.append(recycler)
 
@@ -249,13 +247,13 @@ func _build_model_configs() -> void:
 	fabricator.scene_path = "res://assets/meshes/machines/mesh_fabricator_module.glb"
 	fabricator.scale = Vector3.ONE
 	fabricator.position = Vector3(MODEL_SPACING * 2.0, 0.0, 0.0)
-	fabricator.collision_mask = LAYER_ENVIRONMENT
+	fabricator.collision_mask = PhysicsLayers.ENVIRONMENT
 	fabricator.expect_solid = true
 	fabricator.max_allowed_gaps = 0
 	fabricator.coverage_threshold = DEFAULT_COVERAGE_THRESHOLD
 	fabricator.collision_setup = func(root: Node3D) -> StaticBody3D:
 		return _create_box_collision(
-			root, Vector3(2.0, 1.2, 1.2), Vector3(0.0, 0.6, 0.0), LAYER_ENVIRONMENT
+			root, Vector3(2.0, 1.2, 1.2), Vector3(0.0, 0.6, 0.0), PhysicsLayers.ENVIRONMENT
 		)
 	_configs.append(fabricator)
 
@@ -266,13 +264,13 @@ func _build_model_configs() -> void:
 	resource_node.scale = Vector3(3.2, 3.2, 3.2)
 	resource_node.mesh_offset = Vector3(0.0, 0.9, 0.0)
 	resource_node.position = Vector3(MODEL_SPACING * 3.0, 0.0, 0.0)
-	resource_node.collision_mask = LAYER_INTERACTABLE
+	resource_node.collision_mask = PhysicsLayers.INTERACTABLE
 	resource_node.expect_solid = true
 	resource_node.max_allowed_gaps = 0
 	resource_node.coverage_threshold = DEFAULT_COVERAGE_THRESHOLD
 	resource_node.collision_setup = func(root: Node3D) -> StaticBody3D:
 		return _create_sphere_collision(
-			root, 1.5, Vector3(0.0, 0.9, 0.0), LAYER_INTERACTABLE
+			root, 1.5, Vector3(0.0, 0.9, 0.0), PhysicsLayers.INTERACTABLE
 		)
 	_configs.append(resource_node)
 
@@ -365,7 +363,7 @@ func _create_vhacd_collision(root: Node3D) -> StaticBody3D:
 			(child as MeshInstance3D).create_multiple_convex_collisions(decomp)
 			for body_child: Node in child.get_children():
 				if body_child is StaticBody3D:
-					(body_child as StaticBody3D).collision_layer = LAYER_ENVIRONMENT
+					(body_child as StaticBody3D).collision_layer = PhysicsLayers.ENVIRONMENT
 					(body_child as StaticBody3D).collision_mask = 0
 					return body_child as StaticBody3D
 			break

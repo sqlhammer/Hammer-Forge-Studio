@@ -17,9 +17,6 @@ const ANALYSIS_DURATION: float = 2.5
 const ANALYSIS_MAX_RANGE: float = 5.0
 const FACING_DISTANCE_CONE_DEG: float = 45.0
 
-## Physics layers for interaction raycast
-const LAYER_ENVIRONMENT: int = 1 << 2  # Layer 3
-const LAYER_INTERACTABLE: int = 1 << 3  # Layer 4
 const INTERACTION_RAY_LENGTH: float = 6.0
 
 ## Ping ring visual
@@ -171,7 +168,7 @@ func _cast_interaction_ray() -> Dictionary:
 	var forward: Vector3 = -_camera.global_transform.basis.z
 	var to: Vector3 = from + forward * INTERACTION_RAY_LENGTH
 	var query := PhysicsRayQueryParameters3D.create(from, to)
-	query.collision_mask = LAYER_INTERACTABLE
+	query.collision_mask = PhysicsLayers.INTERACTABLE
 	return space_state.intersect_ray(query)
 
 func _spawn_ping_ring() -> void:

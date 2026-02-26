@@ -53,6 +53,23 @@ python orchestrator/approve_gate.py --reject           # reject
 python orchestrator/approve_gate.py --comment "LGTM"   # approve with note
 ```
 
+### Resume Planning After New Tickets Are Added
+
+If the conductor has gone `IDLE` (all known tickets were DONE) and new tickets are then created, use this helper to reset it to `PLANNING` so it picks them up:
+
+```bash
+python orchestrator/resume_planning.py          # confirms before writing
+python orchestrator/resume_planning.py --force  # no prompt
+```
+
+Then re-run the conductor as normal:
+
+```bash
+python orchestrator/conductor.py <milestone>
+```
+
+The script is a no-op if the conductor is not currently `IDLE`.
+
 ### View Logs
 
 ```bash
@@ -84,6 +101,7 @@ Edit `orchestrator/config.json` to adjust:
 orchestrator/
 ├── conductor.py          # Main loop (entry point)
 ├── approve_gate.py       # CLI: approve/reject a gate
+├── resume_planning.py    # CLI: reset IDLE → PLANNING when new tickets added
 ├── status.py             # CLI: show current state
 ├── config.json           # Configuration
 ├── state.json            # Runtime state (auto-created, gitignored)
@@ -105,6 +123,7 @@ orchestrator/
 
 ```
 IDLE -> PLANNING -> DISPATCHING -> WORKING -> EVALUATING -> PLANNING (loop)
+IDLE -> PLANNING (resume_planning.py — new tickets added)
                                                          -> GATE_BLOCKED (phase done)
                                                          -> HALTED (error)
 GATE_BLOCKED -> PLANNING (approved) | HALTED (rejected)

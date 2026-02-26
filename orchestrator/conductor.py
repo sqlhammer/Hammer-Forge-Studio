@@ -352,21 +352,27 @@ def extract_json_from_output(output: str) -> dict:
 
     # Try direct parse first
     try:
-        return json.loads(output)
+        result = json.loads(output)
+        if isinstance(result, dict):
+            return result
+        # If parsed as list/other type, fall through to brace extraction
     except json.JSONDecodeError:
         pass
 
-    # Try to find JSON object in output (Claude sometimes wraps in markdown)
+    # Try to find JSON object in output (Claude sometimes wraps in markdown
+    # or returns an array instead of an object)
     # Look for the outermost { ... }
     brace_start = output.find("{")
     brace_end = output.rfind("}")
     if brace_start != -1 and brace_end != -1 and brace_end > brace_start:
         try:
-            return json.loads(output[brace_start:brace_end + 1])
+            result = json.loads(output[brace_start:brace_end + 1])
+            if isinstance(result, dict):
+                return result
         except json.JSONDecodeError:
             pass
 
-    raise ValueError(f"Could not extract JSON from output: {output[:200]}...")
+    raise ValueError(f"Could not extract JSON object from output: {output[:200]}...")
 
 
 # ---------------------------------------------------------------------------

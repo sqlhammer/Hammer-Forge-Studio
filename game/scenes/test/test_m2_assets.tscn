@@ -16,7 +16,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, 0)
 [node name="PlayerCharacter" type="Node3D" parent="." instance=ExtResource("2_kermr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0)
 
-[node name="ShipExterior" type="Node3D" parent="." instance=ExtResource("3_nqfol")]
+[node name="ShipExterior" type="StaticBody3D" parent="." instance=ExtResource("3_nqfol")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0)
 
 [node name="ResourceNode" type="Node3D" parent="." instance=ExtResource("4_q17av")]

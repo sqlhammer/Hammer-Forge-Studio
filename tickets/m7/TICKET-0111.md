@@ -2,7 +2,7 @@
 id: TICKET-0111
 title: "Refactor — Ship exterior as a standalone instanced scene"
 type: REFACTOR
-status: TODO
+status: IN_PROGRESS
 priority: P2
 owner: technical-artist
 created_by: producer
@@ -38,3 +38,4 @@ Per the updated Scene Design standard in `docs/engineering/coding-standards.md`,
 ## Activity Log
 - 2026-02-25 [producer] Created ticket — standards refactor, self-contained scene rule
 - 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone
+- 2026-02-26 [technical-artist] Starting work — creating ship_exterior.tscn wrapper scene

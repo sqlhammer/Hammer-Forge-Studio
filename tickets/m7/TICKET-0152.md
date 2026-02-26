@@ -2,7 +2,7 @@
 id: TICKET-0152
 title: "Bugfix — compass and scan progress bar anchored to upper-left instead of top-center"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: studio-head
@@ -61,3 +61,4 @@ Both elements are anchored/offset to the upper-left corner of the screen.
 ## Activity Log
 - 2026-02-26 [studio-head] Created — observed during post-M7 playtesting before QA sign-off
 - 2026-02-26 [gameplay-programmer] Status → IN_PROGRESS — Starting work
+- 2026-02-26 [gameplay-programmer] Status → DONE — Fixed compass and mining progress bar anchors in .tscn scene files; removed conflicting runtime anchor code. 480/480 tests pass. Commit: 4ec811c, PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/116

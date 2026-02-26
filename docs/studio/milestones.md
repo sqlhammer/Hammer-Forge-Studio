@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-02-25
+**Last Updated:** 2026-02-26
 
 > Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
@@ -31,7 +31,7 @@
 | M3 | First Playable — Minimal ship in world, scan/mine loop | — | Complete | 13 | 0 | 13 | 2026-02-23 |
 | M4 | Ship Infrastructure — Ship globals, module system, Recycler, greybox interior | — | Complete | 21 | 0 | 21 | 2026-02-24 |
 | M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Complete | 38 | 0 | 38 | 2026-02-25 |
-| M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Active | 17 | 16 | 1 | — |
+| M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit and machine room buildout | — | Planning | — | — | — | — |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | — | — | — | — |
 | M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
@@ -316,6 +316,8 @@
 3. **Milestone QA Close** — grants final sign-off on TICKET-0102 icon integration test
 
 **Dependencies:** M5 (provides the complete set of in-game systems, UI panels, and HUD elements whose icons are required)
+
+**Closed:** 2026-02-26 — QA sign-off by qa-engineer (467/467 tests passing). Studio Head approved. 29 production icons integrated across all UI locations.
 
 ---
 

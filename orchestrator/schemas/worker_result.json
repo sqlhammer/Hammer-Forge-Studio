@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Worker Result",
+  "description": "Structured output from a worker agent after executing a ticket.",
+  "type": "object",
+  "required": ["ticket", "outcome", "summary"],
+  "properties": {
+    "ticket": {
+      "type": "string",
+      "description": "Ticket ID that was worked on (e.g. 'TICKET-0090')."
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["done", "blocked", "failed", "partial"],
+      "description": "Final status of the work."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Human-readable summary of what was accomplished or why it failed."
+    },
+    "commit_hash": {
+      "type": "string",
+      "description": "Git commit hash if work was committed."
+    },
+    "pr_url": {
+      "type": "string",
+      "description": "Pull request URL if a PR was created."
+    },
+    "files_changed": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of files created or modified."
+    },
+    "new_gd_scripts": {
+      "type": "boolean",
+      "description": "True if new .gd script files were created (triggers UID commit procedure)."
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Description of blocking issues if outcome is blocked or failed."
+    }
+  },
+  "additionalProperties": false
+}

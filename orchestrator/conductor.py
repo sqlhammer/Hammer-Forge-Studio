@@ -1,0 +1,1046 @@
+#!/usr/bin/env python3
+"""conductor.py — Orchestration loop for Hammer Forge Studio.
+
+Usage:
+    python orchestrator/conductor.py <milestone> <phase>
+    python orchestrator/conductor.py --resume
+    python orchestrator/conductor.py --status
+
+The Conductor is a dumb executor. The Producer (Claude) is the intelligent
+scheduler. The Conductor never decides which agent to spawn or which ticket
+to assign — it only executes what the Producer outputs.
+"""
+
+import argparse
+import asyncio
+import json
+import os
+import platform
+import signal
+import subprocess
+import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+ORCH_DIR = REPO_ROOT / "orchestrator"
+CONFIG_PATH = ORCH_DIR / "config.json"
+STATE_PATH = ORCH_DIR / "state.json"
+ACTIVITY_LOG = ORCH_DIR / "activity.log"
+PENDING_GATE_PATH = ORCH_DIR / "pending_gate.json"
+GATE_RESPONSE_PATH = ORCH_DIR / "gate_response.json"
+PROMPTS_DIR = ORCH_DIR / "prompts"
+SCHEMAS_DIR = ORCH_DIR / "schemas"
+RESULTS_DIR = ORCH_DIR / "results"
+LOGS_DIR = ORCH_DIR / "logs"
+AGENTS_DIR = REPO_ROOT / "agents"
+WORKTREES_DIR = REPO_ROOT / ".claude" / "worktrees"
+
+# ---------------------------------------------------------------------------
+# Godot MCP tool names by tier
+# ---------------------------------------------------------------------------
+
+# Tier 3 only (full engine access beyond scene construction)
+TIER_3_TOOLS = [
+    "mcp__godot-mcp__create_script",
+    "mcp__godot-mcp__attach_script",
+    "mcp__godot-mcp__edit_file",
+    "mcp__godot-mcp__execute_editor_script",
+    "mcp__godot-mcp__get_godot_errors",
+    "mcp__godot-mcp__clear_output_logs",
+]
+
+# Tier 2 only (scene construction beyond read/observe)
+TIER_2_TOOLS = [
+    "mcp__godot-mcp__create_scene",
+    "mcp__godot-mcp__add_node",
+    "mcp__godot-mcp__add_resource",
+    "mcp__godot-mcp__update_property",
+    "mcp__godot-mcp__delete_node",
+    "mcp__godot-mcp__delete_scene",
+    "mcp__godot-mcp__duplicate_node",
+    "mcp__godot-mcp__move_node",
+    "mcp__godot-mcp__add_scene",
+    "mcp__godot-mcp__open_scene",
+    "mcp__godot-mcp__play_scene",
+    "mcp__godot-mcp__stop_running_scene",
+    "mcp__godot-mcp__simulate_input",
+    "mcp__godot-mcp__set_anchor_preset",
+    "mcp__godot-mcp__set_anchor_values",
+]
+
+# Tier 1 (read/observe) — these are never blocked for tiers 1–3
+# Note: get_godot_errors is Tier 3 despite the get_* prefix
+TIER_1_TOOLS = [
+    "mcp__godot-mcp__get_scene_tree",
+    "mcp__godot-mcp__get_filesystem_tree",
+    "mcp__godot-mcp__get_project_info",
+    "mcp__godot-mcp__get_scene_file_content",
+    "mcp__godot-mcp__search_files",
+    "mcp__godot-mcp__get_open_scripts",
+    "mcp__godot-mcp__view_script",
+    "mcp__godot-mcp__get_editor_screenshot",
+    "mcp__godot-mcp__get_running_scene_screenshot",
+    "mcp__godot-mcp__uid_to_project_path",
+    "mcp__godot-mcp__project_path_to_uid",
+    "mcp__godot-mcp__get_input_map",
+]
+
+# All Godot MCP tools (for tier 0 — block everything)
+ALL_GODOT_TOOLS = TIER_1_TOOLS + TIER_2_TOOLS + TIER_3_TOOLS
+
+
+# ---------------------------------------------------------------------------
+# Utility
+# ---------------------------------------------------------------------------
+
+def now_iso() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+
+
+def load_json(path: Path) -> dict:
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def write_json(path: Path, data: dict):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+
+
+def format_duration(seconds: float) -> str:
+    m, s = divmod(int(seconds), 60)
+    return f"{m}m {s}s"
+
+
+def format_cost(usd: float) -> str:
+    return f"${usd:.2f}"
+
+
+# ---------------------------------------------------------------------------
+# Activity Logger
+# ---------------------------------------------------------------------------
+
+class ActivityLogger:
+    def __init__(self, path: Path):
+        self.path = path
+
+    def log(self, tag: str, message: str):
+        ts = now_iso()
+        line = f"{ts} [{tag:<12s}] {message}\n"
+        with open(self.path, "a", encoding="utf-8") as f:
+            f.write(line)
+        # Also print to console
+        print(line.rstrip())
+
+
+# ---------------------------------------------------------------------------
+# Config helpers
+# ---------------------------------------------------------------------------
+
+def get_model(config: dict, agent_slug: str) -> str:
+    overrides = config["models"].get("overrides", {})
+    return overrides.get(agent_slug, config["models"]["default_worker"])
+
+
+def get_budget(config: dict, agent_slug: str) -> float:
+    overrides = config["budgets"].get("overrides", {})
+    return overrides.get(agent_slug, config["budgets"]["default_worker_usd"])
+
+
+def get_timeout(config: dict, agent_slug: str) -> int:
+    overrides = config["timeouts"].get("overrides", {})
+    return overrides.get(agent_slug, config["timeouts"]["default_minutes"])
+
+
+def get_blocked_tools(config: dict, agent_slug: str) -> list[str]:
+    """Return list of Godot MCP tool names this agent is NOT allowed to use."""
+    tiers = config.get("tool_tiers", {})
+
+    if agent_slug in tiers.get("0", []):
+        return ALL_GODOT_TOOLS
+    elif agent_slug in tiers.get("1", []):
+        return TIER_2_TOOLS + TIER_3_TOOLS
+    elif agent_slug in tiers.get("2", []):
+        return TIER_3_TOOLS
+    elif agent_slug in tiers.get("3", []):
+        return []
+    else:
+        # Unknown agent — block all Godot tools as a safety default
+        return ALL_GODOT_TOOLS
+
+
+# ---------------------------------------------------------------------------
+# State management
+# ---------------------------------------------------------------------------
+
+def create_initial_state(milestone: str, phase: str) -> dict:
+    return {
+        "status": "PLANNING",
+        "milestone": milestone,
+        "phase": phase,
+        "wave_number": 0,
+        "started_at": now_iso(),
+        "active_workers": [],
+        "completed_waves": [],
+        "total_cost_usd": 0.0,
+        "retries": {},
+    }
+
+
+def load_state() -> dict:
+    if STATE_PATH.exists():
+        return load_json(STATE_PATH)
+    return None
+
+
+def save_state(state: dict):
+    write_json(STATE_PATH, state)
+
+
+# ---------------------------------------------------------------------------
+# Worktree helpers
+# ---------------------------------------------------------------------------
+
+def create_worktree(agent_slug: str, ticket_id: str) -> tuple[Path, str]:
+    """Create a git worktree for the worker. Returns (worktree_path, branch_name)."""
+    safe_slug = agent_slug.replace("/", "-")
+    safe_ticket = ticket_id.replace("/", "-")
+    worktree_name = f"orch-{safe_slug}-{safe_ticket}"
+    branch_name = f"orch/{agent_slug}/{ticket_id}"
+    worktree_path = WORKTREES_DIR / worktree_name
+
+    if worktree_path.exists():
+        # Clean up stale worktree
+        subprocess.run(
+            ["git", "worktree", "remove", "--force", str(worktree_path)],
+            cwd=str(REPO_ROOT), capture_output=True
+        )
+
+    # Delete the branch if it exists (leftover from a previous attempt)
+    subprocess.run(
+        ["git", "branch", "-D", branch_name],
+        cwd=str(REPO_ROOT), capture_output=True
+    )
+
+    # Create worktree with new branch from HEAD
+    result = subprocess.run(
+        ["git", "worktree", "add", "-b", branch_name, str(worktree_path)],
+        cwd=str(REPO_ROOT), capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Failed to create worktree: {result.stderr}")
+
+    return worktree_path, branch_name
+
+
+def remove_worktree(worktree_path: Path, branch_name: str):
+    """Remove a worktree and its branch."""
+    subprocess.run(
+        ["git", "worktree", "remove", "--force", str(worktree_path)],
+        cwd=str(REPO_ROOT), capture_output=True
+    )
+    subprocess.run(
+        ["git", "branch", "-D", branch_name],
+        cwd=str(REPO_ROOT), capture_output=True
+    )
+
+
+# ---------------------------------------------------------------------------
+# Prompt rendering
+# ---------------------------------------------------------------------------
+
+def render_template(template_path: Path, variables: dict) -> str:
+    """Simple {variable} substitution in a template file."""
+    text = template_path.read_text(encoding="utf-8")
+    for key, value in variables.items():
+        text = text.replace(f"{{{key}}}", str(value))
+    return text
+
+
+# ---------------------------------------------------------------------------
+# Claude CLI interface
+# ---------------------------------------------------------------------------
+
+async def run_claude(
+    prompt: str,
+    model: str,
+    budget: float,
+    blocked_tools: list[str],
+    agent_claude_md: Path | None = None,
+    output_json: bool = True,
+    json_schema: dict | None = None,
+    cwd: Path | None = None,
+    timeout_minutes: int = 30,
+    log_path: Path | None = None,
+) -> tuple[int, str, str]:
+    """Run claude -p as a subprocess. Returns (exit_code, stdout, stderr)."""
+    cmd = ["claude", "-p", "--model", model, "--verbose"]
+
+    if budget > 0:
+        cmd.extend(["--max-turns", "200"])
+
+    if blocked_tools:
+        cmd.extend(["--disallowed-tools", ",".join(blocked_tools)])
+
+    if output_json:
+        cmd.extend(["--output-format", "json"])
+
+    if json_schema:
+        cmd.extend(["--output-format", "stream-json"])
+
+    if agent_claude_md and agent_claude_md.exists():
+        agent_context = agent_claude_md.read_text(encoding="utf-8")
+        cmd.extend(["--append-system-prompt", agent_context])
+
+    cmd.extend(["--dangerously-skip-permissions"])
+
+    # The prompt goes last
+    cmd.append(prompt)
+
+    effective_cwd = str(cwd) if cwd else str(REPO_ROOT)
+    timeout_seconds = timeout_minutes * 60
+
+    if log_path:
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        log_file = open(log_path, "w", encoding="utf-8")
+    else:
+        log_file = None
+
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            cwd=effective_cwd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+
+        try:
+            stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                proc.communicate(), timeout=timeout_seconds
+            )
+        except asyncio.TimeoutError:
+            proc.kill()
+            await proc.communicate()
+            return (-1, "", f"TIMEOUT after {timeout_minutes}m")
+
+        stdout = stdout_bytes.decode("utf-8", errors="replace")
+        stderr = stderr_bytes.decode("utf-8", errors="replace")
+
+        if log_file:
+            log_file.write(f"=== STDOUT ===\n{stdout}\n")
+            log_file.write(f"=== STDERR ===\n{stderr}\n")
+            log_file.write(f"=== EXIT CODE: {proc.returncode} ===\n")
+
+        return (proc.returncode, stdout, stderr)
+
+    finally:
+        if log_file:
+            log_file.close()
+
+
+def extract_json_from_output(output: str) -> dict:
+    """Extract JSON from Claude output, handling potential wrapper text."""
+    output = output.strip()
+
+    # Try direct parse first
+    try:
+        return json.loads(output)
+    except json.JSONDecodeError:
+        pass
+
+    # Try to find JSON object in output (Claude sometimes wraps in markdown)
+    # Look for the outermost { ... }
+    brace_start = output.find("{")
+    brace_end = output.rfind("}")
+    if brace_start != -1 and brace_end != -1 and brace_end > brace_start:
+        try:
+            return json.loads(output[brace_start:brace_end + 1])
+        except json.JSONDecodeError:
+            pass
+
+    raise ValueError(f"Could not extract JSON from output: {output[:200]}...")
+
+
+# ---------------------------------------------------------------------------
+# Windows toast notification
+# ---------------------------------------------------------------------------
+
+def fire_toast(title: str, message: str):
+    """Send a Windows toast notification via PowerShell."""
+    if platform.system() != "Windows":
+        return
+    try:
+        ps_script = f"""
+        [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+        [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
+        $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+        $xml.LoadXml('<toast><visual><binding template="ToastText02"><text id="1">{title}</text><text id="2">{message}</text></binding></visual></toast>')
+        $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
+        [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("Hammer Forge Studio").Show($toast)
+        """
+        subprocess.Popen(
+            ["powershell", "-NoProfile", "-Command", ps_script],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+    except Exception:
+        pass  # Best-effort notification
+
+
+# ---------------------------------------------------------------------------
+# Conductor
+# ---------------------------------------------------------------------------
+
+class Conductor:
+    def __init__(self, config_path: Path = CONFIG_PATH, resume: bool = False):
+        self.config = load_json(config_path)
+        self.logger = ActivityLogger(ACTIVITY_LOG)
+        self.state = None
+        self.shutdown_requested = False
+
+        if resume:
+            self.state = load_state()
+            if self.state is None:
+                print("ERROR: No state.json found. Cannot resume.")
+                sys.exit(1)
+            self.logger.log("SYSTEM", "Resumed from saved state")
+
+        # Ensure output dirs exist
+        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+        LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+    def setup_signal_handlers(self):
+        """Catch Ctrl+C for graceful shutdown."""
+        def handler(sig, frame):
+            self.logger.log("SYSTEM", "Shutdown requested (SIGINT)")
+            self.shutdown_requested = True
+        signal.signal(signal.SIGINT, handler)
+
+    async def run(self, milestone: str, phase: str):
+        """Main orchestration loop."""
+        if self.state is None:
+            self.state = create_initial_state(milestone, phase)
+            save_state(self.state)
+
+        self.setup_signal_handlers()
+        self.logger.log("SYSTEM",
+            f"Started (milestone={self.state['milestone']}, phase={self.state['phase']})")
+
+        while not self.shutdown_requested:
+            status = self.state["status"]
+
+            if status == "PLANNING":
+                await self._do_planning()
+
+            elif status == "DISPATCHING":
+                await self._do_dispatching()
+
+            elif status == "WORKING":
+                await self._do_working()
+
+            elif status == "EVALUATING":
+                await self._do_evaluating()
+
+            elif status == "GATE_BLOCKED":
+                await self._do_gate_blocked()
+
+            elif status == "HALTED":
+                self.logger.log("HALTED",
+                    "System halted. Run with --resume after resolving the issue.")
+                break
+
+            elif status == "IDLE":
+                self.logger.log("SYSTEM", "Idle — no more work.")
+                break
+
+            else:
+                self.logger.log("ERROR", f"Unknown state: {status}")
+                self.state["status"] = "HALTED"
+
+            save_state(self.state)
+
+            if self.shutdown_requested:
+                self.logger.log("SYSTEM", "Graceful shutdown — saving state.")
+                save_state(self.state)
+                break
+
+        self.logger.log("SYSTEM", "Conductor exiting.")
+
+    # ------------------------------------------------------------------
+    # PLANNING
+    # ------------------------------------------------------------------
+
+    async def _do_planning(self):
+        """Ask the Producer for the next wave plan."""
+        self.state["wave_number"] += 1
+        wave_num = self.state["wave_number"]
+
+        self.logger.log("PLAN", f"Requesting wave {wave_num} plan from Producer...")
+
+        # Build prompt
+        retry_tickets = [
+            tid for tid, count in self.state.get("retries", {}).items()
+            if count > 0
+        ]
+        template_vars = {
+            "milestone": self.state["milestone"],
+            "phase": self.state["phase"],
+            "wave_number": str(wave_num),
+            "retry_tickets": json.dumps(retry_tickets) if retry_tickets else "none",
+            "completed_waves": json.dumps(self.state.get("completed_waves", [])),
+            "max_parallel": str(self.config["concurrency"]["max_parallel_workers"]),
+        }
+        prompt = render_template(PROMPTS_DIR / "plan_wave.md", template_vars)
+
+        # Call Producer
+        model = self.config["models"]["producer"]
+        budget = self.config["budgets"]["producer_usd"]
+        blocked = get_blocked_tools(self.config, "producer")
+
+        exit_code, stdout, stderr = await run_claude(
+            prompt=prompt,
+            model=model,
+            budget=budget,
+            blocked_tools=blocked,
+            output_json=True,
+            cwd=REPO_ROOT,
+            timeout_minutes=10,
+            log_path=LOGS_DIR / f"producer-wave{wave_num}-{now_iso().replace(':', '')}.log",
+        )
+
+        if exit_code != 0:
+            self.logger.log("ERROR", f"Producer exited with code {exit_code}: {stderr[:200]}")
+            # Retry up to 3 times
+            if self.state.get("_producer_retries", 0) < 3:
+                self.state["_producer_retries"] = self.state.get("_producer_retries", 0) + 1
+                self.logger.log("RETRY", f"Retrying Producer (attempt {self.state['_producer_retries']}/3)")
+                self.state["wave_number"] -= 1  # Don't increment wave on retry
+                return
+            self.logger.log("ERROR", "Producer failed 3 times. Halting.")
+            self.state["status"] = "HALTED"
+            return
+
+        self.state.pop("_producer_retries", None)
+
+        # Parse plan
+        try:
+            plan = extract_json_from_output(stdout)
+        except ValueError as e:
+            self.logger.log("ERROR", f"Failed to parse Producer JSON: {e}")
+            self.state["status"] = "HALTED"
+            return
+
+        action = plan.get("action", "error")
+        summary = plan.get("summary", "")
+        self.logger.log("PLAN", f"Wave {wave_num} action={action}: {summary}")
+
+        if action == "spawn_agents":
+            wave = plan.get("wave", [])
+            if not wave:
+                self.logger.log("PLAN", "Empty wave — treating as no_work.")
+                self.state["status"] = "IDLE"
+                return
+            # Store wave plan for dispatching
+            self.state["_pending_wave"] = wave
+            assignments = ", ".join(
+                f"{a['ticket']}→{a['agent']}" for a in wave
+            )
+            self.logger.log("PLAN",
+                f"Wave {wave_num}: {len(wave)} assignments [{assignments}]")
+            self.state["status"] = "DISPATCHING"
+
+        elif action == "gate_blocked":
+            gate = plan.get("gate", {})
+            self.state["status"] = "GATE_BLOCKED"
+            self.state["_pending_gate"] = gate
+            self.logger.log("GATE",
+                f"Phase \"{gate.get('phase', '?')}\" complete — awaiting approval")
+
+        elif action == "no_work":
+            self.logger.log("PLAN", "No workable tickets. Idling.")
+            self.state["status"] = "IDLE"
+
+        elif action == "milestone_complete":
+            self.logger.log("SYSTEM",
+                f"Milestone {self.state['milestone']} complete!")
+            self.state["status"] = "IDLE"
+
+        elif action == "error":
+            self.logger.log("ERROR", f"Producer reported error: {summary}")
+            self.state["status"] = "HALTED"
+
+    # ------------------------------------------------------------------
+    # DISPATCHING
+    # ------------------------------------------------------------------
+
+    async def _do_dispatching(self):
+        """Create worktrees and spawn workers for the planned wave."""
+        wave = self.state.pop("_pending_wave", [])
+        if not wave:
+            self.state["status"] = "PLANNING"
+            return
+
+        workers = []
+        for assignment in wave:
+            agent_slug = assignment["agent"]
+            ticket_id = assignment["ticket"]
+            budget = assignment.get("budget_usd", get_budget(self.config, agent_slug))
+            needs_worktree = assignment.get("needs_worktree", True)
+            needs_godot = assignment.get("needs_godot_mcp", False)
+            supplement = assignment.get("prompt_supplement", "")
+
+            # Create worktree if needed
+            worktree_path = None
+            branch_name = None
+            if needs_worktree:
+                try:
+                    worktree_path, branch_name = create_worktree(agent_slug, ticket_id)
+                except RuntimeError as e:
+                    self.logger.log("ERROR", f"Worktree creation failed for {ticket_id}: {e}")
+                    continue
+
+            workers.append({
+                "agent": agent_slug,
+                "ticket": ticket_id,
+                "budget_usd": budget,
+                "needs_worktree": needs_worktree,
+                "needs_godot_mcp": needs_godot,
+                "worktree_path": str(worktree_path) if worktree_path else None,
+                "branch": branch_name,
+                "prompt_supplement": supplement,
+                "started_at": now_iso(),
+            })
+
+        self.state["active_workers"] = workers
+        self.state["status"] = "WORKING"
+        save_state(self.state)
+
+    # ------------------------------------------------------------------
+    # WORKING
+    # ------------------------------------------------------------------
+
+    async def _do_working(self):
+        """Spawn all workers concurrently and wait for them to complete."""
+        workers = self.state.get("active_workers", [])
+        if not workers:
+            self.state["status"] = "EVALUATING"
+            return
+
+        tasks = []
+        for worker in workers:
+            task = asyncio.create_task(self._run_worker(worker))
+            tasks.append((worker, task))
+
+        # Wait for all workers
+        results = []
+        for worker, task in tasks:
+            result = await task
+            results.append((worker, result))
+
+        # Process results
+        wave_tickets = []
+        all_succeeded = True
+        any_new_gd = False
+
+        for worker, (exit_code, stdout, stderr) in results:
+            agent = worker["agent"]
+            ticket = worker["ticket"]
+            duration = "?"  # Will be tracked by the subprocess
+
+            if exit_code == 0:
+                # Try to parse result
+                try:
+                    result_data = extract_json_from_output(stdout)
+                    outcome = result_data.get("outcome", "unknown")
+                    if result_data.get("new_gd_scripts", False):
+                        any_new_gd = True
+
+                    # Save result file
+                    result_path = RESULTS_DIR / f"{ticket}.json"
+                    write_json(result_path, result_data)
+
+                    if outcome == "done":
+                        self.logger.log("DONE", f"{agent} <- {ticket}")
+                        wave_tickets.append(ticket)
+                    elif outcome == "blocked":
+                        self.logger.log("BLOCKED", f"{agent} <- {ticket}: {result_data.get('summary', '')}")
+                        all_succeeded = False
+                    else:
+                        self.logger.log("PARTIAL", f"{agent} <- {ticket}: outcome={outcome}")
+                        all_succeeded = False
+                        self._queue_retry(ticket)
+                except ValueError:
+                    self.logger.log("DONE", f"{agent} <- {ticket} (no structured output)")
+                    wave_tickets.append(ticket)
+            elif exit_code == -1:
+                self.logger.log("TIMEOUT", f"{agent} <- {ticket}: {stderr}")
+                all_succeeded = False
+                self._queue_retry(ticket)
+            else:
+                self.logger.log("FAILED", f"{agent} <- {ticket} (exit={exit_code})")
+                all_succeeded = False
+                self._queue_retry(ticket)
+
+        # Record completed wave
+        self.state["completed_waves"].append({
+            "wave": self.state["wave_number"],
+            "tickets": wave_tickets,
+            "completed_at": now_iso(),
+        })
+        self.state["_any_new_gd"] = any_new_gd
+        self.state["active_workers"] = []
+
+        status_msg = f"Wave {self.state['wave_number']} complete: "
+        status_msg += f"{len(wave_tickets)}/{len(results)} succeeded"
+        self.logger.log("WAVE", status_msg)
+
+        self.state["status"] = "EVALUATING"
+
+    async def _run_worker(self, worker: dict) -> tuple[int, str, str]:
+        """Run a single worker agent."""
+        agent_slug = worker["agent"]
+        ticket_id = worker["ticket"]
+        budget = worker["budget_usd"]
+        supplement = worker.get("prompt_supplement", "")
+
+        # Build worker prompt
+        template_vars = {
+            "agent_name": agent_slug.replace("-", " ").title(),
+            "agent_slug": agent_slug,
+            "ticket_id": ticket_id,
+            "milestone": self.state["milestone"],
+            "ticket_title": ticket_id,  # Will be refined by the agent after reading
+            "prompt_supplement": supplement if supplement else "No additional notes.",
+        }
+        prompt = render_template(PROMPTS_DIR / "worker_dispatch.md", template_vars)
+
+        # Determine working directory
+        cwd = Path(worker["worktree_path"]) if worker.get("worktree_path") else REPO_ROOT
+
+        # Agent CLAUDE.md
+        agent_md = AGENTS_DIR / agent_slug / "CLAUDE.md"
+
+        # Blocked tools
+        blocked = get_blocked_tools(self.config, agent_slug)
+
+        # Timeout
+        timeout = get_timeout(self.config, agent_slug)
+
+        # Model
+        model = get_model(self.config, agent_slug)
+
+        ts = now_iso().replace(":", "")
+        log_path = LOGS_DIR / f"{agent_slug}-{ticket_id}-{ts}.log"
+
+        self.logger.log("DISPATCH",
+            f"{agent_slug} -> {ticket_id} (model={model}, budget={format_cost(budget)})")
+
+        start = time.time()
+        exit_code, stdout, stderr = await run_claude(
+            prompt=prompt,
+            model=model,
+            budget=budget,
+            blocked_tools=blocked,
+            agent_claude_md=agent_md,
+            output_json=True,
+            cwd=cwd,
+            timeout_minutes=timeout,
+            log_path=log_path,
+        )
+        elapsed = time.time() - start
+
+        self.logger.log(
+            "DONE" if exit_code == 0 else "FAILED",
+            f"{agent_slug} <- {ticket_id} ({format_duration(elapsed)}, exit={exit_code})"
+        )
+
+        return (exit_code, stdout, stderr)
+
+    def _queue_retry(self, ticket_id: str):
+        """Queue a ticket for retry if under the max retry count."""
+        max_retries = self.config["retries"]["max_per_ticket"]
+        current = self.state.get("retries", {}).get(ticket_id, 0)
+        if current < max_retries:
+            self.state.setdefault("retries", {})[ticket_id] = current + 1
+            self.logger.log("RETRY",
+                f"{ticket_id} queued for retry (attempt {current + 1}/{max_retries})")
+        else:
+            self.logger.log("ERROR",
+                f"{ticket_id} exceeded max retries ({max_retries}). Halting.")
+            self.state["status"] = "HALTED"
+
+    # ------------------------------------------------------------------
+    # EVALUATING
+    # ------------------------------------------------------------------
+
+    async def _do_evaluating(self):
+        """Merge branches and clean up after a wave."""
+        completed = self.state.get("completed_waves", [])
+        if not completed:
+            self.state["status"] = "PLANNING"
+            return
+
+        last_wave = completed[-1]
+
+        # Merge branches from workers that used worktrees
+        # We need to look at the active_workers snapshot before it was cleared
+        # For now, attempt to merge any orch/* branches that exist
+        await self._merge_pending_branches()
+
+        # Handle UID commits if any new .gd scripts were created
+        if self.state.pop("_any_new_gd", False):
+            await self._handle_uid_commits()
+
+        # Check budget ceiling
+        if self.state["total_cost_usd"] >= self.config["budgets"]["session_ceiling_usd"]:
+            self.logger.log("BUDGET",
+                f"Session ceiling reached ({format_cost(self.state['total_cost_usd'])}). Halting.")
+            self.state["status"] = "HALTED"
+            return
+
+        # Continue to next planning cycle
+        self.state["status"] = "PLANNING"
+
+    async def _merge_pending_branches(self):
+        """Merge all orch/* branches into main, then clean up."""
+        # List orch branches
+        result = subprocess.run(
+            ["git", "branch", "--list", "orch/*"],
+            cwd=str(REPO_ROOT), capture_output=True, text=True
+        )
+        branches = [b.strip().lstrip("* ") for b in result.stdout.splitlines() if b.strip()]
+
+        if not branches:
+            return
+
+        # Ensure we're on main
+        subprocess.run(
+            ["git", "checkout", "main"],
+            cwd=str(REPO_ROOT), capture_output=True
+        )
+
+        for branch in branches:
+            self.logger.log("MERGE", f"Merging {branch} -> main")
+            merge_result = subprocess.run(
+                ["git", "merge", branch, "--no-edit",
+                 "-m", f"Merge {branch} into main"],
+                cwd=str(REPO_ROOT), capture_output=True, text=True
+            )
+            if merge_result.returncode != 0:
+                self.logger.log("ERROR",
+                    f"Merge conflict on {branch}: {merge_result.stderr[:200]}")
+                # Abort the merge
+                subprocess.run(
+                    ["git", "merge", "--abort"],
+                    cwd=str(REPO_ROOT), capture_output=True
+                )
+                self.state["status"] = "HALTED"
+                return
+
+            self.logger.log("MERGE", f"Merged {branch} -> main")
+
+            # Clean up branch and worktree
+            # Find worktree for this branch
+            wt_result = subprocess.run(
+                ["git", "worktree", "list", "--porcelain"],
+                cwd=str(REPO_ROOT), capture_output=True, text=True
+            )
+            for line in wt_result.stdout.splitlines():
+                if line.startswith("worktree ") and "orch-" in line:
+                    wt_path = line.split("worktree ", 1)[1]
+                    subprocess.run(
+                        ["git", "worktree", "remove", "--force", wt_path],
+                        cwd=str(REPO_ROOT), capture_output=True
+                    )
+
+            # Delete branch
+            subprocess.run(
+                ["git", "branch", "-D", branch],
+                cwd=str(REPO_ROOT), capture_output=True
+            )
+
+        # Push main
+        push_result = subprocess.run(
+            ["git", "push", "origin", "main"],
+            cwd=str(REPO_ROOT), capture_output=True, text=True
+        )
+        if push_result.returncode != 0:
+            self.logger.log("ERROR", f"Push failed: {push_result.stderr[:200]}")
+
+    async def _handle_uid_commits(self):
+        """GDScript UID commit procedure from CLAUDE.md."""
+        self.logger.log("SYSTEM", "Checking for new .gd.uid files...")
+
+        # Trigger Godot filesystem scan (best-effort — Godot may not be running)
+        try:
+            # We can't use Godot MCP from Python directly, so we just wait
+            # and check for files that Godot may have generated
+            await asyncio.sleep(5)
+        except asyncio.CancelledError:
+            return
+
+        # Check for new uid files
+        result = subprocess.run(
+            ["git", "ls-files", "--others", "--exclude-standard", "--", "*.gd.uid"],
+            cwd=str(REPO_ROOT), capture_output=True, text=True
+        )
+        uid_files = [f for f in result.stdout.splitlines() if f.strip()]
+
+        if uid_files:
+            self.logger.log("SYSTEM", f"Found {len(uid_files)} new .gd.uid files")
+            subprocess.run(
+                ["git", "add", "--"] + uid_files,
+                cwd=str(REPO_ROOT), capture_output=True
+            )
+            subprocess.run(
+                ["git", "commit", "-m", "chore: commit Godot-generated UIDs"],
+                cwd=str(REPO_ROOT), capture_output=True
+            )
+            subprocess.run(
+                ["git", "push", "origin", "main"],
+                cwd=str(REPO_ROOT), capture_output=True
+            )
+            self.logger.log("SYSTEM", "UID files committed and pushed.")
+
+    # ------------------------------------------------------------------
+    # GATE_BLOCKED
+    # ------------------------------------------------------------------
+
+    async def _do_gate_blocked(self):
+        """Handle phase gate — notify human and wait for approval."""
+        gate = self.state.pop("_pending_gate", {})
+        if not gate:
+            # Check if pending_gate.json already exists (resume scenario)
+            if PENDING_GATE_PATH.exists():
+                gate = load_json(PENDING_GATE_PATH)
+            else:
+                self.state["status"] = "PLANNING"
+                return
+
+        # Write gate file
+        gate["requested_at"] = now_iso()
+        write_json(PENDING_GATE_PATH, gate)
+
+        # Print notification
+        phase = gate.get("phase", "?")
+        milestone = gate.get("milestone", self.state["milestone"])
+        next_phase = gate.get("next_phase", "?")
+        summary = gate.get("summary", "")
+
+        banner = "\n" + "=" * 60
+        banner += f"\n  GATE — ACTION REQUIRED"
+        banner += f"\n  Phase \"{phase}\" ({milestone}) is complete."
+        banner += f"\n  {summary}"
+        banner += f"\n  Next phase: \"{next_phase}\""
+        banner += f"\n  Run: python orchestrator/approve_gate.py"
+        banner += "\n" + "=" * 60 + "\n"
+        print(banner)
+
+        # Fire Windows toast
+        fire_toast(
+            f"Gate: {phase} ({milestone})",
+            f"Phase complete. Run approve_gate.py to continue."
+        )
+
+        self.logger.log("GATE",
+            f"Awaiting Studio Head approval for {phase} ({milestone})")
+
+        # Poll for response
+        while not self.shutdown_requested:
+            if GATE_RESPONSE_PATH.exists():
+                try:
+                    response = load_json(GATE_RESPONSE_PATH)
+                except (json.JSONDecodeError, OSError):
+                    await asyncio.sleep(5)
+                    continue
+
+                action = response.get("action", "")
+                comment = response.get("comment", "")
+
+                if action == "approve":
+                    self.logger.log("APPROVED",
+                        f"Studio Head approved phase gate"
+                        + (f" — {comment}" if comment else ""))
+                    self.state["phase"] = next_phase
+                    self.state["status"] = "PLANNING"
+                elif action == "reject":
+                    self.logger.log("REJECTED",
+                        f"Studio Head rejected phase gate"
+                        + (f" — {comment}" if comment else ""))
+                    self.state["status"] = "HALTED"
+                else:
+                    self.logger.log("ERROR",
+                        f"Unknown gate response action: {action}")
+                    self.state["status"] = "HALTED"
+
+                # Clean up gate files
+                _safe_delete(PENDING_GATE_PATH)
+                _safe_delete(GATE_RESPONSE_PATH)
+                return
+
+            await asyncio.sleep(5)
+
+        # Shutdown requested while waiting for gate
+        self.logger.log("SYSTEM", "Shutdown during gate wait. Gate still pending.")
+
+
+def _safe_delete(path: Path):
+    try:
+        path.unlink()
+    except OSError:
+        pass
+
+
+# ---------------------------------------------------------------------------
+# CLI entry point
+# ---------------------------------------------------------------------------
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Hammer Forge Studio — Agent Orchestrator"
+    )
+    parser.add_argument("milestone", nargs="?",
+        help="Milestone ID (e.g., M6)")
+    parser.add_argument("phase", nargs="?",
+        help="Starting phase name (e.g., Foundation)")
+    parser.add_argument("--resume", action="store_true",
+        help="Resume from saved state.json")
+    parser.add_argument("--status", action="store_true",
+        help="Print current state and exit")
+    parser.add_argument("--config", type=Path, default=CONFIG_PATH,
+        help="Path to config.json")
+
+    args = parser.parse_args()
+
+    if args.status:
+        state = load_state()
+        if state:
+            print(json.dumps(state, indent=2))
+        else:
+            print("No state.json found.")
+        return
+
+    conductor = Conductor(config_path=args.config, resume=args.resume)
+
+    if args.resume:
+        milestone = conductor.state["milestone"]
+        phase = conductor.state["phase"]
+    elif args.milestone and args.phase:
+        milestone = args.milestone
+        phase = args.phase
+    else:
+        parser.error("Provide <milestone> <phase>, or use --resume")
+        return
+
+    asyncio.run(conductor.run(milestone, phase))
+
+
+if __name__ == "__main__":
+    main()

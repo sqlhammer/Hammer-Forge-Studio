@@ -1,0 +1,45 @@
+{
+  "models": {
+    "producer": "sonnet",
+    "default_worker": "sonnet",
+    "overrides": {
+      "qa-engineer": "opus",
+      "gameplay-programmer": "opus",
+      "systems-programmer": "sonnet",
+      "technical-artist": "opus",
+      "character-animator": "opus",
+      "environment-artist": "opus",
+      "tools-devops-engineer": "opus"
+    }
+  },
+  "budgets": {
+    "producer_usd": 1.00,
+    "default_worker_usd": 3.00,
+    "overrides": {
+      "gameplay-programmer": 5.00,
+      "systems-programmer": 5.00,
+      "qa-engineer": 5.00
+    },
+    "session_ceiling_usd": 100.00
+  },
+  "timeouts": {
+    "default_minutes": 30,
+    "overrides": {
+      "gameplay-programmer": 45,
+      "qa-engineer": 45
+    }
+  },
+  "concurrency": {
+    "max_parallel_workers": 4,
+    "godot_mcp_exclusive": true
+  },
+  "retries": {
+    "max_per_ticket": 3
+  },
+  "tool_tiers": {
+    "0": ["producer"],
+    "1": ["game-designer", "narrative-designer", "technical-writer"],
+    "2": ["environment-artist", "character-animator", "ui-ux-designer", "audio-engineer", "vfx-artist", "qa-engineer"],
+    "3": ["systems-programmer", "gameplay-programmer", "tools-devops-engineer", "technical-artist"]
+  }
+}

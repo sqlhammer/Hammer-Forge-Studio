@@ -1,1 +1,11 @@
 .claude/
+
+__pycache__/
+
+# Orchestrator runtime artifacts
+orchestrator/state.json
+orchestrator/pending_gate.json
+orchestrator/gate_response.json
+orchestrator/activity.log
+orchestrator/logs/
+orchestrator/results/

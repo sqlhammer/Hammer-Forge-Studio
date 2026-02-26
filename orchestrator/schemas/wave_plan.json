@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Wave Plan",
+  "description": "Producer output: the next wave of agent assignments, or a control action.",
+  "type": "object",
+  "required": ["action", "summary"],
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": ["spawn_agents", "gate_blocked", "no_work", "milestone_complete", "error"],
+      "description": "What the conductor should do next."
+    },
+    "wave": {
+      "type": "array",
+      "description": "Agent assignments for this wave (required when action=spawn_agents).",
+      "items": {
+        "type": "object",
+        "required": ["agent", "ticket", "budget_usd", "needs_worktree", "needs_godot_mcp"],
+        "properties": {
+          "agent": {
+            "type": "string",
+            "description": "Agent slug (e.g. 'gameplay-programmer')."
+          },
+          "ticket": {
+            "type": "string",
+            "description": "Ticket ID (e.g. 'TICKET-0090')."
+          },
+          "budget_usd": {
+            "type": "number",
+            "minimum": 0.01,
+            "description": "Max budget for this worker invocation."
+          },
+          "needs_worktree": {
+            "type": "boolean",
+            "description": "True if this worker modifies code and needs git isolation."
+          },
+          "needs_godot_mcp": {
+            "type": "boolean",
+            "description": "True if this worker needs Godot MCP tools."
+          },
+          "prompt_supplement": {
+            "type": "string",
+            "description": "Optional extra instructions from the Producer to this worker."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "gate": {
+      "type": "object",
+      "description": "Gate details (required when action=gate_blocked).",
+      "required": ["milestone", "phase", "next_phase", "summary"],
+      "properties": {
+        "milestone": { "type": "string" },
+        "phase": { "type": "string" },
+        "next_phase": { "type": "string" },
+        "summary": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "string",
+      "description": "Human-readable summary of the planning decision."
+    }
+  },
+  "additionalProperties": false
+}

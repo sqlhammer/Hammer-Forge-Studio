@@ -2,7 +2,7 @@
 id: TICKET-0126
 title: "Ship interior scene — 24m×12m layout with cockpit, machine room, corridors, vestibule, 4 module zones"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -95,8 +95,18 @@ Reuse the M4 entry/exit system with updated spawn positions:
 - The cockpit is a room shell only in this ticket — functional elements (status displays, viewport) are separate tickets (TICKET-0127, TICKET-0128)
 
 ## Handoff Notes
-(Leave blank until handoff occurs.)
+- Rebuilt `ship_interior.tscn` to 24m×12m multi-room layout: cockpit (12×6m), corridor (4×2m), machine room (12×12m), vestibule (4×4m)
+- 4 module zones in 2×2 grid: A=Recycler(-2.5,0,4.5), B=Fabricator(2.5,0,4.5), C=AutomationHub(-2.5,0,-0.5), D=Spare(2.5,0,-0.5)
+- Cockpit: instanced `cockpit_console.tscn` at (0,0,-11.5), viewport opening (4m×1.5m cutout in north wall) with frame mesh
+- Marker3D placeholders: `StatusDisplayArea` at (0,1.5,-9) for TICKET-0127, `ViewportArea` at (0,2.25,-12) for TICKET-0128
+- Entry/exit: vestibule spawn at (0,0,+10), exit trigger at Z=+11.5, exterior spawn at (0,0,+14) — set by test_world
+- Corridor fill walls seal gaps between machine room and cockpit at X:[-6,-2] and X:[+2,+6], Z:[-6,-4]
+- Tech tree terminal relocated to machine room north wall left of corridor at (-4,0.75,-3.8)
+- Public API unchanged — all existing methods still work, zone count increased from 3 to 4
+- Unit tests updated to 16 tests (was 15): added zone 3 tests, updated positions/boundaries for 4-zone layout
+- Note: machine scenes instanced in .tscn coexist with test_world's dynamic module placement system (existing architecture)
 
 ## Activity Log
 - 2026-02-26 [producer] Created ticket — ship interior scene rebuild
 - 2026-02-26 [gameplay-programmer] Starting work — rebuilding ship interior to 24m×12m multi-room layout
+- 2026-02-26 [gameplay-programmer] Completed — commit 1927046, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/93 (merged)

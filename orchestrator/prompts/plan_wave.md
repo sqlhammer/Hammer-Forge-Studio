@@ -6,6 +6,7 @@ You are the Producer agent in orchestration mode. Analyze the ticket queue and o
 - Wave number: {wave_number}
 - Retry queue: {retry_tickets}
 - Completed waves so far: {completed_waves}
+- Active ticket locks (in-flight): {active_ticket_ids}
 
 ## Instructions
 
@@ -24,7 +25,7 @@ You are the Producer agent in orchestration mode. Analyze the ticket queue and o
 - Maximum **{max_parallel}** workers per wave.
 - Only assign tickets whose `depends_on` are ALL `DONE`.
 - Prefer tickets earlier in dependency chains to unblock downstream work.
-- **`IN_PROGRESS` tickets from prior waves are NOT active locks.** If `active_workers` is empty, all agents are free regardless of any `IN_PROGRESS` ticket status in the ticket files. A stale `IN_PROGRESS` means the previous dispatch did not complete cleanly — treat that agent as available and re-dispatch the ticket as normal.
+- **Tickets listed in `active_ticket_ids` are currently in-flight — do NOT assign them in this wave under any circumstances.**
 
 ## Assignment Guidelines
 

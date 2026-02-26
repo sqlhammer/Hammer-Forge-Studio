@@ -220,6 +220,7 @@ def create_initial_state(milestone: str, phase: str) -> dict:
         "wave_number": 0,
         "started_at": now_iso(),
         "active_workers": [],
+        "active_ticket_ids": [],
         "completed_waves": [],
         "total_cost_usd": 0.0,
         "retries": {},
@@ -570,6 +571,7 @@ class Conductor:
             tid for tid, count in self.state.get("retries", {}).items()
             if count > 0
         ]
+        active_ticket_ids = self.state.get("active_ticket_ids", [])
         template_vars = {
             "milestone": self.state["milestone"],
             "phase": self.state["phase"],
@@ -577,6 +579,7 @@ class Conductor:
             "retry_tickets": json.dumps(retry_tickets) if retry_tickets else "none",
             "completed_waves": json.dumps(self.state.get("completed_waves", [])),
             "max_parallel": str(self.config["concurrency"]["max_parallel_workers"]),
+            "active_ticket_ids": json.dumps(active_ticket_ids),
         }
         prompt = render_template(PROMPTS_DIR / "plan_wave.md", template_vars)
 
@@ -674,10 +677,19 @@ class Conductor:
             self.state["status"] = "PLANNING"
             return
 
+        active_locks = self.state.get("active_ticket_ids", [])
+
         workers = []
         for assignment in wave:
             agent_slug = assignment["agent"]
             ticket_id = assignment["ticket"]
+
+            # Dispatch guard: skip tickets already locked
+            if ticket_id in active_locks:
+                self.logger.log("WARNING",
+                    f"{ticket_id} already in active_ticket_ids — skipping duplicate dispatch")
+                continue
+
             budget = assignment.get("budget_usd", get_budget(self.config, agent_slug))
             needs_worktree = assignment.get("needs_worktree", True)
             needs_godot = assignment.get("needs_godot_mcp", False)
@@ -704,6 +716,12 @@ class Conductor:
                 "prompt_supplement": supplement,
                 "started_at": now_iso(),
             })
+
+        # Populate active ticket locks
+        self.state["active_ticket_ids"] = [w["ticket"] for w in workers]
+        if self.state["active_ticket_ids"]:
+            self.logger.log("LOCK",
+                f"Locked tickets: {', '.join(self.state['active_ticket_ids'])}")
 
         self.state["active_workers"] = workers
         self.state["status"] = "WORKING"
@@ -739,6 +757,13 @@ class Conductor:
         for worker, (exit_code, stdout, stderr) in results:
             agent = worker["agent"]
             ticket = worker["ticket"]
+
+            # Release ticket lock (defensive — only remove if present)
+            active_locks = self.state.get("active_ticket_ids", [])
+            if ticket in active_locks:
+                active_locks.remove(ticket)
+                self.state["active_ticket_ids"] = active_locks
+                save_state(self.state)
 
             if exit_code == 0:
                 if not stdout.strip():

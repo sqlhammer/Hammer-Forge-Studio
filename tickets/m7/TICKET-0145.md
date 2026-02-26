@@ -2,7 +2,7 @@
 id: TICKET-0145
 title: "Conductor — ticket locking to prevent duplicate concurrent dispatch"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: tools-devops-engineer
 created_by: systems-programmer
@@ -45,3 +45,4 @@ This ticket introduces a proper active-ticket lock set that the conductor mainta
 ## Activity Log
 
 - 2026-02-26 [systems-programmer] Created ticket to address missing ticket-level locking in conductor
+- 2026-02-26 [tools-devops-engineer] Starting work — implementing ticket locking in conductor

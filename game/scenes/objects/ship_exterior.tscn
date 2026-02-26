@@ -1,10 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://cawcd10a5hvt8"]
+[gd_scene load_steps=4 format=3 uid="uid://cawcd10a5hvt8"]
 
 [ext_resource type="Script" uid="uid://crd5bd3wuejku" path="res://scripts/objects/ship_exterior.gd" id="1_w5gf8"]
 [ext_resource type="PackedScene" uid="uid://b56yxo1q640l8" path="res://assets/meshes/vehicles/mesh_ship_exterior.glb" id="2_mesh"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_hull"]
-size = Vector3(24, 12, 44)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_recharge"]
 size = Vector3(32, 15, 52)
@@ -16,10 +13,6 @@ script = ExtResource("1_w5gf8")
 
 [node name="ShipMesh" parent="." instance=ExtResource("2_mesh")]
 transform = Transform3D(24, 0, 0, 0, 24, 0, 0, 0, 24, 0, 6.5, 0)
-
-[node name="HullCollision" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
-shape = SubResource("BoxShape3D_hull")
 
 [node name="EntranceDoor" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 23)

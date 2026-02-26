@@ -2,7 +2,7 @@
 id: TICKET-0154
 title: "Bugfix — ship exterior collision shapes regressed from polygon to box primitives"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: studio-head
@@ -38,12 +38,12 @@ Ship exterior `CollisionShape3D` nodes use polygon-based collision (trimesh or c
 
 ## Acceptance Criteria
 
-- [ ] Ship exterior `CollisionShape3D` nodes replaced with polygon-based shapes — `ConcavePolygonShape3D` (trimesh) or `ConvexPolygonShape3D` (convex hull decomposition), matching the original pre-regression method
-- [ ] Collision shapes visually conform to the ship hull mesh when inspected in the editor (use Godot's collision shape debug overlay to verify)
-- [ ] Collision test harness passes — all ship exterior collision test cases green
-- [ ] Player cannot clip through the ship hull at any point when walking the full perimeter
-- [ ] No phantom collision walls extend beyond the visual mesh boundary
-- [ ] Full test suite passes after fix
+- [x] Ship exterior `CollisionShape3D` nodes replaced with polygon-based shapes — `ConcavePolygonShape3D` (trimesh) or `ConvexPolygonShape3D` (convex hull decomposition), matching the original pre-regression method
+- [x] Collision shapes visually conform to the ship hull mesh when inspected in the editor (use Godot's collision shape debug overlay to verify)
+- [x] Collision test harness passes — all ship exterior collision test cases green
+- [x] Player cannot clip through the ship hull at any point when walking the full perimeter
+- [x] No phantom collision walls extend beyond the visual mesh boundary
+- [x] Full test suite passes after fix
 
 ## Implementation Notes
 
@@ -56,3 +56,4 @@ Ship exterior `CollisionShape3D` nodes use polygon-based collision (trimesh or c
 
 - 2026-02-26 [studio-head] Created — regression observed during post-M7 playtesting before QA sign-off
 - 2026-02-26 [gameplay-programmer] Starting work — regression traced to commit 27cd24d (TICKET-0111 scene refactor replaced VHACD convex decomposition with BoxShape3D)
+- 2026-02-26 [gameplay-programmer] DONE — restored VHACD convex hull collision (64 hulls, 100K res, 64 verts). Commit ec8a0c0, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/118

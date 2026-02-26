@@ -2,7 +2,7 @@
 id: TICKET-0156
 title: "Bugfix — mining minigame UI shifted to upper-left"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: studio-head
@@ -49,3 +49,4 @@ Mining minigame UI is anchored/offset to the upper-left corner of the screen.
 ## Activity Log
 
 - 2026-02-26 [studio-head] Created — regression observed during post-M7 playtesting before QA sign-off
+- 2026-02-26 [gameplay-programmer] Status → IN_PROGRESS — Starting work

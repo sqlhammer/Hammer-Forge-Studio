@@ -151,9 +151,7 @@ func _setup_hud_positions() -> void:
 	_pickup_notifications.anchor_bottom = 0.5
 	_pickup_notifications.position = Vector2(-PickupNotificationManager.TOAST_WIDTH - 32, 0)
 
-	# Minigame overlay — center, between crosshair and mining progress
-	_minigame_overlay.set_anchors_preset(Control.PRESET_CENTER)
-	_minigame_overlay.position = Vector2(-MiningMinigameOverlay.OVERLAY_WIDTH / 2.0, 10)
+	# Minigame overlay — anchors/offsets set in game_hud.tscn (center, 10px below crosshair)
 
 	# Ship globals — bottom-right (hidden by default, shown when inside ship)
 	_ship_globals.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)

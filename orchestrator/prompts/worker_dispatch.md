@@ -7,12 +7,13 @@ Execute **{ticket_id}**. Read the ticket file at `tickets/{milestone}/{ticket_id
 ## Execution Steps
 
 1. **Read the ticket** at `tickets/{milestone}/{ticket_id}.md` and verify all `depends_on` are DONE. If any dependency is not DONE, report `outcome: "blocked"` immediately.
-2. **Update the ticket status** to `IN_PROGRESS` — add an Activity Log entry with timestamp and "Starting work".
-3. **Complete all acceptance criteria** listed in the ticket. Follow the coding standards in `docs/engineering/coding-standards.md`.
-4. **Commit your work** with message: `{ticket_id}: {ticket_title}`
+2. **Pre-claim check**: Verify the ticket status is not already `IN_PROGRESS`. If the ticket file shows `status: IN_PROGRESS`, output `outcome: "blocked"` with `summary: "Ticket is already IN_PROGRESS — possible duplicate dispatch"` and stop immediately.
+3. **Update the ticket status** to `IN_PROGRESS` — add an Activity Log entry with timestamp and "Starting work".
+4. **Complete all acceptance criteria** listed in the ticket. Follow the coding standards in `docs/engineering/coding-standards.md`.
+5. **Commit your work** with message: `{ticket_id}: {ticket_title}`
    - Include `Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>` in the commit.
-5. **Push your branch** and create a PR targeting `main`. Self-merge the PR immediately.
-6. **Update the ticket status** to `DONE` — add a final Activity Log entry with the commit hash and PR URL.
+6. **Push your branch** and create a PR targeting `main`. Self-merge the PR immediately.
+7. **Update the ticket status** to `DONE` — add a final Activity Log entry with the commit hash and PR URL.
 
 ## Producer Notes
 

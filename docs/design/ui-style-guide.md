@@ -2,7 +2,7 @@
 
 **Owner:** ui-ux-designer
 **Status:** Active
-**Last Updated:** 2026-02-22
+**Last Updated:** 2026-02-25
 
 > The visual and interaction standard for all game UI. All UI scenes must comply with this guide before submission.
 
@@ -191,10 +191,29 @@ Used for battery, mining progress, and any timed fill.
 
 ## Icon Style
 
-- **Style:** Line icons, 2px stroke weight, rounded caps
-- **Size grid:** 16x16px (inline), 24x24px (standard), 32x32px (large/prominent)
-- **Color:** Inherits from parent text color by default; override for state-specific meaning
-- **Format:** SVG preferred for editor; exported as Godot `AtlasTexture` or `SVGTexture` for runtime
+Icon design is split into two categories with separate authoritative specifications:
+
+- **Item icons** (inventory slots, tech tree node cards, machine panels): see [`docs/art/icon-style-guide-items.md`](../art/icon-style-guide-items.md)
+- **HUD/functional icons** (suit battery, compass, status indicators, notifications, tech tree state): see [`docs/art/icon-style-guide-hud.md`](../art/icon-style-guide-hud.md)
+
+### Size Grid Summary
+
+| Category | Sizes |
+|----------|-------|
+| Item icons | 48×48px (primary), 32×32px (secondary), 28×28px (compact) |
+| HUD/functional icons | 16×16px (inline), 24×24px (standard), 32×32px (large/prominent) |
+
+### Format & Generation
+
+- **Format:** SVG (primary); PNG with alpha at minimum 256px (item) / 72px (HUD) as fallback
+- **Generation method:** Method A — Programmatic SVG (Python direct XML construction). See [`docs/art/icon-poc-report.md`](../art/icon-poc-report.md) for full pipeline documentation and evaluation results.
+- **Naming convention:** `icon_item_[name].svg` for item icons; `icon_hud_[name].svg` for HUD icons
+
+### Shared Rules
+
+- HUD icons: stroke-based (`stroke="currentColor"`, `fill="none"`), 2px stroke weight, rounded caps/joins — color inherited via Godot `modulate` on `TextureRect`
+- Item icons: 2px stroke weight, rounded caps/joins, isometric/3-quarter view perspective
+- Never convey state through color alone — pair with shape or label (see Accessibility section)
 
 ---
 

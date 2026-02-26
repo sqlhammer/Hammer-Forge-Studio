@@ -165,6 +165,79 @@ def get_timeout(config: dict, agent_slug: str) -> int:
     return overrides.get(agent_slug, config["timeouts"]["default_minutes"])
 
 
+def read_ticket_status(ticket_id: str, milestone: str) -> str:
+    """Read a ticket file and return its status field.
+
+    Parses YAML frontmatter from tickets/{milestone}/{ticket_id}.md.
+    Returns 'UNKNOWN' if the file doesn't exist or can't be parsed.
+    """
+    ticket_path = REPO_ROOT / "tickets" / milestone / f"{ticket_id}.md"
+    if not ticket_path.exists():
+        # Try lowercase milestone folder
+        ticket_path = REPO_ROOT / "tickets" / milestone.lower() / f"{ticket_id}.md"
+    if not ticket_path.exists():
+        return "UNKNOWN"
+    try:
+        text = ticket_path.read_text(encoding="utf-8")
+        for line in text.splitlines()[:30]:
+            m = re.match(r'^status:\s*["\']?(\S+?)["\']?\s*$', line)
+            if m:
+                return m.group(1).upper()
+    except Exception:
+        pass
+    return "UNKNOWN"
+
+
+def validate_dependencies(
+    ticket_id: str,
+    milestone: str,
+    completed_this_session: list[str] | None = None,
+) -> tuple[bool, list[str]]:
+    """Check that all depends_on entries for a ticket are DONE.
+
+    Returns (True, []) if all deps are satisfied, or
+    (False, [list of unmet dep IDs]) otherwise.
+    Tickets in completed_this_session are treated as DONE regardless of
+    filesystem status (handles race between commit and git pull).
+    """
+    completed_set = set(completed_this_session or [])
+
+    ticket_path = REPO_ROOT / "tickets" / milestone / f"{ticket_id}.md"
+    if not ticket_path.exists():
+        ticket_path = REPO_ROOT / "tickets" / milestone.lower() / f"{ticket_id}.md"
+    if not ticket_path.exists():
+        # Can't validate — assume OK
+        return (True, [])
+
+    try:
+        text = ticket_path.read_text(encoding="utf-8")
+    except Exception:
+        return (True, [])
+
+    # Extract depends_on list from YAML frontmatter
+    depends_on: list[str] = []
+    dep_match = re.search(r'^depends_on:\s*\[(.*?)\]', text, re.MULTILINE)
+    if dep_match:
+        raw = dep_match.group(1).strip()
+        if raw:
+            depends_on = [
+                d.strip().strip("\"'") for d in raw.split(",") if d.strip()
+            ]
+
+    if not depends_on:
+        return (True, [])
+
+    unmet = []
+    for dep_id in depends_on:
+        if dep_id in completed_set:
+            continue
+        status = read_ticket_status(dep_id, milestone)
+        if status != "DONE":
+            unmet.append(dep_id)
+
+    return (len(unmet) == 0, unmet)
+
+
 def get_blocked_tools(config: dict, agent_slug: str) -> list[str]:
     """Return list of Godot MCP tool names this agent is NOT allowed to use."""
     tiers = config.get("tool_tiers", {})
@@ -222,6 +295,7 @@ def create_initial_state(milestone: str, phase: str) -> dict:
         "active_workers": [],
         "active_ticket_ids": [],
         "completed_waves": [],
+        "completed_this_session": [],
         "total_cost_usd": 0.0,
         "retries": {},
     }
@@ -561,6 +635,18 @@ class Conductor:
 
     async def _do_planning(self):
         """Ask the Producer for the next wave plan."""
+        # Pull latest to pick up ticket status changes from worker commits
+        pull_result = subprocess.run(
+            ["git", "-C", str(REPO_ROOT), "pull"],
+            capture_output=True, text=True, check=False,
+        )
+        if pull_result.returncode == 0:
+            self.logger.log("PLAN", "git pull OK")
+        else:
+            self.logger.log("WARNING",
+                f"git pull failed (exit={pull_result.returncode}): "
+                f"{pull_result.stderr.strip()[:200]}")
+
         self.state["wave_number"] += 1
         wave_num = self.state["wave_number"]
 
@@ -572,6 +658,7 @@ class Conductor:
             if count > 0
         ]
         active_ticket_ids = self.state.get("active_ticket_ids", [])
+        completed_this_session = self.state.get("completed_this_session", [])
         template_vars = {
             "milestone": self.state["milestone"],
             "phase": self.state["phase"],
@@ -580,6 +667,7 @@ class Conductor:
             "completed_waves": json.dumps(self.state.get("completed_waves", [])),
             "max_parallel": str(self.config["concurrency"]["max_parallel_workers"]),
             "active_ticket_ids": json.dumps(active_ticket_ids),
+            "completed_this_session": json.dumps(completed_this_session),
         }
         prompt = render_template(PROMPTS_DIR / "plan_wave.md", template_vars)
 
@@ -690,6 +778,18 @@ class Conductor:
                     f"{ticket_id} already in active_ticket_ids — skipping duplicate dispatch")
                 continue
 
+            # Dependency validation: skip if depends_on not satisfied
+            completed = self.state.get("completed_this_session", [])
+            deps_ok, unmet = validate_dependencies(
+                ticket_id, self.state["milestone"], completed
+            )
+            if not deps_ok:
+                for dep in unmet:
+                    self.logger.log("SKIP",
+                        f"{ticket_id} dependency unmet — {dep} is not DONE "
+                        "(producer planning error)")
+                continue
+
             budget = assignment.get("budget_usd", get_budget(self.config, agent_slug))
             needs_worktree = assignment.get("needs_worktree", True)
             needs_godot = assignment.get("needs_godot_mcp", False)
@@ -791,6 +891,10 @@ class Conductor:
                     if outcome == "done":
                         self.logger.log("DONE", f"{agent} <- {ticket}")
                         wave_tickets.append(ticket)
+                        # Track session-completed tickets for dependency validation
+                        session_done = self.state.setdefault("completed_this_session", [])
+                        if ticket not in session_done:
+                            session_done.append(ticket)
                     elif outcome == "blocked":
                         self.logger.log("BLOCKED", f"{agent} <- {ticket}: {result_data.get('summary', '')}")
                         all_succeeded = False

@@ -7,6 +7,8 @@ You are the Producer agent in orchestration mode. Analyze the ticket queue and o
 - Retry queue: {retry_tickets}
 - Completed waves so far: {completed_waves}
 - Active ticket locks (in-flight): {active_ticket_ids}
+- Completed this session: {completed_this_session}
+  - Tickets in `completed_this_session` are definitively DONE in this session — treat them as DONE even if the ticket file hasn't been updated yet.
 
 ## Instructions
 

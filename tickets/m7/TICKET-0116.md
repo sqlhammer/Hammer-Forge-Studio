@@ -2,7 +2,7 @@
 id: TICKET-0116
 title: "Refactor — Mining drone as a standalone instanced scene"
 type: REFACTOR
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -45,3 +45,4 @@ Per the updated Scene Design standard, every conceptual game object must be its 
 - 2026-02-25 [producer] Created ticket — standards refactor, self-contained scene rule
 - 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone
 - 2026-02-26 [gameplay-programmer] Starting work — creating mining_drone.tscn and updating instantiation
+- 2026-02-26 [gameplay-programmer] DONE — commit 7fb574b, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/88

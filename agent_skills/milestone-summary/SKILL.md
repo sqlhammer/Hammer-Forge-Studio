@@ -24,7 +24,7 @@ When this skill is active, follow these rules:
      - Any critical blockers or risks that have emerged since the last milestone summary
   4. Output your summary using **plain markdown only** — paste the script output verbatim, then append:
      - Bullet-point phase gate status per phase (no table)
-     - Bullet-point list of unblocked agents ready to act
+     - Bullet-point list of truly unblocked agents ready to act (skip any agent whose next ticket still has an open dependency)
   5. Do NOT read milestones.md unless the user specifically asks for the milestone goal text. The script output already contains everything needed for a status summary.
 
 ## Examples

@@ -1,0 +1,30 @@
+{
+  "models": {
+    "producer": "haiku",
+    "default_worker": "haiku",
+    "overrides": {}
+  },
+  "budgets": {
+    "producer_usd": 0.25,
+    "default_worker_usd": 0.50,
+    "overrides": {},
+    "session_ceiling_usd": 5.00
+  },
+  "timeouts": {
+    "default_minutes": 5,
+    "overrides": {}
+  },
+  "concurrency": {
+    "max_parallel_workers": 2,
+    "godot_mcp_exclusive": true
+  },
+  "retries": {
+    "max_per_ticket": 3
+  },
+  "tool_tiers": {
+    "0": ["producer"],
+    "1": [],
+    "2": ["qa-engineer"],
+    "3": ["systems-programmer", "gameplay-programmer"]
+  }
+}

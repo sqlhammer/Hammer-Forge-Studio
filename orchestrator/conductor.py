@@ -28,8 +28,8 @@ from pathlib import Path
 # Paths
 # ---------------------------------------------------------------------------
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-ORCH_DIR = REPO_ROOT / "orchestrator"
+REPO_ROOT = Path(os.environ.get("HFS_REPO_ROOT", Path(__file__).resolve().parent.parent))
+ORCH_DIR = Path(os.environ.get("HFS_ORCH_DIR", REPO_ROOT / "orchestrator"))
 CONFIG_PATH = ORCH_DIR / "config.json"
 STATE_PATH = ORCH_DIR / "state.json"
 ACTIVITY_LOG = ORCH_DIR / "activity.log"
@@ -441,12 +441,14 @@ def fire_toast(title: str, message: str):
 # ---------------------------------------------------------------------------
 
 class Conductor:
-    def __init__(self, config_path: Path = CONFIG_PATH, resume: bool = False):
+    def __init__(self, config_path: Path = CONFIG_PATH, resume: bool = False,
+                 run_claude_fn=None):
         self.config = load_json(config_path)
         self.logger = ActivityLogger(ACTIVITY_LOG)
         self.state = None
         self.shutdown_requested = False
         self._active_procs: set[asyncio.subprocess.Process] = set()
+        self._run_claude = run_claude_fn or run_claude
 
         if resume:
             self.state = load_state()
@@ -557,7 +559,7 @@ class Conductor:
         budget = self.config["budgets"]["producer_usd"]
         blocked = get_blocked_tools(self.config, "producer")
 
-        exit_code, stdout, stderr = await run_claude(
+        exit_code, stdout, stderr = await self._run_claude(
             prompt=prompt,
             model=model,
             budget=budget,
@@ -831,7 +833,7 @@ class Conductor:
             f"{agent_slug} -> {ticket_id} (model={model}, budget={format_cost(budget)})")
 
         start = time.time()
-        exit_code, stdout, stderr = await run_claude(
+        exit_code, stdout, stderr = await self._run_claude(
             prompt=prompt,
             model=model,
             budget=budget,

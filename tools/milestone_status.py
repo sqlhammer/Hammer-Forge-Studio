@@ -84,7 +84,7 @@ def main():
     # Collect active ticket dirs (skip _archive/)
     active_dirs = [
         d for d in TICKETS_DIR.iterdir()
-        if d.is_dir() and d.name != "_archive"
+        if d.is_dir() and d.name not in ("_archive", "_test")
     ]
     # Also include root-level tickets (TICKET-*.md directly in tickets/)
     ticket_files = list(TICKETS_DIR.glob("TICKET-*.md"))

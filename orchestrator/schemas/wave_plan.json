@@ -61,6 +61,58 @@
     "summary": {
       "type": "string",
       "description": "Human-readable summary of the planning decision."
+    },
+    "new_tickets": {
+      "type": "array",
+      "description": "Optional tickets to create before dispatching workers (permitted with action=spawn_agents only).",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "type", "owner", "phase", "priority", "summary", "acceptance_criteria"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Full ticket ID (e.g. 'TICKET-0155')."
+          },
+          "title": {
+            "type": "string",
+            "description": "Short descriptive title for the ticket."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["TASK", "BUGFIX", "REVIEW", "BLOCKER", "SPIKE"],
+            "description": "Ticket type."
+          },
+          "owner": {
+            "type": "string",
+            "description": "Agent slug (e.g. 'systems-programmer')."
+          },
+          "phase": {
+            "type": "string",
+            "description": "Milestone phase name."
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["P0", "P1", "P2"],
+            "description": "Ticket priority."
+          },
+          "depends_on": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": [],
+            "description": "List of ticket IDs this ticket depends on."
+          },
+          "summary": {
+            "type": "string",
+            "description": "One-sentence description of the ticket."
+          },
+          "acceptance_criteria": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of acceptance criteria lines."
+          }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "additionalProperties": false

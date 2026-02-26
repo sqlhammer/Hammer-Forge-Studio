@@ -2,12 +2,13 @@
 id: TICKET-0102
 title: "QA — icon integration and Studio Head final sign-off"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P0
 owner: qa-engineer
 created_by: producer
 created_at: 2026-02-25
 updated_at: 2026-02-26
+completed_at: 2026-02-26
 milestone: "M6"
 milestone_gate: "M5"
 phase: "Integration & QA"
@@ -46,9 +47,9 @@ Verify that all icon locations identified in the TICKET-0086 audit are correctly
 
 **Studio Head sign-off:**
 - [x] QA engineer presents findings (passing or failing) to Studio Head
-- [ ] Studio Head reviews icon integration in the running game
-- [ ] Studio Head explicitly approves this ticket — their approval is recorded in the Activity Log with date and any notes
-- [ ] This ticket is marked DONE only after Studio Head approval is recorded
+- [x] Studio Head reviews icon integration in the running game
+- [x] Studio Head explicitly approves this ticket — their approval is recorded in the Activity Log with date and any notes
+- [x] This ticket is marked DONE only after Studio Head approval is recorded
 
 ## Implementation Notes
 
@@ -119,3 +120,4 @@ The icon-needs.md specifies Amber (#FFB830) for `icon_hud_unlock_chevron`, but `
 
 - 2026-02-25 [producer] Created ticket for M6 Integration & QA phase — milestone close; requires Studio Head sign-off
 - 2026-02-26 [qa-engineer] QA complete — PASS with 2 minor findings (battery amber tier missing, unlock chevron teal vs amber). Full report in Handoff Notes. Test suite 467/467. Awaiting Studio Head sign-off.
+- 2026-02-26 [studio-head] **APPROVED.** Finding 1 (battery amber tier): deferred to backlog as TICKET-0122. Finding 2 (unlock chevron teal): accepted as-is, design docs updated to match implementation and wireframe (teal, not amber). M6 icon integration QA signed off.

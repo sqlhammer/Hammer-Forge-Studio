@@ -69,7 +69,7 @@ Communicate state and action, not object identity. Must be readable at **16×16p
 | `icon_hud_notification_warning` | Notification badge — warning | Notification toast left border marker | 16×16px | Amber (#FFB830) | No texture; left-border color only |
 | `icon_hud_notification_critical` | Notification badge — critical/error | Notification toast left border marker | 16×16px | Coral (#FF6B5A) | No texture; left-border color only |
 | `icon_hud_lock` | Tech tree node locked (padlock) | Tech tree node card — bottom-right state indicator | 16×16px | Neutral (#94A3B8) | Text label placeholder ("🔒" or text) |
-| `icon_hud_unlock_chevron` | Tech tree node unlockable (upward chevron) | Tech tree node card — bottom-right state indicator | 16×16px | Amber (#FFB830) | Text label placeholder |
+| `icon_hud_unlock_chevron` | Tech tree node unlockable (upward chevron) | Tech tree node card — bottom-right state indicator | 16×16px | Teal (#00D4AA) | Text label placeholder |
 | `icon_hud_unlock_check` | Tech tree node unlocked (checkmark) | Tech tree node card — bottom-right state indicator | 16×16px | Green (#4ADE80) | Text label placeholder |
 | `icon_hud_mining_active` | Mining drill active / in-progress indicator | HUD mining progress area; mining minigame overlay | 16–24px | Teal (active) | No dedicated texture — bar + label only |
 | `icon_hud_scan_ping` | Scan pulse / ping burst | First-person HUD scan action indicator | 16–24px | Teal | No dedicated texture |

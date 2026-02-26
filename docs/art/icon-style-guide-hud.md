@@ -76,7 +76,7 @@ State colors are applied at **runtime in GDScript via `modulate`**, not in the S
 | `icon_hud_notification_warning` | — | — | — | — | Amber `#FFB830` (fixed) |
 | `icon_hud_notification_critical` | — | — | — | — | Coral `#FF6B5A` (fixed) |
 | `icon_hud_lock` | — | — | — | — | Neutral `#94A3B8` (fixed) |
-| `icon_hud_unlock_chevron` | — | — | — | — | Amber `#FFB830` (fixed) |
+| `icon_hud_unlock_chevron` | — | — | — | — | Teal `#00D4AA` (fixed) |
 | `icon_hud_unlock_check` | — | — | — | — | Green `#4ADE80` (fixed) |
 | All others | Inherits | — | — | — | — |
 
@@ -143,7 +143,7 @@ HUD icon SVG files use `stroke="#FFFFFF"`. The effective display color is set at
 
 1. **`#F1F5F9`** — Text Primary; default/inherit state for icons without explicit state colors (~17:1)
 2. **`#00D4AA`** — Primary Teal; Normal/Active state for battery, power, heat, oxygen, drone (~9:1)
-3. **`#FFB830`** — Amber; Warning state and fixed colors for unlock_chevron, notification_warning (~9:1)
+3. **`#FFB830`** — Amber; Warning state and fixed color for notification_warning (~9:1)
 4. **`#FF6B5A`** — Coral; Critical state and fixed color for notification_critical (~5.5:1)
 
 Additional approved modulate colors from the state table: `#4ADE80` (Green, ~7:1) for integrity/unlock_check/notification_info; `#94A3B8` (Neutral, ~5:1) for drone idle and lock. Do not use any color outside this set or the state table in Color Usage above.

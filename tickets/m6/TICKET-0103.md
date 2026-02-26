@@ -2,12 +2,13 @@
 id: TICKET-0103
 title: "BUGFIX: Suit recharge no longer triggers when near the ship"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-25
-updated_at: 2026-02-25
+updated_at: 2026-02-26
+completed_at: 2026-02-26
 milestone: "M6"
 phase: "Integration & QA"
 depends_on: []
@@ -29,11 +30,11 @@ The suit battery recharge mechanic no longer activates when the player is in pro
 
 ## Acceptance Criteria
 
-- [ ] Suit battery recharges when the player is within the ship's recharge trigger radius, matching pre-M4 behavior
-- [ ] Recharge rate and threshold distance are unchanged from prior implementation
-- [ ] No recharge occurs outside the trigger radius
-- [ ] All existing `suit_battery` tests pass
-- [ ] Full test suite passes with zero failures
+- [x] Suit battery recharges when the player is within the ship's recharge trigger radius, matching pre-M4 behavior
+- [x] Recharge rate and threshold distance are unchanged from prior implementation
+- [x] No recharge occurs outside the trigger radius
+- [x] All existing `suit_battery` tests pass
+- [x] Full test suite passes with zero failures (467/467)
 
 ## Investigation Notes
 
@@ -45,3 +46,4 @@ The suit battery recharge mechanic no longer activates when the player is in pro
 ## Activity Log
 
 - 2026-02-25 [producer] Created bug ticket — regression reported during M6 Integration & QA
+- 2026-02-26 [gameplay-programmer] Fixed — replaced signal-based Area3D detection with per-frame polling via get_overlapping_bodies(). Root cause: Area3D body_entered/exited signals unreliable with CharacterBody3D using move_and_slide() in _process(). PR #73 merged, commit f1b198f. 467/467 tests passing.

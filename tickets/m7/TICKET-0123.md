@@ -2,7 +2,7 @@
 id: TICKET-0123
 title: "Ship interior wireframes — cockpit, machine room, corridors, entry vestibule, viewport spec"
 type: DESIGN
-status: TODO
+status: DONE
 priority: P1
 owner: ui-ux-designer
 created_by: producer
@@ -46,14 +46,14 @@ This wireframe must define spatial dimensions, walking paths, module zone positi
 
 ## Acceptance Criteria
 
-- [ ] Wireframe document created at `docs/design/wireframes/m7/ship-interior-layout.md`
-- [ ] Top-down floor plan showing all four areas with dimensions
-- [ ] Module zone positions specified with coordinates relative to scene origin
-- [ ] Cockpit layout showing console position, status display positions, and viewport position/size
-- [ ] Entry/exit flow documented (vestibule trigger zones, spawn points)
-- [ ] Walking clearance verified — no path narrower than 2m
-- [ ] Implementation notes for scene structure (node types, hierarchy)
-- [ ] All design follows `docs/engineering/coding-standards.md`
+- [x] Wireframe document created at `docs/design/wireframes/m7/ship-interior-layout.md`
+- [x] Top-down floor plan showing all four areas with dimensions
+- [x] Module zone positions specified with coordinates relative to scene origin
+- [x] Cockpit layout showing console position, status display positions, and viewport position/size
+- [x] Entry/exit flow documented (vestibule trigger zones, spawn points)
+- [x] Walking clearance verified — no path narrower than 2m
+- [x] Implementation notes for scene structure (node types, hierarchy)
+- [x] All design follows `docs/engineering/coding-standards.md`
 
 ## Implementation Notes
 
@@ -63,7 +63,15 @@ This wireframe must define spatial dimensions, walking paths, module zone positi
 - Consider future expansion: the machine room should be designed so additional module zones can be added in later milestones without restructuring
 
 ## Handoff Notes
-(Leave blank until handoff occurs.)
+
+Wireframe at `docs/design/wireframes/m7/ship-interior-layout.md`. Key decisions for TICKET-0126 (gameplay-programmer):
+- **24m × 12m** total footprint. Coordinate origin at interior center; Y=0 floor, Z-negative is north/cockpit.
+- **4 module zones** in a 2×2 grid in the machine room. All zone coordinates in the Zone Coordinates table.
+- **Viewport:** transparent hull cutout (not SubViewport). Implement as a gap in the north cockpit wall geometry with a thin frame mesh border.
+- **Status displays:** `SubViewport` textures on `MeshInstance3D` panels, reusing ship globals HUD bar nodes.
+- **Scene root:** `Node3D` instanced scene at `res://game/scenes/gameplay/ship_interior.tscn`.
+- Console and cockpit features are built in TICKET-0127 and TICKET-0128 — this wireframe defines their positions.
 
 ## Activity Log
 - 2026-02-26 [producer] Created ticket — M7 ship interior wireframes
+- 2026-02-26 [ui-ux-designer] Completed wireframe — all acceptance criteria met. Wireframe at docs/design/wireframes/m7/ship-interior-layout.md

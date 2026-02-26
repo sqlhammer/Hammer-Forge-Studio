@@ -16,6 +16,7 @@ import asyncio
 import json
 import os
 import platform
+import re
 import signal
 import subprocess
 import sys
@@ -445,7 +446,7 @@ class Conductor:
         self.logger = ActivityLogger(ACTIVITY_LOG)
         self.state = None
         self.shutdown_requested = False
-        self._active_proc: asyncio.subprocess.Process | None = None
+        self._active_procs: set[asyncio.subprocess.Process] = set()
 
         if resume:
             self.state = load_state()
@@ -459,19 +460,20 @@ class Conductor:
         LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
     def _track_proc(self, proc: asyncio.subprocess.Process):
-        """Callback to track the active subprocess for shutdown."""
-        self._active_proc = proc
+        """Callback to track active subprocesses for shutdown."""
+        self._active_procs.add(proc)
 
     def setup_signal_handlers(self):
         """Catch Ctrl+C for graceful shutdown."""
         def handler(sig, frame):
             self.logger.log("SYSTEM", "Shutdown requested (SIGINT)")
             self.shutdown_requested = True
-            if self._active_proc and self._active_proc.returncode is None:
-                try:
-                    self._active_proc.kill()
-                except ProcessLookupError:
-                    pass
+            for proc in list(self._active_procs):
+                if proc.returncode is None:
+                    try:
+                        proc.kill()
+                    except ProcessLookupError:
+                        pass
         signal.signal(signal.SIGINT, handler)
 
     async def run(self, milestone: str, phase: str):
@@ -709,13 +711,23 @@ class Conductor:
         for worker, (exit_code, stdout, stderr) in results:
             agent = worker["agent"]
             ticket = worker["ticket"]
-            duration = "?"  # Will be tracked by the subprocess
 
             if exit_code == 0:
+                if not stdout.strip():
+                    self.logger.log("CRASH",
+                        f"{agent} <- {ticket}: exit=0 but empty stdout — treating as failed")
+                    all_succeeded = False
+                    self._queue_retry(ticket)
+                    continue
+
                 # Try to parse result
                 try:
                     result_data = extract_json_from_output(stdout)
+                    # Normalize outcome: "completed" is a common agent synonym for "done"
                     outcome = result_data.get("outcome", "unknown")
+                    if outcome == "completed":
+                        outcome = "done"
+                        result_data["outcome"] = "done"
                     if result_data.get("new_gd_scripts", False):
                         any_new_gd = True
 
@@ -741,7 +753,11 @@ class Conductor:
                 all_succeeded = False
                 self._queue_retry(ticket)
             else:
-                self.logger.log("FAILED", f"{agent} <- {ticket} (exit={exit_code})")
+                empty = not stdout.strip() and not stderr.strip()
+                label = "CRASH" if empty else "FAILED"
+                self.logger.log(label,
+                    f"{agent} <- {ticket} (exit={exit_code}"
+                    + (", empty output — possible crash/signal" if empty else "") + ")")
                 all_succeeded = False
                 self._queue_retry(ticket)
 
@@ -780,6 +796,21 @@ class Conductor:
 
         # Determine working directory
         cwd = Path(worker["worktree_path"]) if worker.get("worktree_path") else REPO_ROOT
+
+        # Preflight: verify worktree is accessible before dispatching
+        if worker.get("worktree_path"):
+            if not cwd.exists():
+                self.logger.log("ERROR",
+                    f"Worktree {cwd} does not exist — aborting {ticket_id}")
+                return (-2, "", "worktree missing")
+            status_check = subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd=str(cwd), capture_output=True, text=True
+            )
+            if status_check.returncode != 0:
+                self.logger.log("ERROR",
+                    f"Worktree {cwd} git status failed — aborting {ticket_id}")
+                return (-2, "", "worktree git error")
 
         # Agent CLAUDE.md
         agent_md = AGENTS_DIR / agent_slug / "CLAUDE.md"
@@ -867,70 +898,87 @@ class Conductor:
         self.state["status"] = "PLANNING"
 
     async def _merge_pending_branches(self):
-        """Merge all orch/* branches into main, then clean up."""
-        # List orch branches
+        """Clean up orch worktrees and branches after workers self-merged via GitHub PR.
+
+        Workers push their branch and self-merge via PR. This step only needs to:
+        1. Remove worktrees (must happen before branch deletion)
+        2. Pull latest main (to pick up PR merges)
+        3. Delete local orch/* branches
+
+        No local git merge is performed here — that was the source of the double-merge
+        conflict (TICKET-0135). Branch parsing also strips *, +, and space prefixes
+        that git adds for current-branch and worktree-checked-out decorations (TICKET-0134).
+        """
+        # List orch/* branches, stripping *, +, and space prefix decorations.
         result = subprocess.run(
             ["git", "branch", "--list", "orch/*"],
             cwd=str(REPO_ROOT), capture_output=True, text=True
         )
-        branches = [b.strip().lstrip("* ") for b in result.stdout.splitlines() if b.strip()]
+        branches = [
+            re.sub(r'^[*+ ]+', '', b.strip())
+            for b in result.stdout.splitlines() if b.strip()
+        ]
+        branches = [b for b in branches if b]
 
         if not branches:
             return
 
-        # Ensure we're on main
+        # Build branch -> worktree_path map from porcelain output.
+        # Porcelain format (blocks separated by blank lines):
+        #   worktree /path/to/wt
+        #   HEAD <hash>
+        #   branch refs/heads/<name>
+        wt_result = subprocess.run(
+            ["git", "worktree", "list", "--porcelain"],
+            cwd=str(REPO_ROOT), capture_output=True, text=True
+        )
+        worktree_map: dict[str, str] = {}  # branch_name -> worktree_path
+        current_wt_path: str | None = None
+        for line in wt_result.stdout.splitlines():
+            if line.startswith("worktree "):
+                current_wt_path = line.split("worktree ", 1)[1]
+            elif line.startswith("branch refs/heads/") and current_wt_path:
+                branch_ref = line.split("branch refs/heads/", 1)[1]
+                if branch_ref.startswith("orch/"):
+                    worktree_map[branch_ref] = current_wt_path
+
+        # Step 1: Remove worktrees FIRST — prevents git branch -D failures on
+        # branches still checked out in a linked worktree (TICKET-0136).
+        for branch, wt_path in worktree_map.items():
+            self.logger.log("CLEANUP", f"Removing worktree {wt_path} (branch={branch})")
+            subprocess.run(
+                ["git", "worktree", "remove", "--force", wt_path],
+                cwd=str(REPO_ROOT), capture_output=True
+            )
+
+        # Step 2: Ensure we're on main, then pull — workers already merged via PR.
         subprocess.run(
             ["git", "checkout", "main"],
             cwd=str(REPO_ROOT), capture_output=True
         )
-
-        for branch in branches:
-            self.logger.log("MERGE", f"Merging {branch} -> main")
-            merge_result = subprocess.run(
-                ["git", "merge", branch, "--no-edit",
-                 "-m", f"Merge {branch} into main"],
-                cwd=str(REPO_ROOT), capture_output=True, text=True
-            )
-            if merge_result.returncode != 0:
-                self.logger.log("ERROR",
-                    f"Merge conflict on {branch}: {merge_result.stderr[:200]}")
-                # Abort the merge
-                subprocess.run(
-                    ["git", "merge", "--abort"],
-                    cwd=str(REPO_ROOT), capture_output=True
-                )
-                self.state["status"] = "HALTED"
-                return
-
-            self.logger.log("MERGE", f"Merged {branch} -> main")
-
-            # Clean up branch and worktree
-            # Find worktree for this branch
-            wt_result = subprocess.run(
-                ["git", "worktree", "list", "--porcelain"],
-                cwd=str(REPO_ROOT), capture_output=True, text=True
-            )
-            for line in wt_result.stdout.splitlines():
-                if line.startswith("worktree ") and "orch-" in line:
-                    wt_path = line.split("worktree ", 1)[1]
-                    subprocess.run(
-                        ["git", "worktree", "remove", "--force", wt_path],
-                        cwd=str(REPO_ROOT), capture_output=True
-                    )
-
-            # Delete branch
-            subprocess.run(
-                ["git", "branch", "-D", branch],
-                cwd=str(REPO_ROOT), capture_output=True
-            )
-
-        # Push main
-        push_result = subprocess.run(
-            ["git", "push", "origin", "main"],
+        pull_result = subprocess.run(
+            ["git", "pull", "origin", "main"],
             cwd=str(REPO_ROOT), capture_output=True, text=True
         )
-        if push_result.returncode != 0:
-            self.logger.log("ERROR", f"Push failed: {push_result.stderr[:200]}")
+        if pull_result.returncode != 0:
+            self.logger.log("ERROR", f"git pull origin main failed: {pull_result.stderr[:200]}")
+            self.state["status"] = "HALTED"
+            return
+        self.logger.log("MERGE", "Pulled latest main (workers merged via GitHub PR)")
+
+        # Step 3: Delete local orch/* branches.
+        for branch in branches:
+            del_result = subprocess.run(
+                ["git", "branch", "-D", branch],
+                cwd=str(REPO_ROOT), capture_output=True, text=True
+            )
+            if del_result.returncode == 0:
+                self.logger.log("CLEANUP", f"Deleted local branch {branch}")
+            else:
+                # Branch may already be gone — not fatal
+                self.logger.log("CLEANUP",
+                    f"Branch {branch} not deleted (may already be gone): "
+                    + del_result.stderr.strip())
 
     async def _handle_uid_commits(self):
         """GDScript UID commit procedure from CLAUDE.md."""

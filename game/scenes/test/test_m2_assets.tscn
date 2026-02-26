@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://jpgu150dmyh8" path="res://assets/meshes/tools/mesh_hand_drill.glb" id="1_rhf70"]
 [ext_resource type="PackedScene" uid="uid://bdaj5sjxc870k" path="res://assets/meshes/characters/mesh_player_character.glb" id="2_kermr"]
 [ext_resource type="PackedScene" uid="uid://cawcd10a5hvt8" path="res://scenes/objects/ship_exterior.tscn" id="3_nqfol"]
-[ext_resource type="PackedScene" uid="uid://pb0blxdrx6ys" path="res://assets/meshes/props/mesh_resource_node_scrap.glb" id="4_q17av"]
+[ext_resource type="PackedScene" path="res://scenes/objects/deposit_scrap_metal.tscn" id="4_q17av"]
 
 [node name="TestM2Assets" type="Node3D"]
 
@@ -19,7 +19,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0)
 [node name="ShipExterior" type="StaticBody3D" parent="." instance=ExtResource("3_nqfol")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0)
 
-[node name="ResourceNode" type="Node3D" parent="." instance=ExtResource("4_q17av")]
+[node name="ScrapDeposit" type="StaticBody3D" parent="." instance=ExtResource("4_q17av")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0)
 
 [node name="ReviewCamera" type="Camera3D" parent="."]

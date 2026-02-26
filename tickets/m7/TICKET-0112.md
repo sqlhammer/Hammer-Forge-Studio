@@ -2,7 +2,7 @@
 id: TICKET-0112
 title: "Refactor — Resource deposit as a standalone instanced scene with type subscenes"
 type: REFACTOR
-status: TODO
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -42,3 +42,4 @@ Additional deposit type subscenes (ore, etc.) should follow the same pattern in 
 ## Activity Log
 - 2026-02-25 [producer] Created ticket — standards refactor, self-contained scene rule
 - 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone
+- 2026-02-26 [gameplay-programmer] Starting work — IN_PROGRESS

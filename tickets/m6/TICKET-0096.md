@@ -2,12 +2,12 @@
 id: TICKET-0096
 title: "Studio Head method approval — present recommendation, receive method selection"
 type: TASK
-status: OPEN
+status: DONE
 priority: P0
 owner: producer
 created_by: producer
 created_at: 2026-02-25
-updated_at: 2026-02-25
+updated_at: 2026-02-26
 milestone: "M6"
 milestone_gate: "M5"
 phase: "Evaluation & Selection"
@@ -24,13 +24,13 @@ This ticket is owned by the producer and cannot be marked DONE autonomously — 
 
 ## Acceptance Criteria
 
-- [ ] Producer presents `docs/art/icon-poc-report.md` to Studio Head
-- [ ] Studio Head reviews the report and either:
+- [x] Producer presents `docs/art/icon-poc-report.md` to Studio Head
+- [x] Studio Head reviews the report and either:
   - Approves the recommended method, OR
   - Selects a different method with documented rationale
-- [ ] Studio Head's decision is recorded in this ticket's Activity Log (date, method selected, any notes)
-- [ ] Producer records the decision in `agents/producer/decisions.md` with rationale
-- [ ] Winning method name is added to the Handoff Notes of TICKET-0097 so the technical-artist knows which experiment output to promote
+- [x] Studio Head's decision is recorded in this ticket's Activity Log (date, method selected, any notes)
+- [x] Producer records the decision in `agents/producer/decisions.md` with rationale
+- [x] Winning method name is added to the Handoff Notes of TICKET-0097 so the technical-artist knows which experiment output to promote
 
 ## Implementation Notes
 
@@ -40,8 +40,11 @@ This ticket is owned by the producer and cannot be marked DONE autonomously — 
 
 ## Handoff Notes
 
-**Winning method:** [To be filled in by producer when Studio Head approves]
+**Winning method:** Method A — Programmatic SVG (Python direct XML construction)
+
+Studio Head declined the hybrid A+C recommendation in favor of Method A only. Rationale: simplicity, zero attribution burden, perfect consistency. No hybrid. No CC BY 3.0.
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket for M6 Evaluation & Selection phase — Phase 3 gate; Phase 4 blocked until DONE
+- 2026-02-26 [producer] Presented evaluation report to Studio Head. Studio Head selected **Method A Only** (declined hybrid recommendation). Decision recorded in `agents/producer/decisions.md`. TICKET-0097 handoff notes updated. DONE.

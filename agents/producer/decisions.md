@@ -21,6 +21,26 @@
 
 ---
 
+## [2026-02-26] [TICKET-0096] Icon Generation Method Selection
+
+**Context:** Three icon generation methods were evaluated in M6 Experiments phase (TICKET-0092–0094) and scored by the technical-artist (TICKET-0095). The evaluation report (`docs/art/icon-poc-report.md`) used the 7-dimension scoring framework from TICKET-0089, with per-icon scoring across all 29 icons. Results: Method A (Programmatic SVG) = 4.52, Method C (game-icons.net Library) = 4.31, Method B (Recraft.ai API) = 2.73. The A-C gap of 0.21 triggered the hybrid threshold rule (recommend hybrid if within 0.3 points).
+
+**Decision:** Studio Head selected **Method A Only (Programmatic SVG)** as the production icon pipeline. The hybrid recommendation was declined.
+
+**Alternatives considered:**
+1. Hybrid A+C — technical-artist's recommendation; merges best library shapes into Method A's codebase. Declined by Studio Head in favor of simplicity.
+2. Method C Only — marginally higher visual quality (+0.14) but lower consistency (4.17 vs 5.00), CC BY 3.0 attribution burden, and 41% of icons are Method A code anyway. Not selected.
+3. Method B (Recraft.ai API) — eliminated. Filled-path rendering is fundamentally incompatible with stroke-based style guide. Worst scores in consistency (2.34), scalability (2.48), and cost ($5.52).
+
+**Rationale:**
+- Method A scores highest overall (4.52) with perfect marks in 5 of 7 dimensions (Human Effort, Financial Cost, Consistency, Godot Compatibility, Maintainability)
+- Zero cost, zero external dependencies, fully deterministic and reproducible
+- No CC BY 3.0 attribution requirement — cleaner IP position
+- Perfect consistency (5.00) — every icon follows identical construction rules
+- Visual quality (3.31) is adequate and style-guide-compliant; any future improvements can be made directly in the Python script without changing pipelines
+
+---
+
 ## [2026-02-21] [TICKET-0001 through TICKET-0007] M1 Milestone Kickoff and Sprint Planning
 
 **Context:** Studio Head provided M1 goals: testable player scene with first-person and third-person view systems, plus unified input architecture supporting keyboard and gamepad.

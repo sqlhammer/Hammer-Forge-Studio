@@ -39,8 +39,13 @@ Move the winning experiment's icon outputs into the permanent game asset locatio
 
 ## Handoff Notes
 
-**Winning method:** [Filled in from TICKET-0096 after Studio Head approval]
+**Winning method:** Method A — Programmatic SVG (Python direct XML construction)
+
+- Source icons: `docs/art/icon-experiments/method-a/item-icons/` (9 SVGs) and `docs/art/icon-experiments/method-a/hud-icons/` (20 SVGs)
+- **No hybrid.** All 29 icons from Method A only. Do not mix with Method B or C outputs.
+- No CC BY 3.0 attribution required.
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket for M6 Integration & QA phase
+- 2026-02-26 [producer] Updated handoff notes with Studio Head's method selection: Method A Only (TICKET-0096 DONE)

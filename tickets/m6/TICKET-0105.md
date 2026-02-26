@@ -2,12 +2,13 @@
 id: TICKET-0105
 title: "Regenerate all 29 icons — apply contrast-compliant palette from amended style guides"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: technical-artist
 created_by: producer
 created_at: 2026-02-25
-updated_at: 2026-02-25
+updated_at: 2026-02-26
+completed_at: 2026-02-26
 milestone: "M6"
 phase: "Integration & QA"
 depends_on: [TICKET-0104]
@@ -21,15 +22,15 @@ The current production icons in `game/assets/icons/` are too dark against the ga
 
 ## Acceptance Criteria
 
-- [ ] Read `docs/art/icon-style-guide-items.md` and `docs/art/icon-style-guide-hud.md` (post TICKET-0104 amendments) and identify the approved fill hex values and contrast threshold
-- [ ] Update the Method A Python SVG generator to use the approved fill palette
-- [ ] Regenerate all 29 icons:
+- [x] Read `docs/art/icon-style-guide-items.md` and `docs/art/icon-style-guide-hud.md` (post TICKET-0104 amendments) and identify the approved fill hex values and contrast threshold
+- [x] Update the Method A Python SVG generator to use the approved fill palette
+- [x] Regenerate all 29 icons:
   - 9 item icons → `game/assets/icons/item/` (replace in-place)
   - 20 HUD/functional icons → `game/assets/icons/hud/` (replace in-place)
-- [ ] All regenerated icons visually verified at 16px and 48px for legibility — confirm icons are clearly readable against their known background colors before committing
-- [ ] File names unchanged — integration code must require zero changes
-- [ ] Source experiment archive (`docs/art/icon-experiments/method-a/`) updated to reflect the revised generator output (replace archived SVGs with the new versions so the archive stays current)
-- [ ] Committed to `main` with a clear commit message referencing both this ticket and TICKET-0104
+- [x] All regenerated icons visually verified at 16px and 48px for legibility — confirm icons are clearly readable against their known background colors before committing
+- [x] File names unchanged — integration code must require zero changes
+- [x] Source experiment archive (`docs/art/icon-experiments/method-a/`) updated to reflect the revised generator output (replace archived SVGs with the new versions so the archive stays current)
+- [x] Committed to `main` with a clear commit message referencing both this ticket and TICKET-0104
 
 ## Implementation Notes
 
@@ -41,3 +42,4 @@ The current production icons in `game/assets/icons/` are too dark against the ga
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket — icon contrast fix. Depends on TICKET-0104 style guide amendments. Blocks TICKET-0106 visual QA.
+- 2026-02-26 [technical-artist] DONE — Updated generator: item icons stroke="#F1F5F9", HUD icons stroke="#FFFFFF" + fill="#FFFFFF". Regenerated all 29 icons to both game/assets/icons/ and docs/art/icon-experiments/method-a/. Commit 54335a0, PR #74.

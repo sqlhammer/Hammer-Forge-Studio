@@ -2,7 +2,7 @@
 id: TICKET-0117
 title: "Refactor — UI panels and HUD elements as standalone instanced subscenes"
 type: REFACTOR
-status: IN_REVIEW
+status: DONE
 priority: P2
 owner: systems-programmer
 created_by: producer
@@ -68,3 +68,4 @@ Per the updated Scene Design standard, every conceptual game object — includin
 - 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone
 - 2026-02-26 [gameplay-programmer] Starting work — IN_PROGRESS
 - 2026-02-26 [gameplay-programmer] Implementation complete — created 15 .tscn scenes, refactored game_hud.gd and test_world.gd. Submitting for code review — IN_REVIEW
+- 2026-02-26 [systems-programmer] Verified merge complete — commit e832c11 merged to main via PR #85. Marking DONE.

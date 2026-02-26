@@ -2,12 +2,12 @@
 id: TICKET-0104
 title: "Amend icon style guides — add contrast requirements against in-game backgrounds"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: ui-ux-designer
 created_by: producer
 created_at: 2026-02-25
-updated_at: 2026-02-25
+updated_at: 2026-02-25 (DONE)
 milestone: "M6"
 phase: "Integration & QA"
 depends_on: []
@@ -21,15 +21,15 @@ Post-integration QA has identified that the current Method A SVG icons are too d
 
 ## Acceptance Criteria
 
-- [ ] `docs/art/icon-style-guide-items.md` amended with a **Contrast Requirements** section
-- [ ] `docs/art/icon-style-guide-hud.md` amended with a **Contrast Requirements** section
-- [ ] Both sections define:
+- [x] `docs/art/icon-style-guide-items.md` amended with a **Contrast Requirements** section
+- [x] `docs/art/icon-style-guide-hud.md` amended with a **Contrast Requirements** section
+- [x] Both sections define:
   - The known background colors icons appear on (dark panel background, inventory slot, HUD overlay). Read the current scenes and UI style guide to identify the actual hex values in use.
   - A minimum luminance difference between the icon's primary fill color and the background it sits on (define a specific value, e.g., primary fill must be at least 40% lighter than the darkest background it is used on)
   - A rule for icon stroke/outline: if fill-alone contrast is insufficient, a light outline or drop-shadow effect is required to separate the icon from the background
   - Explicit approved fill palette: list 2–4 approved fill colors (hex values) that satisfy the contrast requirement against all known backgrounds
-- [ ] `docs/design/ui-style-guide.md` Icon Style section updated to note that contrast requirements are defined in the individual style guides (1-line addition only — do not rewrite the section)
-- [ ] All changes committed to `main`
+- [x] `docs/design/ui-style-guide.md` Icon Style section updated to note that contrast requirements are defined in the individual style guides (1-line addition only — do not rewrite the section)
+- [x] All changes committed to `main`
 
 ## Implementation Notes
 
@@ -37,6 +37,17 @@ Post-integration QA has identified that the current Method A SVG icons are too d
 - The contrast rule does not need to be WCAG-exact, but must be a specific, testable numeric threshold the technical-artist can implement in the Python SVG generator
 - Do not redesign the icon shapes or change any other aspect of the style guides — this is a targeted contrast-only amendment
 
+## Handoff Notes
+
+Both icon style guides amended with full Contrast Requirements sections. Root cause documented: `stroke="currentColor"` resolves to black in Godot's SVG renderer when no CSS `color` is inherited from parent — causing near-zero contrast on dark panel backgrounds.
+
+- `icon-style-guide-items.md`: 3-surface background table (#0F1923, #1A2736, #0A0F18), 4.5:1 minimum contrast threshold, stroke color fix (use `#F1F5F9` directly), outline rule for fill-only paths, 4-color approved stroke palette.
+- `icon-style-guide-hud.md`: Same background table, 4.5:1 threshold, stroke color fix (use `#FFFFFF` as base for modulate tinting to work correctly), fill path fix (`fill="#FFFFFF"`), outline rule, 4-color approved modulate palette.
+- `ui-style-guide.md`: 1-line addition to Shared Rules only, no other sections modified.
+
+Merged via PR #72 (commit 3c1d3ee).
+
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket — contrast deficiency identified post-integration. Blocks icon regeneration (TICKET-0105).
+- 2026-02-25 [ui-ux-designer] DONE — Contrast Requirements sections added to both style guides. 1-line ui-style-guide note added. Root cause: currentColor → black in Godot SVG renderer. Fix: #F1F5F9 for item icons, #FFFFFF for HUD icons. PR #72 merged (commit 3c1d3ee).

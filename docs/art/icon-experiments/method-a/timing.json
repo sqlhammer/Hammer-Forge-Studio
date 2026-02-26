@@ -1,8 +1,8 @@
 {
   "experiment": "Method A - Programmatic SVG",
-  "generated_at": "2026-02-25T18:35:53.084093",
+  "generated_at": "2026-02-26T06:57:43.980498",
   "total_icons": 29,
-  "total_duration_s": 0.008,
+  "total_duration_s": 0.014,
   "total_cost_usd": 0.0,
   "icons": [
     {
@@ -10,203 +10,203 @@
       "category": "item",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_scrap_metal.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_scrap_metal.svg"
     },
     {
       "name": "icon_item_metal",
       "category": "item",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_metal.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_metal.svg"
     },
     {
       "name": "icon_item_spare_battery",
       "category": "item",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_spare_battery.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_spare_battery.svg"
     },
     {
       "name": "icon_item_head_lamp",
       "category": "item",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_head_lamp.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_head_lamp.svg"
     },
     {
       "name": "icon_item_hand_drill",
       "category": "item",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_hand_drill.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_hand_drill.svg"
     },
     {
       "name": "icon_item_resource_node",
       "category": "item",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_resource_node.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_resource_node.svg"
     },
     {
       "name": "icon_item_module_recycler",
       "category": "item",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_module_recycler.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_module_recycler.svg"
     },
     {
       "name": "icon_item_module_fabricator",
       "category": "item",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_module_fabricator.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_module_fabricator.svg"
     },
     {
       "name": "icon_item_module_automation_hub",
       "category": "item",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_module_automation_hub.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\item-icons\\icon_item_module_automation_hub.svg"
     },
     {
       "name": "icon_hud_battery",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_battery.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_battery.svg"
     },
     {
       "name": "icon_hud_scanner",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_scanner.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_scanner.svg"
     },
     {
       "name": "icon_hud_battery_micro",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_battery_micro.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_battery_micro.svg"
     },
     {
       "name": "icon_hud_star_filled",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_star_filled.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_star_filled.svg"
     },
     {
       "name": "icon_hud_star_empty",
       "category": "hud",
-      "duration_ms": 0.0,
+      "duration_ms": 1.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_star_empty.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_star_empty.svg"
     },
     {
       "name": "icon_hud_compass_center",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_compass_center.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_compass_center.svg"
     },
     {
       "name": "icon_hud_compass_ping",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_compass_ping.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_compass_ping.svg"
     },
     {
       "name": "icon_hud_power",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_power.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_power.svg"
     },
     {
       "name": "icon_hud_integrity",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_integrity.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_integrity.svg"
     },
     {
       "name": "icon_hud_heat",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_heat.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_heat.svg"
     },
     {
       "name": "icon_hud_oxygen",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_oxygen.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_oxygen.svg"
     },
     {
       "name": "icon_hud_notification_info",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_notification_info.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_notification_info.svg"
     },
     {
       "name": "icon_hud_notification_warning",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_notification_warning.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_notification_warning.svg"
     },
     {
       "name": "icon_hud_notification_critical",
       "category": "hud",
-      "duration_ms": 0.0,
+      "duration_ms": 1.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_notification_critical.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_notification_critical.svg"
     },
     {
       "name": "icon_hud_lock",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_lock.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_lock.svg"
     },
     {
       "name": "icon_hud_unlock_chevron",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_unlock_chevron.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_unlock_chevron.svg"
     },
     {
       "name": "icon_hud_unlock_check",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_unlock_check.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_unlock_check.svg"
     },
     {
       "name": "icon_hud_mining_active",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_mining_active.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_mining_active.svg"
     },
     {
       "name": "icon_hud_scan_ping",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_scan_ping.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_scan_ping.svg"
     },
     {
       "name": "icon_hud_drone",
       "category": "hud",
       "duration_ms": 0.0,
       "cost": 0.0,
-      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\orktree\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_drone.svg"
+      "file": "C:\\repos\\Hammer-Forge-Studio\\.claude\\worktrees\\dazzling-cooking-puzzle\\docs\\art\\icon-experiments\\method-a\\hud-icons\\icon_hud_drone.svg"
     }
   ]
 }

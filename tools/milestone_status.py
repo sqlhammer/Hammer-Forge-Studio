@@ -8,6 +8,7 @@ Accepts "M5", "5", "m5". Defaults to auto-detecting the active milestone.
 Scans only active ticket dirs (skips _archive/ entirely).
 """
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -15,6 +16,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TICKETS_DIR = REPO_ROOT / "tickets"
 MILESTONES_FILE = REPO_ROOT / "docs" / "studio" / "milestones.md"
+STATE_JSON = REPO_ROOT / "orchestrator" / "state.json"
 
 
 def normalize_milestone(raw: str) -> str:
@@ -69,6 +71,19 @@ def parse_depends(raw: str) -> list[str]:
     return [t.strip() for t in raw.split(",") if t.strip()]
 
 
+def load_active_tickets() -> set:
+    """Return set of ticket IDs currently dispatched per orchestrator/state.json.
+
+    Reads the gitignored runtime state file written by the conductor. Returns an
+    empty set if the file is absent or unparseable (e.g., orchestrator not running).
+    """
+    try:
+        data = json.loads(STATE_JSON.read_text(encoding="utf-8"))
+        return {w["ticket"] for w in data.get("active_workers", []) if "ticket" in w}
+    except (OSError, ValueError, KeyError):
+        return set()
+
+
 def main():
     # Parse flags and positional args
     args = sys.argv[1:]
@@ -94,9 +109,6 @@ def main():
     # Parse all tickets
     status_map: dict[str, str] = {}  # ticket_id → status (all active)
     rows = []  # (id, title, status, owner, phase, depends_str) for target milestone
-    done_count = 0
-    in_progress_count = 0
-    open_count = 0
 
     for path in ticket_files:
         fm = parse_frontmatter(path)
@@ -120,12 +132,24 @@ def main():
 
         rows.append((ticket_id, title, status, owner, phase, depends_str))
 
-        if status == "DONE":
-            done_count += 1
-        elif status == "IN_PROGRESS":
-            in_progress_count += 1
-        else:
-            open_count += 1
+    # Apply real-time overlay: tickets in state.json active_workers show as IN_PROGRESS
+    # even before the worker has committed the status change to git.
+    active_tickets = load_active_tickets()
+    if active_tickets:
+        rows = [
+            (t_id, t_title,
+             "IN_PROGRESS" if t_id in active_tickets and t_status not in ("DONE", "IN_PROGRESS") else t_status,
+             t_owner, t_phase, t_deps)
+            for t_id, t_title, t_status, t_owner, t_phase, t_deps in rows
+        ]
+        for t_id in active_tickets:
+            if t_id in status_map and status_map[t_id] not in ("DONE", "IN_PROGRESS"):
+                status_map[t_id] = "IN_PROGRESS"
+
+    # Count from effective statuses
+    done_count = sum(1 for _, _, s, _, _, _ in rows if s == "DONE")
+    in_progress_count = sum(1 for _, _, s, _, _, _ in rows if s == "IN_PROGRESS")
+    open_count = sum(1 for _, _, s, _, _, _ in rows if s not in ("DONE", "IN_PROGRESS"))
 
     total = len(rows)
     if total == 0:

@@ -2,7 +2,7 @@
 id: TICKET-0128
 title: "Cockpit exterior viewport/window"
 type: FEATURE
-status: TODO
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -72,7 +72,15 @@ The cockpit window is a key immersion element. It connects the interior space to
 - If performance is not a concern and the wireframe recommends it, Option A (SubViewport) can be used directly
 
 ## Handoff Notes
-(Leave blank until handoff occurs.)
+- Added `_build_viewport_window()` to `ship_interior.gd` — creates a QuadMesh (3.8m×1.4m) with a procedural sky gradient shader (blue top → orange horizon)
+- Window pane positioned at (0, 2.25, -11.95), centered in the existing viewport opening (4m×1.5m, framed by `_build_viewport_frame()`)
+- Shader uses `render_mode unshaded, cull_disabled` — window content always visible regardless of interior lighting
+- Added `ViewportLight` OmniLight3D at (0, 2.25, -11.5) with warm color (0.85, 0.75, 0.6) to simulate sunlight through window
+- Existing `ViewportArea` Marker3D at (0, 2.25, -12) documented as M8 camera anchor with TODO comments
+- TODO comments in both `_build_cockpit_features()` and `_build_viewport_window()` describe the M8 SubViewport upgrade path
+- No new scripts created — all changes in existing `ship_interior.gd`
+- Frame mesh (bottom, left, right edges) was already built by TICKET-0126
 
 ## Activity Log
 - 2026-02-26 [producer] Created ticket — cockpit exterior viewport/window
+- 2026-02-26 [gameplay-programmer] Starting work — implementing cockpit exterior viewport/window

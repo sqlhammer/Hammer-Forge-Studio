@@ -277,18 +277,24 @@ func _setup_hud() -> void:
 	add_child(_inventory_screen)
 
 func _update_recharge(delta: float) -> void:
+	if _ship_exterior and _first_person:
+		var in_zone: bool = _ship_exterior.is_body_in_recharge_zone(_first_person)
+		if in_zone and not SuitBattery.is_recharging() and SuitBattery.get_charge_percent() < 1.0:
+			Global.log("TestWorld: player entered recharge zone")
+			SuitBattery.start_recharge()
+		elif not in_zone and SuitBattery.is_recharging():
+			Global.log("TestWorld: player exited recharge zone")
+			SuitBattery.stop_recharge()
 	if SuitBattery.is_recharging():
 		SuitBattery.process_recharge(delta)
 
 func _on_recharge_zone_entered(body: Node3D) -> void:
 	if body == _first_person:
-		Global.log("TestWorld: player entered recharge zone")
-		SuitBattery.start_recharge()
+		Global.log("TestWorld: recharge zone signal — entered")
 
 func _on_recharge_zone_exited(body: Node3D) -> void:
 	if body == _first_person:
-		Global.log("TestWorld: player exited recharge zone")
-		SuitBattery.stop_recharge()
+		Global.log("TestWorld: recharge zone signal — exited")
 
 func _setup_ship_interior() -> void:
 	# Load and instance ship interior scene underground

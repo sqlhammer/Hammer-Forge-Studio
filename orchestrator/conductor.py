@@ -2,9 +2,13 @@
 """conductor.py — Orchestration loop for Hammer Forge Studio.
 
 Usage:
-    python orchestrator/conductor.py <milestone> <phase>
-    python orchestrator/conductor.py --resume
+    python orchestrator/conductor.py <milestone>
     python orchestrator/conductor.py --status
+
+Behaviour:
+  - If state.json exists, resumes automatically from saved state.
+  - If no state.json, starts fresh and auto-detects the starting phase
+    from the milestone's ticket files (first non-DONE ticket by ID order).
 
 The Conductor is a dumb executor. The Producer (Claude) is the intelligent
 scheduler. The Conductor never decides which agent to spawn or which ticket
@@ -181,6 +185,32 @@ def get_blocked_tools(config: dict, agent_slug: str) -> list[str]:
 # ---------------------------------------------------------------------------
 # State management
 # ---------------------------------------------------------------------------
+
+def detect_starting_phase(milestone: str) -> str:
+    """Return the phase of the earliest non-DONE ticket for the milestone.
+
+    Ticket files are sorted by name (which encodes ID order), so the first
+    non-DONE ticket determines which phase the conductor should start in.
+    Falls back to "Foundation" if all tickets are DONE or none are found.
+    """
+    tickets_dir = REPO_ROOT / "tickets" / milestone.lower()
+    if not tickets_dir.exists():
+        return "Foundation"
+
+    status_re = re.compile(r'^status:\s*["\']?(\w+)["\']?', re.MULTILINE)
+    phase_re = re.compile(r'^phase:\s*["\']?([^"\'\\n]+?)["\']?\s*$', re.MULTILINE)
+
+    for ticket_file in sorted(tickets_dir.glob("TICKET-*.md")):
+        text = ticket_file.read_text(encoding="utf-8")
+        status_match = status_re.search(text)
+        if not status_match or status_match.group(1).upper() == "DONE":
+            continue
+        phase_match = phase_re.search(text)
+        if phase_match:
+            return phase_match.group(1).strip()
+
+    return "Foundation"
+
 
 def create_initial_state(milestone: str, phase: str) -> dict:
     return {
@@ -441,20 +471,16 @@ def fire_toast(title: str, message: str):
 # ---------------------------------------------------------------------------
 
 class Conductor:
-    def __init__(self, config_path: Path = CONFIG_PATH, resume: bool = False,
-                 run_claude_fn=None):
+    def __init__(self, config_path: Path = CONFIG_PATH, run_claude_fn=None):
         self.config = load_json(config_path)
         self.logger = ActivityLogger(ACTIVITY_LOG)
-        self.state = None
         self.shutdown_requested = False
         self._active_procs: set[asyncio.subprocess.Process] = set()
         self._run_claude = run_claude_fn or run_claude
 
-        if resume:
-            self.state = load_state()
-            if self.state is None:
-                print("ERROR: No state.json found. Cannot resume.")
-                sys.exit(1)
+        # Auto-resume from saved state if it exists
+        self.state = load_state()
+        if self.state is not None:
             self.logger.log("SYSTEM", "Resumed from saved state")
 
         # Ensure output dirs exist
@@ -1115,11 +1141,8 @@ def main():
         description="Hammer Forge Studio — Agent Orchestrator"
     )
     parser.add_argument("milestone", nargs="?",
-        help="Milestone ID (e.g., M6)")
-    parser.add_argument("phase", nargs="?",
-        help="Starting phase name (e.g., Foundation)")
-    parser.add_argument("--resume", action="store_true",
-        help="Resume from saved state.json")
+        help="Milestone ID (e.g., M7). Required for a fresh start; "
+             "omit only with --status.")
     parser.add_argument("--status", action="store_true",
         help="Print current state and exit")
     parser.add_argument("--config", type=Path, default=CONFIG_PATH,
@@ -1135,17 +1158,20 @@ def main():
             print("No state.json found.")
         return
 
-    conductor = Conductor(config_path=args.config, resume=args.resume)
+    conductor = Conductor(config_path=args.config)
 
-    if args.resume:
+    if conductor.state is not None:
+        # Resuming — milestone and phase come from saved state
         milestone = conductor.state["milestone"]
         phase = conductor.state["phase"]
-    elif args.milestone and args.phase:
-        milestone = args.milestone
-        phase = args.phase
     else:
-        parser.error("Provide <milestone> <phase>, or use --resume")
-        return
+        # Fresh start — milestone required; phase auto-detected from tickets
+        if not args.milestone:
+            parser.error("Provide <milestone> for a fresh start (e.g., M7)")
+            return
+        milestone = args.milestone
+        phase = detect_starting_phase(milestone)
+        print(f"Fresh start: milestone={milestone}, auto-detected phase={phase!r}")
 
     asyncio.run(conductor.run(milestone, phase))
 

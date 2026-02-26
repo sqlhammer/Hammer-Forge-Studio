@@ -124,19 +124,14 @@ func get_interaction_prompt_hud() -> InteractionPromptHUD:
 # ── Private Methods ───────────────────────────────────────
 
 func _setup_hud_positions() -> void:
-	# Compass bar — top center
-	_compass_bar.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_compass_bar.position = Vector2(-CompassBar.COMPASS_WIDTH / 2.0, 32)
+	# Compass bar — anchors/offsets set in game_hud.tscn (center-top, 32px margin)
+	# Mining progress — anchors/offsets set in game_hud.tscn (center, 60px below crosshair)
 
 	# Crosshair — center dot (only element still created programmatically)
 	_crosshair = _create_crosshair()
 	_crosshair.set_anchors_preset(Control.PRESET_CENTER)
 	_crosshair.position = Vector2(-2, -2)
 	_hud_root.add_child(_crosshair)
-
-	# Mining progress — center, below crosshair
-	_mining_progress.set_anchors_preset(Control.PRESET_CENTER)
-	_mining_progress.position = Vector2(-MiningProgress.BAR_WIDTH / 2.0, 60)
 
 	# Scanner readout — center-right
 	_scanner_readout.anchor_left = 1.0

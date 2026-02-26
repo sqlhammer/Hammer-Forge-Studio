@@ -35,15 +35,7 @@ var _ping_icon_tex: Texture2D = null
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	# Center compass bar horizontally at the top of the parent (TICKET-0140)
-	anchor_left = 0.5
-	anchor_right = 0.5
-	anchor_top = 0.0
-	anchor_bottom = 0.0
-	offset_left = -COMPASS_WIDTH / 2.0
-	offset_right = COMPASS_WIDTH / 2.0
-	offset_top = 0.0
-	offset_bottom = 56.0
+	# Anchors and offsets set in compass_bar.tscn / game_hud.tscn (TICKET-0152)
 	custom_minimum_size = Vector2(COMPASS_WIDTH, 56)
 	_font = ThemeDB.fallback_font
 	_font_mono = ThemeDB.fallback_font

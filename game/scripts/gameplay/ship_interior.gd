@@ -53,6 +53,7 @@ var _fade_layer: CanvasLayer = null
 var _player_ref: CharacterBody3D = null
 var _is_player_inside: bool = false
 var _player_in_exit_zone: bool = false
+var _exit_zone: ShipExitZone = null
 var _terminal_area: Area3D = null
 var _sub_viewport: SubViewport = null
 var _viewport_camera: Camera3D = null
@@ -393,19 +394,20 @@ func _build_spawn_markers() -> void:
 	add_child(_enter_marker)
 
 	# Exit trigger area — near the back of the vestibule (Z ≈ +11.5)
-	var exit_area := Area3D.new()
-	exit_area.name = "ExitTrigger"
-	exit_area.collision_layer = 0
-	exit_area.collision_mask = PhysicsLayers.PLAYER
+	_exit_zone = ShipExitZone.new()
+	_exit_zone.name = "ExitTrigger"
+	_exit_zone.collision_layer = 0
+	_exit_zone.collision_mask = PhysicsLayers.PLAYER
 	var exit_col := CollisionShape3D.new()
 	var exit_shape := BoxShape3D.new()
 	exit_shape.size = Vector3(VESTIBULE_WIDTH, 2.0, 1.0)
 	exit_col.shape = exit_shape
 	exit_col.position = Vector3(0.0, 1.0, 11.5)
-	exit_area.add_child(exit_col)
-	add_child(exit_area)
-	exit_area.body_entered.connect(_on_exit_zone_entered)
-	exit_area.body_exited.connect(_on_exit_zone_exited)
+	_exit_zone.add_child(exit_col)
+	add_child(_exit_zone)
+	_exit_zone.body_entered.connect(_on_exit_zone_entered)
+	_exit_zone.body_exited.connect(_on_exit_zone_exited)
+	_exit_zone.add_to_group("interaction_prompt_source")
 
 	# Exterior marker — default position, set by test world after instancing
 	_exterior_marker = Marker3D.new()

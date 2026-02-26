@@ -1,7 +1,7 @@
 ---
 id: TICKET-9904
 title: "Test: Post-gate task A"
-status: IN_PROGRESS
+status: DONE
 owner: gameplay-programmer
 milestone: "TEST"
 phase: "Beta"
@@ -19,3 +19,5 @@ needs_worktree: false
 **2026-02-26T12:00:03Z** — Starting work (gameplay-programmer)
 
 **2026-02-26T12:00:04Z** — DONE
+
+**2026-02-26T12:00:05Z** — Ticket completed. Commit: 965ef89. Pushed to main.

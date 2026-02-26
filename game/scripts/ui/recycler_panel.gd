@@ -28,9 +28,9 @@ const COLOR_DIM := Color("#000000", 0.5)
 var _is_open: bool = false
 var _dim_rect: ColorRect = null
 var _main_panel: PanelContainer = null
-var _input_slot_icon: ColorRect = null
+var _input_slot_icon: TextureRect = null
 var _input_slot_label: Label = null
-var _output_slot_icon: ColorRect = null
+var _output_slot_icon: TextureRect = null
 var _output_slot_label: Label = null
 var _progress_bar: ProgressBar = null
 var _progress_label: Label = null
@@ -207,7 +207,7 @@ func _build_slot_row() -> CenterContainer:
 	# Input slot
 	var input_container := _create_labeled_slot("INPUT")
 	hbox.add_child(input_container)
-	_input_slot_icon = input_container.get_meta("icon") as ColorRect
+	_input_slot_icon = input_container.get_meta("icon") as TextureRect
 	_input_slot_label = input_container.get_meta("label") as Label
 
 	# Arrow
@@ -221,7 +221,7 @@ func _build_slot_row() -> CenterContainer:
 	# Output slot
 	var output_container := _create_labeled_slot("OUTPUT")
 	hbox.add_child(output_container)
-	_output_slot_icon = output_container.get_meta("icon") as ColorRect
+	_output_slot_icon = output_container.get_meta("icon") as TextureRect
 	_output_slot_label = output_container.get_meta("label") as Label
 
 	return center
@@ -248,9 +248,10 @@ func _create_labeled_slot(slot_label_text: String) -> VBoxContainer:
 	slot.add_theme_stylebox_override("panel", style)
 	container.add_child(slot)
 
-	var icon := ColorRect.new()
+	var icon := TextureRect.new()
 	icon.custom_minimum_size = Vector2(40, 40)
-	icon.set_anchors_preset(Control.PRESET_CENTER)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.visible = false
 	slot.add_child(icon)
 
@@ -372,14 +373,18 @@ func _refresh_ui() -> void:
 	# Update input slot
 	var has_input: bool = Recycler.is_job_active() or scrap_count >= Recycler.RECIPE_INPUT_QUANTITY
 	_input_slot_icon.visible = has_input
-	_input_slot_icon.color = COLOR_TEAL
+	var input_icon_path: String = ResourceDefs.get_icon_path(Recycler.RECIPE_INPUT_TYPE)
+	if not input_icon_path.is_empty():
+		_input_slot_icon.texture = load(input_icon_path) as Texture2D
 	_input_slot_label.visible = has_input
 	_input_slot_label.text = "x%d" % Recycler.RECIPE_INPUT_QUANTITY
 
 	# Update output slot
 	var has_output: bool = Recycler.has_uncollected_output()
 	_output_slot_icon.visible = has_output
-	_output_slot_icon.color = COLOR_AMBER
+	var output_icon_path: String = ResourceDefs.get_icon_path(Recycler.RECIPE_OUTPUT_TYPE)
+	if not output_icon_path.is_empty():
+		_output_slot_icon.texture = load(output_icon_path) as Texture2D
 	_output_slot_label.visible = has_output
 	_output_slot_label.text = "x%d" % Recycler.get_pending_output_quantity()
 

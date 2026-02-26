@@ -33,7 +33,7 @@ const OXYGEN_CRITICAL: float = 19.0
 
 # ── Private Variables ─────────────────────────────────────
 var _bars: Array[ProgressBar] = []
-var _icons: Array[ColorRect] = []
+var _icons: Array[TextureRect] = []
 var _labels: Array[Label] = []
 var _values: Array[float] = [100.0, 100.0, 50.0, 100.0]
 var _alerts_container: VBoxContainer = null
@@ -92,9 +92,14 @@ func _build_ui() -> void:
 	vbox.add_child(divider)
 
 	# Variable rows
-	var var_names: Array[String] = ["P", "I", "H", "O"]
+	var icon_paths: Array[String] = [
+		"res://assets/icons/hud/icon_hud_power.svg",
+		"res://assets/icons/hud/icon_hud_integrity.svg",
+		"res://assets/icons/hud/icon_hud_heat.svg",
+		"res://assets/icons/hud/icon_hud_oxygen.svg",
+	]
 	for i: int in range(4):
-		var row := _create_variable_row(var_names[i], i)
+		var row := _create_variable_row(icon_paths[i], i)
 		vbox.add_child(row)
 
 	# Alerts divider
@@ -124,33 +129,22 @@ func _build_ui() -> void:
 	none_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 	_alerts_container.add_child(none_label)
 
-func _create_variable_row(icon_text: String, index: int) -> HBoxContainer:
+func _create_variable_row(icon_path: String, index: int) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 4)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	# Icon
-	var icon_container := Control.new()
-	icon_container.custom_minimum_size = Vector2(ICON_SIZE, ICON_SIZE)
-	icon_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(icon_container)
-
-	var icon := ColorRect.new()
+	# Ship global icon
+	var icon := TextureRect.new()
 	icon.custom_minimum_size = Vector2(ICON_SIZE, ICON_SIZE)
-	icon.color = COLOR_TEAL
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.modulate = COLOR_TEAL
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon_container.add_child(icon)
+	if not icon_path.is_empty():
+		icon.texture = load(icon_path) as Texture2D
+	row.add_child(icon)
 	_icons.append(icon)
-
-	var icon_label := Label.new()
-	icon_label.text = icon_text
-	icon_label.add_theme_font_size_override("font_size", 11)
-	icon_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	icon_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon_container.add_child(icon_label)
 
 	# Progress bar
 	var bar := ProgressBar.new()
@@ -218,7 +212,7 @@ func _apply_color(index: int, color: Color) -> void:
 	fill_style.bg_color = color
 	_bars[index].add_theme_stylebox_override("fill", fill_style)
 	_labels[index].add_theme_color_override("font_color", color)
-	_icons[index].color = color
+	_icons[index].modulate = color
 
 func _get_power_color(value: float) -> Color:
 	if value <= POWER_CRITICAL:

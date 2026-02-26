@@ -527,27 +527,31 @@ func _build_drone_card(status: Dictionary) -> PanelContainer:
 	vbox.add_theme_constant_override("separation", 4)
 	card.add_child(vbox)
 
-	# Header row: state dot + drone name + state text
+	# Header row: drone icon + drone name + state text
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 8)
 	vbox.add_child(header)
 
-	var dot := ColorRect.new()
-	dot.custom_minimum_size = Vector2(12, 12)
-	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var drone_icon := TextureRect.new()
+	drone_icon.custom_minimum_size = Vector2(20, 20)
+	drone_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	drone_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var drone_tex: Texture2D = load("res://assets/icons/hud/icon_hud_drone.svg") as Texture2D
+	if drone_tex:
+		drone_icon.texture = drone_tex
 	var state_name: String = status.get("state", "IDLE") as String
 	match state_name:
 		"IDLE":
-			dot.color = COLOR_IDLE
+			drone_icon.modulate = COLOR_IDLE
 		"TRAVELING":
-			dot.color = COLOR_TRAVELING
+			drone_icon.modulate = COLOR_TRAVELING
 		"EXTRACTING":
-			dot.color = COLOR_EXTRACTING
+			drone_icon.modulate = COLOR_EXTRACTING
 		"RETURNING":
-			dot.color = COLOR_RETURNING
+			drone_icon.modulate = COLOR_RETURNING
 		_:
-			dot.color = COLOR_IDLE
-	header.add_child(dot)
+			drone_icon.modulate = COLOR_IDLE
+	header.add_child(drone_icon)
 
 	var drone_id: int = status.get("drone_id", 0) as int
 	var name_label := Label.new()

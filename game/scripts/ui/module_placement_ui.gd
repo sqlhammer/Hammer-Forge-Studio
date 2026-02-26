@@ -257,6 +257,17 @@ func _build_available_module_list() -> void:
 		hbox.add_theme_constant_override("separation", 12)
 		row.add_child(hbox)
 
+		# Module icon
+		var icon := TextureRect.new()
+		icon.custom_minimum_size = Vector2(28, 28)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var icon_path: String = ModuleDefs.get_icon_path(module_id)
+		if not icon_path.is_empty():
+			icon.texture = load(icon_path) as Texture2D
+		hbox.add_child(icon)
+
 		var name_label := Label.new()
 		name_label.text = module_name
 		name_label.add_theme_font_size_override("font_size", 20)

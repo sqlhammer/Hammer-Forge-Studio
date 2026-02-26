@@ -46,9 +46,9 @@ var _focus_on_list: bool = true
 
 ## Left column detail elements
 var _recipe_name_label: Label = null
-var _input_slot_icon: ColorRect = null
+var _input_slot_icon: TextureRect = null
 var _input_slot_label: Label = null
-var _output_slot_icon: ColorRect = null
+var _output_slot_icon: TextureRect = null
 var _output_slot_label: Label = null
 var _input_desc_label: Label = null
 var _output_desc_label: Label = null
@@ -289,7 +289,7 @@ func _build_slot_row() -> CenterContainer:
 	# Input slot
 	var input_container := _create_labeled_slot("INPUT")
 	hbox.add_child(input_container)
-	_input_slot_icon = input_container.get_meta("icon") as ColorRect
+	_input_slot_icon = input_container.get_meta("icon") as TextureRect
 	_input_slot_label = input_container.get_meta("label") as Label
 
 	# Input description
@@ -310,7 +310,7 @@ func _build_slot_row() -> CenterContainer:
 	# Output slot
 	var output_container := _create_labeled_slot("OUTPUT")
 	hbox.add_child(output_container)
-	_output_slot_icon = output_container.get_meta("icon") as ColorRect
+	_output_slot_icon = output_container.get_meta("icon") as TextureRect
 	_output_slot_label = output_container.get_meta("label") as Label
 
 	# Output description
@@ -344,9 +344,10 @@ func _create_labeled_slot(slot_label_text: String) -> VBoxContainer:
 	slot.add_theme_stylebox_override("panel", style)
 	container.add_child(slot)
 
-	var icon := ColorRect.new()
+	var icon := TextureRect.new()
 	icon.custom_minimum_size = Vector2(40, 40)
-	icon.set_anchors_preset(Control.PRESET_CENTER)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.visible = false
 	slot.add_child(icon)
 
@@ -455,11 +456,15 @@ func _build_recipe_row(recipe_id: String) -> PanelContainer:
 	indicator.color = Color.TRANSPARENT
 	hbox.add_child(indicator)
 
-	# Icon placeholder
-	var icon := ColorRect.new()
+	# Recipe icon
+	var icon := TextureRect.new()
 	icon.custom_minimum_size = Vector2(32, 32)
-	icon.color = COLOR_TEAL
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var recipe_icon_path: String = FabricatorDefs.get_icon_path(recipe_id)
+	if not recipe_icon_path.is_empty():
+		icon.texture = load(recipe_icon_path) as Texture2D
 	hbox.add_child(icon)
 
 	# Text block
@@ -579,7 +584,9 @@ func _refresh_detail() -> void:
 		var available: int = PlayerInventory.get_total_count(resource_type)
 
 		_input_slot_icon.visible = true
-		_input_slot_icon.color = COLOR_TEAL
+		var input_icon_path: String = ResourceDefs.get_icon_path(resource_type)
+		if not input_icon_path.is_empty():
+			_input_slot_icon.texture = load(input_icon_path) as Texture2D
 		_input_slot_label.visible = true
 		_input_slot_label.text = "x%d" % quantity
 		_input_desc_label.text = "%s x%d" % [resource_name, quantity]
@@ -602,13 +609,17 @@ func _refresh_detail() -> void:
 		var out_type: ResourceDefs.ResourceType = output.get("resource_type", ResourceDefs.ResourceType.NONE) as ResourceDefs.ResourceType
 		var out_qty: int = output.get("quantity", 0) as int
 		_output_slot_icon.visible = true
-		_output_slot_icon.color = COLOR_GREEN
+		var out_icon_path: String = ResourceDefs.get_icon_path(out_type)
+		if not out_icon_path.is_empty():
+			_output_slot_icon.texture = load(out_icon_path) as Texture2D
 		_output_slot_label.visible = true
 		_output_slot_label.text = "x%d" % out_qty
 		_output_desc_label.text = ResourceDefs.get_resource_name(out_type)
 	elif output_mode == FabricatorDefs.OUTPUT_MODE_EQUIP_HEAD_LAMP:
 		_output_slot_icon.visible = true
-		_output_slot_icon.color = COLOR_AMBER
+		var lamp_icon_path: String = FabricatorDefs.get_icon_path(recipe_id)
+		if not lamp_icon_path.is_empty():
+			_output_slot_icon.texture = load(lamp_icon_path) as Texture2D
 		_output_slot_label.visible = false
 		_output_desc_label.text = "Head Lamp (Equip)"
 	else:

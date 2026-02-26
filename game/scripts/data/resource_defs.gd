@@ -81,7 +81,7 @@ const RESOURCE_CATALOG: Dictionary = {
 		"name": "Scrap Metal",
 		"description": "Salvaged metal fragments. Common building material for basic repairs and crafting.",
 		"stack_size": 100,
-		"icon": "",
+		"icon": "res://assets/icons/item/icon_item_scrap_metal.svg",
 		"category": "raw_material",
 		"deposit_tier": DepositTier.TIER_1,
 		"base_energy_per_unit": 2.0,
@@ -90,7 +90,7 @@ const RESOURCE_CATALOG: Dictionary = {
 		"name": "Metal",
 		"description": "Refined metal ingot. Processed from Scrap Metal via the Recycler. Used for crafting and upgrades.",
 		"stack_size": 50,
-		"icon": "",
+		"icon": "res://assets/icons/item/icon_item_metal.svg",
 		"category": "processed_material",
 		"deposit_tier": DepositTier.TIER_1,
 		"base_energy_per_unit": 0.0,
@@ -99,7 +99,7 @@ const RESOURCE_CATALOG: Dictionary = {
 		"name": "Spare Battery",
 		"description": "A portable power cell for the player's suit. Single-use: restores suit battery to 100% when consumed in the field. Crafted at the Fabricator.",
 		"stack_size": 1,
-		"icon": "",
+		"icon": "res://assets/icons/item/icon_item_spare_battery.svg",
 		"category": "consumable",
 		"deposit_tier": DepositTier.TIER_1,
 		"base_energy_per_unit": 0.0,
@@ -149,3 +149,8 @@ static func get_description(resource_type: ResourceType) -> String:
 static func get_category(resource_type: ResourceType) -> String:
 	var entry: Dictionary = RESOURCE_CATALOG.get(resource_type, {})
 	return entry.get("category", "") as String
+
+## Returns the icon path for a resource type, or empty string if none defined.
+static func get_icon_path(resource_type: ResourceType) -> String:
+	var entry: Dictionary = RESOURCE_CATALOG.get(resource_type, {})
+	return entry.get("icon", "") as String

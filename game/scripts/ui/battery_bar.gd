@@ -28,12 +28,14 @@ var _flash_visible: bool = true
 var _shimmer_offset: float = 0.0
 var _font_mono: Font = null
 var _bar_rect := Rect2(0, 0, 0, 0)
+var _icon_texture: Texture2D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(TOTAL_WIDTH, TOTAL_HEIGHT)
 	_font_mono = ThemeDB.fallback_font
+	_icon_texture = load("res://assets/icons/hud/icon_hud_battery.svg") as Texture2D
 	SuitBattery.charge_changed.connect(_on_charge_changed)
 	SuitBattery.battery_depleted.connect(_on_battery_depleted)
 	SuitBattery.battery_recharged.connect(_on_battery_recharged)
@@ -63,8 +65,10 @@ func _draw() -> void:
 	# Determine state color
 	var state_color: Color = _get_state_color()
 
-	# Draw battery icon (simple lightning bolt)
-	_draw_battery_icon(Vector2(x_offset, y_center - ICON_SIZE / 2.0), state_color)
+	# Draw battery icon
+	if _icon_texture:
+		var icon_rect := Rect2(x_offset, y_center - ICON_SIZE / 2.0, ICON_SIZE, ICON_SIZE)
+		draw_texture_rect(_icon_texture, icon_rect, false, state_color)
 	x_offset += ICON_SIZE + 8.0
 
 	# Draw progress bar background
@@ -112,18 +116,6 @@ func _get_state_color() -> Color:
 		return Color(COLOR_CRITICAL, pulse_alpha)
 	else:
 		return COLOR_NORMAL
-
-func _draw_battery_icon(pos: Vector2, color: Color) -> void:
-	# Simple lightning bolt icon
-	var points: PackedVector2Array = PackedVector2Array([
-		pos + Vector2(14, 0),
-		pos + Vector2(14, 10),
-		pos + Vector2(16, 12),
-		pos + Vector2(10, 24),
-		pos + Vector2(10, 12),
-		pos + Vector2(8, 10),
-	])
-	draw_colored_polygon(points, color)
 
 func _on_charge_changed(current: float, maximum: float) -> void:
 	if maximum > 0.0:

@@ -161,7 +161,7 @@ The following are explicitly **not** being built and should not be scoped into a
 | M4 | **Complete** | 2026-02-24 | Ship infrastructure: ship globals, module system, Recycler, greybox interior |
 | M5 | **Complete** | 2026-02-25 | Processing & Crafting: smelting, components, tech tree, build/upgrade |
 | M6 | **Complete** | 2026-02-26 | Icon Generation Pipeline: icon PoC evaluation, style guides, full icon set |
-| M7 | Planning | — | Ship Interior: cockpit, machine room, scene architecture overhaul |
+| M7 | **Complete** | 2026-02-26 | Ship Interior: cockpit, machine room, scene architecture overhaul |
 | M8 | Planning | — | Ship Navigation: biome-to-biome travel, fuel system |
 | M9 | Planning | — | Visual Asset Refinement: polished art pass on existing assets |
 | M10 | Planning | — | Movement & Usability Refinement: game feel, controls, HUD/UX tuning |

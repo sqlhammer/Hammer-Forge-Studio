@@ -1,7 +1,7 @@
 # Deferred Work Items
 
 **Owner:** producer
-**Last Updated:** 2026-02-25 (D-017–D-023 added)
+**Last Updated:** 2026-02-26 (D-024 added from M6 QA finding)
 
 > Tracks gameplay features and systems that were intentionally descoped from a milestone during planning. Each item references the design spec it originates from and the milestone where it was deferred. These items MUST be revisited and scheduled into a future milestone — they are not optional cuts, they are postponed work.
 
@@ -55,6 +55,12 @@
 | D-021 | Carriable items refactor — extract Spare Battery and Head Lamp as standalone instanced scenes | N/A (scene architecture standards) | Items were implemented inline during M5; instancing deferred to avoid scope creep | M6 or later | Open | — |
 | D-022 | Mining drone refactor — extract as a standalone instanced scene | N/A (scene architecture standards) | Drone was implemented inline during M5; instancing deferred to avoid scope creep | M6 or later | Open | — |
 | D-023 | UI panels and HUD refactor — extract all panels and HUD elements as standalone instanced subscenes | N/A (scene architecture standards) | UI was built inline during M4/M5; instancing deferred to keep gameplay features prioritised | M6 or later | Open | — |
+
+### From M6 — Icon Generation Pipeline
+
+| ID | Description | Design Ref | Reason Deferred | Suggested Milestone | Status | Scheduled In |
+|----|-------------|------------|-----------------|---------------------|--------|--------------|
+| D-024 | Battery bar amber warning tier — add intermediate amber (#FFB830) tint between teal (normal) and coral (critical) for a 3-tier color system | `docs/art/icon-needs.md` | Icon-needs spec called for 3-tier tinting but implementation shipped with 2 tiers; Studio Head deferred to backlog during M6 QA sign-off | M10 (Movement & Usability Refinement) | Scheduled | TICKET-0122 |
 
 ---
 

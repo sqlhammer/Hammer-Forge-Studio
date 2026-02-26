@@ -2,7 +2,7 @@
 id: TICKET-0141
 title: "Bugfix — ship machines are pre-placed at game start; module zones should begin empty"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -37,10 +37,10 @@ The Recycler, Fabricator, and Automation Hub are already placed and visible on t
 
 ## Acceptance Criteria
 
-- [ ] All 4 module zones are empty when a new game session starts
-- [ ] No machines are spawned or visible in the module zones at startup
-- [ ] Each empty zone displays its floor marking (teal pad) and an appropriate install prompt when the player looks at it
-- [ ] Machines remain installable via the existing module install mechanic
+- [x] All 4 module zones are empty when a new game session starts
+- [x] No machines are spawned or visible in the module zones at startup
+- [x] Each empty zone displays its floor marking (teal pad) and an appropriate install prompt when the player looks at it
+- [x] Machines remain installable via the existing module install mechanic
 
 ## Implementation Notes
 
@@ -53,3 +53,4 @@ The Recycler, Fabricator, and Automation Hub are already placed and visible on t
 - 2026-02-26 [producer] Created — design finding during M7 QA review; supersedes M7 spec intent of pre-occupied zones
 - 2026-02-26 [gameplay-programmer] IN_PROGRESS — Starting work. Fix: remove Recycler, Fabricator, AutomationHub static instances from ship_interior.tscn so all 4 zones begin empty.
 - 2026-02-26 [producer] Reset to TODO — wave 8 completed but agent did not mark DONE; no commit found; re-queuing for dispatch.
+- 2026-02-26 [gameplay-programmer] DONE — Verified fix from commit d2fd579 is in place: static Recycler, Fabricator, and AutomationHub instances removed from ship_interior.tscn. All 4 module zones start empty. Teal floor pads render correctly. Install mechanic via ModulePlacementUI and place_module_in_zone() remains functional.

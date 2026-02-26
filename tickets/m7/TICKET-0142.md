@@ -2,7 +2,7 @@
 id: TICKET-0142
 title: "Bugfix — cockpit status displays floating in center of room instead of wall-mounted"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -35,9 +35,9 @@ The status display panel is positioned in the center of the cockpit room, floati
 
 ## Acceptance Criteria
 
-- [ ] Status display panel is flush against the cockpit wall (back wall or appropriate side wall)
-- [ ] Panel faces the player naturally when standing in the cockpit
-- [ ] Panel does not clip into the wall geometry — correctly surface-aligned
+- [x] Status display panel is flush against the cockpit wall (back wall or appropriate side wall)
+- [x] Panel faces the player naturally when standing in the cockpit
+- [x] Panel does not clip into the wall geometry — correctly surface-aligned
 
 ## Implementation Notes
 
@@ -48,3 +48,4 @@ The status display panel is positioned in the center of the cockpit room, floati
 ## Activity Log
 
 - 2026-02-26 [producer] Created — placement defect found during M7 QA review
+- 2026-02-26 [gameplay-programmer] IN_PROGRESS — Starting work. Displays at Z=-9 need to move to Z=-11.85 (back wall behind CockpitConsole).

@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/head_lamp.gd" id="1_script"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_placeholder"]
+size = Vector3(0.06, 0.04, 0.08)
+
+[node name="HeadLamp" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="LampLight" type="SpotLight3D" parent="."]
+visible = false
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_placeholder")

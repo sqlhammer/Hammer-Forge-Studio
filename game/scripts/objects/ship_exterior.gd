@@ -32,6 +32,14 @@ func _ready() -> void:
 	_build_entrance_marker()
 	Global.log("ShipExterior: ready")
 
+# ── Public Methods ───────────────────────────────────────
+
+## Returns true if the given body is currently inside the recharge zone.
+func is_body_in_recharge_zone(body: Node3D) -> bool:
+	if not _recharge_zone:
+		return false
+	return _recharge_zone.get_overlapping_bodies().has(body)
+
 # ── Private Methods ───────────────────────────────────────
 
 func _build_mesh() -> void:

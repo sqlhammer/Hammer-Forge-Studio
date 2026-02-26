@@ -75,6 +75,63 @@ Do not use Amber, Coral, or Green as item icon fill colors. Those hues are reser
 
 ---
 
+## Contrast Requirements
+
+> Added by TICKET-0104 — post-integration QA identified readability failures against in-game panel backgrounds.
+
+### Known Background Colors
+
+Item icons appear on the following in-game surfaces (hex values from `docs/design/ui-style-guide.md`):
+
+| Surface | Hex | Opacity | Usage |
+|---------|-----|---------|-------|
+| Panel Background | `#0F1923` | 85% | Inventory screen background, machine interaction panels (Recycler, Fabricator), tech tree node cards |
+| Panel Background Light | `#1A2736` | 90% | Individual inventory slot backgrounds, nested panels |
+| Surface (Full-screen Overlay) | `#0A0F18` | 95% | Full-screen overlays (inventory, tech tree) |
+
+The effective darkest background is **`#0A0F18`** (Surface Deep Navy). All contrast thresholds below are measured against this value — meeting the threshold here guarantees readability on all lighter panel surfaces.
+
+### Minimum Contrast Threshold
+
+The icon's primary stroke color must achieve a **minimum contrast ratio of 4.5:1** against `#0A0F18`. Contrast ratios for reference colors:
+
+| Color | Hex | Contrast vs `#0A0F18` | Status |
+|-------|-----|----------------------|--------|
+| Text Primary | `#F1F5F9` | ~17:1 | ✅ Approved |
+| Primary Teal | `#00D4AA` | ~9:1 | ✅ Approved |
+| Amber | `#FFB830` | ~9:1 | ✅ Approved |
+| Positive Green | `#4ADE80` | ~7:1 | ✅ Approved |
+| Neutral Slate | `#94A3B8` | ~5:1 | ⚠️ Borderline — use sparingly |
+| Deep Teal | `#007A63` | ~2.8:1 | ❌ Fails — do not use as stroke |
+| Black | `#000000` | 1:1 | ❌ Fails — do not use as stroke |
+
+### Stroke Color Rule (Critical Fix)
+
+**Do not use `stroke="currentColor"` in item icon SVG files.** In Godot's SVG renderer, `currentColor` resolves to **black (`#000000`)** when no CSS `color` is set by the parent — producing near-zero contrast against the game's dark panel backgrounds.
+
+**Required stroke color:** Replace `stroke="currentColor"` on the `<svg>` root element with `stroke="#F1F5F9"` (Text Primary). Set this value directly in the SVG file.
+
+`#F1F5F9` gives item icons their intended light appearance in inventory slots, machine panels, and tech tree node cards without requiring per-scene GDScript color overrides.
+
+### Outline Rule
+
+The accent fill colors defined in the Color Usage section (`#0A0F18` at 15% opacity, `#00D4AA` at 12%, `#007A63` at 18%) are too low-opacity to carry the visual weight of the icon — the **stroke is the primary contrast surface**. The stroke color change to `#F1F5F9` is the primary fix.
+
+If any path omits a visible stroke (e.g., a fill-only decorative shape is added in a future revision), that path must include `stroke="#F1F5F9"` at `stroke-width="2"` to remain readable against dark panel backgrounds.
+
+### Approved Stroke Colors
+
+Use one of these 4 approved hex values as the stroke color for item icon SVG root elements:
+
+1. **`#F1F5F9`** — Text Primary; use for all production item icons in neutral state (default)
+2. **`#00D4AA`** — Primary Teal; permitted if the specific item has a teal/energy identity
+3. **`#FFB830`** — Amber; permitted for items with a warning or energy-cost identity; use sparingly
+4. **`#4ADE80`** — Positive Green; permitted for items with a complete or beneficial identity; use sparingly
+
+Default to **`#F1F5F9`** for all production item icons unless a specific palette color is semantically required by the item's role.
+
+---
+
 ## Style Constraints
 
 ### Stroke

@@ -140,6 +140,7 @@ func _create_variable_row(icon_path: String, index: int) -> HBoxContainer:
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.modulate = COLOR_TEAL
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if not icon_path.is_empty():
 		icon.texture = load(icon_path) as Texture2D
@@ -152,6 +153,7 @@ func _create_variable_row(icon_path: String, index: int) -> HBoxContainer:
 	bar.max_value = 100.0
 	bar.value = _values[index]
 	bar.show_percentage = false
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var bar_bg := StyleBoxFlat.new()

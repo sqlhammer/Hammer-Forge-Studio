@@ -2,7 +2,7 @@
 id: TICKET-0139
 title: "Bugfix — inventory ship status icons misaligned with bars"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -46,3 +46,4 @@ The icon column is offset — icons do not align with their corresponding bars. 
 ## Activity Log
 
 - 2026-02-26 [producer] Created — visual regression found during M7 QA review
+- 2026-02-26 [gameplay-programmer] IN_PROGRESS — Starting work. Root cause: icon and bar children in `_create_variable_row` lack `size_flags_vertical = SIZE_SHRINK_CENTER`, causing them to stretch instead of vertically centering within HBoxContainer rows.

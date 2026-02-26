@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://cm2gd3f8mcibm" path="res://scripts/ui/ship_globals_hud.gd" id="1_sgh"]
+
+[node name="ShipGlobalsHUD" type="Control"]
+script = ExtResource("1_sgh")

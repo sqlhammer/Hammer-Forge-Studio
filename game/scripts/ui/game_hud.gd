@@ -3,22 +3,31 @@ class_name GameHUD
 extends CanvasLayer
 
 # ── Private Variables ─────────────────────────────────────
-var _compass_bar: CompassBar = null
-var _battery_bar: BatteryBar = null
-var _scanner_readout: ScannerReadout = null
-var _mining_progress: MiningProgress = null
-var _pickup_notifications: PickupNotificationManager = null
 var _crosshair: Control = null
 var _scanner: Scanner = null
-var _ship_globals: ShipGlobalsHUD = null
-var _minigame_overlay: MiningMinigameOverlay = null
 var _mining_ref: Mining = null
+
+# ── Onready Variables ─────────────────────────────────────
+@onready var _hud_root: Control = $HUDRoot
+@onready var _compass_bar: CompassBar = $HUDRoot/CompassBar
+@onready var _battery_bar: BatteryBar = $HUDRoot/BatteryBar
+@onready var _scanner_readout: ScannerReadout = $HUDRoot/ScannerReadout
+@onready var _mining_progress: MiningProgress = $HUDRoot/MiningProgress
+@onready var _pickup_notifications: PickupNotificationManager = $HUDRoot/PickupNotifications
+@onready var _ship_globals: ShipGlobalsHUD = $HUDRoot/ShipGlobalsHUD
+@onready var _minigame_overlay: MiningMinigameOverlay = $HUDRoot/MiningMinigameOverlay
+@onready var _inventory_screen: InventoryScreen = $InventoryScreen
+@onready var _fabricator_panel: FabricatorPanel = $FabricatorPanel
+@onready var _recycler_panel: RecyclerPanel = $RecyclerPanel
+@onready var _tech_tree_panel: TechTreePanel = $TechTreePanel
+@onready var _automation_hub_panel: AutomationHubPanel = $AutomationHubPanel
+@onready var _module_placement_ui: ModulePlacementUI = $ModulePlacementUI
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
 	layer = 1
-	_build_hud()
+	_setup_hud_positions()
 
 func _process(_delta: float) -> void:
 	# Show readout for already-analyzed deposits when aimed at
@@ -82,68 +91,72 @@ func show_ship_globals(show: bool) -> void:
 	if _ship_globals:
 		_ship_globals.set_ship_visible(show)
 
+## Returns the inventory screen.
+func get_inventory_screen() -> InventoryScreen:
+	return _inventory_screen
+
+## Returns the fabricator panel.
+func get_fabricator_panel() -> FabricatorPanel:
+	return _fabricator_panel
+
+## Returns the recycler panel.
+func get_recycler_panel() -> RecyclerPanel:
+	return _recycler_panel
+
+## Returns the tech tree panel.
+func get_tech_tree_panel() -> TechTreePanel:
+	return _tech_tree_panel
+
+## Returns the automation hub panel.
+func get_automation_hub_panel() -> AutomationHubPanel:
+	return _automation_hub_panel
+
+## Returns the module placement UI.
+func get_module_placement_ui() -> ModulePlacementUI:
+	return _module_placement_ui
+
 # ── Private Methods ───────────────────────────────────────
 
-func _build_hud() -> void:
-	# Root control that fills the screen
-	var root := Control.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(root)
-
+func _setup_hud_positions() -> void:
 	# Compass bar — top center
-	_compass_bar = CompassBar.new()
 	_compass_bar.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_compass_bar.position = Vector2(-CompassBar.COMPASS_WIDTH / 2.0, 32)
-	root.add_child(_compass_bar)
 
-	# Crosshair — center dot
+	# Crosshair — center dot (only element still created programmatically)
 	_crosshair = _create_crosshair()
 	_crosshair.set_anchors_preset(Control.PRESET_CENTER)
 	_crosshair.position = Vector2(-2, -2)
-	root.add_child(_crosshair)
+	_hud_root.add_child(_crosshair)
 
 	# Mining progress — center, below crosshair
-	_mining_progress = MiningProgress.new()
 	_mining_progress.set_anchors_preset(Control.PRESET_CENTER)
 	_mining_progress.position = Vector2(-MiningProgress.BAR_WIDTH / 2.0, 60)
-	root.add_child(_mining_progress)
 
 	# Scanner readout — center-right
-	_scanner_readout = ScannerReadout.new()
 	_scanner_readout.anchor_left = 1.0
 	_scanner_readout.anchor_right = 1.0
 	_scanner_readout.anchor_top = 0.5
 	_scanner_readout.anchor_bottom = 0.5
 	_scanner_readout.position = Vector2(-ScannerReadout.READOUT_WIDTH - 80, -160)
-	root.add_child(_scanner_readout)
 
 	# Battery bar — bottom-left
-	_battery_bar = BatteryBar.new()
 	_battery_bar.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_battery_bar.position = Vector2(32, -BatteryBar.TOTAL_HEIGHT - 32)
-	root.add_child(_battery_bar)
 
 	# Pickup notifications — center-right, stacking
-	_pickup_notifications = PickupNotificationManager.new()
 	_pickup_notifications.anchor_left = 1.0
 	_pickup_notifications.anchor_right = 1.0
 	_pickup_notifications.anchor_top = 0.5
 	_pickup_notifications.anchor_bottom = 0.5
 	_pickup_notifications.position = Vector2(-PickupNotificationManager.TOAST_WIDTH - 32, 0)
-	root.add_child(_pickup_notifications)
 
 	# Minigame overlay — center, between crosshair and mining progress
-	_minigame_overlay = MiningMinigameOverlay.new()
 	_minigame_overlay.set_anchors_preset(Control.PRESET_CENTER)
 	_minigame_overlay.position = Vector2(-MiningMinigameOverlay.OVERLAY_WIDTH / 2.0, 10)
-	root.add_child(_minigame_overlay)
 
 	# Ship globals — bottom-right (hidden by default, shown when inside ship)
-	_ship_globals = ShipGlobalsHUD.new()
 	_ship_globals.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	_ship_globals.position = Vector2(-ShipGlobalsHUD.PANEL_WIDTH - 32, -ShipGlobalsHUD.PANEL_HEIGHT - 32)
-	root.add_child(_ship_globals)
 
 func _create_crosshair() -> Control:
 	var dot := ColorRect.new()

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://bm22em53lh45" path="res://scripts/ui/mining_progress.gd" id="1_mpg"]
+
+[node name="MiningProgress" type="Control"]
+script = ExtResource("1_mpg")

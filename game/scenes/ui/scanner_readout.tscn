@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://dlolpbu4bhd55" path="res://scripts/ui/scanner_readout.gd" id="1_scn"]
+
+[node name="ScannerReadout" type="PanelContainer"]
+script = ExtResource("1_scn")

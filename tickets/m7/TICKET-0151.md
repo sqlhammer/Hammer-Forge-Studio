@@ -2,7 +2,7 @@
 id: TICKET-0151
 title: "Bugfix — test_scanner_unit.gd parse error: Scanner.LAYER_INTERACTABLE removed"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: qa-engineer
@@ -37,9 +37,9 @@ The suite fails to parse at line 101 which references `Scanner.LAYER_INTERACTABL
 
 ## Acceptance Criteria
 
-- [ ] `test_scanner_unit.gd` line 101 updated to reference `PhysicsLayers.INTERACTABLE` instead of `Scanner.LAYER_INTERACTABLE`
-- [ ] Full test suite passes with `test_scanner_unit` included (expected total: 480 tests)
-- [ ] No other references to `Scanner.LAYER_INTERACTABLE` remain in the codebase
+- [x] `test_scanner_unit.gd` line 101 updated to reference `PhysicsLayers.INTERACTABLE` instead of `Scanner.LAYER_INTERACTABLE`
+- [x] Full test suite passes with `test_scanner_unit` included (expected total: 480 tests)
+- [x] No other references to `Scanner.LAYER_INTERACTABLE` remain in the codebase
 
 ## Implementation Notes
 
@@ -50,3 +50,4 @@ Single-line fix at `game/tests/test_scanner_unit.gd` line 101:
 ## Activity Log
 - 2026-02-26 [qa-engineer] Created — regression from TICKET-0144 (PhysicsLayers centralization) that was not caught during code review
 - 2026-02-26 [systems-programmer] Starting work — single-line fix in test_scanner_unit.gd line 101
+- 2026-02-26 [systems-programmer] DONE — replaced Scanner.LAYER_INTERACTABLE with PhysicsLayers.INTERACTABLE on line 101. Commit: b1849560f268438a68611b9d48398361279a85b2, PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/115 (merged to main: d67525ef25a885998a24e8461394e4c39362a02f). Full test suite: 480/480 passed (0 failed, 0 skipped), test_scanner_unit: 23/23 passed.

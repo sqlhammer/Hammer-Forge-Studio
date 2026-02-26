@@ -54,6 +54,8 @@ var _player_ref: CharacterBody3D = null
 var _is_player_inside: bool = false
 var _player_in_exit_zone: bool = false
 var _terminal_area: Area3D = null
+var _sub_viewport: SubViewport = null
+var _viewport_camera: Camera3D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -181,6 +183,16 @@ func get_nearby_zone_index() -> int:
 		if zone.get_overlapping_bodies().has(_player_ref):
 			return i
 	return -1
+
+## Configures the viewport window to render the exterior world.
+## camera_position is the world-space position for the exterior camera.
+## Since the camera's parent (SubViewport) is non-spatial, local position equals world position.
+func setup_viewport_world(world: World3D, camera_position: Vector3) -> void:
+	if _sub_viewport:
+		_sub_viewport.world_3d = world
+	if _viewport_camera:
+		_viewport_camera.position = camera_position
+		Global.log("ShipInterior: viewport camera positioned at %s" % str(camera_position))
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -415,29 +427,21 @@ func _build_cockpit_features() -> void:
 	add_child(viewport_marker)
 
 func _build_viewport_window() -> void:
-	# TODO (M8 — TICKET-0128 Option A): Replace this static sky gradient with a SubViewport
-	# rendering a Camera3D positioned at the ship's exterior location, facing forward. Anchor
-	# the camera to the ship's world position and apply the SubViewport texture to this mesh.
-	# This will provide a real-time exterior view during navigation sequences.
-	# See TICKET-0128 Implementation Approaches → Option A for full details.
+	# SubViewport renders the exterior world through a secondary camera so the
+	# cockpit window shows the actual outside environment (sky + geometry).
+	# The interior is placed underground, so transparency alone cannot work.
+	_sub_viewport = SubViewport.new()
+	_sub_viewport.name = "ExteriorViewport"
+	_sub_viewport.size = Vector2i(512, 256)
+	_sub_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_sub_viewport.transparent_bg = false
+	add_child(_sub_viewport)
 
-	# Sky gradient shader — blue top fading to orange horizon
-	var sky_shader := Shader.new()
-	var shader_code: String = "shader_type spatial;\n"
-	shader_code += "\n"
-	shader_code += "uniform vec3 sky_color : source_color = vec3(0.3, 0.5, 0.9);\n"
-	shader_code += "uniform vec3 horizon_color : source_color = vec3(0.95, 0.6, 0.3);\n"
-	shader_code += "uniform float emission_strength : hint_range(0.0, 5.0) = 1.5;\n"
-	shader_code += "\n"
-	shader_code += "void fragment() {\n"
-	shader_code += "    vec3 gradient = mix(horizon_color, sky_color, UV.y);\n"
-	shader_code += "    ALBEDO = gradient;\n"
-	shader_code += "    EMISSION = gradient * emission_strength;\n"
-	shader_code += "}\n"
-	sky_shader.code = shader_code
-
-	var sky_material := ShaderMaterial.new()
-	sky_material.shader = sky_shader
+	# Camera will be positioned at the ship exterior by setup_viewport_world()
+	_viewport_camera = Camera3D.new()
+	_viewport_camera.name = "ExteriorCamera"
+	_viewport_camera.fov = 70.0
+	_sub_viewport.add_child(_viewport_camera)
 
 	# Window surface — QuadMesh filling the viewport frame opening (4m × 1.5m)
 	var window_mesh := MeshInstance3D.new()
@@ -445,11 +449,15 @@ func _build_viewport_window() -> void:
 	var quad := QuadMesh.new()
 	quad.size = Vector2(4.0, 1.5)
 	window_mesh.mesh = quad
-	window_mesh.material_override = sky_material
-	# Centered in the viewport opening, slightly in front of the north wall
+
+	# Unshaded material so interior lighting does not affect the exterior view
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_texture = _sub_viewport.get_texture()
+	window_mesh.material_override = mat
 	window_mesh.position = Vector3(0.0, 2.25, -11.97)
 	add_child(window_mesh)
-	Global.log("ShipInterior: viewport window built (static sky gradient — M8 upgrade to live camera)")
+	Global.log("ShipInterior: viewport window built (SubViewport exterior camera)")
 
 func _build_lighting() -> void:
 	# Machine room light — centered overhead at Y=2.8

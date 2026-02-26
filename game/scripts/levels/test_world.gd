@@ -306,6 +306,10 @@ func _setup_ship_interior() -> void:
 	_ship_interior.position = Vector3(0, INTERIOR_Y_OFFSET, 0)
 	add_child(_ship_interior)
 
+	# Position the cockpit viewport camera at the ship exterior front, looking forward
+	var viewport_camera_pos := Vector3(0.0, 8.0, -23.0)
+	_ship_interior.setup_viewport_world(get_viewport().world_3d, viewport_camera_pos)
+
 	if _first_person:
 		_ship_interior.setup(_first_person)
 

@@ -2,7 +2,7 @@
 id: TICKET-0143
 title: "Bugfix — cockpit viewport window renders flat color instead of exterior world"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -35,9 +35,9 @@ The window mesh displays a flat solid gradient (pale warm white blending to pale
 
 ## Acceptance Criteria
 
-- [ ] The viewport window shows the exterior world visible through it
-- [ ] Sky and at minimum basic exterior geometry are visible from the cockpit
-- [ ] The window reads unmistakably as looking outside, not as a painted surface
+- [x] The viewport window shows the exterior world visible through it
+- [x] Sky and at minimum basic exterior geometry are visible from the cockpit
+- [x] The window reads unmistakably as looking outside, not as a painted surface
 
 ## Implementation Notes
 
@@ -49,3 +49,4 @@ The window mesh displays a flat solid gradient (pale warm white blending to pale
 ## Activity Log
 
 - 2026-02-26 [producer] Created — feature defect found during M7 QA review
+- 2026-02-26 [gameplay-programmer] IN_PROGRESS — Starting work on cockpit viewport window bugfix

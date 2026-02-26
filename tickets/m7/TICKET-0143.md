@@ -2,7 +2,7 @@
 id: TICKET-0143
 title: "Bugfix — cockpit viewport window renders flat color instead of exterior world"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -50,3 +50,4 @@ The window mesh displays a flat solid gradient (pale warm white blending to pale
 
 - 2026-02-26 [producer] Created — feature defect found during M7 QA review
 - 2026-02-26 [gameplay-programmer] IN_PROGRESS — Starting work on cockpit viewport window bugfix
+- 2026-02-26 [gameplay-programmer] DONE — Fix verified in codebase. Replaced static sky gradient shader with SubViewport + Camera3D approach. Commit: 8d8ea87, PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/109

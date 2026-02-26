@@ -280,6 +280,7 @@ async def run_claude(
     cwd: Path | None = None,
     timeout_minutes: int = 30,
     log_path: Path | None = None,
+    on_proc_start: callable = None,
 ) -> tuple[int, str, str]:
     """Run claude -p as a subprocess. Returns (exit_code, stdout, stderr)."""
     cmd = ["claude", "-p", "--model", model, "--verbose"]
@@ -321,6 +322,9 @@ async def run_claude(
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
+
+        if on_proc_start:
+            on_proc_start(proc)
 
         try:
             stdout_bytes, stderr_bytes = await asyncio.wait_for(
@@ -441,6 +445,7 @@ class Conductor:
         self.logger = ActivityLogger(ACTIVITY_LOG)
         self.state = None
         self.shutdown_requested = False
+        self._active_proc: asyncio.subprocess.Process | None = None
 
         if resume:
             self.state = load_state()
@@ -453,11 +458,20 @@ class Conductor:
         RESULTS_DIR.mkdir(parents=True, exist_ok=True)
         LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
+    def _track_proc(self, proc: asyncio.subprocess.Process):
+        """Callback to track the active subprocess for shutdown."""
+        self._active_proc = proc
+
     def setup_signal_handlers(self):
         """Catch Ctrl+C for graceful shutdown."""
         def handler(sig, frame):
             self.logger.log("SYSTEM", "Shutdown requested (SIGINT)")
             self.shutdown_requested = True
+            if self._active_proc and self._active_proc.returncode is None:
+                try:
+                    self._active_proc.kill()
+                except ProcessLookupError:
+                    pass
         signal.signal(signal.SIGINT, handler)
 
     async def run(self, milestone: str, phase: str):
@@ -550,6 +564,7 @@ class Conductor:
             cwd=REPO_ROOT,
             timeout_minutes=10,
             log_path=LOGS_DIR / f"producer-wave{wave_num}-{now_iso().replace(':', '')}.log",
+            on_proc_start=self._track_proc,
         )
 
         if exit_code != 0:
@@ -795,6 +810,7 @@ class Conductor:
             cwd=cwd,
             timeout_minutes=timeout,
             log_path=log_path,
+            on_proc_start=self._track_proc,
         )
         elapsed = time.time() - start
 

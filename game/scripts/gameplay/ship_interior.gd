@@ -331,6 +331,16 @@ func _build_viewport_frame() -> void:
 	right_frame.position = Vector3(2.0, 2.25, -11.95)
 	add_child(right_frame)
 
+	# Top edge
+	var top_frame := MeshInstance3D.new()
+	top_frame.name = "ViewportFrameTop"
+	var top_mesh := BoxMesh.new()
+	top_mesh.size = Vector3(4.2, 0.1, 0.1)
+	top_frame.mesh = top_mesh
+	top_frame.material_override = frame_mat
+	top_frame.position = Vector3(0.0, 3.0, -11.95)
+	add_child(top_frame)
+
 func _build_module_zones() -> void:
 	var zone_centers: Array[Vector3] = [ZONE_A_CENTER, ZONE_B_CENTER, ZONE_C_CENTER, ZONE_D_CENTER]
 	for i: int in range(ZONE_COUNT):
@@ -403,48 +413,48 @@ func _build_cockpit_features() -> void:
 	status_marker.position = Vector3(0.0, 1.5, -9.0)
 	add_child(status_marker)
 
-	# Marker3D anchor for M8 exterior camera feed — position marks the center of the
-	# viewport opening where a SubViewport + Camera3D will replace the static sky gradient
-	# TODO: M8 — Attach SubViewport camera here for live exterior view (see _build_viewport_window)
+	# Marker3D placeholder for TICKET-0128 (Viewport Area)
 	var viewport_marker := Marker3D.new()
 	viewport_marker.name = "ViewportArea"
 	viewport_marker.position = Vector3(0.0, 2.25, -12.0)
 	add_child(viewport_marker)
 
 func _build_viewport_window() -> void:
-	# Static sky gradient for M7 greybox — reads as "outside" at a glance
-	# TODO: M8 — Replace with SubViewport + Camera3D rendering the live exterior world.
-	# The ViewportArea Marker3D at (0, 2.25, -12) anchors the exterior camera position.
-	# Extract into standalone cockpit_viewport.tscn for the SubViewport approach.
-	var shader_code: String = "shader_type spatial;\nrender_mode unshaded, cull_disabled;\n\nuniform vec4 sky_color : source_color = vec4(0.3, 0.5, 0.85, 1.0);\nuniform vec4 horizon_color : source_color = vec4(0.85, 0.55, 0.25, 1.0);\n\nvoid fragment() {\n\tALBEDO = mix(sky_color.rgb, horizon_color.rgb, UV.y);\n}\n"
+	# TODO (M8 — TICKET-0128 Option A): Replace this static sky gradient with a SubViewport
+	# rendering a Camera3D positioned at the ship's exterior location, facing forward. Anchor
+	# the camera to the ship's world position and apply the SubViewport texture to this mesh.
+	# This will provide a real-time exterior view during navigation sequences.
+	# See TICKET-0128 Implementation Approaches → Option A for full details.
+
+	# Sky gradient shader — blue top fading to orange horizon
 	var sky_shader := Shader.new()
+	var shader_code: String = "shader_type spatial;\n"
+	shader_code += "\n"
+	shader_code += "uniform vec3 sky_color : source_color = vec3(0.3, 0.5, 0.9);\n"
+	shader_code += "uniform vec3 horizon_color : source_color = vec3(0.95, 0.6, 0.3);\n"
+	shader_code += "uniform float emission_strength : hint_range(0.0, 5.0) = 1.5;\n"
+	shader_code += "\n"
+	shader_code += "void fragment() {\n"
+	shader_code += "    vec3 gradient = mix(horizon_color, sky_color, UV.y);\n"
+	shader_code += "    ALBEDO = gradient;\n"
+	shader_code += "    EMISSION = gradient * emission_strength;\n"
+	shader_code += "}\n"
 	sky_shader.code = shader_code
+
 	var sky_material := ShaderMaterial.new()
 	sky_material.shader = sky_shader
 
-	# Window pane — fills the viewport opening in the cockpit north wall
-	var window_pane := MeshInstance3D.new()
-	window_pane.name = "ViewportWindowPane"
+	# Window surface — QuadMesh filling the viewport frame opening (4m × 1.5m)
+	var window_mesh := MeshInstance3D.new()
+	window_mesh.name = "ViewportWindow"
 	var quad := QuadMesh.new()
-	quad.size = Vector2(3.8, 1.4)
-	window_pane.mesh = quad
-	window_pane.material_override = sky_material
-	window_pane.position = Vector3(0.0, 2.25, -11.95)
-	add_child(window_pane)
-
-	# Warm light simulating sunlight through the window
-	var window_light := OmniLight3D.new()
-	window_light.name = "ViewportLight"
-	var warm_sunlight_color := Color(0.85, 0.75, 0.6)
-	window_light.light_color = warm_sunlight_color
-	window_light.light_energy = 0.8
-	window_light.omni_range = 5.0
-	window_light.omni_attenuation = 1.5
-	window_light.shadow_enabled = false
-	window_light.position = Vector3(0.0, 2.25, -11.5)
-	add_child(window_light)
-
-	Global.log("ShipInterior: cockpit viewport window built — static sky gradient")
+	quad.size = Vector2(4.0, 1.5)
+	window_mesh.mesh = quad
+	window_mesh.material_override = sky_material
+	# Centered in the viewport opening, slightly in front of the north wall
+	window_mesh.position = Vector3(0.0, 2.25, -11.97)
+	add_child(window_mesh)
+	Global.log("ShipInterior: viewport window built (static sky gradient — M8 upgrade to live camera)")
 
 func _build_lighting() -> void:
 	# Machine room light — centered overhead at Y=2.8

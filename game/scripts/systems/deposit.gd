@@ -111,6 +111,17 @@ func get_analysis_summary() -> Dictionary:
 		"is_depleted": is_depleted(),
 	}
 
+## Returns the interaction prompt dictionary for HUD display.
+## Unscanned (pinged) deposits show "Scan" with hold; analyzed minable deposits show "Mine".
+func get_interaction_prompt() -> Dictionary:
+	if is_depleted():
+		return {}
+	if is_analyzed():
+		return {"key": "E", "label": "Mine", "hold": false}
+	if is_pinged():
+		return {"key": "E", "label": "Scan", "hold": true}
+	return {}
+
 ## Initializes deposit from parameters (for procedural generation).
 func setup(p_resource_type: ResourceDefs.ResourceType, p_purity: ResourceDefs.Purity, p_density_tier: ResourceDefs.DensityTier, p_quantity: int) -> void:
 	resource_type = p_resource_type

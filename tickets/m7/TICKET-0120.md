@@ -2,7 +2,7 @@
 id: TICKET-0120
 title: "Feature — Interaction Prompt HUD: contextual action hints and persistent controls"
 type: FEATURE
-status: TODO
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -129,17 +129,17 @@ Add `get_interaction_prompt()` to the relevant scripts. Do not change any existi
 
 ## Acceptance Criteria
 
-- [ ] `game/scenes/ui/interaction_prompt_hud.tscn` exists with the structure above
-- [ ] `game/scripts/ui/interaction_prompt_hud.gd` is attached to the scene root
-- [ ] `interaction_prompt_hud.tscn` is instanced as a child of `game_hud.tscn`
-- [ ] Contextual prompt appears when aiming at an interactable with `get_interaction_prompt()` within range
-- [ ] Contextual prompt hides when not aiming at an interactable or out of range
-- [ ] Hold actions render with a visually thicker key badge border than tap actions
-- [ ] Persistent controls panel is always visible in the bottom-right with Q (Ping) and I (Inventory) rows
-- [ ] Resource node (unscanned), resource node (scanned/minable), and ship entry area all implement `get_interaction_prompt()` and display correctly
-- [ ] Prompt appearance/disappearance is animated (fade or slide)
-- [ ] Scene is independently openable in the Godot editor without errors
-- [ ] All code follows `docs/engineering/coding-standards.md`
+- [x] `game/scenes/ui/interaction_prompt_hud.tscn` exists with the structure above
+- [x] `game/scripts/ui/interaction_prompt_hud.gd` is attached to the scene root
+- [x] `interaction_prompt_hud.tscn` is instanced as a child of `game_hud.tscn`
+- [x] Contextual prompt appears when aiming at an interactable with `get_interaction_prompt()` within range
+- [x] Contextual prompt hides when not aiming at an interactable or out of range
+- [x] Hold actions render with a visually thicker key badge border than tap actions
+- [x] Persistent controls panel is always visible in the bottom-right with Q (Ping) and I (Inventory) rows
+- [x] Resource node (unscanned), resource node (scanned/minable), and ship entry area all implement `get_interaction_prompt()` and display correctly
+- [x] Prompt appearance/disappearance is animated (fade or slide)
+- [x] Scene is independently openable in the Godot editor without errors
+- [x] All code follows `docs/engineering/coding-standards.md`
 
 ---
 
@@ -153,10 +153,19 @@ Add `get_interaction_prompt()` to the relevant scripts. Do not change any existi
 ---
 
 ## Handoff Notes
-(Leave blank until handoff occurs.)
+- Created `interaction_prompt_hud.tscn` (CanvasLayer root) with ContextualPrompt (PanelContainer + HBoxContainer with KeyBadge Panel + ActionLabel) and PersistentControls (PanelContainer with VBoxContainer for PingRow and InventoryRow)
+- Created `interaction_prompt_hud.gd` — drives contextual prompt via raycast from player camera (6m range, Layer 4) with fallback area-based proximity detection via "interaction_prompt_source" group
+- Instanced `interaction_prompt_hud.tscn` as child of `game_hud.tscn`; wired setup in `game_hud.gd` and camera updates in `test_world.gd`
+- Added `get_interaction_prompt() -> Dictionary` to `deposit.gd`: returns Scan/hold for pinged deposits, Mine/tap for analyzed deposits, empty for depleted/undiscovered
+- Created `ship_enter_zone.gd` (extends Area3D) with `get_interaction_prompt()` returning Enter Ship/tap; prompt disable flag toggled on ship enter/exit
+- Updated `test_world.gd`: ship enter zone uses ShipEnterZone class, added to "interaction_prompt_source" group, prompt disabled when player enters ship
+- Hold actions get 4px key badge border vs 2px for tap actions (StyleBoxFlat border_width dynamic update)
+- Placeholder icons are white ColorRect squares (20×20) — ready for art asset swap
+- No new autoloads created; all interaction detection reuses existing physics patterns from Scanner
 
 ---
 
 ## Activity Log
 - 2026-02-25 [producer] Created ticket — contextual interaction prompt + persistent controls HUD
 - 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone
+- 2026-02-26 [gameplay-programmer] Starting work — implementing contextual interaction prompt HUD and persistent controls

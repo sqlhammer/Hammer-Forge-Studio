@@ -28,7 +28,7 @@ var _inventory_screen: InventoryScreen = null
 var _ship_exterior: ShipExterior = null
 var _deposit_container: Node3D = null
 var _ship_interior: Node3D = null
-var _ship_enter_zone: Area3D = null
+var _ship_enter_zone: ShipEnterZone = null
 var _player_near_ship_entrance: bool = false
 var _transitioning: bool = false
 var _module_placement_ui: ModulePlacementUI = null
@@ -323,7 +323,7 @@ func _setup_ship_interior() -> void:
 
 	# Create an enter-ship interaction zone that straddles the hull edge (3× hull Z-edge = 21)
 	# Zone must extend outside the hull so the player can reach it without clipping through
-	_ship_enter_zone = Area3D.new()
+	_ship_enter_zone = ShipEnterZone.new()
 	_ship_enter_zone.name = "ShipEnterZone"
 	_ship_enter_zone.collision_layer = 0
 	_ship_enter_zone.collision_mask = LAYER_PLAYER
@@ -337,6 +337,7 @@ func _setup_ship_interior() -> void:
 
 	_ship_enter_zone.body_entered.connect(_on_ship_enter_zone_entered)
 	_ship_enter_zone.body_exited.connect(_on_ship_enter_zone_exited)
+	_ship_enter_zone.add_to_group("interaction_prompt_source")
 	Global.log("TestWorld: ship interior ready")
 
 func _update_ship_interact() -> void:
@@ -569,9 +570,13 @@ func _on_player_entered_ship() -> void:
 	Global.log("TestWorld: player entered ship — activating ship HUD")
 	if _hud:
 		_hud.show_ship_globals(true)
+	if _ship_enter_zone:
+		_ship_enter_zone.set_prompt_enabled(false)
 
 func _on_player_exited_ship() -> void:
 	Global.log("TestWorld: player exited ship — deactivating ship HUD")
+	if _ship_enter_zone:
+		_ship_enter_zone.set_prompt_enabled(true)
 	if _hud:
 		_hud.show_ship_globals(false)
 	# Close any open ship UI panels
@@ -600,5 +605,9 @@ func _on_view_mode_changed(mode: String) -> void:
 			_scanner.set_view_mode(mode)
 		if _mining:
 			_mining.set_camera(new_camera)
+		if _hud:
+			var prompt_hud: InteractionPromptHUD = _hud.get_interaction_prompt_hud()
+			if prompt_hud:
+				prompt_hud.set_camera(new_camera)
 	if _hud:
 		_hud.set_crosshair_visible(mode == "first_person")

@@ -2,12 +2,13 @@
 id: TICKET-0128
 title: "Cockpit exterior viewport/window"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-26
 updated_at: 2026-02-26
+
 milestone: "M7"
 phase: "Build & Features"
 depends_on: [TICKET-0126]
@@ -83,3 +84,4 @@ The cockpit window is a key immersion element. It connects the interior space to
 ## Activity Log
 - 2026-02-26 [producer] Created ticket — cockpit exterior viewport/window
 - 2026-02-26 [gameplay-programmer] Starting work — implementing Option C (static sky gradient shader) at ViewportArea anchor
+- 2026-02-26 [gameplay-programmer] Implementation complete — PR #99 (commit 68a68a8) merged to main. Marking DONE.

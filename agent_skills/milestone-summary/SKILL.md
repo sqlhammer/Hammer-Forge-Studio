@@ -18,10 +18,14 @@ When this skill is active, follow these rules:
 
   1. `git -C /c/repos/Hammer-Forge-Studio pull` to get the latest state of the repo
   2. Run `bash tools/milestone_status.sh --brief [M#]` (pass `--brief` always; pass the milestone argument if the user specified one, otherwise omit to auto-detect). `--brief` omits DONE rows and keeps output small.
-  3. Output your summary using **plain markdown only** — paste the script output verbatim, then append:
+  3. Run `python orchestrator/status.py` and include highlight information if it contains relevant updates not present in the milestone status script output. This may include:
+     - Unblocked agents and their next steps
+     - Updated phase gate statuses
+     - Any critical blockers or risks that have emerged since the last milestone summary
+  4. Output your summary using **plain markdown only** — paste the script output verbatim, then append:
      - Bullet-point phase gate status per phase (no table)
      - Bullet-point list of unblocked agents ready to act
-  4. Do NOT read milestones.md unless the user specifically asks for the milestone goal text. The script output already contains everything needed for a status summary.
+  5. Do NOT read milestones.md unless the user specifically asks for the milestone goal text. The script output already contains everything needed for a status summary.
 
 ## Examples
 /milestone-summary

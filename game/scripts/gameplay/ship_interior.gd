@@ -67,6 +67,7 @@ func _ready() -> void:
 	_build_module_zones()
 	_build_spawn_markers()
 	_build_cockpit_features()
+	_build_viewport_window()
 	_build_lighting()
 	_build_fade_overlay()
 	_build_terminal()
@@ -402,11 +403,48 @@ func _build_cockpit_features() -> void:
 	status_marker.position = Vector3(0.0, 1.5, -9.0)
 	add_child(status_marker)
 
-	# Marker3D placeholder for TICKET-0128 (Viewport Area)
+	# Marker3D anchor for M8 exterior camera feed — position marks the center of the
+	# viewport opening where a SubViewport + Camera3D will replace the static sky gradient
+	# TODO: M8 — Attach SubViewport camera here for live exterior view (see _build_viewport_window)
 	var viewport_marker := Marker3D.new()
 	viewport_marker.name = "ViewportArea"
 	viewport_marker.position = Vector3(0.0, 2.25, -12.0)
 	add_child(viewport_marker)
+
+func _build_viewport_window() -> void:
+	# Static sky gradient for M7 greybox — reads as "outside" at a glance
+	# TODO: M8 — Replace with SubViewport + Camera3D rendering the live exterior world.
+	# The ViewportArea Marker3D at (0, 2.25, -12) anchors the exterior camera position.
+	# Extract into standalone cockpit_viewport.tscn for the SubViewport approach.
+	var shader_code: String = "shader_type spatial;\nrender_mode unshaded, cull_disabled;\n\nuniform vec4 sky_color : source_color = vec4(0.3, 0.5, 0.85, 1.0);\nuniform vec4 horizon_color : source_color = vec4(0.85, 0.55, 0.25, 1.0);\n\nvoid fragment() {\n\tALBEDO = mix(sky_color.rgb, horizon_color.rgb, UV.y);\n}\n"
+	var sky_shader := Shader.new()
+	sky_shader.code = shader_code
+	var sky_material := ShaderMaterial.new()
+	sky_material.shader = sky_shader
+
+	# Window pane — fills the viewport opening in the cockpit north wall
+	var window_pane := MeshInstance3D.new()
+	window_pane.name = "ViewportWindowPane"
+	var quad := QuadMesh.new()
+	quad.size = Vector2(3.8, 1.4)
+	window_pane.mesh = quad
+	window_pane.material_override = sky_material
+	window_pane.position = Vector3(0.0, 2.25, -11.95)
+	add_child(window_pane)
+
+	# Warm light simulating sunlight through the window
+	var window_light := OmniLight3D.new()
+	window_light.name = "ViewportLight"
+	var warm_sunlight_color := Color(0.85, 0.75, 0.6)
+	window_light.light_color = warm_sunlight_color
+	window_light.light_energy = 0.8
+	window_light.omni_range = 5.0
+	window_light.omni_attenuation = 1.5
+	window_light.shadow_enabled = false
+	window_light.position = Vector3(0.0, 2.25, -11.5)
+	add_child(window_light)
+
+	Global.log("ShipInterior: cockpit viewport window built — static sky gradient")
 
 func _build_lighting() -> void:
 	# Machine room light — centered overhead at Y=2.8

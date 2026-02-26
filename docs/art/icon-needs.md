@@ -54,7 +54,7 @@ Communicate state and action, not object identity. Must be readable at **16×16p
 
 | Icon Name | Description | UI Location(s) | Sizes Required | State Colors | Placeholder Status |
 |-----------|-------------|----------------|---------------|-------------|-------------------|
-| `icon_hud_battery` | Suit battery / lightning bolt | Bottom-left battery bar (HUD) | 24×24px | Teal (full) → Amber (low) → Coral (critical) | Drawn procedurally via `_draw_battery_icon()` in `battery_bar.gd` — no texture |
+| `icon_hud_battery` | Suit battery / lightning bolt | Bottom-left battery bar (HUD) | 24×24px | Green ≥100% → Teal >50% → Amber 26–50% (#FFB830, WARNING_THRESHOLD=0.50) → Coral ≤25% (#FF6B5A, CRITICAL_THRESHOLD=0.25) | Loaded as SVG texture via `battery_bar.gd`; tint applied via `draw_texture_rect` |
 | `icon_hud_scanner` | Scanner active indicator (diamond ◆) | Scanner readout panel header | 16×16px | Inherits text color | Text glyph placeholder |
 | `icon_hud_battery_micro` | Inline battery/energy indicator (⚡) | Scanner readout — energy row | 16×16px | Inherits text color | Text glyph placeholder |
 | `icon_hud_star_filled` | Filled purity star | Scanner readout, inventory detail | 20×20px (readout), 16×16px (compact) | Amber (#FFB830) | Text/shape placeholder |

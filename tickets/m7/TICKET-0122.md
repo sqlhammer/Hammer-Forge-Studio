@@ -2,12 +2,12 @@
 id: TICKET-0122
 title: "Add amber warning tier to battery bar icon tinting"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P3
-owner: ""
+owner: systems-programmer
 created_by: qa-engineer
 created_at: 2026-02-26
-updated_at: 2026-02-26
+updated_at: 2026-02-26T00:00:00
 milestone: "M7"
 phase: "Build & Features"
 depends_on: []
@@ -37,3 +37,4 @@ The battery bar icon currently transitions directly from teal (normal, 26-99%) t
 
 - 2026-02-26 [qa-engineer] Created from TICKET-0102 QA Finding 1 — battery amber warning tier missing. Studio Head directed: add to backlog.
 - 2026-02-26 [producer] Scheduled into M7 — Ship Interior milestone
+- 2026-02-26 [systems-programmer] Starting work — adding amber warning tier to battery_bar.gd and unit tests.

@@ -9,11 +9,13 @@ const ICON_SIZE: float = 24.0
 const TOTAL_WIDTH: float = 200.0
 const TOTAL_HEIGHT: float = 48.0
 const CRITICAL_THRESHOLD: float = 0.25
+const WARNING_THRESHOLD: float = 0.50
 const PULSE_SPEED: float = 4.2  # ~1.5s loop (2*PI / 1.5)
 
 ## Style colors matching UI style guide
 const COLOR_FULL := Color("#4ADE80")
 const COLOR_NORMAL := Color("#00D4AA")
+const COLOR_WARNING := Color("#FFB830")
 const COLOR_CRITICAL := Color("#FF6B5A")
 const COLOR_BAR_BG := Color("#1A2736")
 const COLOR_RECHARGE_SHIMMER := Color("#00D4AA", 0.3)
@@ -111,9 +113,11 @@ func _get_state_color() -> Color:
 	elif _charge_percent <= 0.0 or _is_depleted:
 		return COLOR_CRITICAL
 	elif _charge_percent <= CRITICAL_THRESHOLD:
-		# Pulse between 70% and 100% opacity
+		# Pulse between 70% and 100% opacity to signal urgency
 		var pulse_alpha: float = 0.7 + 0.3 * (sin(_pulse_timer) * 0.5 + 0.5)
 		return Color(COLOR_CRITICAL, pulse_alpha)
+	elif _charge_percent <= WARNING_THRESHOLD:
+		return COLOR_WARNING
 	else:
 		return COLOR_NORMAL
 

@@ -2,7 +2,7 @@
 id: TICKET-0133
 title: "Bugfix — conductor outcome check rejects 'completed' as invalid"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P0
 owner: systems-programmer
 created_by: qa-engineer
@@ -30,10 +30,10 @@ This is the **primary cause of the 0% success rate** across all 4 orchestrator w
 
 ## Acceptance Criteria
 
-- [ ] Conductor accepts `"completed"` as equivalent to `"done"` (normalize on intake, e.g., map `"completed"` → `"done"`)
-- [ ] `worker_dispatch.md` prompt includes the exact expected outcome values (`done`, `blocked`, `failed`, `partial`) with clear instructions to use `"done"` for success
-- [ ] `worker_result.json` schema is embedded or referenced in the dispatch prompt so agents see the contract
-- [ ] Existing result files in `orchestrator/results/` parse correctly after the fix
+- [x] Conductor accepts `"completed"` as equivalent to `"done"` (normalize on intake, e.g., map `"completed"` → `"done"`)
+- [x] `worker_dispatch.md` prompt includes the exact expected outcome values (`done`, `blocked`, `failed`, `partial`) with clear instructions to use `"done"` for success
+- [x] `worker_result.json` schema is embedded or referenced in the dispatch prompt so agents see the contract
+- [x] Existing result files in `orchestrator/results/` parse correctly after the fix
 
 ## Implementation Notes
 
@@ -45,3 +45,4 @@ This is the **primary cause of the 0% success rate** across all 4 orchestrator w
 ## Activity Log
 
 - 2026-02-26 [qa-engineer] Created from orchestrator diagnostic — outcome mismatch is root cause of 0% success rate
+- 2026-02-26 [systems-programmer] Implemented: added outcome normalization in `_do_working` (maps "completed"→"done"), updated `worker_dispatch.md` with explicit outcome enum and embedded schema. Commit cc49fe53, PR #84.

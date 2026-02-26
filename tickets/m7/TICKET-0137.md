@@ -2,7 +2,7 @@
 id: TICKET-0137
 title: "Bugfix — TICKET-0117 worker produces empty output and crashes"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: systems-programmer
 created_by: qa-engineer
@@ -30,10 +30,10 @@ The Claude CLI process either crashed immediately or was killed before producing
 
 ## Acceptance Criteria
 
-- [ ] Conductor logs a diagnostic message when a worker produces empty stdout (distinguishing "crash" from "no output")
-- [ ] `_active_proc` tracking supports multiple concurrent workers (e.g., a set instead of a single reference)
-- [ ] Signal handler kills ALL active worker processes on shutdown, not just the last one registered
-- [ ] Worker startup validates the worktree is in a clean state before dispatching Claude CLI
+- [x] Conductor logs a diagnostic message when a worker produces empty stdout (distinguishing "crash" from "no output")
+- [x] `_active_proc` tracking supports multiple concurrent workers (e.g., a set instead of a single reference)
+- [x] Signal handler kills ALL active worker processes on shutdown, not just the last one registered
+- [x] Worker startup validates the worktree is in a clean state before dispatching Claude CLI
 
 ## Implementation Notes
 
@@ -45,3 +45,4 @@ The Claude CLI process either crashed immediately or was killed before producing
 ## Activity Log
 
 - 2026-02-26 [qa-engineer] Created from orchestrator diagnostic — empty worker output on TICKET-0117
+- 2026-02-26 [systems-programmer] Implemented: `_active_proc` → `_active_procs: set`; signal handler iterates set; CRASH log label for empty stdout (both exit=0 and nonzero); preflight worktree existence + git status check in `_run_worker`. Commit cc49fe53, PR #84.

@@ -2,7 +2,7 @@
 id: TICKET-0135
 title: "Bugfix — double merge: workers self-merge PR then conductor retries local merge"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: qa-engineer
@@ -27,8 +27,8 @@ The system must use ONE merge strategy, not both.
 
 ## Acceptance Criteria
 
-- [ ] Exactly one merge path exists: either worker PR self-merge OR conductor local merge, not both
-- [ ] If using worker PR merges: conductor pulls `main` after workers finish instead of merging locally; `_merge_pending_branches` becomes cleanup-only (remove worktrees, delete branches)
+- [x] Exactly one merge path exists: either worker PR self-merge OR conductor local merge, not both
+- [x] If using worker PR merges: conductor pulls `main` after workers finish instead of merging locally; `_merge_pending_branches` becomes cleanup-only (remove worktrees, delete branches)
 - [ ] If using conductor local merges: remove the PR self-merge instruction from `worker_dispatch.md`; workers only push their branch
 - [ ] Document the chosen strategy in `orchestrator/README.md`
 
@@ -40,3 +40,4 @@ The system must use ONE merge strategy, not both.
 ## Activity Log
 
 - 2026-02-26 [qa-engineer] Created from orchestrator diagnostic — dual merge strategy causes conflicts
+- 2026-02-26 [systems-programmer] Chose PR-self-merge strategy. Converted `_merge_pending_branches` to: (1) remove worktrees, (2) git pull origin main, (3) delete local branches — no local git merge. README.md documentation deferred (see notes). Commit cc49fe53, PR #84.

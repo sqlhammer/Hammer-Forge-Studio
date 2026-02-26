@@ -2,7 +2,7 @@
 id: TICKET-0138
 title: "Bugfix — worker dispatch prompt missing output schema and field name contract"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P2
 owner: systems-programmer
 created_by: qa-engineer
@@ -28,10 +28,10 @@ The conductor's `extract_json_from_output` has workarounds for code fences and t
 
 ## Acceptance Criteria
 
-- [ ] `worker_dispatch.md` includes the full `worker_result.json` schema inline (or a clear example with all field names and enum values)
-- [ ] The prompt explicitly states: "Use `outcome: \"done\"` for success, `outcome: \"blocked\"` if dependencies unmet, `outcome: \"failed\"` for errors"
-- [ ] The prompt includes a concrete example JSON block showing the exact expected output format
-- [ ] The prompt reinforces: output raw JSON only, no markdown code fences
+- [x] `worker_dispatch.md` includes the full `worker_result.json` schema inline (or a clear example with all field names and enum values)
+- [x] The prompt explicitly states: "Use `outcome: \"done\"` for success, `outcome: \"blocked\"` if dependencies unmet, `outcome: \"failed\"` for errors"
+- [x] The prompt includes a concrete example JSON block showing the exact expected output format
+- [x] The prompt reinforces: output raw JSON only, no markdown code fences
 
 ## Implementation Notes
 
@@ -46,3 +46,4 @@ The conductor's `extract_json_from_output` has workarounds for code fences and t
 ## Activity Log
 
 - 2026-02-26 [qa-engineer] Created from orchestrator diagnostic — prompt-schema mismatch causes systematic field errors
+- 2026-02-26 [systems-programmer] Implemented: added "Required outcome values" section with exact enum, full schema block with all field names, success+blocked concrete JSON examples, and reinforced raw-JSON-only instruction. Commit cc49fe53, PR #84.

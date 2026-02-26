@@ -2,7 +2,7 @@
 id: TICKET-0134
 title: "Bugfix — branch name parsing does not strip '+' worktree prefix"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P0
 owner: systems-programmer
 created_by: qa-engineer
@@ -29,9 +29,9 @@ This error repeats for every branch across all 4 waves.
 
 ## Acceptance Criteria
 
-- [ ] Branch name parsing correctly strips `+`, `*`, and space prefixes from `git branch --list` output
-- [ ] Merges succeed for branches checked out in worktrees
-- [ ] Add a test or assertion that branch names contain no leading whitespace or prefix characters before passing to `git merge`
+- [x] Branch name parsing correctly strips `+`, `*`, and space prefixes from `git branch --list` output
+- [x] Merges succeed for branches checked out in worktrees
+- [x] Add a test or assertion that branch names contain no leading whitespace or prefix characters before passing to `git merge`
 
 ## Implementation Notes
 
@@ -43,3 +43,4 @@ This error repeats for every branch across all 4 waves.
 ## Activity Log
 
 - 2026-02-26 [qa-engineer] Created from orchestrator diagnostic — branch prefix parsing causes 100% merge failure rate
+- 2026-02-26 [systems-programmer] Implemented: `re.sub(r'^[*+ ]+', '', b.strip())` in `_merge_pending_branches`. Commit cc49fe53, PR #84.

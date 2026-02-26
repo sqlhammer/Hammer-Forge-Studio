@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TICKET-0092: Experiment A - Programmatic SVG (direct XML construction)
+TICKET-0092 / TICKET-0105: Experiment A - Programmatic SVG (direct XML construction)
 
 Generates all 29 icons for The Inheritance:
   - 9 item icons (48x48px primary, 24x24 viewBox)
@@ -8,7 +8,9 @@ Generates all 29 icons for The Inheritance:
 
 Style guide specs:
   - viewBox="0 0 24 24", stroke-width="2", stroke-linecap="round",
-    stroke-linejoin="round", fill="none", stroke="currentColor"
+    stroke-linejoin="round", fill="none"
+  - Item icons: stroke="#F1F5F9" (Text Primary) — contrast fix per TICKET-0104
+  - HUD icons: stroke="#FFFFFF" (white base for modulate tinting) — per TICKET-0104
   - Safe area: 2-unit margin (content within 2-22 on each axis)
   - Item icons: 8-12 paths max, optional accent fill
   - HUD icons: 3-8 paths max, stroke-only (exceptions noted)
@@ -22,16 +24,39 @@ from datetime import datetime
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(SCRIPT_DIR)
-ITEM_DIR = os.path.join(PROJECT_DIR, "docs", "art", "icon-experiments", "method-a", "item-icons")
-HUD_DIR = os.path.join(PROJECT_DIR, "docs", "art", "icon-experiments", "method-a", "hud-icons")
+ARCHIVE_ITEM_DIR = os.path.join(PROJECT_DIR, "docs", "art", "icon-experiments", "method-a", "item-icons")
+ARCHIVE_HUD_DIR = os.path.join(PROJECT_DIR, "docs", "art", "icon-experiments", "method-a", "hud-icons")
+GAME_ITEM_DIR = os.path.join(PROJECT_DIR, "game", "assets", "icons", "item")
+GAME_HUD_DIR = os.path.join(PROJECT_DIR, "game", "assets", "icons", "hud")
 
-SVG_OPEN = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+# Legacy aliases used by ITEM_DIR/HUD_DIR references
+ITEM_DIR = ARCHIVE_ITEM_DIR
+HUD_DIR = ARCHIVE_HUD_DIR
+
+# Internal template — functions generate with this; main() applies contrast fix
+_SVG_OPEN = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
 SVG_CLOSE = '</svg>'
+
+# Contrast-compliant stroke colors (TICKET-0104 / TICKET-0105)
+SVG_OPEN_ITEM = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#F1F5F9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+SVG_OPEN_HUD = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
 
 
 def make_svg(inner):
     """Wrap inner SVG elements in the standard document."""
-    return f"{SVG_OPEN}\n{inner}\n{SVG_CLOSE}\n"
+    return f"{_SVG_OPEN}\n{inner}\n{SVG_CLOSE}\n"
+
+
+def _apply_item_contrast(svg):
+    """Apply item icon contrast fix: stroke currentColor -> #F1F5F9."""
+    return svg.replace(_SVG_OPEN, SVG_OPEN_ITEM)
+
+
+def _apply_hud_contrast(svg):
+    """Apply HUD icon contrast fix: stroke -> #FFFFFF, fill currentColor -> #FFFFFF."""
+    svg = svg.replace(_SVG_OPEN, SVG_OPEN_HUD)
+    svg = svg.replace('fill="currentColor"', 'fill="#FFFFFF"')
+    return svg
 
 
 def star_points(cx, cy, outer_r, inner_r, n=5):
@@ -395,48 +420,54 @@ HUD_ICONS = {
 # GENERATION
 # ---------------------------------------------------------------------------
 
+def _write_svg(svg_content, *dirs, filename="icon.svg"):
+    """Write SVG content to multiple output directories."""
+    for d in dirs:
+        filepath = os.path.join(d, filename)
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(svg_content)
+
+
 def main():
-    os.makedirs(ITEM_DIR, exist_ok=True)
-    os.makedirs(HUD_DIR, exist_ok=True)
+    for d in (ARCHIVE_ITEM_DIR, ARCHIVE_HUD_DIR, GAME_ITEM_DIR, GAME_HUD_DIR):
+        os.makedirs(d, exist_ok=True)
 
     timing_records = []
     total_start = time.time()
 
-    # Generate item icons
+    # Generate item icons — stroke="#F1F5F9" (TICKET-0105)
     for name, fn in ITEM_ICONS.items():
         t0 = time.time()
-        svg_content = fn()
+        svg_content = _apply_item_contrast(fn())
         t1 = time.time()
-        filepath = os.path.join(ITEM_DIR, f"{name}.svg")
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(svg_content)
+        filename = f"{name}.svg"
+        _write_svg(svg_content, ARCHIVE_ITEM_DIR, GAME_ITEM_DIR, filename=filename)
         duration_ms = (t1 - t0) * 1000
         timing_records.append({
             "name": name,
             "category": "item",
             "duration_ms": round(duration_ms, 2),
             "cost": 0.00,
-            "file": filepath,
+            "file": os.path.join(ARCHIVE_ITEM_DIR, filename),
         })
-        print(f"  [item] {name}.svg  ({duration_ms:.1f}ms)")
+        print(f"  [item] {filename}  ({duration_ms:.1f}ms)")
 
-    # Generate HUD icons
+    # Generate HUD icons — stroke="#FFFFFF", fill="#FFFFFF" (TICKET-0105)
     for name, fn in HUD_ICONS.items():
         t0 = time.time()
-        svg_content = fn()
+        svg_content = _apply_hud_contrast(fn())
         t1 = time.time()
-        filepath = os.path.join(HUD_DIR, f"{name}.svg")
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(svg_content)
+        filename = f"{name}.svg"
+        _write_svg(svg_content, ARCHIVE_HUD_DIR, GAME_HUD_DIR, filename=filename)
         duration_ms = (t1 - t0) * 1000
         timing_records.append({
             "name": name,
             "category": "hud",
             "duration_ms": round(duration_ms, 2),
             "cost": 0.00,
-            "file": filepath,
+            "file": os.path.join(ARCHIVE_HUD_DIR, filename),
         })
-        print(f"  [hud]  {name}.svg  ({duration_ms:.1f}ms)")
+        print(f"  [hud]  {filename}  ({duration_ms:.1f}ms)")
 
     total_end = time.time()
     total_duration_s = total_end - total_start

@@ -329,6 +329,9 @@
 
 **Dependencies:** M6
 
+**Notes:**
+- M7 serves as a live proof-of-concept for the automated agent orchestration system. By this milestone, the full multi-agent pipeline (producer, gameplay-programmer, systems-programmer, ui-ux-designer, technical-artist, qa-engineer) has been operating across several milestones. M7 is an opportunity to evaluate whether the orchestration system is functioning as intended — ticket throughput, phase gate enforcement, agent handoffs, and cross-agent dependency management — and to identify any gaps before scaling further.
+
 ---
 
 ### M8 — Ship Navigation

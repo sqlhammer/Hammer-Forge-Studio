@@ -1,0 +1,54 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" uid="uid://q1ud6g7dowe4" path="res://scripts/ui/game_hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/compass_bar.tscn" id="2_cmp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/mining_progress.tscn" id="3_mpg"]
+[ext_resource type="PackedScene" path="res://scenes/ui/scanner_readout.tscn" id="4_scn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/battery_bar.tscn" id="5_bat"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pickup_notification.tscn" id="6_pkn"]
+[ext_resource type="PackedScene" path="res://scenes/ui/mining_minigame_overlay.tscn" id="7_mgo"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ship_globals_hud.tscn" id="8_sgh"]
+[ext_resource type="PackedScene" path="res://scenes/ui/inventory_screen.tscn" id="9_inv"]
+[ext_resource type="PackedScene" path="res://scenes/ui/fabricator_panel.tscn" id="10_fab"]
+[ext_resource type="PackedScene" path="res://scenes/ui/recycler_panel.tscn" id="11_rec"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tech_tree_panel.tscn" id="12_ttp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/automation_hub_panel.tscn" id="13_ahp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/module_placement_ui.tscn" id="14_mpu"]
+
+[node name="GameHUD" type="CanvasLayer"]
+layer = 1
+script = ExtResource("1_hud")
+
+[node name="HUDRoot" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CompassBar" parent="HUDRoot" instance=ExtResource("2_cmp")]
+
+[node name="MiningProgress" parent="HUDRoot" instance=ExtResource("3_mpg")]
+
+[node name="ScannerReadout" parent="HUDRoot" instance=ExtResource("4_scn")]
+
+[node name="BatteryBar" parent="HUDRoot" instance=ExtResource("5_bat")]
+
+[node name="PickupNotifications" parent="HUDRoot" instance=ExtResource("6_pkn")]
+
+[node name="MiningMinigameOverlay" parent="HUDRoot" instance=ExtResource("7_mgo")]
+
+[node name="ShipGlobalsHUD" parent="HUDRoot" instance=ExtResource("8_sgh")]
+
+[node name="InventoryScreen" parent="." instance=ExtResource("9_inv")]
+
+[node name="FabricatorPanel" parent="." instance=ExtResource("10_fab")]
+
+[node name="RecyclerPanel" parent="." instance=ExtResource("11_rec")]
+
+[node name="TechTreePanel" parent="." instance=ExtResource("12_ttp")]
+
+[node name="AutomationHubPanel" parent="." instance=ExtResource("13_ahp")]
+
+[node name="ModulePlacementUI" parent="." instance=ExtResource("14_mpu")]

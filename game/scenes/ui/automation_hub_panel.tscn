@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://bvvc1vya8yhwh" path="res://scripts/ui/automation_hub_panel.gd" id="1_ahp"]
+
+[node name="AutomationHubPanel" type="CanvasLayer"]
+script = ExtResource("1_ahp")

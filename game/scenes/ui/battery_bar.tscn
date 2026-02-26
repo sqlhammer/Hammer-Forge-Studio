@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://uqmjts0j0xtv" path="res://scripts/ui/battery_bar.gd" id="1_bat"]
+
+[node name="BatteryBar" type="Control"]
+script = ExtResource("1_bat")

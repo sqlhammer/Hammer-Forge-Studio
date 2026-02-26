@@ -264,17 +264,21 @@ func _setup_gameplay_systems() -> void:
 	add_child(_mining)
 
 func _setup_hud() -> void:
-	# Main HUD
-	_hud = GameHUD.new()
+	# Main HUD (includes all UI panels and HUD elements as instanced subscenes)
+	var hud_scene: PackedScene = preload("res://scenes/ui/game_hud.tscn")
+	_hud = hud_scene.instantiate() as GameHUD
 	_hud.name = "HUD"
 	add_child(_hud)
 	if _camera and _first_person and _scanner and _mining:
 		_hud.setup(_camera, _first_person, _scanner, _mining)
 
-	# Inventory screen (separate CanvasLayer)
-	_inventory_screen = InventoryScreen.new()
-	_inventory_screen.name = "InventoryScreen"
-	add_child(_inventory_screen)
+	# Get panel references from the HUD
+	_inventory_screen = _hud.get_inventory_screen()
+	_module_placement_ui = _hud.get_module_placement_ui()
+	_recycler_panel = _hud.get_recycler_panel()
+	_tech_tree_panel = _hud.get_tech_tree_panel()
+	_fabricator_panel = _hud.get_fabricator_panel()
+	_automation_hub_panel = _hud.get_automation_hub_panel()
 
 func _update_recharge(delta: float) -> void:
 	if _ship_exterior and _first_person:
@@ -444,31 +448,9 @@ func _on_head_lamp_toggled(active: bool) -> void:
 		_head_lamp_light.visible = active
 
 func _setup_ship_ui() -> void:
-	# Module placement UI
-	_module_placement_ui = ModulePlacementUI.new()
-	_module_placement_ui.name = "ModulePlacementUI"
-	add_child(_module_placement_ui)
+	# Panels are instanced in game_hud.tscn; connect signals and configure
 	_module_placement_ui.module_installed.connect(_on_module_installed)
 
-	# Recycler interaction panel
-	_recycler_panel = RecyclerPanel.new()
-	_recycler_panel.name = "RecyclerPanel"
-	add_child(_recycler_panel)
-
-	# Tech tree panel
-	_tech_tree_panel = TechTreePanel.new()
-	_tech_tree_panel.name = "TechTreePanel"
-	add_child(_tech_tree_panel)
-
-	# Fabricator interaction panel
-	_fabricator_panel = FabricatorPanel.new()
-	_fabricator_panel.name = "FabricatorPanel"
-	add_child(_fabricator_panel)
-
-	# Automation Hub panel
-	_automation_hub_panel = AutomationHubPanel.new()
-	_automation_hub_panel.name = "AutomationHubPanel"
-	add_child(_automation_hub_panel)
 	_automation_hub_panel.setup(Vector3.ZERO)  # Ship position for deposit distance calculations
 	_automation_hub_panel.drone_deployed.connect(_on_drone_deployed)
 	_automation_hub_panel.drones_recalled.connect(_on_drones_recalled)

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://dnt04kq4v8s00" path="res://scripts/ui/fabricator_panel.gd" id="1_fab"]
+
+[node name="FabricatorPanel" type="CanvasLayer"]
+script = ExtResource("1_fab")

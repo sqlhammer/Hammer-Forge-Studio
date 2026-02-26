@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://c18vr3wriewhm" path="res://scripts/ui/pickup_notification.gd" id="1_pkn"]
+
+[node name="PickupNotifications" type="VBoxContainer"]
+script = ExtResource("1_pkn")

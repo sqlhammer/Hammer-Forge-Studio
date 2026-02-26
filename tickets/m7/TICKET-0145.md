@@ -8,8 +8,8 @@ owner: tools-devops-engineer
 created_by: systems-programmer
 created_at: 2026-02-26
 updated_at: 2026-02-26
-milestone: "M8"
-phase: "Orchestrator Infrastructure"
+milestone: "M7"
+phase: "QA"
 depends_on: []
 blocks: [TICKET-0146, TICKET-0148]
 tags: [orchestrator, conductor, locking, concurrency, infrastructure]

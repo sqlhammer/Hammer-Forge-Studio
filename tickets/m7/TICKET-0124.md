@@ -2,7 +2,7 @@
 id: TICKET-0124
 title: "Cockpit console — greybox 3D mesh placeholder"
 type: TASK
-status: TODO
+status: DONE
 priority: P2
 owner: technical-artist
 created_by: producer
@@ -38,12 +38,12 @@ Keep it simple — this is greybox. 3–5 CSG primitives or a basic modeled mesh
 
 ## Acceptance Criteria
 
-- [ ] `game/scenes/objects/cockpit_console.tscn` exists as a standalone scene
-- [ ] Console mesh has appropriate collision shape(s)
-- [ ] Scene is independently openable and runnable in the Godot editor without errors
-- [ ] Mesh uses greybox placeholder materials (no textures)
-- [ ] A `Marker3D` named `ScreenCenter` marks where the navigation UI will later be placed
-- [ ] All code/scenes follow `docs/engineering/coding-standards.md`
+- [x] `game/scenes/objects/cockpit_console.tscn` exists as a standalone scene
+- [x] Console mesh has appropriate collision shape(s)
+- [x] Scene is independently openable and runnable in the Godot editor without errors
+- [x] Mesh uses greybox placeholder materials (no textures)
+- [x] A `Marker3D` named `ScreenCenter` marks where the navigation UI will later be placed
+- [x] All code/scenes follow `docs/engineering/coding-standards.md`
 
 ## Implementation Notes
 
@@ -56,3 +56,4 @@ Keep it simple — this is greybox. 3–5 CSG primitives or a basic modeled mesh
 
 ## Activity Log
 - 2026-02-26 [producer] Created ticket — cockpit console greybox mesh
+- 2026-02-26 [technical-artist] Implemented — CSG greybox console (3 CSGBox3D: base, body, angled screen), StaticBody3D root, BoxShape3D collision, ScreenCenter Marker3D, medium grey StandardMaterial3D

@@ -38,11 +38,6 @@ const COLOR_ZONE_TEAL_OCCUPIED := Color("#00D4AA", 0.15)
 const COLOR_VIEWPORT_FRAME := Color("#333333")
 const COLOR_LIGHT := Color("#E0E0E0")
 
-## Physics layers
-const LAYER_PLAYER: int = 1 << 0
-const LAYER_ENVIRONMENT: int = 1 << 2
-const LAYER_INTERACTABLE: int = 1 << 3
-
 ## Fade transition
 const FADE_DURATION: float = 0.3
 
@@ -367,7 +362,7 @@ func _build_module_zones() -> void:
 		var zone_area := Area3D.new()
 		zone_area.name = "PlacementZone_%d" % i
 		zone_area.collision_layer = 0
-		zone_area.collision_mask = LAYER_PLAYER
+		zone_area.collision_mask = PhysicsLayers.PLAYER
 		var zone_col := CollisionShape3D.new()
 		zone_col.name = "ZoneShape_%d" % i
 		var zone_shape := BoxShape3D.new()
@@ -389,7 +384,7 @@ func _build_spawn_markers() -> void:
 	var exit_area := Area3D.new()
 	exit_area.name = "ExitTrigger"
 	exit_area.collision_layer = 0
-	exit_area.collision_mask = LAYER_PLAYER
+	exit_area.collision_mask = PhysicsLayers.PLAYER
 	var exit_col := CollisionShape3D.new()
 	var exit_shape := BoxShape3D.new()
 	exit_shape.size = Vector3(VESTIBULE_WIDTH, 2.0, 1.0)
@@ -512,7 +507,7 @@ func _build_terminal() -> void:
 	_terminal_area = Area3D.new()
 	_terminal_area.name = "TerminalArea"
 	_terminal_area.collision_layer = 0
-	_terminal_area.collision_mask = LAYER_PLAYER
+	_terminal_area.collision_mask = PhysicsLayers.PLAYER
 	var col := CollisionShape3D.new()
 	col.name = "TerminalShape"
 	var shape := BoxShape3D.new()
@@ -526,7 +521,7 @@ func _build_terminal() -> void:
 func _create_static_surface(surface_name: String, size: Vector3, pos: Vector3, color: Color, roughness: float) -> void:
 	var body := StaticBody3D.new()
 	body.name = surface_name
-	body.collision_layer = LAYER_ENVIRONMENT
+	body.collision_layer = PhysicsLayers.ENVIRONMENT
 	body.collision_mask = 0
 	body.position = pos
 

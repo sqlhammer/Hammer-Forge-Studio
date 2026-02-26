@@ -8,9 +8,6 @@ extends CanvasLayer
 ## Raycast detection range — matches scanner interaction distance
 const INTERACTION_RAY_LENGTH: float = 6.0
 
-## Physics layers for interaction detection
-const LAYER_INTERACTABLE: int = 1 << 3  # Layer 4
-
 ## Layout
 const PROMPT_BOTTOM_MARGIN: float = 80.0
 const PERSISTENT_MARGIN: float = 16.0
@@ -85,7 +82,7 @@ func _get_raycast_prompt() -> Dictionary:
 	var forward: Vector3 = -_camera.global_transform.basis.z
 	var to: Vector3 = from + forward * INTERACTION_RAY_LENGTH
 	var query := PhysicsRayQueryParameters3D.create(from, to)
-	query.collision_mask = LAYER_INTERACTABLE
+	query.collision_mask = PhysicsLayers.INTERACTABLE
 	var result: Dictionary = space_state.intersect_ray(query)
 	if result.is_empty():
 		return {}

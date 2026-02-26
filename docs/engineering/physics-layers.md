@@ -1,8 +1,8 @@
 # Physics Layer Assignments
 
 **Owner:** systems-programmer
-**Status:** Draft
-**Last Updated:** —
+**Status:** Active
+**Last Updated:** 2026-02-26
 
 > Canonical collision layer definitions. Never use raw integers in collision mask code — reference these layer names.
 
@@ -23,10 +23,20 @@
 
 ## Usage in GDScript
 
+Reference the `PhysicsLayers` class from `game/scripts/core/physics_layers.gd`. Never use raw integers.
+
 ```gdscript
-# Reference layers by name via ProjectSettings — never by number
-collision_layer = 1 << 0  # Layer 1 (player) — index is layer - 1
-collision_mask = (1 << 2) | (1 << 3)  # Layers 3 and 4
+# Use named constants from PhysicsLayers
+collision_layer = PhysicsLayers.PLAYER           # Layer 1
+collision_mask = PhysicsLayers.ENVIRONMENT | PhysicsLayers.INTERACTABLE  # Layers 3 and 4
 ```
 
-_To be replaced with named constants once defined in a core constants resource._
+### Available Constants
+
+| Constant | Value | Layer # |
+|----------|-------|---------|
+| `PhysicsLayers.PLAYER` | `1 << 0` | 1 |
+| `PhysicsLayers.ENEMY` | `1 << 1` | 2 |
+| `PhysicsLayers.ENVIRONMENT` | `1 << 2` | 3 |
+| `PhysicsLayers.INTERACTABLE` | `1 << 3` | 4 |
+| `PhysicsLayers.PROJECTILE` | `1 << 4` | 5 |

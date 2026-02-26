@@ -2,12 +2,12 @@
 id: TICKET-0144
 title: "Centralize physics layer constants into PhysicsLayers core class"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P3
 owner: systems-programmer
 created_by: systems-programmer
 created_at: 2026-02-26
-updated_at: 2026-02-26
+updated_at: 2026-02-26T00:01:00Z
 milestone: "M7"
 phase: "QA"
 depends_on: []
@@ -46,3 +46,4 @@ Other scripts may define their own local layer constants — do a full codebase 
 
 ## Activity Log
 - 2026-02-26 [systems-programmer] Created from TICKET-0129 FINDING-01 — physics layer constants duplicated across M7 scripts
+- 2026-02-26 [systems-programmer] Starting work — no dependencies to check; proceeding with implementation

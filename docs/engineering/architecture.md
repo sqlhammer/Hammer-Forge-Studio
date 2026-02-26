@@ -209,6 +209,38 @@ func _test_descriptive_name() -> void:
 
 ---
 
+## Core Utility Classes
+
+### PhysicsLayers
+
+**Location:** `game/scripts/core/physics_layers.gd`
+
+**Purpose:** Centralized, named physics layer bit-mask constants for the entire project. Eliminates duplicated local constant definitions across scripts.
+
+**Public API:**
+```gdscript
+PhysicsLayers.PLAYER        # int — 1 << 0 (layer 1)
+PhysicsLayers.ENEMY         # int — 1 << 1 (layer 2)
+PhysicsLayers.ENVIRONMENT   # int — 1 << 2 (layer 3)
+PhysicsLayers.INTERACTABLE  # int — 1 << 3 (layer 4)
+PhysicsLayers.PROJECTILE    # int — 1 << 4 (layer 5)
+```
+
+**Usage:**
+```gdscript
+collision_layer = PhysicsLayers.ENVIRONMENT
+collision_mask = PhysicsLayers.PLAYER | PhysicsLayers.INTERACTABLE
+```
+
+**Dependencies:** None — plain class_name script with constants, no Godot base class required.
+
+**Design Notes:**
+- Do not use raw integers for collision layers anywhere in the codebase
+- Do not add local layer constant copies to individual scripts — always reference `PhysicsLayers`
+- Layer values must not be changed without updating `docs/engineering/physics-layers.md` and reviewing all usages
+
+---
+
 ## Architecture Principles
 
 - All cross-system communication goes through signals on the `EventBus` autoload

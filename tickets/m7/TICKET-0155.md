@@ -2,7 +2,7 @@
 id: TICKET-0155
 title: "Bugfix — missing interaction prompt at ship interior exit"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: studio-head
@@ -61,3 +61,4 @@ No interaction prompt is shown near the ship exit. The player has no contextual 
 ## Activity Log
 
 - 2026-02-26 [studio-head] Created — missing prompt observed during post-M7 playtesting before QA sign-off
+- 2026-02-26 [gameplay-programmer] Starting work — exit trigger Area3D exists but is not wired to interaction prompt system

@@ -2,12 +2,12 @@
 id: TICKET-0098
 title: "Update UI style guide — replace icon section with approved direction"
 type: TASK
-status: OPEN
+status: DONE
 priority: P2
 owner: ui-ux-designer
 created_by: producer
 created_at: 2026-02-25
-updated_at: 2026-02-25
+updated_at: 2026-02-25 (DONE)
 milestone: "M6"
 milestone_gate: "M5"
 phase: "Integration & QA"
@@ -28,13 +28,13 @@ This entry was a placeholder. Now that the winning icon method and style have be
 
 ## Acceptance Criteria
 
-- [ ] `docs/design/ui-style-guide.md` Icon Style section replaced with content that:
+- [x] `docs/design/ui-style-guide.md` Icon Style section replaced with content that:
   - References `docs/art/icon-style-guide-items.md` as the authoritative spec for item icons
   - References `docs/art/icon-style-guide-hud.md` as the authoritative spec for HUD/functional icons
   - Retains any size grid or format information that is still accurate after the experiment, updating any values that changed
   - Notes the winning generation method and links to `docs/art/icon-poc-report.md` for full pipeline documentation
-- [ ] No other sections of `docs/design/ui-style-guide.md` modified
-- [ ] Change committed to `main`
+- [x] No other sections of `docs/design/ui-style-guide.md` modified
+- [x] Change committed to `main`
 
 ## Implementation Notes
 
@@ -43,8 +43,9 @@ This entry was a placeholder. Now that the winning icon method and style have be
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+`docs/design/ui-style-guide.md` Icon Style section replaced with authoritative references to both icon style guides (items and HUD). Updated size grid covers both categories (item: 48/32/28px; HUD: 16/24/32px). Notes Method A — Programmatic SVG as the approved generation method with link to `docs/art/icon-poc-report.md`. SVG/PNG format specs and naming conventions documented. No other sections modified. Merged via PR #70 (commit aef938e).
 
 ## Activity Log
 
 - 2026-02-25 [producer] Created ticket for M6 Integration & QA phase
+- 2026-02-25 [ui-ux-designer] DONE — Icon Style section replaced in docs/design/ui-style-guide.md. References both authoritative style guides, winning method (Method A), and links to poc-report. PR #70 merged (commit aef938e).

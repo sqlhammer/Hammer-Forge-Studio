@@ -10,7 +10,7 @@ created_at: 2026-02-26
 updated_at: 2026-02-26
 milestone: "M7"
 phase: "QA"
-depends_on: [TICKET-0129]
+depends_on: [TICKET-0129, TICKET-0139, TICKET-0140, TICKET-0141, TICKET-0142, TICKET-0143]
 blocks: []
 tags: [qa, testing, full-loop, milestone-close]
 ---
@@ -76,3 +76,4 @@ Final QA pass for M7. Run the full test suite and perform manual testing of all 
 
 ## Activity Log
 - 2026-02-26 [producer] Created ticket — M7 full loop QA
+- 2026-02-26 [producer] Added depends_on: TICKET-0139 through TICKET-0143 (5 QA bugfix tickets — must resolve before QA can close)

@@ -2,7 +2,7 @@
 
 **Owner:** systems-programmer
 **Status:** Active
-**Last Updated:** 2026-02-22
+**Last Updated:** 2026-02-27
 
 > Living document of all core engine systems. Updated whenever a new autoload or core system is added. Every public API must be documented here.
 
@@ -15,6 +15,12 @@
 | Global | `res://autoloads/Global.gd` | Shared utility functions and debug logging |
 | InputManager | `res://autoloads/InputManager.gd` | Centralized input handling and device management |
 | AgentLogger | `res://autoloads/AgentLogger.gd` | Structured JSONL logging for AI agent consumption |
+| PlayerInventory | `res://scripts/systems/inventory.gd` | Player item inventory: add, remove, query, serialize |
+| DepositRegistry | `res://scripts/systems/deposit_registry.gd` | World deposit tracking, query, and procedural generation |
+| ShipState | `res://scripts/systems/ship_state.gd` | Ship mode state (ground/orbit), module slot management |
+| FuelSystem | `res://scripts/systems/fuel_system.gd` | Ship fuel tank, consumption, refuel, and travel feasibility |
+| NavigationSystem | `res://scripts/systems/navigation_system.gd` | Biome registry, travel state machine, fuel cost, biome_changed signal |
+| ResourceRespawnSystem | `res://scripts/systems/resource_respawn_system.gd` | Per-biome surface deposit respawn tracking on biome transitions |
 
 ---
 
@@ -169,6 +175,52 @@ func get_entry_count() -> int
 - Godot types (Vector2, Vector3, etc.) auto-serialized to strings for JSON safety
 - `stack_trace` only populated in debug builds (`get_stack()` returns empty in release)
 - Level filtering via `set_minimum_level()` — entries below threshold exit immediately with zero allocation
+
+---
+
+### ResourceRespawnSystem
+
+**Purpose:** Tracks per-biome surface deposit depletion state and manages the respawn cycle on biome transitions. When the player departs a biome, all surface deposits that depleted while the player was there are queued for respawn. When the player returns to a previously-visited biome, queued deposits are restored to full stock (data layer only — physical scene resets are handled by biome scene tickets TICKET-0170–0172). Deep nodes (`infinite: true`) are explicitly excluded from all respawn logic.
+
+**Script:** `res://scripts/systems/resource_respawn_system.gd`
+
+**Signals:**
+- `respawn_queued(biome_id: String)` — Emitted when the player departs a biome that has depleted surface deposits. Passes the departed biome's ID.
+- `respawn_applied(biome_id: String)` — Emitted when the player returns to a previously-visited biome with pending respawns. Biome scene tickets listen to this to restore physical deposit visibility.
+
+**Public API:**
+```gdscript
+# Report a surface deposit as depleted (called by deposit/biome scripts)
+# Pass infinite=true to identify deep nodes — they are silently excluded.
+func report_depleted(deposit_id: String, biome_id: String, infinite: bool = false) -> void
+
+# Query pending respawns for a biome (called by biome scene tickets on load)
+func get_pending_respawns(biome_id: String) -> Array
+
+# Check if the player has never departed a biome before
+func is_first_visit(biome_id: String) -> bool
+
+# Confirm respawn was applied to the scene (clears the pending queue)
+func mark_respawns_applied(biome_id: String) -> void
+
+# Reset all state (new-game init and test teardown)
+func reset() -> void
+```
+
+**Respawn Cycle:**
+1. Player is in Biome A. Surface deposits deplete → call `report_depleted(id, "biome_a")`.
+2. Player travels to Biome B → `biome_changed("biome_b")` fires.
+3. System moves all active depletions for Biome A into `_pending_respawns["biome_a"]` and emits `respawn_queued("biome_a")`.
+4. Player returns to Biome A → `biome_changed("biome_a")` fires.
+5. System detects Biome A has been previously departed and has pending respawns → emits `respawn_applied("biome_a")`.
+6. Biome A scene loads → calls `get_pending_respawns("biome_a")` to get deposit IDs, restores visibility, then calls `mark_respawns_applied("biome_a")`.
+
+**Dependencies:** NavigationSystem (listens to `biome_changed` signal), Global (debug logging)
+
+**Design Notes:**
+- First visit to any biome never triggers respawn (guard: `_departed_biomes` dict).
+- `_previous_biome` is tracked internally because `NavigationSystem.current_biome` is already updated when `biome_changed` fires.
+- The system only tracks string deposit IDs — it does not hold references to Deposit node objects (those are owned by biome scenes).
 
 ---
 

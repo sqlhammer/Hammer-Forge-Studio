@@ -557,6 +557,10 @@ func _create_deposit(
 		deposit.add_to_group("surface_deposit")
 
 	deposit.add_to_group("interactable")
+
+	# Register with DepositRegistry so scanner ping can detect this deposit
+	DepositRegistry.register(deposit)
+
 	return deposit
 
 

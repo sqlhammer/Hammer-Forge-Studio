@@ -572,8 +572,15 @@ func _create_deposit(
 	deposit_body.add_child(deposit_col)
 	deposit.add_child(deposit_body)
 
-	# Add to appropriate group
+	# Add to appropriate groups (matches RockWarrensBiome pattern)
+	if is_deep:
+		deposit.add_to_group("deep_deposit")
+	else:
+		deposit.add_to_group("surface_deposit")
 	deposit.add_to_group("interactable")
+
+	# Register with DepositRegistry so scanner ping can detect this deposit
+	DepositRegistry.register(deposit)
 
 	return deposit
 

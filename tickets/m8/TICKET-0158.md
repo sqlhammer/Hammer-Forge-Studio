@@ -2,7 +2,7 @@
 id: TICKET-0158
 title: "Fuel system — data layer, tank mechanics, consumption formula, low-fuel signal"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -49,3 +49,4 @@ Implement the ship fuel system as a data layer and signal bus. The ship has a fu
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Foundation phase
+- 2026-02-27 [systems-programmer] Starting work — implementing FuelSystem autoload, FuelSystemDefs data layer, ship weight formula, and full unit test suite

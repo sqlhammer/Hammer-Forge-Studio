@@ -216,17 +216,19 @@ func _fade_in() -> void:
 
 
 ## Removes all children from the biome container.
-## Unregisters all deposits from DepositRegistry before freeing nodes to prevent
-## stale references in the registry after the biome is unloaded.
+## Removes biome nodes first, then unregisters deposits from DepositRegistry.
+## queue_free() is deferred, so deposits remain valid for unregistration after
+## the biome is removed from the container.
 func _clear_biome_container() -> void:
 	if not _biome_container:
 		return
-	var registered: Array[Deposit] = DepositRegistry.get_all()
-	for deposit: Deposit in registered:
-		DepositRegistry.unregister(deposit)
 	for child: Node in _biome_container.get_children():
 		_biome_container.remove_child(child)
 		child.queue_free()
+	var registered: Array[Deposit] = DepositRegistry.get_all()
+	for deposit: Deposit in registered:
+		if is_instance_valid(deposit):
+			DepositRegistry.unregister(deposit)
 	_current_biome_node = null
 	Global.log("TravelSequenceManager: biome container cleared")
 

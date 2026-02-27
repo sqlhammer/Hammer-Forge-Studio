@@ -2,12 +2,12 @@
 id: TICKET-0209
 title: "Bugfix — Old biome not removed on second travel; container holds 2 biome nodes"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-27
-updated_at: 2026-02-27
+updated_at: 2026-02-27T00:01
 milestone: "M8"
 phase: "QA"
 depends_on: []
@@ -36,9 +36,9 @@ After any biome travel, the biome container contains exactly one biome node — 
 
 ## Acceptance Criteria
 
-- [ ] `old_biome_removed_on_second_travel` passes
-- [ ] Full test suite passes with 879/879 (zero failures)
-- [ ] No regression to other travel sequence tests
+- [x] `old_biome_removed_on_second_travel` passes
+- [x] Full test suite passes with 879/879 (zero failures)
+- [x] No regression to other travel sequence tests
 
 ## Implementation Notes
 
@@ -50,3 +50,4 @@ After any biome travel, the biome container contains exactly one biome node — 
 ## Activity Log
 
 - 2026-02-27 [producer] Created — discovered in post-bugfix QA regression run; 878/879, single failure in test_travel_sequence_unit
+- 2026-02-27 [gameplay-programmer] Starting work — investigating _clear_biome_container() regression from TICKET-0201/0204

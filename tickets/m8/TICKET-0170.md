@@ -2,7 +2,7 @@
 id: TICKET-0170
 title: "Shattered Flats biome — terrain, alien ruins, collapsed spire, resource placement"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -47,3 +47,4 @@ Build the Shattered Flats biome scene using the procedural terrain system (TICKE
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Gameplay phase
+- 2026-02-27 [gameplay-programmer] Starting work — implementing Shattered Flats biome class with declarative TerrainFeatureRequest API

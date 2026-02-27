@@ -2,7 +2,7 @@
 id: TICKET-0201
 title: "Bugfix — Resource nodes missing from compass after ping in Shattered Flats"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -46,3 +46,5 @@ After a ping, nearby resource nodes are marked on the compass and remain visible
 ## Activity Log
 
 - 2026-02-27 [producer] Created — Studio Head reported during final M8 playtest review
+- 2026-02-27 [gameplay-programmer] Starting work — investigating ShatteredFlatsBiome vs other biomes
+- 2026-02-27 [gameplay-programmer] Root cause identified: all three biomes create Deposit nodes without calling DepositRegistry.register(); scanner uses DepositRegistry.get_in_range() which returns empty array. ShatteredFlatsBiome also missing surface_deposit/deep_deposit group assignments. Fixed by: (1) adding DepositRegistry.register(deposit) in ShatteredFlatsBiome._create_deposit(), RockWarrensBiome._create_deposit(), and DebrisFieldBiome._build_deposits(); (2) adding correct group assignments to ShatteredFlatsBiome and DebrisFieldBiome; (3) adding deposit cleanup in TravelSequenceManager._clear_biome_container(). This fix also resolves TICKET-0202 (scan raycast) since deposits must be pinged before analysis, and ping required DepositRegistry registration.

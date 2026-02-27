@@ -216,9 +216,14 @@ func _fade_in() -> void:
 
 
 ## Removes all children from the biome container.
+## Unregisters all deposits from DepositRegistry before freeing nodes to prevent
+## stale references in the registry after the biome is unloaded.
 func _clear_biome_container() -> void:
 	if not _biome_container:
 		return
+	var registered: Array[Deposit] = DepositRegistry.get_all()
+	for deposit: Deposit in registered:
+		DepositRegistry.unregister(deposit)
 	for child: Node in _biome_container.get_children():
 		_biome_container.remove_child(child)
 		child.queue_free()

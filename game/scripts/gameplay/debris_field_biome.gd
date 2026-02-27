@@ -466,6 +466,9 @@ func _build_deposits() -> void:
 		deposit_container.add_child(deposit)
 		_add_deposit_visual(deposit, deposit_info, scrap_mesh_scene, cryonite_mesh_scene, false)
 		_add_deposit_collision(deposit)
+		deposit.add_to_group("surface_deposit")
+		deposit.add_to_group("interactable")
+		DepositRegistry.register(deposit)
 
 	# Build deep deposits
 	for deposit_info: Dictionary in _deep_deposits:
@@ -473,6 +476,9 @@ func _build_deposits() -> void:
 		deposit_container.add_child(deposit)
 		_add_deposit_visual(deposit, deposit_info, scrap_mesh_scene, cryonite_mesh_scene, true)
 		_add_deposit_collision(deposit)
+		deposit.add_to_group("deep_deposit")
+		deposit.add_to_group("interactable")
+		DepositRegistry.register(deposit)
 
 	Global.log("DebrisFieldBiome: %d surface + %d deep deposits placed" % [
 		_surface_deposits.size(), _deep_deposits.size()])

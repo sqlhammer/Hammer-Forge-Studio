@@ -86,4 +86,4 @@ See `docs/art/wireframes/m8/fuel-gauge-hud.md` for full spec.
 
 - 2026-02-27 [producer] Created — M8 Foundation phase
 - 2026-02-27 [ui-ux-designer] Starting work — authoring navigation console modal wireframe and fuel gauge HUD wireframe
-- 2026-02-27 [ui-ux-designer] DONE — commit aa9dabf, PR #128 (https://github.com/sqlhammer/Hammer-Forge-Studio/pull/128) merged to main. Wireframes delivered: docs/art/wireframes/m8/navigation-console-modal.md and docs/art/wireframes/m8/fuel-gauge-hud.md. Style guide updated with Resource Gauge and Biome Node Map patterns.
+- 2026-02-27 [ui-ux-designer] DONE — commit aa9dabf, PR #128 (https://github.com/sqlhammer/Hammer-Forge-Studio/pull/128) merged to main. Wireframes: docs/art/wireframes/m8/navigation-console-modal.md and docs/art/wireframes/m8/fuel-gauge-hud.md. Style guide updated with Resource Gauge and Biome Node Map patterns.

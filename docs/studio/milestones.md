@@ -33,7 +33,7 @@
 | M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Complete | 38 | 0 | 38 | 2026-02-25 |
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
-| M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | 2* | 2 | 0 | — |
+| M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Planning | 28 | 28 | 0 | — |
 | M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
 | M10 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
 | M11 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
@@ -389,12 +389,38 @@
 - **Integration** (TBD): Biome templates, travel sequences, console UI
 - **QA** (TBD): Code review and full loop QA
 
-**Tickets:** TICKET-0131 through TICKET-0132 (TDD Foundation phase); additional tickets TBD at M8 kickoff
+**Tickets:** TICKET-0131–0132, TICKET-0149, TICKET-0153, TICKET-0157–0180 (28 total)
 
 | Phase | Ticket | Title | Type | Owner |
 |-------|--------|-------|------|-------|
 | TDD Foundation | TICKET-0131 | Establish Red/Green TDD process — guidelines and conventions for M8 | TASK | producer |
 | TDD Foundation | TICKET-0132 | M8 test infrastructure — unified test suite and cross-milestone regression validation | TASK | qa-engineer |
+| TDD Foundation | TICKET-0149 | Conductor — Godot MCP mutex: gate Godot editor access to one agent at a time | TASK | tools-devops-engineer |
+| Foundation | TICKET-0157 | Cryonite — resource data layer and Fabricator Fuel Cell recipe | FEATURE | systems-programmer |
+| Foundation | TICKET-0158 | Fuel system — tank data layer, consumption formula, low-fuel signal | FEATURE | systems-programmer |
+| Foundation | TICKET-0159 | Navigation system — biome registry, travel state machine, fuel cost calculation | FEATURE | systems-programmer |
+| Foundation | TICKET-0160 | Deep resource node — data layer, infinite-yield flag, slow drill rate | FEATURE | systems-programmer |
+| Foundation | TICKET-0161 | Resource respawn system — biome-change trigger, surface node respawn logic | FEATURE | systems-programmer |
+| Foundation | TICKET-0162 | Procedural terrain system — seed-based noise heightmap, biome archetype templates | FEATURE | gameplay-programmer |
+| Foundation | TICKET-0163 | World boundary system — hard bounds, edge detection, boundary enforcement | FEATURE | gameplay-programmer |
+| Foundation | TICKET-0164 | World boundary test harness — unit tests verifying boundary enforcement | TASK | qa-engineer |
+| Foundation | TICKET-0165 | UI/UX — navigation console modal, biome map, fuel gauge HUD designs | DESIGN | ui-ux-designer |
+| Foundation | TICKET-0166 | Foundation phase gate — regression test suite | TASK | qa-engineer |
+| Foundation | TICKET-0179 | Cryonite deposit — greybox 3D mesh (pressurized rock formation) | TASK | technical-artist |
+| Gameplay | TICKET-0153 | Mouse interaction support for inventory, machine builder, and tech tree menus | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0167 | Navigation console UI — modal screen, biome selection, fuel cost, confirm travel | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0168 | Travel sequence — transition animation, biome load, player respawn at destination | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0169 | Fuel consumption HUD — low-fuel warning, tank gauge display | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0170 | Shattered Flats biome — terrain, alien ruins, collapsed spire, resource placement | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0171 | Rock Warrens biome — terrain, dense rock formations, corridors, resource placement | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0172 | Debris Field biome — terrain, wreckage clusters, resource placement | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0173 | Deep resource nodes — scene implementation, slow-yield behaviour, drone integration | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0174 | Player jump — 50% player height, first-person and third-person | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0175 | Headlamp — surface toggle action in interaction prompt HUD controls panel | FEATURE | gameplay-programmer |
+| Gameplay | TICKET-0176 | Gameplay phase gate — regression test suite | TASK | qa-engineer |
+| Gameplay | TICKET-0180 | Debug scene — biome spawn selector and begin-wealthy toggle | FEATURE | gameplay-programmer |
+| QA | TICKET-0177 | Code review — M8 systems | REVIEW | systems-programmer |
+| QA | TICKET-0178 | QA testing — M8 full loop | TASK | qa-engineer |
 
 **Dependencies:** M7 (must complete before M8 kickoff)
 

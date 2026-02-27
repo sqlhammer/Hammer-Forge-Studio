@@ -9,7 +9,7 @@ created_by: studio-head
 created_at: 2026-02-26
 updated_at: 2026-02-26
 milestone: "M8"
-phase: "TBD"
+phase: "Gameplay"
 depends_on: []
 blocks: []
 tags: [ui, hud, inventory, machine-builder, tech-tree, mouse, input, m8]

@@ -194,18 +194,44 @@ func _launch(biome_id: String, begin_wealthy: bool) -> void:
 	if begin_wealthy:
 		grant_wealthy_resources()
 
-	# Build the 3D world
-	var world: Node3D = _build_debug_world(biome_id, begin_wealthy)
+	# Build the 3D world structure (player and ship at origin; positions set after scene is live)
+	var world: Node3D = _build_debug_world(biome_id)
 	if world == null:
 		_status_label.text = "Failed to create world for '%s'." % biome_id
 		_launch_button.disabled = false
 		return
 
-	# Switch scene
+	# Add world to the scene tree BEFORE positioning player/ship or calling _setup_gameplay().
+	# This allows biome _ready() callbacks to fire (e.g. ShatteredFlatsBiome.generate()) and
+	# initializes @onready variables on the player (including Camera3D).
 	var old_scene: Node = get_tree().current_scene
 	get_tree().root.add_child(world)
 	get_tree().current_scene = world
 	old_scene.queue_free()
+
+	# With all _ready() callbacks complete, biomes are fully generated and spawn positions accurate.
+	var biome: Node3D = world.get_node("Biome") as Node3D
+	var spawns: Dictionary = _get_spawn_positions(biome)
+	var player_pos: Vector3 = spawns["player"] as Vector3
+	var ship_pos: Vector3 = spawns["ship"] as Vector3
+
+	# Position ship
+	var ship: Node3D = world.get_node_or_null("Ship") as Node3D
+	if ship != null:
+		ship.position = ship_pos
+
+	# Position player and set up gameplay systems (camera is now initialized via @onready)
+	var player: Node3D = world.get_node_or_null("Player") as Node3D
+	if player != null:
+		player.position = player_pos
+		_setup_gameplay(world, player)
+
+	# [DEBUG] label overlay for begin-wealthy sessions
+	if begin_wealthy:
+		_add_debug_overlay(world)
+
+	# Capture mouse for first-person gameplay
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 	Global.log("DebugLauncher: launched biome '%s' (wealthy=%s)" % [
 		biome_id, str(begin_wealthy)
@@ -214,8 +240,10 @@ func _launch(biome_id: String, begin_wealthy: bool) -> void:
 
 # ── Private Methods: World Construction ──────────────────
 
-## Builds a minimal 3D world with the selected biome, player, ship, and HUD.
-func _build_debug_world(biome_id: String, begin_wealthy: bool) -> Node3D:
+## Builds a minimal 3D world with the selected biome, player, and ship at origin.
+## Player and ship positions are set by _launch() after the scene enters the tree,
+## ensuring biome _ready() callbacks complete and @onready variables are initialized.
+func _build_debug_world(biome_id: String) -> Node3D:
 	var world: Node3D = Node3D.new()
 	world.name = "DebugWorld"
 
@@ -231,39 +259,23 @@ func _build_debug_world(biome_id: String, begin_wealthy: bool) -> Node3D:
 	biome.name = "Biome"
 	world.add_child(biome)
 
-	# Initialize biomes that need manual generation calls
+	# Initialize biomes that require explicit generation before entering the scene tree.
+	# ShatteredFlatsBiome auto-generates in _ready() once the scene is live.
 	_initialize_biome(biome)
 
-	# Get spawn positions from biome
-	var spawns: Dictionary = _get_spawn_positions(biome)
-	var player_pos: Vector3 = spawns["player"] as Vector3
-	var ship_pos: Vector3 = spawns["ship"] as Vector3
-
-	# Ship exterior
+	# Ship exterior — positioned at origin; final position set by _launch() after scene is live
 	var ship_scene: PackedScene = load("res://scenes/objects/ship_exterior.tscn") as PackedScene
 	if ship_scene:
 		var ship: Node3D = ship_scene.instantiate()
 		ship.name = "Ship"
-		ship.position = ship_pos
 		world.add_child(ship)
 
-	# Player
+	# Player — positioned at origin; final position set by _launch() after scene is live
 	var player_scene: PackedScene = load("res://player/player.tscn") as PackedScene
 	if player_scene:
 		var player: Node3D = player_scene.instantiate()
 		player.name = "Player"
-		player.position = player_pos
 		world.add_child(player)
-
-		# Set up gameplay systems using the player
-		_setup_gameplay(world, player)
-
-	# [DEBUG] label overlay for begin-wealthy sessions
-	if begin_wealthy:
-		_add_debug_overlay(world)
-
-	# Capture mouse for first-person gameplay
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 	return world
 

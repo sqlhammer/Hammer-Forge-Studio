@@ -3,19 +3,19 @@
     "producer": "sonnet",
     "default_worker": "sonnet",
     "overrides": {
-      "qa-engineer": "opus",
-      "gameplay-programmer": "opus",
-      "systems-programmer": "opus",
+      "qa-engineer": "sonnet",
+      "gameplay-programmer": "sonnet",
+      "systems-programmer": "sonnet",
       "technical-artist": "opus",
       "character-animator": "opus",
-      "environment-artist": "opus",
-      "tools-devops-engineer": "opus",
+      "environment-artist": "sonnet",
+      "tools-devops-engineer": "sonnet",
       "game-designer": "opus",
-      "narrative-designer": "opus",
-      "technical-writer": "opus",
-      "ui-ux-designer": "opus",
+      "narrative-designer": "sonnet",
+      "technical-writer": "sonnet",
+      "ui-ux-designer": "sonnet",
       "audio-engineer": "opus",
-      "vfx-artist": "opus"
+      "vfx-artist": "sonnet"
     }
   },
   "budgets": {

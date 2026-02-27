@@ -65,6 +65,23 @@ func setup(camera: Camera3D, player: CharacterBody3D) -> void:
 func set_camera(camera: Camera3D) -> void:
 	_camera = camera
 
+## Returns true if the headlamp control row is visible in the controls panel.
+func has_headlamp_control() -> bool:
+	return false
+
+## Returns the currently displayed key label for the headlamp control, or empty string if absent.
+func get_headlamp_key_label() -> String:
+	return ""
+
+## Returns the keyboard key label for the given input action, or "?" if not mapped.
+func get_action_key_label(action: String) -> String:
+	var events: Array[InputEvent] = InputMap.action_get_events(action)
+	for event: InputEvent in events:
+		if event is InputEventKey:
+			var key_event: InputEventKey = event as InputEventKey
+			return OS.get_keycode_string(key_event.keycode)
+	return "?"
+
 # ── Private Methods ───────────────────────────────────────
 
 func _detect_interaction_prompt() -> Dictionary:

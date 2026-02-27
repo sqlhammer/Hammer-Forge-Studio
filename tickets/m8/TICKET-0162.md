@@ -2,7 +2,7 @@
 id: TICKET-0162
 title: "Procedural terrain system — declarative feature requests, ArrayMesh, seed-based generation"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -75,20 +75,20 @@ New request types can be added in future milestones without modifying the genera
 
 ## Acceptance Criteria
 
-- [ ] `TerrainFeatureRequest` resource defined with typed fields as specified above
-- [ ] `TerrainGenerator` accepts: `seed: int`, `archetype: BiomeArchetypeConfig`, `requests: Array[TerrainFeatureRequest]`
-- [ ] `TerrainGenerationResult` returned containing: terrain `ArrayMesh`, confirmed positions per request, any unresolvable request warnings
-- [ ] Terrain generation is fully deterministic — same seed + same archetype + same requests always produces identical output
-- [ ] `ConcavePolygonShape3D` baked from the final `ArrayMesh` at generation time (one-time, not dynamic)
-- [ ] Terrain size: 500m × 500m — no geometry outside world boundary extents (TICKET-0163)
-- [ ] Internal geometry organized in a chunk-aligned spatial grid (chunk size TBD by implementer, consistent with likely future streaming granularity) — grid structure accessible for future LOD/streaming work without refactor
-- [ ] Three biome archetype configs defined with noise parameters appropriate to their character:
+- [x] `TerrainFeatureRequest` resource defined with typed fields as specified above
+- [x] `TerrainGenerator` accepts: `seed: int`, `archetype: BiomeArchetypeConfig`, `requests: Array[TerrainFeatureRequest]`
+- [x] `TerrainGenerationResult` returned containing: terrain `ArrayMesh`, confirmed positions per request, any unresolvable request warnings
+- [x] Terrain generation is fully deterministic — same seed + same archetype + same requests always produces identical output
+- [x] `ConcavePolygonShape3D` baked from the final `ArrayMesh` at generation time (one-time, not dynamic)
+- [x] Terrain size: 500m × 500m — no geometry outside world boundary extents (TICKET-0163)
+- [x] Internal geometry organized in a chunk-aligned spatial grid (chunk size TBD by implementer, consistent with likely future streaming granularity) — grid structure accessible for future LOD/streaming work without refactor
+- [x] Three biome archetype configs defined with noise parameters appropriate to their character:
   - `shattered_flats`: low-frequency noise, gentle undulation, open traversal — biome ticket submits a `plateau` request for the central landmark area
   - `rock_warrens`: high-frequency noise, dense vertical variation — biome ticket submits `walkable_clearance` requests around all placement points; clearance-based corridor emergence is the primary strategy; if testing reveals dead-end corridors, fallback to path-based carving (see Implementation Notes)
   - `debris_field`: medium-frequency noise, scattered mound clusters, flat clearings between them
-- [ ] All placement requests resolved before mesh is finalized — no post-hoc terrain flattening
-- [ ] Terrain walkable — no enclosed geometry trapping the player; all `walkable_clearance` requests honored
-- [ ] Unit tests cover:
+- [x] All placement requests resolved before mesh is finalized — no post-hoc terrain flattening
+- [x] Terrain walkable — no enclosed geometry trapping the player; all `walkable_clearance` requests honored
+- [x] Unit tests cover:
   - Determinism (same inputs → identical `ArrayMesh` vertex data)
   - Boundary compliance (no vertex outside 500m × 500m)
   - `plateau` request produces a flat elevated area within tolerance
@@ -96,7 +96,7 @@ New request types can be added in future milestones without modifying the genera
   - `resource_spawn` request returns N positions meeting slope and clearance criteria
   - `walkable_clearance` request produces unobstructed ground of specified radius
   - Chunk grid covers full terrain extent with no gaps
-- [ ] Full test suite passes
+- [x] Full test suite passes
 
 ## Implementation Notes
 
@@ -109,10 +109,28 @@ New request types can be added in future milestones without modifying the genera
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+**Implemented by:** gameplay-programmer
+**Commit:** f879769 (merge commit on main)
+**PR:** https://github.com/sqlhammer/Hammer-Forge-Studio/pull/129
+
+**Scripts created:**
+- `game/scripts/gameplay/terrain_feature_request.gd` — TerrainFeatureRequest declarative API (4 feature types: plateau, clearing, resource_spawn, walkable_clearance)
+- `game/scripts/gameplay/biome_archetype_config.gd` — BiomeArchetypeConfig with 3 archetypes (shattered_flats, rock_warrens, debris_field)
+- `game/scripts/gameplay/terrain_generation_result.gd` — TerrainGenerationResult container (mesh, collision, positions, warnings, chunk grid)
+- `game/scripts/gameplay/terrain_chunk.gd` — TerrainChunk per-chunk mesh and collision data
+- `game/scripts/gameplay/terrain_generator.gd` — Main generator: FastNoiseLite noise, feature dispatch table, SurfaceTool mesh, ConcavePolygonShape3D baking, 32m chunk grid
+
+**Architecture:**
+- Generator is biome-agnostic — no biome-specific logic inside TerrainGenerator
+- Feature dispatch table: Dictionary of FeatureType → handler Callable — extensible without modifying core
+- 500m × 500m terrain, 2m vertex spacing (251×251 = 63,001 heightmap samples)
+- 32m chunks (16×16 = 256 chunks), each with independent mesh + collision shape
+- All feature requests resolved and heightmap modified before mesh construction (no post-hoc flattening)
+- Blend margins smooth feature edges into surrounding terrain
 
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Foundation phase. Planning session with Studio Head scheduled to refine implementation approach.
 - 2026-02-27 [producer] Refined — Studio Head planning session complete. Full architecture specified: declarative TerrainFeatureRequest API, ArrayMesh + ConcavePolygonShape3D, 500m × 500m chunk-grid layout, clearance-based Rock Warrens corridors with path-carving fallback, Shattered Flats plateau via feature request (not hardcoded flag).
 - 2026-02-27 [gameplay-programmer] Starting work — implementing procedural terrain system with TDD (RED/GREEN/REFACTOR cycle).
+- 2026-02-27 [gameplay-programmer] DONE — commit f879769, PR #129 merged. 5 new scripts, 25 unit tests.

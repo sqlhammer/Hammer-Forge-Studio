@@ -2,7 +2,7 @@
 id: TICKET-0163
 title: "World boundary system — hard bounds, edge detection, boundary enforcement"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -55,3 +55,4 @@ Implement hard world boundaries that prevent the player and game objects from le
 
 - 2026-02-27 [producer] Created — M8 Foundation phase
 - 2026-02-27 [gameplay-programmer] Starting work — implementing world boundary system with StaticBody3D walls, BiomeArchetypeConfig-driven dimensions, and proximity warning signals.
+- 2026-02-27 [gameplay-programmer] DONE — commit 0151095, PR #133 merged. WorldBoundaryManager with 4 StaticBody3D walls, proximity warning signals, BiomeArchetypeConfig.terrain_size added.

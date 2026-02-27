@@ -272,6 +272,40 @@ During orchestration, the Producer may create new tickets by including a `new_ti
 
 ---
 
+## Godot MCP Concurrency
+
+The Godot Editor MCP server is a single-process resource — it holds one connection to one running Godot instance. When multiple agents call Godot MCP tools concurrently (`execute_editor_script`, `get_scene_tree`, etc.), calls race and interleave, producing corrupt editor state.
+
+### How it works
+
+The conductor manages a file-based mutex at `orchestrator/godot_mcp.lock`. Only one agent at a time may hold the lock. The lock is acquired and released by the conductor — agents themselves never touch it.
+
+### How to mark a ticket as needing Godot MCP
+
+Add `godot_mcp: true` to the ticket frontmatter:
+
+```yaml
+---
+id: TICKET-0200
+godot_mcp: true
+# ... other fields ...
+---
+```
+
+The default is `false`. Only set it when the agent will use Godot MCP tools (scene editing, script execution, editor screenshots, etc.).
+
+### What happens when two Godot-MCP tickets land in the same wave
+
+The conductor acquires the lock for the first `godot_mcp: true` worker it encounters in the wave. Any subsequent `godot_mcp: true` workers are automatically deferred to the next wave — no manual intervention is needed, no error is raised. The deferred ticket re-enters the planning queue and is dispatched in the next cycle once the lock is free.
+
+### Lock protocol details
+
+- **Lock file:** `orchestrator/godot_mcp.lock` (gitignored, never committed)
+- **Stale detection:** Locks older than 30 minutes are automatically removed (indicates a crashed agent)
+- **Crash safety:** The conductor releases the lock in the worker cleanup path, so even if an agent crashes, the lock is freed
+
+---
+
 ## Decision Log Format
 
 When making a significant autonomous decision, append to `agents/producer/decisions.md`:

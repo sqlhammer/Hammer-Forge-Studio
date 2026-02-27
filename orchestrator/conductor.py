@@ -39,6 +39,7 @@ STATE_PATH = ORCH_DIR / "state.json"
 ACTIVITY_LOG = ORCH_DIR / "activity.log"
 PENDING_GATE_PATH = ORCH_DIR / "pending_gate.json"
 GATE_RESPONSE_PATH = ORCH_DIR / "gate_response.json"
+GODOT_MCP_LOCK_PATH = ORCH_DIR / "godot_mcp.lock"
 PROMPTS_DIR = ORCH_DIR / "prompts"
 SCHEMAS_DIR = ORCH_DIR / "schemas"
 RESULTS_DIR = ORCH_DIR / "results"
@@ -127,6 +128,78 @@ def format_duration(seconds: float) -> str:
 
 def format_cost(usd: float) -> str:
     return f"${usd:.2f}"
+
+
+# ---------------------------------------------------------------------------
+# Godot MCP file-based mutex
+# ---------------------------------------------------------------------------
+
+STALE_LOCK_SECONDS = 30 * 60  # 30 minutes
+
+
+def acquire_godot_mcp_lock(
+    ticket_id: str, agent_slug: str, wave: int, logger=None
+) -> bool:
+    """Try to acquire the Godot MCP lock file.
+
+    Returns True if the lock was acquired, False if it is held by another agent.
+    Automatically removes stale locks older than STALE_LOCK_SECONDS.
+    """
+    if GODOT_MCP_LOCK_PATH.exists():
+        try:
+            data = json.loads(GODOT_MCP_LOCK_PATH.read_text(encoding="utf-8"))
+            acquired_at = data.get("acquired_at", "")
+            if acquired_at:
+                lock_time = datetime.fromisoformat(acquired_at)
+                age = (datetime.now(timezone.utc) - lock_time).total_seconds()
+                if age > STALE_LOCK_SECONDS:
+                    if logger:
+                        logger.log("WARNING",
+                            f"Stale Godot MCP lock detected (held by {data.get('holder', '?')} "
+                            f"for {format_duration(age)}). Removing.")
+                    GODOT_MCP_LOCK_PATH.unlink(missing_ok=True)
+                else:
+                    return False
+            else:
+                return False
+        except (json.JSONDecodeError, ValueError, OSError):
+            # Corrupt lock file — remove and proceed
+            GODOT_MCP_LOCK_PATH.unlink(missing_ok=True)
+
+    lock_data = {
+        "holder": ticket_id,
+        "agent": agent_slug,
+        "acquired_at": now_iso(),
+        "wave": wave,
+    }
+    GODOT_MCP_LOCK_PATH.write_text(
+        json.dumps(lock_data, indent=2), encoding="utf-8"
+    )
+    return True
+
+
+def release_godot_mcp_lock(logger=None):
+    """Release the Godot MCP lock file if it exists."""
+    if GODOT_MCP_LOCK_PATH.exists():
+        try:
+            holder = "unknown"
+            data = json.loads(GODOT_MCP_LOCK_PATH.read_text(encoding="utf-8"))
+            holder = data.get("holder", "unknown")
+        except (json.JSONDecodeError, ValueError, OSError):
+            pass
+        GODOT_MCP_LOCK_PATH.unlink(missing_ok=True)
+        if logger:
+            logger.log("UNLOCK", f"Released Godot MCP lock (was held by {holder})")
+
+
+def read_godot_mcp_lock() -> dict | None:
+    """Read the current Godot MCP lock data. Returns None if not held."""
+    if not GODOT_MCP_LOCK_PATH.exists():
+        return None
+    try:
+        return json.loads(GODOT_MCP_LOCK_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, ValueError, OSError):
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -866,6 +939,9 @@ class Conductor:
         active_locks = self.state.get("active_ticket_ids", [])
 
         workers = []
+        deferred = []  # Godot MCP workers deferred due to lock contention
+        godot_lock_acquired_for = None  # ticket_id that holds the lock this wave
+
         for assignment in wave:
             agent_slug = assignment["agent"]
             ticket_id = assignment["ticket"]
@@ -893,6 +969,30 @@ class Conductor:
             needs_godot = assignment.get("needs_godot_mcp", False)
             supplement = assignment.get("prompt_supplement", "")
 
+            # Godot MCP concurrency gate: only one worker may hold the lock
+            if needs_godot:
+                if godot_lock_acquired_for is not None:
+                    # Another worker in this wave already holds the lock — defer
+                    self.logger.log("INFO",
+                        f"Deferred {ticket_id} — Godot MCP lock held by "
+                        f"{godot_lock_acquired_for}")
+                    deferred.append(assignment)
+                    continue
+
+                acquired = acquire_godot_mcp_lock(
+                    ticket_id, agent_slug,
+                    self.state["wave_number"], self.logger
+                )
+                if not acquired:
+                    lock_data = read_godot_mcp_lock()
+                    holder = lock_data["holder"] if lock_data else "unknown"
+                    self.logger.log("INFO",
+                        f"Deferred {ticket_id} — Godot MCP lock held by {holder}")
+                    deferred.append(assignment)
+                    continue
+
+                godot_lock_acquired_for = ticket_id
+
             # Create worktree if needed
             worktree_path = None
             branch_name = None
@@ -901,6 +1001,10 @@ class Conductor:
                     worktree_path, branch_name = create_worktree(agent_slug, ticket_id)
                 except RuntimeError as e:
                     self.logger.log("ERROR", f"Worktree creation failed for {ticket_id}: {e}")
+                    # Release Godot MCP lock if this worker held it
+                    if needs_godot and godot_lock_acquired_for == ticket_id:
+                        release_godot_mcp_lock(self.logger)
+                        godot_lock_acquired_for = None
                     continue
 
             workers.append({
@@ -914,6 +1018,12 @@ class Conductor:
                 "prompt_supplement": supplement,
                 "started_at": now_iso(),
             })
+
+        # Re-queue deferred Godot MCP workers for the next planning cycle
+        if deferred:
+            pending = self.state.setdefault("_pending_wave", [])
+            pending.extend(deferred)
+            save_state(self.state)
 
         # Populate active ticket locks
         self.state["active_ticket_ids"] = [w["ticket"] for w in workers]
@@ -962,6 +1072,10 @@ class Conductor:
                 active_locks.remove(ticket)
                 self.state["active_ticket_ids"] = active_locks
                 save_state(self.state)
+
+            # Release Godot MCP lock if this worker held it
+            if worker.get("needs_godot_mcp", False):
+                release_godot_mcp_lock(self.logger)
 
             if exit_code == 0:
                 if not stdout.strip():

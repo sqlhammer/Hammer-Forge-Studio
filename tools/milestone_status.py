@@ -108,7 +108,7 @@ def main():
 
     # Parse all tickets
     status_map: dict[str, str] = {}  # ticket_id → status (all active)
-    rows = []  # (id, title, status, owner, phase, depends_str) for target milestone
+    rows = []  # (id, title, status, owner, phase, depends_str, godot_mcp) for target milestone
 
     for path in ticket_files:
         fm = parse_frontmatter(path)
@@ -129,8 +129,9 @@ def main():
         depends_raw = fm.get("depends_on", "[]")
         deps = parse_depends(depends_raw)
         depends_str = ", ".join(deps) if deps else ""
+        godot_mcp = fm.get("godot_mcp", "false").strip().lower() == "true"
 
-        rows.append((ticket_id, title, status, owner, phase, depends_str))
+        rows.append((ticket_id, title, status, owner, phase, depends_str, godot_mcp))
 
     # Apply real-time overlay: tickets in state.json active_workers show as IN_PROGRESS
     # even before the worker has committed the status change to git.
@@ -139,17 +140,17 @@ def main():
         rows = [
             (t_id, t_title,
              "IN_PROGRESS" if t_id in active_tickets and t_status not in ("DONE", "IN_PROGRESS") else t_status,
-             t_owner, t_phase, t_deps)
-            for t_id, t_title, t_status, t_owner, t_phase, t_deps in rows
+             t_owner, t_phase, t_deps, t_mcp)
+            for t_id, t_title, t_status, t_owner, t_phase, t_deps, t_mcp in rows
         ]
         for t_id in active_tickets:
             if t_id in status_map and status_map[t_id] not in ("DONE", "IN_PROGRESS"):
                 status_map[t_id] = "IN_PROGRESS"
 
     # Count from effective statuses
-    done_count = sum(1 for _, _, s, _, _, _ in rows if s == "DONE")
-    in_progress_count = sum(1 for _, _, s, _, _, _ in rows if s == "IN_PROGRESS")
-    open_count = sum(1 for _, _, s, _, _, _ in rows if s not in ("DONE", "IN_PROGRESS"))
+    done_count = sum(1 for _, _, s, _, _, _, _ in rows if s == "DONE")
+    in_progress_count = sum(1 for _, _, s, _, _, _, _ in rows if s == "IN_PROGRESS")
+    open_count = sum(1 for _, _, s, _, _, _, _ in rows if s not in ("DONE", "IN_PROGRESS"))
 
     total = len(rows)
     if total == 0:
@@ -164,6 +165,9 @@ def main():
     print()
     print(f"**Stats:** {done_count}/{total} DONE, {in_progress_count} IN_PROGRESS, {open_count} OPEN")
 
+    # Check if any ticket in this milestone uses godot_mcp
+    any_mcp = any(t_mcp for _, _, _, _, _, _, t_mcp in rows)
+
     if brief and done_count == total:
         print()
         print(f"All {total} tickets DONE. No open or in-progress work.")
@@ -173,18 +177,28 @@ def main():
         if brief and display_rows:
             print(f"({done_count} DONE tickets omitted — showing {len(display_rows)} actionable)")
         print()
-        print("| Ticket | Title | Status | Owner | Phase | Dependencies |")
-        print("|--------|-------|--------|-------|-------|--------------|")
-        for t_id, t_title, t_status, t_owner, t_phase, t_deps in display_rows:
-            if len(t_title) > 50:
-                t_title = t_title[:47] + "..."
-            deps_col = t_deps if t_deps else "-"
-            print(f"| {t_id} | {t_title} | {t_status} | {t_owner} | {t_phase} | {deps_col} |")
+        if any_mcp:
+            print("| Ticket | Title | Status | Owner | Phase | Dependencies | MCP |")
+            print("|--------|-------|--------|-------|-------|--------------|-----|")
+            for t_id, t_title, t_status, t_owner, t_phase, t_deps, t_mcp in display_rows:
+                if len(t_title) > 50:
+                    t_title = t_title[:47] + "..."
+                deps_col = t_deps if t_deps else "-"
+                mcp_col = "Y" if t_mcp else "-"
+                print(f"| {t_id} | {t_title} | {t_status} | {t_owner} | {t_phase} | {deps_col} | {mcp_col} |")
+        else:
+            print("| Ticket | Title | Status | Owner | Phase | Dependencies |")
+            print("|--------|-------|--------|-------|-------|--------------|")
+            for t_id, t_title, t_status, t_owner, t_phase, t_deps, _t_mcp in display_rows:
+                if len(t_title) > 50:
+                    t_title = t_title[:47] + "..."
+                deps_col = t_deps if t_deps else "-"
+                print(f"| {t_id} | {t_title} | {t_status} | {t_owner} | {t_phase} | {deps_col} |")
 
     # Check dependency violations
     # Archive invariant: any dep not in status_map is archived → treat as DONE
     violations = []
-    for t_id, _, t_status, _, _, t_deps in rows:
+    for t_id, _, t_status, _, _, t_deps, _ in rows:
         if t_status not in ("IN_PROGRESS", "DONE"):
             continue
         if not t_deps:

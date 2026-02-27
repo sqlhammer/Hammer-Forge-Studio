@@ -6,6 +6,7 @@ __pycache__/
 orchestrator/state.json
 orchestrator/pending_gate.json
 orchestrator/gate_response.json
+orchestrator/godot_mcp.lock
 orchestrator/activity.log
 orchestrator/logs/
 orchestrator/results/

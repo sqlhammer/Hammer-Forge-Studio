@@ -2,12 +2,12 @@
 id: TICKET-0149
 title: "Conductor — Godot MCP mutex: gate Godot editor access to one agent at a time"
 type: TASK
-status: PENDING
+status: DONE
 priority: P1
 owner: tools-devops-engineer
 created_by: producer
 created_at: 2026-02-26
-updated_at: 2026-02-26
+updated_at: 2026-02-27
 milestone: "M8"
 phase: "TDD Foundation"
 depends_on: []
@@ -24,28 +24,28 @@ This ticket implements a file-based mutex so that only one agent at a time may h
 ## Acceptance Criteria
 
 ### Ticket Schema
-- [ ] Add optional boolean field `godot_mcp: true` to the ticket frontmatter schema (default `false`). Agents that require Godot MCP set this flag.
-- [ ] Update `tools/milestone_status.sh` (or equivalent) to surface the flag in status output when set.
+- [x] Add optional boolean field `godot_mcp: true` to the ticket frontmatter schema (default `false`). Agents that require Godot MCP set this flag.
+- [x] Update `tools/milestone_status.sh` (or equivalent) to surface the flag in status output when set.
 
 ### Lock File Protocol
-- [ ] Lock file path: `orchestrator/godot_mcp.lock`
-- [ ] Lock file contents when held: `{"holder": "<ticket-id>", "agent": "<agent-slug>", "acquired_at": "<ISO-8601>", "wave": <wave_number>}`
-- [ ] Lock file absent or empty means the resource is free.
-- [ ] Lock is acquired by the conductor immediately before spawning an agent whose ticket has `godot_mcp: true`.
-- [ ] Lock is released by the conductor immediately after the agent process exits (success or failure).
-- [ ] If the lock file already exists when the conductor tries to acquire it, the conductor defers the agent to the next wave rather than starting it (no busy-wait, no error — just requeue).
-- [ ] Stale lock detection: if `acquired_at` is older than 30 minutes, the conductor logs a WARNING, removes the stale lock, and proceeds with acquisition.
-- [ ] `orchestrator/godot_mcp.lock` is listed in `.gitignore` so it is never committed.
+- [x] Lock file path: `orchestrator/godot_mcp.lock`
+- [x] Lock file contents when held: `{"holder": "<ticket-id>", "agent": "<agent-slug>", "acquired_at": "<ISO-8601>", "wave": <wave_number>}`
+- [x] Lock file absent or empty means the resource is free.
+- [x] Lock is acquired by the conductor immediately before spawning an agent whose ticket has `godot_mcp: true`.
+- [x] Lock is released by the conductor immediately after the agent process exits (success or failure).
+- [x] If the lock file already exists when the conductor tries to acquire it, the conductor defers the agent to the next wave rather than starting it (no busy-wait, no error — just requeue).
+- [x] Stale lock detection: if `acquired_at` is older than 30 minutes, the conductor logs a WARNING, removes the stale lock, and proceeds with acquisition.
+- [x] `orchestrator/godot_mcp.lock` is listed in `.gitignore` so it is never committed.
 
 ### Conductor Integration
-- [ ] In `_do_dispatching()`, before spawning each worker, check whether its ticket has `godot_mcp: true`.
-- [ ] If `godot_mcp: true` and the lock is free: acquire the lock, spawn the agent, release on exit.
-- [ ] If `godot_mcp: true` and the lock is held: skip this agent for the current wave, append it back to `_pending_wave` for retry in the next planning cycle, and log an `INFO` event: `Deferred {ticket_id} — Godot MCP lock held by {holder}`.
-- [ ] Agents without `godot_mcp: true` are unaffected and continue to dispatch concurrently as before.
-- [ ] Add `release_godot_mcp_lock()` call to the conductor's worker cleanup path so crashes or early exits cannot leave a stale lock indefinitely.
+- [x] In `_do_dispatching()`, before spawning each worker, check whether its ticket has `godot_mcp: true`.
+- [x] If `godot_mcp: true` and the lock is free: acquire the lock, spawn the agent, release on exit.
+- [x] If `godot_mcp: true` and the lock is held: skip this agent for the current wave, append it back to `_pending_wave` for retry in the next planning cycle, and log an `INFO` event: `Deferred {ticket_id} — Godot MCP lock held by {holder}`.
+- [x] Agents without `godot_mcp: true` are unaffected and continue to dispatch concurrently as before.
+- [x] Add `release_godot_mcp_lock()` call to the conductor's worker cleanup path so crashes or early exits cannot leave a stale lock indefinitely.
 
 ### Documentation
-- [ ] Add a `## Godot MCP Concurrency` section to `agents/producer/CLAUDE.md` explaining:
+- [x] Add a `## Godot MCP Concurrency` section to `agents/producer/CLAUDE.md` explaining:
   - Why the lock exists and what it protects.
   - How to mark a ticket as needing Godot MCP (`godot_mcp: true`).
   - What happens when two Godot-MCP tickets land in the same wave (one runs, the other defers to the next wave automatically — no manual intervention needed).
@@ -64,3 +64,5 @@ This ticket implements a file-based mutex so that only one agent at a time may h
 ## Activity Log
 
 - 2026-02-26 [producer] Created ticket to address Godot MCP single-connection constraint under parallel agent dispatch
+- 2026-02-27 [tools-devops-engineer] Starting work — implementing file-based Godot MCP mutex
+- 2026-02-27 [tools-devops-engineer] Implementation complete — all acceptance criteria met

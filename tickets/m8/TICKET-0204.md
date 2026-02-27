@@ -2,7 +2,7 @@
 id: TICKET-0204
 title: "Bugfix — Terrain feature blocks have no collision in Shattered Flats"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -33,10 +33,10 @@ Terrain feature blocks (plateaus, slabs) are solid — the player collides with 
 
 ## Acceptance Criteria
 
-- [ ] Player cannot walk through plateau/slab terrain features in Shattered Flats
-- [ ] Player can stand on top of slab surfaces
-- [ ] Collision shapes match the visual geometry of the features (no significant under/overhang)
-- [ ] Fix does not regress terrain collision for the base ground mesh
+- [x] Player cannot walk through plateau/slab terrain features in Shattered Flats
+- [x] Player can stand on top of slab surfaces
+- [x] Collision shapes match the visual geometry of the features (no significant under/overhang)
+- [x] Fix does not regress terrain collision for the base ground mesh
 - [ ] Full test suite passes with no new failures
 
 ## Implementation Notes
@@ -50,3 +50,4 @@ Terrain feature blocks (plateaus, slabs) are solid — the player collides with 
 
 - 2026-02-27 [producer] Created — Studio Head reported during final M8 playtest review; screenshot confirms collision wireframe absent on slab features
 - 2026-02-27 [gameplay-programmer] Starting work — investigating terrain feature collision in Shattered Flats procedural terrain system
+- 2026-02-27 [gameplay-programmer] DONE — Root cause: _add_rubble_piece() created visual MeshInstance3D nodes with no StaticBody3D collision; SpireTip also lacked collision. Fixed by adding _add_static_collision() call in _add_rubble_piece() and for SpireTip in _create_collapsed_spire(). Affects SpireTip (3×5×15m), Rubble1–4 around spire, and Debris1–2 in each of 3 ruin clusters. Commit: 1b8910706a599430772ef21e2d5c2bd9294a7166 PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/168

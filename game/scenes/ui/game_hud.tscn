@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" uid="uid://q1ud6g7dowe4" path="res://scripts/ui/game_hud.gd" id="1_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/compass_bar.tscn" id="2_cmp"]
@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/module_placement_ui.tscn" id="14_mpu"]
 [ext_resource type="PackedScene" path="res://scenes/ui/interaction_prompt_hud.tscn" id="15_iph"]
 [ext_resource type="PackedScene" path="res://scenes/ui/navigation_console.tscn" id="16_nav"]
+[ext_resource type="PackedScene" path="res://scenes/ui/fuel_gauge.tscn" id="17_fgl"]
 
 [node name="GameHUD" type="CanvasLayer"]
 layer = 1
@@ -56,6 +57,8 @@ grow_vertical = 2
 [node name="ScannerReadout" parent="HUDRoot" instance=ExtResource("4_scn")]
 
 [node name="BatteryBar" parent="HUDRoot" instance=ExtResource("5_bat")]
+
+[node name="FuelGauge" parent="HUDRoot" instance=ExtResource("17_fgl")]
 
 [node name="PickupNotifications" parent="HUDRoot" instance=ExtResource("6_pkn")]
 

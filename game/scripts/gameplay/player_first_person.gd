@@ -1,10 +1,15 @@
 ## First-person player controller for surface exploration.
-## Handles character movement, camera control, and integration with InputManager.
+## Handles character movement, camera control, jump, and integration with InputManager.
+## Owner: gameplay-programmer
 class_name PlayerFirstPerson
 extends CharacterBody3D
 
+# ── Signals ──────────────────────────────────────────────
+signal player_jumped
+
 # ── Constants ─────────────────────────────────────────────
 const GRAVITY: float = 9.8
+const JUMP_HEIGHT_RATIO: float = 0.5
 
 # ── Exported Variables ────────────────────────────────────
 @export var movement_speed: float = 5.0
@@ -36,6 +41,7 @@ func _process(delta: float) -> void:
 	_update_movement(delta)
 	_update_camera(delta)
 	_apply_gravity(delta)
+	_update_jump()
 	_apply_movement()
 
 func _input(event: InputEvent) -> void:
@@ -60,7 +66,33 @@ func get_current_velocity() -> Vector3:
 func is_moving() -> bool:
 	return _is_moving
 
+## Returns the calculated jump height (50% of standing height).
+func get_jump_height() -> float:
+	return head_height * JUMP_HEIGHT_RATIO
+
+## Returns the physics-correct jump impulse velocity for the configured jump height.
+func get_jump_velocity() -> float:
+	var jump_height: float = get_jump_height()
+	var impulse: float = sqrt(2.0 * GRAVITY * jump_height)
+	return impulse
+
+## Attempts to perform a jump. Returns true if the jump was executed.
+## Only succeeds when the player is on the ground.
+func try_jump() -> bool:
+	if not is_on_floor():
+		return false
+	_velocity.y = get_jump_velocity()
+	player_jumped.emit()
+	var log_message: String = "PlayerFirstPerson: jumped — velocity=%.2f" % get_jump_velocity()
+	Global.log(log_message)
+	return true
+
 # ── Private Methods ───────────────────────────────────────
+## Checks for jump input and applies jump impulse if grounded.
+func _update_jump() -> void:
+	if InputManager.is_action_just_pressed("jump"):
+		try_jump()
+
 ## Updates player movement based on input.
 func _update_movement(delta: float) -> void:
 	var input_vector: Vector2 = Vector2.ZERO

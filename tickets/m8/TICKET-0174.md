@@ -2,7 +2,7 @@
 id: TICKET-0174
 title: "Player jump — 50% player height, first-person and third-person controllers"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -43,3 +43,4 @@ Add a jump action to both the first-person and third-person player controllers. 
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Gameplay phase
+- 2026-02-27 [gameplay-programmer] Status → IN_PROGRESS — Starting work on player jump mechanic

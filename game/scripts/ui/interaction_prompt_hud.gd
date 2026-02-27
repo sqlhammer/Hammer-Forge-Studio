@@ -40,12 +40,14 @@ var _fade_tween: Tween = null
 @onready var _key_badge: Panel = $ContextualPrompt/PromptPanel/PromptBox/KeyBadge
 @onready var _key_label: Label = $ContextualPrompt/PromptPanel/PromptBox/KeyBadge/KeyLabel
 @onready var _action_label: Label = $ContextualPrompt/PromptPanel/PromptBox/ActionLabel
+@onready var _controls_list: VBoxContainer = $PersistentControls/ControlsList
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
 	_contextual_prompt.modulate.a = 0.0
 	_contextual_prompt.visible = false
+	_add_jump_control_row()
 
 func _process(_delta: float) -> void:
 	if not _camera or not _player:
@@ -153,3 +155,49 @@ func _hide_prompt() -> void:
 	_fade_tween.tween_callback(func() -> void:
 		_contextual_prompt.visible = false
 	)
+
+func _add_jump_control_row() -> void:
+	var row: HBoxContainer = HBoxContainer.new()
+	row.name = "JumpRow"
+	row.add_theme_constant_override("separation", 8)
+
+	var key_label: Label = Label.new()
+	key_label.name = "KeyLabel"
+	key_label.custom_minimum_size = Vector2(50, 28)
+	key_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	key_label.add_theme_color_override("font_color", COLOR_PERSISTENT_KEY)
+	key_label.add_theme_font_size_override("font_size", 13)
+	key_label.add_theme_stylebox_override("normal", _create_persistent_key_style())
+	key_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	key_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	key_label.text = "Space"
+
+	var icon: ColorRect = ColorRect.new()
+	icon.name = "JumpIcon"
+	icon.custom_minimum_size = Vector2(20, 20)
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon.color = Color(1, 1, 1, 0.3)
+
+	var action_label: Label = Label.new()
+	action_label.name = "ActionLabel"
+	action_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	action_label.add_theme_color_override("font_color", COLOR_PERSISTENT_LABEL)
+	action_label.add_theme_font_size_override("font_size", 13)
+	action_label.text = "Jump"
+
+	row.add_child(key_label)
+	row.add_child(icon)
+	row.add_child(action_label)
+	_controls_list.add_child(row)
+
+func _create_persistent_key_style() -> StyleBoxFlat:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = COLOR_KEY_BG
+	style.border_color = COLOR_KEY_BORDER
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(3)
+	style.content_margin_left = 6.0
+	style.content_margin_top = 2.0
+	style.content_margin_right = 6.0
+	style.content_margin_bottom = 2.0
+	return style

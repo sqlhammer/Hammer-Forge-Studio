@@ -1,7 +1,7 @@
 # Deferred Work Items
 
 **Owner:** producer
-**Last Updated:** 2026-02-26 (D-016 through D-024 scheduled into M7)
+**Last Updated:** 2026-02-27 (D-025 added)
 
 > Tracks gameplay features and systems that were intentionally descoped from a milestone during planning. Each item references the design spec it originates from and the milestone where it was deferred. These items MUST be revisited and scheduled into a future milestone — they are not optional cuts, they are postponed work.
 
@@ -61,6 +61,12 @@
 | ID | Description | Design Ref | Reason Deferred | Suggested Milestone | Status | Scheduled In |
 |----|-------------|------------|-----------------|---------------------|--------|--------------|
 | D-024 | Battery bar amber warning tier — add intermediate amber (#FFB830) tint between teal (normal) and coral (critical) for a 3-tier color system | `docs/art/icon-needs.md` | Icon-needs spec called for 3-tier tinting but implementation shipped with 2 tiers; Studio Head deferred to backlog during M6 QA sign-off | M7 (Ship Interior) | Scheduled | TICKET-0122 |
+
+### From M8 — Ship Navigation
+
+| ID | Description | Design Ref | Reason Deferred | Suggested Milestone | Status | Scheduled In |
+|----|-------------|------------|-----------------|---------------------|--------|--------------|
+| D-025 | Expand ticket ID system from 4 digits to 6 digits — update ID generation, all tooling (milestone_status.sh, orchestrator, status.py), ticket filename conventions, and any references in docs/templates | N/A (producer tooling) | Current 4-digit IDs (TICKET-0001–9999) are approaching saturation as milestone count grows; 6-digit IDs (TICKET-000001–999999) provide long-term headroom without tooling breakage | Post-M8 or inter-milestone tooling sprint | Open | — |
 
 ---
 

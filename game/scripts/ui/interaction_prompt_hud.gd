@@ -18,6 +18,10 @@ const KEY_BADGE_BORDER_HOLD: float = 4.0
 ## Animation
 const FADE_DURATION: float = 0.15
 
+## Headlamp controls panel entry
+const HEADLAMP_ACTION: String = "toggle_head_lamp"
+const HEADLAMP_LABEL: String = "Headlamp"
+
 ## Colors (consistent with existing HUD palette)
 const COLOR_KEY_BG := Color("#1A2736")
 const COLOR_KEY_BORDER := Color("#00D4AA")
@@ -33,6 +37,8 @@ var _player: CharacterBody3D = null
 var _current_prompt: Dictionary = {}
 var _is_prompt_visible: bool = false
 var _fade_tween: Tween = null
+var _headlamp_row: HBoxContainer = null
+var _headlamp_key_label: Label = null
 
 # ── Onready Variables ─────────────────────────────────────
 @onready var _contextual_prompt: Control = $ContextualPrompt
@@ -48,8 +54,13 @@ func _ready() -> void:
 	_contextual_prompt.modulate.a = 0.0
 	_contextual_prompt.visible = false
 	_add_jump_control_row()
+	# Headlamp controls panel entry — show if already equipped, listen for future equip
+	HeadLamp.head_lamp_equipped.connect(_on_head_lamp_equipped)
+	if HeadLamp.is_equipped():
+		_add_headlamp_control()
 
 func _process(_delta: float) -> void:
+	_refresh_headlamp_key_label()
 	if not _camera or not _player:
 		return
 	var prompt: Dictionary = _detect_interaction_prompt()
@@ -66,6 +77,25 @@ func setup(camera: Camera3D, player: CharacterBody3D) -> void:
 ## Updates the active camera reference (used on view mode switch).
 func set_camera(camera: Camera3D) -> void:
 	_camera = camera
+
+## Returns true if the headlamp control row is visible in the controls panel.
+func has_headlamp_control() -> bool:
+	return _headlamp_row != null and _headlamp_row.is_inside_tree()
+
+## Returns the currently displayed key label for the headlamp control, or empty string if absent.
+func get_headlamp_key_label() -> String:
+	if not _headlamp_key_label:
+		return ""
+	return _headlamp_key_label.text
+
+## Returns the keyboard key label for the given input action, or "?" if not mapped.
+func get_action_key_label(action: String) -> String:
+	var events: Array[InputEvent] = InputMap.action_get_events(action)
+	for event: InputEvent in events:
+		if event is InputEventKey:
+			var key_event: InputEventKey = event as InputEventKey
+			return OS.get_keycode_string(key_event.keycode)
+	return "?"
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -157,47 +187,69 @@ func _hide_prompt() -> void:
 	)
 
 func _add_jump_control_row() -> void:
-	var row: HBoxContainer = HBoxContainer.new()
+	var row: HBoxContainer = _create_control_row("Space", "Jump", 50.0)
 	row.name = "JumpRow"
+	_controls_list.add_child(row)
+
+func _on_head_lamp_equipped() -> void:
+	_add_headlamp_control()
+
+func _add_headlamp_control() -> void:
+	if _headlamp_row:
+		return
+	var key_text: String = get_action_key_label(HEADLAMP_ACTION)
+	_headlamp_row = _create_control_row(key_text, HEADLAMP_LABEL)
+	# Store key label reference for dynamic refresh
+	_headlamp_key_label = _headlamp_row.get_node("KeyLabel") as Label
+	_controls_list.add_child(_headlamp_row)
+	Global.log("InteractionPromptHUD: headlamp control added [%s]" % key_text)
+
+func _refresh_headlamp_key_label() -> void:
+	if not _headlamp_key_label:
+		return
+	var current_key: String = get_action_key_label(HEADLAMP_ACTION)
+	if _headlamp_key_label.text != current_key:
+		_headlamp_key_label.text = current_key
+
+func _create_control_row(key_text: String, label_text: String, key_min_width: float = 28.0) -> HBoxContainer:
+	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 
+	# Key badge label — matches persistent controls style from the scene
 	var key_label: Label = Label.new()
 	key_label.name = "KeyLabel"
-	key_label.custom_minimum_size = Vector2(50, 28)
+	key_label.custom_minimum_size = Vector2(key_min_width, 28)
 	key_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	key_label.add_theme_color_override("font_color", COLOR_PERSISTENT_KEY)
 	key_label.add_theme_font_size_override("font_size", 13)
-	key_label.add_theme_stylebox_override("normal", _create_persistent_key_style())
+	var key_style: StyleBoxFlat = StyleBoxFlat.new()
+	key_style.bg_color = COLOR_KEY_BG
+	key_style.border_color = COLOR_PERSISTENT_KEY
+	key_style.set_border_width_all(1)
+	key_style.set_corner_radius_all(3)
+	key_style.content_margin_left = 6.0
+	key_style.content_margin_top = 2.0
+	key_style.content_margin_right = 6.0
+	key_style.content_margin_bottom = 2.0
+	key_label.add_theme_stylebox_override("normal", key_style)
 	key_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	key_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	key_label.text = "Space"
+	key_label.text = key_text
+	row.add_child(key_label)
 
+	# Icon placeholder — matches existing PingIcon / InventoryIcon
 	var icon: ColorRect = ColorRect.new()
-	icon.name = "JumpIcon"
 	icon.custom_minimum_size = Vector2(20, 20)
 	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	icon.color = Color(1, 1, 1, 0.3)
+	row.add_child(icon)
 
+	# Action label
 	var action_label: Label = Label.new()
-	action_label.name = "ActionLabel"
 	action_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	action_label.add_theme_color_override("font_color", COLOR_PERSISTENT_LABEL)
 	action_label.add_theme_font_size_override("font_size", 13)
-	action_label.text = "Jump"
-
-	row.add_child(key_label)
-	row.add_child(icon)
+	action_label.text = label_text
 	row.add_child(action_label)
-	_controls_list.add_child(row)
 
-func _create_persistent_key_style() -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = COLOR_KEY_BG
-	style.border_color = COLOR_KEY_BORDER
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(3)
-	style.content_margin_left = 6.0
-	style.content_margin_top = 2.0
-	style.content_margin_right = 6.0
-	style.content_margin_bottom = 2.0
-	return style
+	return row

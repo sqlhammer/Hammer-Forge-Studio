@@ -31,6 +31,7 @@ var _recycler_panel: RecyclerPanel = null
 var _tech_tree_panel: TechTreePanel = null
 var _fabricator_panel: FabricatorPanel = null
 var _automation_hub_panel: AutomationHubPanel = null
+var _navigation_console: NavigationConsole = null
 var _head_lamp_light: SpotLight3D = null
 var _third_person: PlayerThirdPerson = null
 var _player_manager: PlayerManager = null
@@ -274,6 +275,7 @@ func _setup_hud() -> void:
 	_tech_tree_panel = _hud.get_tech_tree_panel()
 	_fabricator_panel = _hud.get_fabricator_panel()
 	_automation_hub_panel = _hud.get_automation_hub_panel()
+	_navigation_console = _hud.get_navigation_console()
 
 func _update_recharge(delta: float) -> void:
 	if _ship_exterior and _first_person:
@@ -354,6 +356,8 @@ func _update_ship_interact() -> void:
 		return
 	if _automation_hub_panel and _automation_hub_panel.is_open():
 		return
+	if _navigation_console and _navigation_console.is_open():
+		return
 	if _inventory_screen and _inventory_screen.is_open():
 		return
 
@@ -372,7 +376,12 @@ func _update_ship_interact() -> void:
 	# Interact with ship interior objects when inside
 	if _ship_interior.is_player_inside():
 		if InputManager.is_action_just_pressed("interact"):
-			# Check terminal first
+			# Check cockpit navigation console
+			if _ship_interior.is_player_near_cockpit_console():
+				if _navigation_console:
+					_navigation_console.open_panel()
+				return
+			# Check terminal
 			if _ship_interior.is_player_near_terminal():
 				_tech_tree_panel.open()
 				return
@@ -589,6 +598,8 @@ func _on_player_exited_ship() -> void:
 		_fabricator_panel.close()
 	if _automation_hub_panel and _automation_hub_panel.is_open():
 		_automation_hub_panel.close()
+	if _navigation_console and _navigation_console.is_open():
+		_navigation_console.close_panel()
 
 func _on_view_mode_changed(mode: String) -> void:
 	Global.log("TestWorld: view mode changed to %s" % mode)

@@ -133,6 +133,18 @@ func close_inventory() -> void:
 func is_open() -> bool:
 	return _is_open
 
+## Returns the currently focused slot index.
+func get_focused_slot() -> int:
+	return _focused_slot
+
+## Selects the given slot by index, matching keyboard navigation behavior.
+func select_slot(index: int) -> void:
+	if index < 0 or index >= Inventory.MAX_SLOTS:
+		return
+	_focused_slot = index
+	_update_focus_visual()
+	_update_detail_area()
+
 # ── Private Methods ───────────────────────────────────────
 
 func _build_ui() -> void:
@@ -259,6 +271,7 @@ func _build_ui() -> void:
 func _create_slot(index: int) -> PanelContainer:
 	var slot := PanelContainer.new()
 	slot.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
+	slot.mouse_filter = Control.MOUSE_FILTER_STOP
 
 	var style := StyleBoxFlat.new()
 	style.bg_color = COLOR_SLOT_BG
@@ -268,12 +281,17 @@ func _create_slot(index: int) -> PanelContainer:
 	style.set_content_margin_all(4)
 	slot.add_theme_stylebox_override("panel", style)
 
+	# Mouse hover and click support
+	slot.mouse_entered.connect(_on_slot_mouse_entered.bind(index))
+	slot.gui_input.connect(_on_slot_gui_input.bind(index))
+
 	# Item icon
 	var icon := TextureRect.new()
 	icon.custom_minimum_size = Vector2(48, 48)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.visible = false
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	slot.add_child(icon)
 	_slot_icons.append(icon)
 
@@ -285,6 +303,7 @@ func _create_slot(index: int) -> PanelContainer:
 	count_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	count_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	count_label.visible = false
+	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	slot.add_child(count_label)
 	_slot_count_labels.append(count_label)
 
@@ -380,6 +399,20 @@ func _move_focus(dx: int, dy: int) -> void:
 	_focused_slot = row * GRID_COLUMNS + col
 	_update_focus_visual()
 	_update_detail_area()
+
+func _on_slot_mouse_entered(index: int) -> void:
+	if not _is_open:
+		return
+	select_slot(index)
+
+func _on_slot_gui_input(event: InputEvent, index: int) -> void:
+	if not _is_open:
+		return
+	var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+	if mouse_event == null:
+		return
+	if mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_LEFT:
+		select_slot(index)
 
 func _on_slot_changed(slot_index: int) -> void:
 	Global.log("InventoryScreen: slot %d changed" % slot_index)

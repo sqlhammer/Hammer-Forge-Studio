@@ -250,11 +250,6 @@ async def run_test(mode: str, verbose: bool, keep_artifacts: bool) -> int:
     shutil.copytree(src_orch / "schemas", orch_dir / "schemas")
     shutil.copytree(src_orch / "prompts", orch_dir / "prompts")
 
-    # Copy test config
-    config_src = src_orch / "test_config.json"
-    config_dst = orch_dir / "config.json"
-    shutil.copy2(config_src, config_dst)
-
     # Create test tickets
     test_ticket_dir = create_test_tickets(REPO_ROOT)
 
@@ -271,7 +266,7 @@ async def run_test(mode: str, verbose: bool, keep_artifacts: bool) -> int:
             conductor = TestConductor(
                 orch_dir=orch_dir,
                 repo_root=REPO_ROOT,
-                config_path=config_dst,
+                config_path=src_orch / "test_config.json",
                 run_claude_fn=mock_fn,
                 verbose=verbose,
             )
@@ -280,7 +275,7 @@ async def run_test(mode: str, verbose: bool, keep_artifacts: bool) -> int:
             conductor = TestConductor(
                 orch_dir=orch_dir,
                 repo_root=REPO_ROOT,
-                config_path=config_dst,
+                config_path=src_orch / "test_config.json",
                 verbose=verbose,
             )
 

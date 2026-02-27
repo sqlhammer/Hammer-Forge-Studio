@@ -36,7 +36,7 @@
     }
   },
   "concurrency": {
-    "max_parallel_workers": 4,
+    "max_parallel_workers": 8,
     "godot_mcp_exclusive": true,
     "max_tickets_per_agent_per_wave": null
   },

@@ -2,12 +2,12 @@
 id: TICKET-0204
 title: "Bugfix — Terrain feature blocks have no collision in Shattered Flats"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-27
-updated_at: 2026-02-27
+updated_at: 2026-02-27T00:00:00
 milestone: "M8"
 phase: "QA"
 depends_on: []
@@ -49,3 +49,4 @@ Terrain feature blocks (plateaus, slabs) are solid — the player collides with 
 ## Activity Log
 
 - 2026-02-27 [producer] Created — Studio Head reported during final M8 playtest review; screenshot confirms collision wireframe absent on slab features
+- 2026-02-27 [gameplay-programmer] Starting work — investigating terrain feature collision in Shattered Flats procedural terrain system

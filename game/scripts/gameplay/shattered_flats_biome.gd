@@ -303,6 +303,8 @@ func _create_collapsed_spire() -> void:
 	spire_tip.position = Vector3(-18.0, SPIRE_TIP_HEIGHT * 0.3, 5.0)
 	spire_tip.material_override = body_material
 	spire_container.add_child(spire_tip)
+	# Add collision for the tip section so the player cannot walk through it
+	_add_static_collision(spire_container, "SpireTip_Col", spire_tip)
 
 	# Rubble base — scattered box fragments around the impact point
 	var rubble_material: StandardMaterial3D = StandardMaterial3D.new()
@@ -595,7 +597,7 @@ func _create_box_mesh(
 	return mesh_instance
 
 
-## Adds a rubble piece (box mesh) to a parent node.
+## Adds a rubble piece (box mesh) with matching StaticBody3D collision to a parent node.
 func _add_rubble_piece(
 	parent: Node3D,
 	piece_name: String,
@@ -607,6 +609,8 @@ func _add_rubble_piece(
 	# Slight random rotation for natural look (deterministic via _rng)
 	piece.rotation_degrees.y = _rng.randf_range(-30.0, 30.0)
 	parent.add_child(piece)
+	# Add collision so the player cannot walk through rubble geometry
+	_add_static_collision(parent, piece_name + "_Col", piece)
 
 
 ## Adds a StaticBody3D collision matching a MeshInstance3D's box mesh to a parent.

@@ -49,6 +49,7 @@
 | # | Milestone | Target Date | Status | Total | Open | Done | QA Sign-off |
 |---|-----------|-------------|--------|-------|------|------|-------------|
 | T1 | Project Reporting Dashboard — GitHub Pages status site, auto-built on push | — | Planning | 10 | 10 | 0 | — |
+| T2 | Usage & Cost Attribution — Orchestrator usage tracking, JSONL ledger, reporting | — | Planning | 7 | 7 | 0 | — |
 
 ---
 
@@ -605,6 +606,61 @@ TICKET-0188 (documentation) — depends on ALL of the above
 - T1 is the first tooling milestone. T-series milestones run parallel to the M-series game development milestones and use independent ticket numbering within the shared TICKET-NNNN sequence.
 - The dashboard reads project files at build time — it does not require agents to manually update a separate data store. Data freshness matches commit cadence.
 - Solution selected: Static Site + GitHub Actions Build Step (Solution B from the evaluation report). See the T1 evaluation report for alternatives considered.
+
+---
+
+### T2 — Usage & Cost Attribution
+
+**Goal:** Track orchestrator usage and costs per agent, ticket, and milestone. Provide capacity utilization reporting against Claude plan limits so the studio can monitor burn rate and stay within rate limits.
+
+**Scope:**
+- Extract usage metadata (tokens, model, cost) from Claude CLI `--output-format json` output in conductor.py
+- JSONL ledger (`orchestrator/usage.jsonl`) — append one record per CLI call with agent, ticket, milestone, phase, tokens, cost, timing
+- Fix dead `total_cost_usd` accumulation in state.json
+- Plan capacity configuration in `orchestrator/config.json` (Max 20 plan limits)
+- Reporting script (`tools/usage_report.py`) — milestone summary, per-agent/ticket/phase breakdowns, capacity gauges (5-hour rolling, weekly rolling, per-session) with Opus 1.7x token weighting
+- Backfill script (`tools/backfill_usage.py`) — reconstruct approximate usage records from existing orchestrator logs
+- Code review and QA validation
+
+**Phases:**
+- **Foundation** (TICKET-0207–TICKET-0209): CLI output extraction, JSONL ledger, capacity config
+- **Reporting** (TICKET-0210–TICKET-0211): Report script with capacity gauges, log backfill
+- **QA** (TICKET-0212–TICKET-0213): Code review and end-to-end QA testing
+
+**Tickets:** TICKET-0207 through TICKET-0213 (7 total)
+
+| Phase | Ticket | Title | Type | Owner |
+|-------|--------|-------|------|-------|
+| Foundation | TICKET-0207 | Usage data extraction from Claude CLI output | FEATURE | tools-devops-engineer |
+| Foundation | TICKET-0208 | Usage JSONL ledger and cost accumulation | FEATURE | tools-devops-engineer |
+| Foundation | TICKET-0209 | Plan capacity configuration | FEATURE | tools-devops-engineer |
+| Reporting | TICKET-0210 | Usage report script with capacity gauges | FEATURE | tools-devops-engineer |
+| Reporting | TICKET-0211 | Usage data backfill from existing logs | FEATURE | tools-devops-engineer |
+| QA | TICKET-0212 | Code review — T2 systems | REVIEW | systems-programmer |
+| QA | TICKET-0213 | QA testing — T2 usage attribution | TASK | qa-engineer |
+
+**Dependency Graph:**
+```
+TICKET-0207 (CLI extraction)
+  └─► TICKET-0208 (JSONL ledger + cost accumulation)
+        ├─► TICKET-0210 (report script) ◄── also depends on TICKET-0209
+        └─► TICKET-0211 (backfill script)
+
+TICKET-0209 (capacity config) — no dependencies, can run in parallel with 0207/0208
+  └─► TICKET-0210 (report script)
+
+TICKET-0212 (code review) — depends on ALL implementation tickets (0207–0211)
+  └─► TICKET-0213 (QA testing)
+```
+
+**Parallel-eligible:** T2 does not block and is not blocked by any game milestone. May begin at any time.
+
+**Dependencies:** None (operates on orchestrator internals; benefits from existing log data but does not require specific milestones)
+
+**Notes:**
+- T2 is informational/reporting only — it does not enforce rate limits or throttle the orchestrator. Capacity gauges are advisory.
+- The JSONL ledger is gitignored (local data). The reporting and backfill scripts are committed.
+- Opus 1.7x token weighting reflects Anthropic's rate limit accounting where Opus output tokens consume 1.7x the capacity of Sonnet/Haiku tokens.
 
 ---
 

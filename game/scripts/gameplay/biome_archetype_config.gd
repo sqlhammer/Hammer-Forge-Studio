@@ -33,6 +33,9 @@ var base_height: float = 0.0
 ## Vertical scaling factor applied to noise values to produce world-space heights.
 var height_scale: float = 10.0
 
+## Side length of the biome play area in metres. Shared by terrain generator and boundary system.
+var terrain_size: float = 500.0
+
 
 # ── Public Methods ────────────────────────────────────────
 
@@ -48,6 +51,7 @@ static func shattered_flats() -> BiomeArchetypeConfig:
 	config.noise_gain = 0.5
 	config.base_height = 0.0
 	config.height_scale = 8.0
+	config.terrain_size = 500.0
 	return config
 
 
@@ -63,6 +67,7 @@ static func rock_warrens() -> BiomeArchetypeConfig:
 	config.noise_gain = 0.5
 	config.base_height = 0.0
 	config.height_scale = 25.0
+	config.terrain_size = 500.0
 	return config
 
 
@@ -78,4 +83,5 @@ static func debris_field() -> BiomeArchetypeConfig:
 	config.noise_gain = 0.5
 	config.base_height = 0.0
 	config.height_scale = 15.0
+	config.terrain_size = 500.0
 	return config

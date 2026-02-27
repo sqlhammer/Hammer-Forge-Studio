@@ -1,7 +1,7 @@
 # Deferred Work Items
 
 **Owner:** producer
-**Last Updated:** 2026-02-27 (D-025 added)
+**Last Updated:** 2026-02-27 (D-026–D-029 added from TICKET-0177 code review)
 
 > Tracks gameplay features and systems that were intentionally descoped from a milestone during planning. Each item references the design spec it originates from and the milestone where it was deferred. These items MUST be revisited and scheduled into a future milestone — they are not optional cuts, they are postponed work.
 
@@ -67,6 +67,10 @@
 | ID | Description | Design Ref | Reason Deferred | Suggested Milestone | Status | Scheduled In |
 |----|-------------|------------|-----------------|---------------------|--------|--------------|
 | D-025 | Expand ticket ID system from 4 digits to 6 digits — update ID generation, all tooling (milestone_status.sh, orchestrator, status.py), ticket filename conventions, and any references in docs/templates | N/A (producer tooling) | Current 4-digit IDs (TICKET-0001–9999) are approaching saturation as milestone count grows; 6-digit IDs (TICKET-000001–999999) provide long-term headroom without tooling breakage | Post-M8 or inter-milestone tooling sprint | Open | — |
+| D-026 | Fix section header mislabeling in M8 data classes — `TerrainFeatureRequest`, `TerrainGenerationResult`, `TerrainChunk`, and `BiomeArchetypeConfig` have public member variables (no `_` prefix, accessed externally) under `# ── Private Variables ──` section headers; should be `# ── Public Variables ──` per coding standards | `docs/engineering/coding-standards.md` | P3 finding from TICKET-0177 code review — cosmetic section header inconsistency, no functional impact | M9 | Open | — |
+| D-027 | DeepResourceNode class unused in biome scenes — biome scripts create `Deposit.new()` with `infinite = true` instead of `DeepResourceNode.new()`; class exists but is never instantiated in production code | N/A (M8 code review) | P3 finding from TICKET-0177 — behavior is correct; using DeepResourceNode would consolidate defaults | M9 | Open | — |
+| D-028 | PlayerFirstPerson uses `_process()` for physics movement — `move_and_slide()` called from `_process()` instead of `_physics_process()`; works in Godot 4 but inconsistent with CharacterBody3D best practices | N/A (pre-M8, noted during M8 review) | P3 finding from TICKET-0177 — no observed issues; migration would improve physics consistency | M9 | Open | — |
+| D-029 | NavigationConsole test null spy reference — `test_navigation_console_unit` `after_each()` calls `_spy.clear()` on null spy, producing SCRIPT ERRORs in log | N/A (QA finding from TICKET-0176) | P3 — tests pass but log is noisy; already noted in TICKET-0176 activity log | M9 | Open | — |
 
 ---
 

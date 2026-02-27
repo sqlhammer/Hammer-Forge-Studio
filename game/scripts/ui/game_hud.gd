@@ -11,6 +11,7 @@ var _mining_ref: Mining = null
 @onready var _hud_root: Control = $HUDRoot
 @onready var _compass_bar: CompassBar = $HUDRoot/CompassBar
 @onready var _battery_bar: BatteryBar = $HUDRoot/BatteryBar
+@onready var _fuel_gauge: FuelGauge = $HUDRoot/FuelGauge
 @onready var _scanner_readout: ScannerReadout = $HUDRoot/ScannerReadout
 @onready var _mining_progress: MiningProgress = $HUDRoot/MiningProgress
 @onready var _pickup_notifications: PickupNotificationManager = $HUDRoot/PickupNotifications
@@ -126,6 +127,10 @@ func get_navigation_console() -> NavigationConsole:
 func get_interaction_prompt_hud() -> InteractionPromptHUD:
 	return _interaction_prompt_hud
 
+## Returns the fuel gauge HUD element.
+func get_fuel_gauge() -> FuelGauge:
+	return _fuel_gauge
+
 # ── Private Methods ───────────────────────────────────────
 
 func _setup_hud_positions() -> void:
@@ -148,6 +153,10 @@ func _setup_hud_positions() -> void:
 	# Battery bar — bottom-left
 	_battery_bar.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_battery_bar.position = Vector2(32, -BatteryBar.TOTAL_HEIGHT - 32)
+
+	# Fuel gauge — bottom-center (32px from bottom edge, horizontally centered)
+	_fuel_gauge.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_fuel_gauge.position = Vector2(-FuelGauge.TOTAL_WIDTH / 2.0, -FuelGauge.TOTAL_HEIGHT - 32)
 
 	# Pickup notifications — center-right, stacking
 	_pickup_notifications.anchor_left = 1.0

@@ -2,7 +2,7 @@
 id: TICKET-0169
 title: "Fuel consumption HUD — low-fuel warning, tank gauge display"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -42,3 +42,4 @@ Implement the persistent fuel gauge HUD element. Displays the ship's current fue
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Gameplay phase
+- 2026-02-27 [gameplay-programmer] Starting work — implementing fuel gauge HUD with signal-driven updates, three visual states, and unit tests

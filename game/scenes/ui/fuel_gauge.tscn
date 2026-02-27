@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/fuel_gauge.gd" id="1_fuel"]
+
+[node name="FuelGauge" type="Control"]
+custom_minimum_size = Vector2(200, 48)
+script = ExtResource("1_fuel")

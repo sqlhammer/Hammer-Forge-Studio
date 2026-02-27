@@ -2,7 +2,7 @@
 id: TICKET-0203
 title: "Bugfix — Ship entry point not findable in Shattered Flats"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -48,3 +48,4 @@ The ship is spawned at the biome's designated spawn point with its entry door/ra
 ## Activity Log
 
 - 2026-02-27 [producer] Created — Studio Head reported during final M8 playtest review
+- 2026-02-27 [gameplay-programmer] Starting work — investigating ship spawn position in Shattered Flats

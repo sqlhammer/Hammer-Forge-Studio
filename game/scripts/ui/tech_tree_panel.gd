@@ -135,6 +135,18 @@ func close() -> void:
 func is_open() -> bool:
 	return _is_open
 
+## Returns the currently focused node index.
+func get_focused_node_index() -> int:
+	return _focused_index
+
+## Selects a tech tree node by index, matching keyboard navigation behavior.
+func select_node_by_index(index: int) -> void:
+	if index < 0 or index >= _node_ids.size():
+		return
+	_stop_pulse()
+	_focused_index = index
+	_refresh_all()
+
 # ── Private Methods ───────────────────────────────────────
 
 func _build_ui() -> void:
@@ -236,6 +248,11 @@ func _build_node_cards() -> void:
 		var card := PanelContainer.new()
 		card.custom_minimum_size = Vector2(CARD_WIDTH, CARD_HEIGHT)
 		card.position = card_positions[i]
+		card.mouse_filter = Control.MOUSE_FILTER_STOP
+
+		# Mouse hover and click support
+		card.mouse_entered.connect(_on_card_mouse_entered.bind(i))
+		card.gui_input.connect(_on_card_gui_input.bind(i))
 
 		var style := StyleBoxFlat.new()
 		style.bg_color = COLOR_PANEL_BG
@@ -286,6 +303,10 @@ func _build_node_cards() -> void:
 		state_label.add_theme_font_size_override("font_size", 14)
 		state_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		state_row.add_child(state_label)
+
+		# Ensure all descendants pass mouse events through to the card
+		_set_descendants_mouse_ignore(card)
+		card.mouse_filter = Control.MOUSE_FILTER_STOP
 
 		_node_cards.append(card)
 		_card_styles.append(style)
@@ -673,6 +694,26 @@ func _animate_close() -> void:
 	tween.tween_property(_dim_rect, "modulate:a", 0.0, 0.15)
 	tween.tween_property(_main_panel, "modulate:a", 0.0, 0.15)
 	tween.tween_callback(func() -> void: visible = false)
+
+func _set_descendants_mouse_ignore(node: Node) -> void:
+	for child: Node in node.get_children():
+		if child is Control:
+			(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_set_descendants_mouse_ignore(child)
+
+func _on_card_mouse_entered(index: int) -> void:
+	if not _is_open or _confirm_visible:
+		return
+	select_node_by_index(index)
+
+func _on_card_gui_input(event: InputEvent, index: int) -> void:
+	if not _is_open or _confirm_visible:
+		return
+	var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+	if mouse_event == null:
+		return
+	if mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_LEFT:
+		select_node_by_index(index)
 
 # ── Signal Handlers ──────────────────────────────────────
 

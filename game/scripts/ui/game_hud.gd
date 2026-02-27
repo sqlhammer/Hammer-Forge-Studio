@@ -22,6 +22,7 @@ var _mining_ref: Mining = null
 @onready var _tech_tree_panel: TechTreePanel = $TechTreePanel
 @onready var _automation_hub_panel: AutomationHubPanel = $AutomationHubPanel
 @onready var _module_placement_ui: ModulePlacementUI = $ModulePlacementUI
+@onready var _navigation_console: NavigationConsole = $NavigationConsole
 @onready var _interaction_prompt_hud: InteractionPromptHUD = $InteractionPromptHUD
 
 # ── Built-in Virtual Methods ──────────────────────────────
@@ -116,6 +117,10 @@ func get_automation_hub_panel() -> AutomationHubPanel:
 ## Returns the module placement UI.
 func get_module_placement_ui() -> ModulePlacementUI:
 	return _module_placement_ui
+
+## Returns the navigation console panel.
+func get_navigation_console() -> NavigationConsole:
+	return _navigation_console
 
 ## Returns the interaction prompt HUD.
 func get_interaction_prompt_hud() -> InteractionPromptHUD:

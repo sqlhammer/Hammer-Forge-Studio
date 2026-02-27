@@ -2,7 +2,7 @@
 id: TICKET-0167
 title: "Navigation console UI — modal screen, biome selection, fuel cost display, confirm travel"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -46,3 +46,4 @@ Implement the navigation console modal screen. Triggered by interacting with the
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Gameplay phase
+- 2026-02-27 [gameplay-programmer] Starting work — implementing navigation console modal, cockpit console interaction, unit tests.

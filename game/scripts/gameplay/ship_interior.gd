@@ -55,6 +55,7 @@ var _is_player_inside: bool = false
 var _player_in_exit_zone: bool = false
 var _exit_zone: ShipExitZone = null
 var _terminal_area: Area3D = null
+var _cockpit_console_area: Area3D = null
 var _sub_viewport: SubViewport = null
 var _viewport_camera: Camera3D = null
 
@@ -69,6 +70,7 @@ func _ready() -> void:
 	_build_lighting()
 	_build_fade_overlay()
 	_build_terminal()
+	_build_cockpit_console_area()
 	Global.log("ShipInterior: initialized — 24m×12m multi-room layout")
 
 # ── Public Methods ────────────────────────────────────────
@@ -174,6 +176,12 @@ func is_player_near_terminal() -> bool:
 	if not _player_ref or not _terminal_area:
 		return false
 	return _terminal_area.get_overlapping_bodies().has(_player_ref)
+
+## Returns true if the player is near the cockpit navigation console.
+func is_player_near_cockpit_console() -> bool:
+	if not _player_ref or not _cockpit_console_area:
+		return false
+	return _cockpit_console_area.get_overlapping_bodies().has(_player_ref)
 
 ## Returns true if the player is near a placement zone. Returns the zone index or -1.
 func get_nearby_zone_index() -> int:
@@ -527,6 +535,22 @@ func _build_terminal() -> void:
 	_terminal_area.add_child(col)
 	add_child(_terminal_area)
 	Global.log("ShipInterior: tech tree terminal built")
+
+func _build_cockpit_console_area() -> void:
+	# Interaction area around the cockpit navigation console (instanced at Z=-11.5 in scene)
+	_cockpit_console_area = Area3D.new()
+	_cockpit_console_area.name = "CockpitConsoleArea"
+	_cockpit_console_area.collision_layer = 0
+	_cockpit_console_area.collision_mask = PhysicsLayers.PLAYER
+	var col := CollisionShape3D.new()
+	col.name = "CockpitConsoleShape"
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(3.0, 2.0, 2.0)
+	col.shape = shape
+	col.position = Vector3(0.0, 1.0, -11.5)
+	_cockpit_console_area.add_child(col)
+	add_child(_cockpit_console_area)
+	Global.log("ShipInterior: cockpit console interaction area built")
 
 func _create_static_surface(surface_name: String, size: Vector3, pos: Vector3, color: Color, roughness: float) -> void:
 	var body := StaticBody3D.new()

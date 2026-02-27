@@ -575,6 +575,11 @@ func _create_deposit(
 	# Add to appropriate group
 	deposit.add_to_group("interactable")
 
+	# Register with DepositRegistry so scanner ping can locate and ping this deposit.
+	# Without registration, DepositRegistry.get_in_range() never returns this deposit,
+	# the ping step is skipped, and is_pinged() stays false — blocking analysis entirely.
+	DepositRegistry.register(deposit)
+
 	return deposit
 
 

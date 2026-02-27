@@ -2,7 +2,7 @@
 id: TICKET-0175
 title: "Headlamp — surface toggle action in interaction prompt HUD controls panel"
 type: FEATURE
-status: PENDING
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -21,12 +21,12 @@ Surface the headlamp toggle action in the interaction prompt HUD's persistent co
 
 ## Acceptance Criteria
 
-- [ ] When Head Lamp is equipped: controls panel shows "[H] Headlamp" (or currently mapped key)
-- [ ] When Head Lamp is not equipped: headlamp entry is absent from the controls panel
-- [ ] Key label resolves dynamically via InputMap (updates if player remaps the action)
-- [ ] Toggling headlamp via the key continues to work as before (no regression to M5 implementation)
-- [ ] Unit tests cover: controls panel entry present when equipped, absent when not equipped, key label reflects current mapping
-- [ ] Full test suite passes
+- [x] When Head Lamp is equipped: controls panel shows "[F] Headlamp" (or currently mapped key)
+- [x] When Head Lamp is not equipped: headlamp entry is absent from the controls panel
+- [x] Key label resolves dynamically via InputMap (updates if player remaps the action)
+- [x] Toggling headlamp via the key continues to work as before (no regression to M5 implementation)
+- [x] Unit tests cover: controls panel entry present when equipped, absent when not equipped, key label reflects current mapping
+- [x] Full test suite passes
 
 ## Implementation Notes
 
@@ -36,8 +36,14 @@ Surface the headlamp toggle action in the interaction prompt HUD's persistent co
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+- **Modified:** `game/scripts/ui/interaction_prompt_hud.gd` — added headlamp control row logic (dynamic creation, InputMap key resolution, per-frame refresh)
+- **Created:** `game/tests/test_interaction_prompt_hud_unit.gd` — 7 unit tests covering presence/absence, key label, remap, edge cases
+- **No scene changes** — HeadLampRow is created programmatically matching PingRow/InventoryRow style
+- **No regression** to M5 headlamp toggle (`toggle_head_lamp` action and `HeadLamp` autoload untouched)
+- **Known limitation:** UID sidecar file for new test script pending Godot filesystem scan
 
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Gameplay phase
+- 2026-02-27 [gameplay-programmer] Starting work — IN_PROGRESS
+- 2026-02-27 [gameplay-programmer] DONE — merge commit dfaf6b6, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/142

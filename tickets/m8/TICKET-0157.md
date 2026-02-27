@@ -2,7 +2,7 @@
 id: TICKET-0157
 title: "Cryonite — resource data layer and Fabricator Fuel Cell recipe"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -47,3 +47,4 @@ Cryonite mining ties into the existing mining minigame: careful, timed play yiel
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Foundation phase
+- 2026-02-27 [systems-programmer] Starting work — adding Cryonite resource, Fuel Cell item, fabricator recipe, and pressurized mining yield logic

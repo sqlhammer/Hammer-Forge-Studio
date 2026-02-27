@@ -6,11 +6,14 @@ extends RefCounted
 
 ## Unique resource types. SCRAP_METAL (M3), METAL (M4 — refined from Scrap Metal).
 ## SPARE_BATTERY (M5 — crafted consumable, restores suit battery).
+## CRYONITE (M8 — pressurized raw mineral). FUEL_CELL (M8 — ship fuel, crafted consumable).
 enum ResourceType {
 	NONE = 0,
 	SCRAP_METAL = 1,
 	METAL = 2,
 	SPARE_BATTERY = 3,
+	CRYONITE = 4,
+	FUEL_CELL = 5,
 }
 
 ## Purity rating from 1-star (lowest) to 5-star (highest).
@@ -104,6 +107,25 @@ const RESOURCE_CATALOG: Dictionary = {
 		"deposit_tier": DepositTier.TIER_1,
 		"base_energy_per_unit": 0.0,
 	},
+	ResourceType.CRYONITE: {
+		"name": "Cryonite",
+		"description": "A volatile mineral trapped in pressurized rock formations. Handle with care — mishandling causes it to vent and partially dissipate. Required to produce Fuel Cells.",
+		"stack_size": 50,
+		"icon": "res://assets/icons/item/icon_item_cryonite.svg",
+		"category": "raw_material",
+		"deposit_tier": DepositTier.TIER_1,
+		"base_energy_per_unit": 2.5,
+		"pressurized": true,
+	},
+	ResourceType.FUEL_CELL: {
+		"name": "Fuel Cell",
+		"description": "A pressurized energy cell used to power the ship's jump drive. Crafted at the Fabricator from Metal and Cryonite. Consumed by the ship fuel system — not player-equippable.",
+		"stack_size": 10,
+		"icon": "res://assets/icons/item/icon_item_fuel_cell.svg",
+		"category": "ship_consumable",
+		"deposit_tier": DepositTier.TIER_1,
+		"base_energy_per_unit": 0.0,
+	},
 }
 
 ## Display names for deposit tiers.
@@ -154,3 +176,9 @@ static func get_category(resource_type: ResourceType) -> String:
 static func get_icon_path(resource_type: ResourceType) -> String:
 	var entry: Dictionary = RESOURCE_CATALOG.get(resource_type, {})
 	return entry.get("icon", "") as String
+
+## Returns true if the resource type is pressurized (e.g., Cryonite).
+## Pressurized resources apply a 50% partial-yield penalty when the mining minigame fails or is skipped.
+static func is_pressurized(resource_type: ResourceType) -> bool:
+	var entry: Dictionary = RESOURCE_CATALOG.get(resource_type, {})
+	return entry.get("pressurized", false) as bool

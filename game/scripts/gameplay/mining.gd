@@ -22,6 +22,7 @@ const MINING_RAY_LENGTH: float = 6.0
 
 ## Minigame tuning
 const BONUS_MULTIPLIER: float = 0.5
+const PARTIAL_YIELD_MULTIPLIER: float = 0.5  ## Fraction of yield kept when a pressurized resource minigame fails
 const LINE_TRACE_DWELL: float = 0.4  ## Seconds crosshair must dwell on a line to trace it
 const LINE_TRACE_RADIUS: float = 0.45  ## Max ray-to-line distance for dwell accumulation
 
@@ -174,11 +175,20 @@ func _complete_mining() -> void:
 
 	var extracted: int = result.get("quantity", 0) as int
 	var all_traced: bool = _are_all_lines_traced()
+	var minigame_succeeded: bool = all_traced and _minigame_active and _pattern_line_count > 0
+	var is_pressurized: bool = ResourceDefs.is_pressurized(_mining_target.resource_type)
+
+	var effective_extracted: int = extracted
 	var bonus: int = 0
-	if all_traced and _minigame_active and _pattern_line_count > 0:
+
+	if is_pressurized and not minigame_succeeded:
+		# Pressurized resource with failed or skipped minigame: partial yield (resource vented)
+		effective_extracted = ceili(extracted * PARTIAL_YIELD_MULTIPLIER)
+		Global.log("Mining: pressurized resource vented — partial yield %d/%d" % [effective_extracted, extracted])
+	elif minigame_succeeded:
 		bonus = ceili(extracted * BONUS_MULTIPLIER)
 
-	var total_to_add: int = extracted + bonus
+	var total_to_add: int = effective_extracted + bonus
 	if total_to_add > 0:
 		var leftover: int = PlayerInventory.add_item(
 			_mining_target.resource_type,

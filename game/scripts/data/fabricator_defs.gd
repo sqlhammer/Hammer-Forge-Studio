@@ -44,6 +44,26 @@ const RECIPE_CATALOG: Dictionary = {
 		"output": {},
 		"duration": HeadLamp.RECIPE_DURATION,
 	},
+	"fuel_cell": {
+		"display_name": "Fuel Cell",
+		"icon": "res://assets/icons/item/icon_item_fuel_cell.svg",
+		"inputs": [
+			{
+				"resource_type": FuelCell.RECIPE_INPUT_RESOURCE_TYPE_A,
+				"quantity": FuelCell.RECIPE_INPUT_QUANTITY_A,
+			},
+			{
+				"resource_type": FuelCell.RECIPE_INPUT_RESOURCE_TYPE_B,
+				"quantity": FuelCell.RECIPE_INPUT_QUANTITY_B,
+			},
+		],
+		"output_mode": OUTPUT_MODE_INVENTORY,
+		"output": {
+			"resource_type": FuelCell.RECIPE_OUTPUT_RESOURCE_TYPE,
+			"quantity": FuelCell.RECIPE_OUTPUT_QUANTITY,
+		},
+		"duration": FuelCell.RECIPE_DURATION,
+	},
 }
 
 # ── Static Helpers ────────────────────────────────────────

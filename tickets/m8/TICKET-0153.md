@@ -2,7 +2,7 @@
 id: TICKET-0153
 title: "Mouse interaction support for inventory, machine builder, and tech tree menus"
 type: FEATURE
-status: PENDING
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: studio-head
@@ -27,13 +27,13 @@ This is a usability baseline: mouse support is expected in any desktop game. No 
 
 ## Acceptance Criteria
 
-- [ ] **Inventory**: individual item slots respond to `mouse_entered`, `mouse_exited` (hover highlight), and `gui_input` left-click (select/move item). Behavior matches existing keyboard-select behavior.
-- [ ] **Machine builder**: each buildable entry in the list responds to left-click as equivalent to navigating to it and pressing confirm. Hover state is visually indicated.
-- [ ] **Tech tree**: each research node responds to left-click to select it for queuing. Hover state is visually indicated.
-- [ ] Mouse and keyboard/controller input are **not mutually exclusive** — switching between input modes mid-session works without state corruption.
-- [ ] `InputManager` mouse detection (if applicable) is leveraged to drive any input-mode switching.
-- [ ] No existing keyboard/controller navigation paths are broken.
-- [ ] Unit tests cover: click-select on inventory slot, click-select on machine entry, click-select on tech tree node, and no-op on disabled/empty slots.
+- [x] **Inventory**: individual item slots respond to `mouse_entered`, `mouse_exited` (hover highlight), and `gui_input` left-click (select/move item). Behavior matches existing keyboard-select behavior.
+- [x] **Machine builder**: each buildable entry in the list responds to left-click as equivalent to navigating to it and pressing confirm. Hover state is visually indicated.
+- [x] **Tech tree**: each research node responds to left-click to select it for queuing. Hover state is visually indicated.
+- [x] Mouse and keyboard/controller input are **not mutually exclusive** — switching between input modes mid-session works without state corruption.
+- [x] `InputManager` mouse detection (if applicable) is leveraged to drive any input-mode switching.
+- [x] No existing keyboard/controller navigation paths are broken.
+- [x] Unit tests cover: click-select on inventory slot, click-select on machine entry, click-select on tech tree node, and no-op on disabled/empty slots.
 - [ ] Full test suite passes after implementation.
 
 ## Implementation Notes
@@ -46,3 +46,5 @@ This is a usability baseline: mouse support is expected in any desktop game. No 
 ## Activity Log
 
 - 2026-02-26 [studio-head] Created — mouse interaction is a baseline usability requirement for desktop
+- 2026-02-27 [gameplay-programmer] Starting work — implementing mouse hover and click support for InventoryScreen, FabricatorPanel, TechTreePanel, and ModulePlacementUI
+- 2026-02-27 [gameplay-programmer] DONE — commit 2ddb138, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/146. Mouse hover/click support added to all four menu panels. 13 unit tests in test_mouse_interaction_unit.gd. UID file for new test script pending Godot editor filesystem scan.

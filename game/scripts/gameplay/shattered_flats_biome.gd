@@ -72,6 +72,15 @@ const SCRAP_METAL_MESH_PATH: String = "res://assets/meshes/props/mesh_resource_n
 ## Cryonite deposit mesh path.
 const CRYONITE_MESH_PATH: String = "res://assets/meshes/cryonite_deposit.glb"
 
+## Visual scale for scrap metal deposit meshes.
+const DEPOSIT_VISUAL_SCALE := Vector3(3.2, 3.2, 3.2)
+
+## Visual scale for cryonite deposit meshes.
+const CRYONITE_VISUAL_SCALE := Vector3(3.5, 3.5, 3.5)
+
+## Visual scale for deep cryonite deposit meshes (larger pressurized formation).
+const DEEP_CRYONITE_VISUAL_SCALE := Vector3(5.0, 5.0, 5.0)
+
 
 # ── Private Variables ─────────────────────────────────────
 
@@ -542,6 +551,12 @@ func _create_deposit(
 		# GLB files load as PackedScene — instantiate and reparent the mesh
 		var scene_instance: Node3D = (mesh_resource as PackedScene).instantiate()
 		scene_instance.name = "DepositMesh"
+		# Apply visual scale matching Debris Field biome (regression from TICKET-0170/0162)
+		if resource_type == ResourceDefs.ResourceType.CRYONITE:
+			scene_instance.scale = DEEP_CRYONITE_VISUAL_SCALE if is_deep else CRYONITE_VISUAL_SCALE
+		else:
+			scene_instance.scale = DEPOSIT_VISUAL_SCALE
+		scene_instance.position.y = 0.9
 		deposit.add_child(scene_instance)
 	else:
 		deposit.add_child(mesh_instance)

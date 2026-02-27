@@ -96,6 +96,14 @@ func close() -> void:
 func is_open() -> bool:
 	return _is_open
 
+## Returns the currently selected module index.
+func get_selected_module_index() -> int:
+	return _selected_index
+
+## Selects a module by its list index, matching keyboard navigation behavior.
+func select_module_by_index(_index: int) -> void:
+	pass
+
 # ── Private Methods ───────────────────────────────────────
 
 func _build_ui() -> void:

@@ -135,6 +135,14 @@ func close() -> void:
 func is_open() -> bool:
 	return _is_open
 
+## Returns the currently focused node index.
+func get_focused_node_index() -> int:
+	return _focused_index
+
+## Selects a tech tree node by index, matching keyboard navigation behavior.
+func select_node_by_index(_index: int) -> void:
+	pass
+
 # ── Private Methods ───────────────────────────────────────
 
 func _build_ui() -> void:

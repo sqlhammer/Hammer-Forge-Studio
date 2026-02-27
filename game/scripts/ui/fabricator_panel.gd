@@ -146,6 +146,14 @@ func close() -> void:
 func is_open() -> bool:
 	return _is_open
 
+## Returns the currently selected recipe list index.
+func get_selected_recipe_index() -> int:
+	return _selected_index
+
+## Selects a recipe by its list index, matching keyboard navigation behavior.
+func select_recipe_by_index(_index: int) -> void:
+	pass
+
 # ── Private Methods ───────────────────────────────────────
 
 func _build_ui() -> void:

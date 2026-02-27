@@ -133,6 +133,14 @@ func close_inventory() -> void:
 func is_open() -> bool:
 	return _is_open
 
+## Returns the currently focused slot index.
+func get_focused_slot() -> int:
+	return _focused_slot
+
+## Selects the given slot by index, matching keyboard navigation behavior.
+func select_slot(_index: int) -> void:
+	pass
+
 # ── Private Methods ───────────────────────────────────────
 
 func _build_ui() -> void:

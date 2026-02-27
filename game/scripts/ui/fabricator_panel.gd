@@ -151,8 +151,14 @@ func get_selected_recipe_index() -> int:
 	return _selected_index
 
 ## Selects a recipe by its list index, matching keyboard navigation behavior.
-func select_recipe_by_index(_index: int) -> void:
-	pass
+func select_recipe_by_index(index: int) -> void:
+	if index < 0 or index >= _recipe_ids.size():
+		return
+	if Fabricator.is_job_active():
+		return
+	_selected_index = index
+	_selected_recipe_id = _recipe_ids[index]
+	_refresh_ui()
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -453,13 +459,20 @@ func _build_recipe_list() -> VBoxContainer:
 func _build_recipe_row(recipe_id: String) -> PanelContainer:
 	var row := PanelContainer.new()
 	row.custom_minimum_size = Vector2(0, 56)
+	row.mouse_filter = Control.MOUSE_FILTER_STOP
 	var row_style := StyleBoxFlat.new()
 	row_style.bg_color = Color.TRANSPARENT
 	row_style.set_content_margin_all(8)
 	row.add_theme_stylebox_override("panel", row_style)
 
+	# Mouse hover and click support — use current row count as the index
+	var row_index: int = _recipe_rows.size()
+	row.mouse_entered.connect(_on_recipe_row_mouse_entered.bind(row_index))
+	row.gui_input.connect(_on_recipe_row_gui_input.bind(row_index))
+
 	var hbox := HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 8)
+	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(hbox)
 
 	# Selection indicator
@@ -513,6 +526,10 @@ func _build_recipe_row(recipe_id: String) -> PanelContainer:
 	dot.custom_minimum_size = Vector2(12, 12)
 	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hbox.add_child(dot)
+
+	# Ensure all descendants pass mouse events through to the row
+	_set_descendants_mouse_ignore(row)
+	row.mouse_filter = Control.MOUSE_FILTER_STOP
 
 	_recipe_rows.append(row)
 	_recipe_row_labels.append(name_label)
@@ -756,6 +773,26 @@ func _animate_close() -> void:
 	tween.tween_property(_dim_rect, "modulate:a", 0.0, 0.15)
 	tween.tween_property(_main_panel, "modulate:a", 0.0, 0.15)
 	tween.tween_callback(func() -> void: visible = false)
+
+func _set_descendants_mouse_ignore(node: Node) -> void:
+	for child: Node in node.get_children():
+		if child is Control:
+			(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_set_descendants_mouse_ignore(child)
+
+func _on_recipe_row_mouse_entered(index: int) -> void:
+	if not _is_open:
+		return
+	select_recipe_by_index(index)
+
+func _on_recipe_row_gui_input(event: InputEvent, index: int) -> void:
+	if not _is_open:
+		return
+	var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+	if mouse_event == null:
+		return
+	if mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_LEFT:
+		select_recipe_by_index(index)
 
 # ── Signal Handlers ──────────────────────────────────────
 

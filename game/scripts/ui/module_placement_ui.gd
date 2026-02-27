@@ -101,8 +101,15 @@ func get_selected_module_index() -> int:
 	return _selected_index
 
 ## Selects a module by its list index, matching keyboard navigation behavior.
-func select_module_by_index(_index: int) -> void:
-	pass
+func select_module_by_index(index: int) -> void:
+	if _module_ids.is_empty():
+		return
+	if index < 0 or index >= _module_ids.size():
+		return
+	_selected_index = index
+	_update_selection_visual()
+	_update_detail_area()
+	_feedback_label.text = ""
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -255,14 +262,20 @@ func _build_available_module_list() -> void:
 
 		var row := PanelContainer.new()
 		row.custom_minimum_size = Vector2(0, 36)
+		row.mouse_filter = Control.MOUSE_FILTER_STOP
 		var row_style := StyleBoxFlat.new()
 		row_style.bg_color = COLOR_SLOT_BG
 		row_style.set_corner_radius_all(4)
 		row_style.set_content_margin_all(8)
 		row.add_theme_stylebox_override("panel", row_style)
 
+		# Mouse hover and click support
+		row.mouse_entered.connect(_on_module_row_mouse_entered.bind(i))
+		row.gui_input.connect(_on_module_row_gui_input.bind(i))
+
 		var hbox := HBoxContainer.new()
 		hbox.add_theme_constant_override("separation", 12)
+		hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(hbox)
 
 		# Module icon
@@ -271,6 +284,7 @@ func _build_available_module_list() -> void:
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var icon_path: String = ModuleDefs.get_icon_path(module_id)
 		if not icon_path.is_empty():
 			icon.texture = load(icon_path) as Texture2D
@@ -281,6 +295,7 @@ func _build_available_module_list() -> void:
 		name_label.add_theme_font_size_override("font_size", 20)
 		name_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		hbox.add_child(name_label)
 
 		var tier_enum: ModuleDefs.ModuleTier = entry.get("tier", ModuleDefs.ModuleTier.TIER_1) as ModuleDefs.ModuleTier
@@ -289,6 +304,7 @@ func _build_available_module_list() -> void:
 		tier_label.text = tier_text
 		tier_label.add_theme_font_size_override("font_size", 16)
 		tier_label.add_theme_color_override("font_color", COLOR_TEAL)
+		tier_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		hbox.add_child(tier_label)
 
 		_module_list_container.add_child(row)
@@ -377,6 +393,20 @@ func _attempt_install() -> void:
 		_animate_close()
 		module_installed.emit(module_id, _zone_index)
 	# Failure messaging handled by _on_install_failed via ModuleManager.install_failed signal
+
+func _on_module_row_mouse_entered(index: int) -> void:
+	if not _is_open:
+		return
+	select_module_by_index(index)
+
+func _on_module_row_gui_input(event: InputEvent, index: int) -> void:
+	if not _is_open:
+		return
+	var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+	if mouse_event == null:
+		return
+	if mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_LEFT:
+		select_module_by_index(index)
 
 func _on_install_failed(module_id: String, reason: String) -> void:
 	if not _is_open:

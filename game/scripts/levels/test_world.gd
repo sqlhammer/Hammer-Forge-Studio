@@ -37,23 +37,24 @@ var _third_person: PlayerThirdPerson = null
 var _player_manager: PlayerManager = null
 var _drone_manager: DroneManager = null
 var _zone_module_ids: Dictionary = {}
+var _biome_content: Node3D = null
+var _travel_manager: TravelSequenceManager = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
 	Global.log("TestWorld: initializing")
 	_build_environment()
-	_build_ground()
-	_build_boundaries()
+	_build_biome_content()
 	_build_ship()
 	_spawn_player()
-	_generate_deposits()
 	_setup_gameplay_systems()
 	_setup_ship_interior()
 	_setup_hud()
 	_setup_ship_ui()
 	_setup_head_lamp()
 	_setup_drone_manager()
+	_setup_travel_sequence()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	Global.log("TestWorld: initialization complete")
 
@@ -94,6 +95,17 @@ func _build_environment() -> void:
 	sun.shadow_enabled = true
 	add_child(sun)
 
+func _build_biome_content() -> void:
+	# Container for biome-specific content (ground, boundaries, deposits).
+	# TravelSequenceManager swaps this container's children on biome travel.
+	_biome_content = Node3D.new()
+	_biome_content.name = "BiomeContent"
+	add_child(_biome_content)
+	_build_ground()
+	_build_boundaries()
+	_generate_deposits()
+	Global.log("TestWorld: biome content built (starter biome)")
+
 func _build_ground() -> void:
 	var ground := StaticBody3D.new()
 	ground.name = "Ground"
@@ -119,12 +131,12 @@ func _build_ground() -> void:
 	col_shape.position.y = -0.05
 	ground.add_child(col_shape)
 
-	add_child(ground)
+	_biome_content.add_child(ground)
 
 func _build_boundaries() -> void:
 	var boundaries := Node3D.new()
 	boundaries.name = "Boundaries"
-	add_child(boundaries)
+	_biome_content.add_child(boundaries)
 
 	# Four invisible walls
 	var offsets: Array[Vector3] = [
@@ -197,7 +209,7 @@ func _spawn_player() -> void:
 func _generate_deposits() -> void:
 	_deposit_container = Node3D.new()
 	_deposit_container.name = "Deposits"
-	add_child(_deposit_container)
+	_biome_content.add_child(_deposit_container)
 
 	var deposits: Array[Deposit] = DepositRegistry.generate_m3_deposits(Vector3.ZERO, DEPOSIT_SPREAD)
 	var scrap_mesh_scene: Resource = load("res://assets/meshes/props/mesh_resource_node_scrap.glb")
@@ -343,6 +355,8 @@ func _setup_ship_interior() -> void:
 
 func _update_ship_interact() -> void:
 	if _transitioning or not _ship_interior:
+		return
+	if _travel_manager and _travel_manager.is_transitioning():
 		return
 
 	# Don't process interact while a UI panel is open
@@ -542,6 +556,33 @@ func _setup_drone_manager() -> void:
 	add_child(_drone_manager)
 	_drone_manager.setup(Vector3.ZERO)
 	Global.log("TestWorld: drone manager ready")
+
+func _setup_travel_sequence() -> void:
+	_travel_manager = TravelSequenceManager.new()
+	_travel_manager.name = "TravelSequenceManager"
+	add_child(_travel_manager)
+	_travel_manager.setup(_player, _ship_exterior, _biome_content)
+	_travel_manager.travel_sequence_started.connect(_on_travel_sequence_started)
+	_travel_manager.travel_sequence_completed.connect(_on_travel_sequence_completed)
+	Global.log("TestWorld: travel sequence manager ready")
+
+func _on_travel_sequence_started(destination_id: String) -> void:
+	_transitioning = true
+	Global.log("TestWorld: travel sequence started → '%s'" % destination_id)
+
+func _on_travel_sequence_completed(destination_id: String) -> void:
+	_transitioning = false
+	# Update ship enter zone position relative to new ship location
+	if _ship_enter_zone and _ship_exterior:
+		var ship_pos: Vector3 = _ship_exterior.position
+		var enter_col: CollisionShape3D = _ship_enter_zone.get_child(0) as CollisionShape3D
+		if enter_col:
+			enter_col.position = Vector3(ship_pos.x, 3.0, ship_pos.z + 23.0)
+	# Update ship interior exterior marker to match new ship position
+	if _ship_interior and _ship_exterior:
+		var exit_offset: Vector3 = Vector3(0.0, 0.0, 24.0)
+		_ship_interior.set_exterior_position(_ship_exterior.position + exit_offset)
+	Global.log("TestWorld: travel sequence completed → '%s'" % destination_id)
 
 func _on_drone_deployed(drone_id: int, program: DroneProgram) -> void:
 	if _drone_manager:

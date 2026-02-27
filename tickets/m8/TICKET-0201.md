@@ -34,7 +34,7 @@ After a ping, nearby resource nodes are marked on the compass and remain visible
 - [x] Pinging in Shattered Flats causes nearby resource nodes to appear on the compass HUD
 - [x] Behavior matches ping behavior in Rock Warrens and Debris Field
 - [x] Fix does not regress compass behavior in other biomes
-- [ ] Full test suite passes with no new failures
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 

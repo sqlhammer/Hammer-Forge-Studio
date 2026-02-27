@@ -2,12 +2,12 @@
 id: TICKET-0132
 title: "M8 test infrastructure — unified test suite and phase gate regression template"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: qa-engineer
 created_by: producer
 created_at: 2026-02-26
-updated_at: 2026-02-26
+updated_at: 2026-02-27
 milestone: "M8"
 phase: "TDD Foundation"
 depends_on: [TICKET-0131]
@@ -59,3 +59,4 @@ Set up the M8 test infrastructure to support Red/Green TDD development. This inc
 
 - 2026-02-26 [producer] Created ticket as foundational test infrastructure work for M8
 - 2026-02-27 [qa-engineer] Starting work — creating M8 test suite scaffolding, regression template, and verifying M7 baseline
+- 2026-02-27 [qa-engineer] DONE — all acceptance criteria met. Created 8 M8 system scaffold files, M8PhaseGateRegressionTemplate base class, TDD Foundation gate suite. M7 baseline verified: 480/480 passing, 0 failures, ~2s execution. Continuous validation guide and regression checklist updated. Commit: 5bc37bd, PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/124 (merged). UIDs committed: 22aba82.

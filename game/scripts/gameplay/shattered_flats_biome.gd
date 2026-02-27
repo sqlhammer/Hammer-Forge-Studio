@@ -72,6 +72,15 @@ const SCRAP_METAL_MESH_PATH: String = "res://assets/meshes/props/mesh_resource_n
 ## Cryonite deposit mesh path.
 const CRYONITE_MESH_PATH: String = "res://assets/meshes/cryonite_deposit.glb"
 
+## Visual scale for scrap metal deposit meshes.
+const DEPOSIT_VISUAL_SCALE := Vector3(3.2, 3.2, 3.2)
+
+## Visual scale for cryonite deposit meshes.
+const CRYONITE_VISUAL_SCALE := Vector3(3.5, 3.5, 3.5)
+
+## Visual scale for deep cryonite deposit meshes (larger pressurized formation).
+const DEEP_CRYONITE_VISUAL_SCALE := Vector3(5.0, 5.0, 5.0)
+
 
 # ── Private Variables ─────────────────────────────────────
 
@@ -303,6 +312,8 @@ func _create_collapsed_spire() -> void:
 	spire_tip.position = Vector3(-18.0, SPIRE_TIP_HEIGHT * 0.3, 5.0)
 	spire_tip.material_override = body_material
 	spire_container.add_child(spire_tip)
+	# Add collision for the tip section so the player cannot walk through it
+	_add_static_collision(spire_container, "SpireTip_Col", spire_tip)
 
 	# Rubble base — scattered box fragments around the impact point
 	var rubble_material: StandardMaterial3D = StandardMaterial3D.new()
@@ -542,6 +553,12 @@ func _create_deposit(
 		# GLB files load as PackedScene — instantiate and reparent the mesh
 		var scene_instance: Node3D = (mesh_resource as PackedScene).instantiate()
 		scene_instance.name = "DepositMesh"
+		# Apply visual scale matching Debris Field biome (regression from TICKET-0170/0162)
+		if resource_type == ResourceDefs.ResourceType.CRYONITE:
+			scene_instance.scale = DEEP_CRYONITE_VISUAL_SCALE if is_deep else CRYONITE_VISUAL_SCALE
+		else:
+			scene_instance.scale = DEPOSIT_VISUAL_SCALE
+		scene_instance.position.y = 0.9
 		deposit.add_child(scene_instance)
 	else:
 		deposit.add_child(mesh_instance)
@@ -579,7 +596,9 @@ func _create_deposit(
 		deposit.add_to_group("surface_deposit")
 	deposit.add_to_group("interactable")
 
-	# Register with DepositRegistry so scanner ping can detect this deposit
+	# Register with DepositRegistry so scanner ping can locate and ping this deposit.
+	# Without registration, DepositRegistry.get_in_range() never returns this deposit,
+	# the ping step is skipped, and is_pinged() stays false — blocking analysis entirely.
 	DepositRegistry.register(deposit)
 
 	return deposit
@@ -602,7 +621,7 @@ func _create_box_mesh(
 	return mesh_instance
 
 
-## Adds a rubble piece (box mesh) to a parent node.
+## Adds a rubble piece (box mesh) with matching StaticBody3D collision to a parent node.
 func _add_rubble_piece(
 	parent: Node3D,
 	piece_name: String,
@@ -614,6 +633,8 @@ func _add_rubble_piece(
 	# Slight random rotation for natural look (deterministic via _rng)
 	piece.rotation_degrees.y = _rng.randf_range(-30.0, 30.0)
 	parent.add_child(piece)
+	# Add collision so the player cannot walk through rubble geometry
+	_add_static_collision(parent, piece_name + "_Col", piece)
 
 
 ## Adds a StaticBody3D collision matching a MeshInstance3D's box mesh to a parent.

@@ -2,12 +2,12 @@
 id: TICKET-0200
 title: "Bugfix — Resource node meshes are too small in Shattered Flats"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-27
-updated_at: 2026-02-27
+updated_at: 2026-02-27T00:00:02
 milestone: "M8"
 phase: "QA"
 depends_on: []
@@ -31,9 +31,9 @@ Resource nodes render at the same scale they had in prior milestones (M7 and ear
 
 ## Acceptance Criteria
 
-- [ ] Resource node mesh scale in Shattered Flats matches the scale used in prior milestones
-- [ ] Fix applies to all node types present in Shattered Flats (Scrap Metal, Cryonite, etc.)
-- [ ] No regression to Rock Warrens or Debris Field node sizes
+- [x] Resource node mesh scale in Shattered Flats matches the scale used in prior milestones
+- [x] Fix applies to all node types present in Shattered Flats (Scrap Metal, Cryonite, etc.)
+- [x] No regression to Rock Warrens or Debris Field node sizes
 - [ ] Full test suite passes with no new failures
 
 ## Implementation Notes
@@ -46,3 +46,5 @@ Resource nodes render at the same scale they had in prior milestones (M7 and ear
 ## Activity Log
 
 - 2026-02-27 [producer] Created — Studio Head reported during final M8 playtest review
+- 2026-02-27 [gameplay-programmer] Starting work — investigating resource node mesh scale regression in Shattered Flats
+- 2026-02-27 [gameplay-programmer] DONE — Added DEPOSIT_VISUAL_SCALE/CRYONITE_VISUAL_SCALE/DEEP_CRYONITE_VISUAL_SCALE constants and applied scale+position.y offset to mesh instances in _create_deposit(). Commit: ad62645, PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/166

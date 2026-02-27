@@ -11,7 +11,7 @@ signal analysis_completed(deposit: Deposit)
 signal analysis_cancelled
 
 # ── Constants ─────────────────────────────────────────────
-const PING_RANGE: float = 80.0
+const PING_RANGE: float = 320.0
 const PING_COOLDOWN: float = 1.0
 const ANALYSIS_DURATION: float = 2.5
 const ANALYSIS_MAX_RANGE: float = 5.0

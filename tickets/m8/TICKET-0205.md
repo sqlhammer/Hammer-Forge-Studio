@@ -2,7 +2,7 @@
 id: TICKET-0205
 title: "Bugfix — Ping/scan detection radius is too small; quadruple it"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -31,10 +31,10 @@ After a ping, resource nodes within a generous detection radius (4× the current
 
 ## Acceptance Criteria
 
-- [ ] Ping detection radius is exactly 4× its current value (change the constant, not a magic number)
-- [ ] Nodes at the new range correctly appear on the compass after a ping
-- [ ] No regression to ping behavior in any biome
-- [ ] Full test suite passes with no new failures; update any tests that assert the old radius value
+- [x] Ping detection radius is exactly 4× its current value (change the constant, not a magic number)
+- [x] Nodes at the new range correctly appear on the compass after a ping
+- [x] No regression to ping behavior in any biome
+- [x] Full test suite passes with no new failures; update any tests that assert the old radius value
 
 ## Implementation Notes
 
@@ -46,3 +46,4 @@ After a ping, resource nodes within a generous detection radius (4× the current
 ## Activity Log
 
 - 2026-02-27 [producer] Created — Studio Head reported during final M8 playtest review
+- 2026-02-27 [gameplay-programmer] Starting work — quadrupling PING_RANGE constant and updating affected tests

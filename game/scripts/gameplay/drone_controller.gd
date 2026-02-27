@@ -87,7 +87,9 @@ func _process_extracting(delta: float) -> void:
 		_finish_extraction()
 		return
 
-	_extraction_accumulator += AutomationHub.DRONE_EXTRACTION_RATE * delta
+	# Deep nodes extract slower based on yield_rate (0.1 = 10% of normal speed)
+	var effective_rate: float = AutomationHub.DRONE_EXTRACTION_RATE * _target_deposit.yield_rate
+	_extraction_accumulator += effective_rate * delta
 	var units_to_extract: int = int(_extraction_accumulator)
 	if units_to_extract > 0:
 		_extraction_accumulator -= units_to_extract

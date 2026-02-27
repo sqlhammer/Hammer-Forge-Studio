@@ -310,6 +310,9 @@ func _on_recharge_zone_exited(body: Node3D) -> void:
 		Global.log("TestWorld: recharge zone signal — exited")
 
 func _setup_ship_interior() -> void:
+	if not _ship_exterior:
+		push_error("TestWorld: _ship_exterior is null — cannot setup ship interior!")
+		return
 	# Load and instance ship interior scene underground
 	var interior_scene: PackedScene = load("res://scenes/gameplay/ship_interior.tscn") as PackedScene
 	if not interior_scene:
@@ -349,7 +352,9 @@ func _setup_ship_interior() -> void:
 	enter_col.shape = enter_shape
 	enter_col.position = Vector3(0.0, 4.5, 0.0)
 	_ship_enter_zone.add_child(enter_col)
-	add_child(_ship_enter_zone)
+	# Parent to ship exterior so the zone follows the ship on biome travel automatically.
+	# enter_col.position is a local offset from the ship center (TICKET-0207).
+	_ship_exterior.add_child(_ship_enter_zone)
 
 	_ship_enter_zone.body_entered.connect(_on_ship_enter_zone_entered)
 	_ship_enter_zone.body_exited.connect(_on_ship_enter_zone_exited)
@@ -575,14 +580,8 @@ func _on_travel_sequence_started(destination_id: String) -> void:
 
 func _on_travel_sequence_completed(destination_id: String) -> void:
 	_transitioning = false
-	# Reposition the full-hull boarding zone to follow the ship after biome travel.
-	# Offset (0, 4.5, 0) centers the BoxShape3D on the ship's bounding box at its new location.
-	# ship_pos.y + 4.5 tracks terrain height correctly for all biomes (TICKET-0206).
-	if _ship_enter_zone and _ship_exterior:
-		var ship_pos: Vector3 = _ship_exterior.position
-		var enter_col: CollisionShape3D = _ship_enter_zone.get_child(0) as CollisionShape3D
-		if enter_col:
-			enter_col.position = Vector3(ship_pos.x, ship_pos.y + 4.5, ship_pos.z)
+	# ShipEnterZone is a child of _ship_exterior, so it follows the ship automatically (TICKET-0207).
+	# No manual repositioning needed here.
 	# Update ship interior exterior marker to match new ship position
 	if _ship_interior and _ship_exterior:
 		var exit_offset: Vector3 = Vector3(0.0, 0.0, 24.0)

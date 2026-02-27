@@ -795,6 +795,10 @@ class Conductor:
         )
         if pull_result.returncode == 0:
             self.logger.log("PLAN", "git pull OK")
+            # Fix 2: After a successful pull, sweep completed_this_session and evict
+            # any ticket whose file doesn't read DONE. This catches cases where a
+            # previous wave's agent self-reported done without updating the ticket file.
+            self._verify_session_completions()
         else:
             self.logger.log("WARNING",
                 f"git pull failed (exit={pull_result.returncode}): "
@@ -910,6 +914,42 @@ class Conductor:
         elif action == "error":
             self.logger.log("ERROR", f"Producer reported error: {summary}")
             self.state["status"] = "HALTED"
+
+    # ------------------------------------------------------------------
+    # SESSION COMPLETION VERIFICATION
+    # ------------------------------------------------------------------
+
+    def _verify_session_completions(self) -> list[str]:
+        """Fix 2: Re-verify completed_this_session against ticket files after a git pull.
+
+        Evicts any ticket that doesn't read DONE from the filesystem.
+        Returns the list of evicted ticket IDs so the caller can log them.
+        The Producer will naturally re-plan evicted tickets on the next wave.
+        Does NOT increment retry counters — eviction is not a failure, it is
+        a correction for tickets the agent forgot to mark DONE.
+        """
+        milestone = self.state.get("milestone", "")
+        session_done = self.state.get("completed_this_session", [])
+        still_valid = []
+        evicted = []
+
+        for ticket_id in session_done:
+            file_status = read_ticket_status(ticket_id, milestone)
+            if file_status == "DONE":
+                still_valid.append(ticket_id)
+            else:
+                self.logger.log("WARNING",
+                    f"Session-completion mismatch: {ticket_id} was recorded as done "
+                    f"but ticket file reads {file_status} — evicting from session set")
+                evicted.append(ticket_id)
+
+        if evicted:
+            self.state["completed_this_session"] = still_valid
+            self.logger.log("WARNING",
+                f"Evicted {len(evicted)} ticket(s) from completed_this_session: "
+                + ", ".join(evicted))
+
+        return evicted
 
     # ------------------------------------------------------------------
     # DISPATCHING
@@ -1101,12 +1141,23 @@ class Conductor:
                     write_json(result_path, result_data)
 
                     if outcome == "done":
-                        self.logger.log("DONE", f"{agent} <- {ticket}")
-                        wave_tickets.append(ticket)
-                        # Track session-completed tickets for dependency validation
-                        session_done = self.state.setdefault("completed_this_session", [])
-                        if ticket not in session_done:
-                            session_done.append(ticket)
+                        # Fix 1: Verify the ticket file actually reads DONE before
+                        # trusting the agent's self-report. If the file disagrees,
+                        # the agent forgot to update status — retry so it finishes.
+                        file_status = read_ticket_status(ticket, self.state["milestone"])
+                        if file_status != "DONE":
+                            self.logger.log("WARNING",
+                                f"{agent} <- {ticket}: outcome=done but ticket file "
+                                f"reads {file_status} — treating as PARTIAL, queuing retry")
+                            all_succeeded = False
+                            self._queue_retry(ticket)
+                        else:
+                            self.logger.log("DONE", f"{agent} <- {ticket}")
+                            wave_tickets.append(ticket)
+                            # Track session-completed tickets for dependency validation
+                            session_done = self.state.setdefault("completed_this_session", [])
+                            if ticket not in session_done:
+                                session_done.append(ticket)
                     elif outcome == "blocked":
                         self.logger.log("BLOCKED", f"{agent} <- {ticket}: {result_data.get('summary', '')}")
                         all_succeeded = False

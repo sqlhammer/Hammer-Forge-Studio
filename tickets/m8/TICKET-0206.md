@@ -2,12 +2,12 @@
 id: TICKET-0206
 title: "Bugfix — Ship boarding zone should cover full collision hull, not a single entry point"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-27
-updated_at: 2026-02-27
+updated_at: 2026-02-27T00:00:00
 milestone: "M8"
 phase: "QA"
 depends_on: []
@@ -48,3 +48,4 @@ Any time the player is physically colliding with or within a small proximity thr
 ## Activity Log
 
 - 2026-02-27 [producer] Created — Studio Head reported during final M8 playtest review
+- 2026-02-27 [gameplay-programmer] Starting work — replacing single-point ShipEnterZone with full-hull boarding zone

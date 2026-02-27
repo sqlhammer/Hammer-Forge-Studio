@@ -334,17 +334,20 @@ func _setup_ship_interior() -> void:
 	_ship_interior.player_entered_ship.connect(_on_player_entered_ship)
 	_ship_interior.player_exited_ship.connect(_on_player_exited_ship)
 
-	# Create an enter-ship interaction zone that straddles the hull edge (3× hull Z-edge = 21)
-	# Zone must extend outside the hull so the player can reach it without clipping through
+	# Create a boarding zone that wraps the full ship hull so the player can board from any side.
+	# BoxShape3D is sized slightly larger than the ship's bounding box (~1–2 m clearance all around):
+	#   ship hull ≈ 26 m wide × 46 m long × 11 m tall (24× scaled mesh, center at Y=6.5).
+	#   boarding box: 28 m wide × 50 m long × 14 m tall, centered at local (0, 4.5, 0).
+	# Replaces the former single-point entrance trigger (TICKET-0206).
 	_ship_enter_zone = ShipEnterZone.new()
 	_ship_enter_zone.name = "ShipEnterZone"
 	_ship_enter_zone.collision_layer = 0
 	_ship_enter_zone.collision_mask = PhysicsLayers.PLAYER
 	var enter_col := CollisionShape3D.new()
 	var enter_shape := BoxShape3D.new()
-	enter_shape.size = Vector3(12.0, 6.0, 10.0)
+	enter_shape.size = Vector3(28.0, 14.0, 50.0)
 	enter_col.shape = enter_shape
-	enter_col.position = Vector3(0, 3.0, 23.0)
+	enter_col.position = Vector3(0.0, 4.5, 0.0)
 	_ship_enter_zone.add_child(enter_col)
 	add_child(_ship_enter_zone)
 
@@ -572,14 +575,14 @@ func _on_travel_sequence_started(destination_id: String) -> void:
 
 func _on_travel_sequence_completed(destination_id: String) -> void:
 	_transitioning = false
-	# Update ship enter zone position relative to new ship location.
-	# Use ship_pos.y + 3.0 so the zone center tracks the terrain height — a hardcoded
-	# Y=3.0 fails when the biome clearing is on elevated terrain (e.g. Shattered Flats).
+	# Reposition the full-hull boarding zone to follow the ship after biome travel.
+	# Offset (0, 4.5, 0) centers the BoxShape3D on the ship's bounding box at its new location.
+	# ship_pos.y + 4.5 tracks terrain height correctly for all biomes (TICKET-0206).
 	if _ship_enter_zone and _ship_exterior:
 		var ship_pos: Vector3 = _ship_exterior.position
 		var enter_col: CollisionShape3D = _ship_enter_zone.get_child(0) as CollisionShape3D
 		if enter_col:
-			enter_col.position = Vector3(ship_pos.x, ship_pos.y + 3.0, ship_pos.z + 23.0)
+			enter_col.position = Vector3(ship_pos.x, ship_pos.y + 4.5, ship_pos.z)
 	# Update ship interior exterior marker to match new ship position
 	if _ship_interior and _ship_exterior:
 		var exit_offset: Vector3 = Vector3(0.0, 0.0, 24.0)

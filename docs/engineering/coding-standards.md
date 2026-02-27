@@ -220,3 +220,34 @@ Physics layer assignments are defined in `docs/engineering/physics-layers.md`. N
 - Structure scenes so they can be run and tested independently
 - Minimize coupling between scenes; export configuration variables to make in-editor testing practical
 - Write debug log calls for all meaningful events and state transitions
+
+---
+
+## TDD Compliance Checklist (M8 and beyond)
+
+All M8 feature work must follow the Red/Green/Refactor cycle defined in `docs/studio/tdd-process-m8.md`. The following checklist is enforced during code review. A PR cannot proceed to review approval until all items are checked.
+
+### Per-Ticket TDD Checklist
+
+- [ ] **Test file created before feature code** — `game/tests/test_<system>.gd` exists and was committed before any implementation in `game/scripts/`
+- [ ] **Red-phase commit present** — commit history contains a `[RED]` commit showing the failing test before implementation
+- [ ] **Green-phase commit present** — commit history contains a `[GREEN]` commit showing the test passing with minimum implementation
+- [ ] **Full test suite passes at ticket close** — zero failures across all test files before marking DONE
+- [ ] **No regressions** — all previously passing tests still pass
+- [ ] **Failure cases tested** — tests exist for invalid inputs, bad state transitions, and edge cases for every public method
+- [ ] **Signals tested** — every signal defined on the new class has at least one test verifying it fires correctly
+- [ ] **No private members accessed in tests** — tests use only public API
+
+### Code Review Gate
+
+**Code review cannot be approved until:**
+
+1. The test suite passes with zero failures
+2. The Red/Green/Refactor commit sequence is visible in the PR history
+3. All items in the Per-Ticket TDD Checklist above are checked
+
+If a PR is opened without a red-phase commit in its history, the reviewer must request the author retroactively document the failing state in the PR description before approving.
+
+### Coverage Targets
+
+See `docs/studio/tdd-process-m8.md` for per-system coverage targets. Systems below their target are a code review blocker.

@@ -172,6 +172,14 @@ The following are explicitly **not** being built and should not be scoped into a
 | M15 | Planning | — | Beta: external testing |
 | Launch | TBD | — | Steam release |
 
+### Tooling Milestones
+
+*Parallel-eligible infrastructure milestones. These do not block or depend on game milestones.*
+
+| Milestone | Status | QA Sign-off | Description |
+|---|---|---|---|
+| T1 | Planning | — | Project Reporting Dashboard: GitHub Pages status site, auto-built on push |
+
 ---
 
 ## Open Items

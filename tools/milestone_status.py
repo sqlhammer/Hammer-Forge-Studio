@@ -20,15 +20,18 @@ STATE_JSON = REPO_ROOT / "orchestrator" / "state.json"
 
 
 def normalize_milestone(raw: str) -> str:
-    """Normalize '5', 'M5', 'm5' → 'M5'."""
-    raw = raw.strip().lstrip("Mm")
+    """Normalize '5', 'M5', 'm5' → 'M5'; 'T1', 't1' → 'T1'."""
+    raw = raw.strip()
+    if raw.upper().startswith("T"):
+        return f"T{raw[1:]}"
+    raw = raw.lstrip("Mm")
     return f"M{raw}"
 
 
 def auto_detect_milestone() -> str:
     text = MILESTONES_FILE.read_text(encoding="utf-8")
     for line in text.splitlines():
-        m = re.match(r"^\|\s*(M\d+)\s*\|", line)
+        m = re.match(r"^\|\s*([MT]\d+)\s*\|", line)
         if not m:
             continue
         ms_id = m.group(1)

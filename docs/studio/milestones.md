@@ -42,6 +42,14 @@
 | M14 | Alpha — Full playthrough possible | — | Planning | — | — | — | — |
 | M15 | Beta — External testing | — | Planning | — | — | — | — |
 
+### Tooling Milestones
+
+*Parallel-eligible infrastructure milestones. These do not block or depend on game milestones and use a separate T-series numbering convention.*
+
+| # | Milestone | Target Date | Status | Total | Open | Done | QA Sign-off |
+|---|-----------|-------------|--------|-------|------|------|-------------|
+| T1 | Project Reporting Dashboard — GitHub Pages status site, auto-built on push | — | Planning | 10 | 10 | 0 | — |
+
 ---
 
 ## Milestone Notes
@@ -551,6 +559,52 @@ TICKET-0188 (documentation) — depends on ALL of the above
 **Phases:** To be defined at M15 kickoff — requires Studio Head approval before agents begin work.
 
 **Dependencies:** M14
+
+---
+
+## Tooling Milestone Notes
+
+### T1 — Project Reporting Dashboard
+
+**Goal:** A self-updating static dashboard deployed on GitHub Pages that visualizes milestone progress, ticket status, dependency graphs, and game system architecture — auto-rebuilt on every push to `main`.
+
+**Scope:**
+- Establish T-series milestone convention for tooling projects (parallel to M-series game milestones)
+- Python build script: parses ticket YAML frontmatter and `milestones.md`, emits pre-baked JSON data files
+- GitHub Actions workflow: triggers on push to `main`, runs build, deploys to GitHub Pages
+- Static dashboard site: HTML/CSS/JS with Mermaid.js for automated diagram rendering
+- Dashboard views: milestone overview (counts, completion %), per-milestone ticket tables, dependency graphs, phase gate status
+- Auto-generated Mermaid diagrams from ticket dependency data and phase structure
+- Hand-curated architecture and game loop diagrams maintained as Mermaid source files
+
+**Phases:**
+- **Foundation** (TICKET-0189–TICKET-0192): T-series convention support, data parser, CI/CD pipeline, site scaffold
+- **Dashboard** (TICKET-0193–TICKET-0196): Milestone overview, ticket details, dependency graphs, architecture diagrams
+- **QA** (TICKET-0197–TICKET-0198): Code review and testing
+
+**Tickets:** TICKET-0189 through TICKET-0198 (10 total)
+
+| Phase | Ticket | Title | Type | Owner |
+|-------|--------|-------|------|-------|
+| Foundation | TICKET-0189 | T-series milestone convention — orchestrator, docs, and process updates | TASK | tools-devops-engineer |
+| Foundation | TICKET-0190 | Dashboard data parser — Python script to read tickets and milestones into JSON | FEATURE | systems-programmer |
+| Foundation | TICKET-0191 | GitHub Actions workflow — build pipeline and GitHub Pages deployment | TASK | tools-devops-engineer |
+| Foundation | TICKET-0192 | Dashboard site scaffold — HTML/CSS/JS structure with Mermaid.js | TASK | systems-programmer |
+| Dashboard | TICKET-0193 | Milestone overview page — progress bars, ticket counts, phase gate status | FEATURE | systems-programmer |
+| Dashboard | TICKET-0194 | Ticket detail views — per-milestone tables with status, owner, dependencies | FEATURE | systems-programmer |
+| Dashboard | TICKET-0195 | Dependency graph diagrams — auto-generated Mermaid from ticket frontmatter | FEATURE | systems-programmer |
+| Dashboard | TICKET-0196 | Architecture and game loop diagrams — curated Mermaid source files | TASK | producer |
+| QA | TICKET-0197 | Code review — T1 systems | REVIEW | systems-programmer |
+| QA | TICKET-0198 | QA testing — dashboard validation and sign-off | TASK | qa-engineer |
+
+**Parallel-eligible:** T1 does not block and is not blocked by any game milestone. May begin at any time.
+
+**Dependencies:** None (reads existing project files; benefits from data but does not require specific milestones to be complete)
+
+**Notes:**
+- T1 is the first tooling milestone. T-series milestones run parallel to the M-series game development milestones and use independent ticket numbering within the shared TICKET-NNNN sequence.
+- The dashboard reads project files at build time — it does not require agents to manually update a separate data store. Data freshness matches commit cadence.
+- Solution selected: Static Site + GitHub Actions Build Step (Solution B from the evaluation report). See the T1 evaluation report for alternatives considered.
 
 ---
 

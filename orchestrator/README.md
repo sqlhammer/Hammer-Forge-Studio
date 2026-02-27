@@ -4,12 +4,21 @@ Automated agent orchestration system. A Python Conductor script runs the main lo
 
 ## Quick Start
 
+**Starting a new milestone (always do this first):**
+
 ```bash
 cd /c/repos/Hammer-Forge-Studio
-python orchestrator/conductor.py M6 Foundation
+python orchestrator/start_milestone.py M8
+python orchestrator/conductor.py M8
 ```
 
-This starts the orchestration loop for milestone M6, beginning at the Foundation phase.
+`start_milestone.py` writes a fresh `state.json` for the new milestone. Without it, the conductor resumes the previous milestone's saved state and ignores the CLI argument.
+
+**Resuming an in-progress milestone after a crash:**
+
+```bash
+python orchestrator/conductor.py M8   # state.json already exists — resumes automatically
+```
 
 ## How It Works
 
@@ -22,11 +31,23 @@ This starts the orchestration loop for milestone M6, beginning at the Foundation
 
 ## Commands
 
-### Start Orchestration
+### Start a New Milestone
 
 ```bash
-python orchestrator/conductor.py <milestone> <phase>
-# Example: python orchestrator/conductor.py M6 Foundation
+python orchestrator/start_milestone.py <milestone>
+python orchestrator/start_milestone.py <milestone> "<phase>"  # specify starting phase
+python orchestrator/start_milestone.py <milestone> --force    # skip confirmation
+
+# Then run the conductor:
+python orchestrator/conductor.py <milestone>
+```
+
+`start_milestone.py` must be run before the conductor whenever beginning a new milestone. The conductor only creates fresh state when `state.json` is absent — if a previous milestone's state file exists, it will resume that state regardless of the milestone argument.
+
+### Resume or Continue Orchestration
+
+```bash
+python orchestrator/conductor.py <milestone>
 ```
 
 ### Resume After Crash
@@ -100,6 +121,7 @@ Edit `orchestrator/config.json` to adjust:
 ```
 orchestrator/
 ├── conductor.py          # Main loop (entry point)
+├── start_milestone.py    # CLI: initialize fresh state for a new milestone (run before conductor)
 ├── approve_gate.py       # CLI: approve/reject a gate
 ├── resume_planning.py    # CLI: reset IDLE → PLANNING when new tickets added
 ├── status.py             # CLI: show current state
@@ -122,6 +144,7 @@ orchestrator/
 ## State Machine
 
 ```
+[fresh] -> PLANNING (start_milestone.py — new milestone kickoff)
 IDLE -> PLANNING -> DISPATCHING -> WORKING -> EVALUATING -> PLANNING (loop)
 IDLE -> PLANNING (resume_planning.py — new tickets added)
                                                          -> GATE_BLOCKED (phase done)

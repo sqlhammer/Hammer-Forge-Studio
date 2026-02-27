@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" uid="uid://q1ud6g7dowe4" path="res://scripts/ui/game_hud.gd" id="1_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/compass_bar.tscn" id="2_cmp"]
@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/automation_hub_panel.tscn" id="13_ahp"]
 [ext_resource type="PackedScene" path="res://scenes/ui/module_placement_ui.tscn" id="14_mpu"]
 [ext_resource type="PackedScene" path="res://scenes/ui/interaction_prompt_hud.tscn" id="15_iph"]
+[ext_resource type="PackedScene" path="res://scenes/ui/navigation_console.tscn" id="16_nav"]
 
 [node name="GameHUD" type="CanvasLayer"]
 layer = 1
@@ -84,5 +85,7 @@ grow_vertical = 2
 [node name="AutomationHubPanel" parent="." instance=ExtResource("13_ahp")]
 
 [node name="ModulePlacementUI" parent="." instance=ExtResource("14_mpu")]
+
+[node name="NavigationConsole" parent="." instance=ExtResource("16_nav")]
 
 [node name="InteractionPromptHUD" parent="." instance=ExtResource("15_iph")]

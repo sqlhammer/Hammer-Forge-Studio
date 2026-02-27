@@ -2,7 +2,7 @@
 id: TICKET-0180
 title: "Debug scene — biome spawn selector and begin-wealthy toggle"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -48,3 +48,4 @@ A dedicated debug scene for Studio Head playtesting. Provides a simple menu UI t
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Gameplay phase
+- 2026-02-27 [gameplay-programmer] Starting work — building debug launcher scene with biome selector, begin-wealthy toggle, and unit tests

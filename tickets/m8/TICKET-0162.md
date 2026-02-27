@@ -2,7 +2,7 @@
 id: TICKET-0162
 title: "Procedural terrain system — declarative feature requests, ArrayMesh, seed-based generation"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -115,3 +115,4 @@ New request types can be added in future milestones without modifying the genera
 
 - 2026-02-27 [producer] Created — M8 Foundation phase. Planning session with Studio Head scheduled to refine implementation approach.
 - 2026-02-27 [producer] Refined — Studio Head planning session complete. Full architecture specified: declarative TerrainFeatureRequest API, ArrayMesh + ConcavePolygonShape3D, 500m × 500m chunk-grid layout, clearance-based Rock Warrens corridors with path-carving fallback, Shattered Flats plateau via feature request (not hardcoded flag).
+- 2026-02-27 [gameplay-programmer] Starting work — implementing procedural terrain system with TDD (RED/GREEN/REFACTOR cycle).

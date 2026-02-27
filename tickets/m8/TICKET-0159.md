@@ -2,7 +2,7 @@
 id: TICKET-0159
 title: "Navigation system — biome registry, travel state machine, fuel cost calculation"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -56,3 +56,4 @@ This system is the backbone of ship travel — every biome ticket, the navigatio
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Foundation phase. Resolves D-004.
+- 2026-02-27 [systems-programmer] Starting work — implementing BiomeRegistry, NavigationSystem autoload, unit tests.

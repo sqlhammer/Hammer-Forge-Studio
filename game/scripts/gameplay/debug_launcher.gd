@@ -383,6 +383,57 @@ func _setup_gameplay(world: Node3D, player: Node3D) -> void:
 	world.add_child(hud)
 	hud.setup(camera, first_person, scanner, mining)
 
+	# Ship boarding — create enter zone + ship interior so the player can board in debug sessions.
+	# TestWorld is never used by the debug launcher, so boarding must be wired here (TICKET-0208).
+	_setup_ship_boarding(world, first_person, hud)
+
+
+## Creates a ShipEnterZone on the ship and a ShipInterior underground so the player
+## can board the ship in a debug-launched session (mirrors TestWorld._setup_ship_interior).
+## The zone is a child of the ship node so it follows the ship automatically.
+func _setup_ship_boarding(world: Node3D, first_person: CharacterBody3D, hud: GameHUD) -> void:
+	var ship: Node3D = world.get_node_or_null("Ship") as Node3D
+	if ship == null:
+		push_error("DebugLauncher: no Ship node found — cannot set up boarding zone")
+		return
+
+	# Full-hull boarding zone sized to match the ship bounding box (~1–2 m clearance).
+	# Parented to the ship so it follows ship position automatically (no repositioning needed).
+	var enter_zone := ShipEnterZone.new()
+	enter_zone.name = "ShipEnterZone"
+	enter_zone.collision_layer = 0
+	enter_zone.collision_mask = PhysicsLayers.PLAYER
+	var enter_col := CollisionShape3D.new()
+	var enter_shape := BoxShape3D.new()
+	enter_shape.size = Vector3(28.0, 14.0, 50.0)
+	enter_col.shape = enter_shape
+	enter_col.position = Vector3(0.0, 4.5, 0.0)
+	enter_zone.add_child(enter_col)
+	ship.add_child(enter_zone)
+	enter_zone.add_to_group("interaction_prompt_source")
+
+	# Ship interior placed underground to isolate it from the exterior world.
+	var interior_scene: PackedScene = load("res://scenes/gameplay/ship_interior.tscn") as PackedScene
+	if interior_scene == null:
+		push_error("DebugLauncher: could not load ship_interior.tscn — boarding zone created but boarding will fail")
+		return
+	var ship_interior: ShipInterior = interior_scene.instantiate() as ShipInterior
+	ship_interior.name = "ShipInterior"
+	ship_interior.position = Vector3(0.0, INTERIOR_Y_OFFSET, 0.0)
+	world.add_child(ship_interior)
+	ship_interior.setup_viewport_world(world.get_viewport().world_3d, Vector3(0.0, 8.0, -23.0))
+	ship_interior.setup(first_person)
+	# Exterior exit position is ship world position + hull Z-edge offset.
+	ship_interior.set_exterior_position(ship.position + Vector3(0.0, 0.0, 24.0))
+
+	# Boarding handler processes E-press input for enter/exit while DebugLauncher is not active.
+	var handler := DebugShipBoardingHandler.new()
+	handler.name = "ShipBoardingHandler"
+	world.add_child(handler)
+	handler.setup(ship_interior, first_person, enter_zone, hud)
+
+	Global.log("DebugLauncher: ship boarding zone and interior ready")
+
 
 ## Adds a [DEBUG] label overlay visible during begin-wealthy sessions.
 func _add_debug_overlay(world: Node3D) -> void:

@@ -2,12 +2,12 @@
 id: TICKET-0208
 title: "Bugfix — Debug launcher world has no ShipEnterZone; boarding impossible from debug launch"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-27
-updated_at: 2026-02-27
+updated_at: 2026-02-27T00:00:00
 milestone: "M8"
 phase: "QA"
 depends_on: []
@@ -67,3 +67,4 @@ Making the zone a child of the ship node avoids any repositioning concern entire
 ## Activity Log
 
 - 2026-02-27 [producer] Created — Studio Head confirmed boarding broken in debug launcher after TICKET-0207 fix; root cause confirmed: debug launcher never creates ShipEnterZone
+- 2026-02-27 [gameplay-programmer] Starting work — creating ShipEnterZone + ShipInterior setup in debug_launcher.gd via new DebugShipBoardingHandler node

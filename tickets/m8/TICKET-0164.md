@@ -2,7 +2,7 @@
 id: TICKET-0164
 title: "World boundary test harness — unit tests verifying boundary enforcement"
 type: TASK
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: qa-engineer
 created_by: producer
@@ -44,3 +44,4 @@ Write a dedicated test harness that verifies the world boundary system functions
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Foundation phase
+- 2026-02-27 [qa-engineer] Starting work — writing unit tests for world boundary system

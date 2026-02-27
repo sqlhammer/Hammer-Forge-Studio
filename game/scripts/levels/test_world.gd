@@ -572,12 +572,14 @@ func _on_travel_sequence_started(destination_id: String) -> void:
 
 func _on_travel_sequence_completed(destination_id: String) -> void:
 	_transitioning = false
-	# Update ship enter zone position relative to new ship location
+	# Update ship enter zone position relative to new ship location.
+	# Use ship_pos.y + 3.0 so the zone center tracks the terrain height — a hardcoded
+	# Y=3.0 fails when the biome clearing is on elevated terrain (e.g. Shattered Flats).
 	if _ship_enter_zone and _ship_exterior:
 		var ship_pos: Vector3 = _ship_exterior.position
 		var enter_col: CollisionShape3D = _ship_enter_zone.get_child(0) as CollisionShape3D
 		if enter_col:
-			enter_col.position = Vector3(ship_pos.x, 3.0, ship_pos.z + 23.0)
+			enter_col.position = Vector3(ship_pos.x, ship_pos.y + 3.0, ship_pos.z + 23.0)
 	# Update ship interior exterior marker to match new ship position
 	if _ship_interior and _ship_exterior:
 		var exit_offset: Vector3 = Vector3(0.0, 0.0, 24.0)

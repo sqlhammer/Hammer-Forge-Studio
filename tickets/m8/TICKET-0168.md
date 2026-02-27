@@ -2,7 +2,7 @@
 id: TICKET-0168
 title: "Travel sequence — transition animation, biome load, player respawn at destination"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -46,3 +46,4 @@ Implement the full travel sequence triggered when the player confirms a navigati
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Gameplay phase
+- 2026-02-27 [gameplay-programmer] Starting work — implementing travel sequence: fade transition, biome load/unload, player/ship respawn, unit tests.

@@ -34,7 +34,7 @@
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Active | 28 | 28 | 0 | — |
-| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 7 | 7 | 0 | — |
+| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 10 | 10 | 0 | — |
 | M10 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
 | M11 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
 | M12 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
@@ -445,25 +445,32 @@
 - **Orchestrator Resilience** (TICKET-0182–TICKET-0188): Conductor hardening for usage-limit edge cases — checkpoint system, LIMIT_WAIT cooldown, resume dispatch, structured logging, documentation. **Parallel-eligible: this phase does not block and is not blocked by any other M9 phase.** May begin as soon as M8 closes. Touches only `orchestrator/` code and `docs/engineering/` — no game code changes.
 - Additional visual asset phases TBD at M9 kickoff — require Studio Head approval.
 
-**Tickets:** TICKET-0182 through TICKET-0188 (Orchestrator Resilience); additional tickets TBD for visual asset phases.
+**Tickets:** TICKET-0182 through TICKET-0191 (Orchestrator Resilience); additional tickets TBD for visual asset phases.
 
-| Phase | Ticket | Title | Type | Owner |
-|-------|--------|-------|------|-------|
-| Orchestrator Resilience | TICKET-0182 | Fix dead-lock on IN_PROGRESS pre-claim and add silent-success detection | BUG | tools-devops-engineer |
-| Orchestrator Resilience | TICKET-0183 | Checkpoint system — write, read, and clear suspension checkpoints | FEATURE | tools-devops-engineer |
-| Orchestrator Resilience | TICKET-0184 | Usage-limit detection and LIMIT_WAIT cooldown state | FEATURE | tools-devops-engineer |
-| Orchestrator Resilience | TICKET-0185 | Resume dispatch with checkpoint context injection | FEATURE | tools-devops-engineer |
-| Orchestrator Resilience | TICKET-0186 | UID commit idempotency and conductor-level gate detection fallback | TASK | tools-devops-engineer |
-| Orchestrator Resilience | TICKET-0187 | Structured suspension logging and gate deferral on unresolved checkpoints | FEATURE | tools-devops-engineer |
-| Orchestrator Resilience | TICKET-0188 | Documentation — resilience runbook, CLAUDE.md updates, and config reference | TASK | producer |
+| Phase | Ticket | Title | Type | Priority | Owner |
+|-------|--------|-------|------|----------|-------|
+| Orchestrator Resilience | TICKET-0182 | Fix dead-lock on IN_PROGRESS pre-claim and add silent-success detection | BUG | P0 | tools-devops-engineer |
+| Orchestrator Resilience | TICKET-0183 | Checkpoint system — write, read, and clear suspension checkpoints | FEATURE | P1 | tools-devops-engineer |
+| Orchestrator Resilience | TICKET-0184 | Usage-limit detection and LIMIT_WAIT cooldown state | FEATURE | P1 | tools-devops-engineer |
+| Orchestrator Resilience | TICKET-0185 | Resume dispatch with checkpoint context injection | FEATURE | P1 | tools-devops-engineer |
+| Orchestrator Resilience | TICKET-0186 | UID commit idempotency — make _handle_uid_commits restartable | TASK | P2 | tools-devops-engineer |
+| Orchestrator Resilience | TICKET-0187 | Structured suspension logging and gate deferral on unresolved checkpoints | FEATURE | P2 | tools-devops-engineer |
+| Orchestrator Resilience | TICKET-0189 | Conductor-level gate detection fallback when Producer is unavailable | FEATURE | P2 | tools-devops-engineer |
+| Orchestrator Resilience | TICKET-0190 | Auto-remediation for silently-merged PRs with IN_PROGRESS tickets | FEATURE | P3 | tools-devops-engineer |
+| Orchestrator Resilience | TICKET-0191 | Log archive rotation at milestone close | TASK | P3 | tools-devops-engineer |
+| Orchestrator Resilience | TICKET-0188 | Documentation — resilience runbook, CLAUDE.md updates, and config reference | TASK | P2 | producer |
 
 **Dependency Graph (Orchestrator Resilience):**
 ```
 TICKET-0182 (P0 dead-lock fix)
   └─► TICKET-0183 (checkpoint system)
         ├─► TICKET-0185 (resume dispatch) ◄── also depends on TICKET-0182
-        ├─► TICKET-0186 (UID idempotency + gate fallback)
-        └─► TICKET-0187 (suspension logging + gate deferral)
+        ├─► TICKET-0186 (UID idempotency)
+        ├─► TICKET-0187 (suspension logging + gate deferral)
+        │     └─► TICKET-0191 (log archive rotation)
+        ├─► TICKET-0189 (conductor gate fallback)
+        └─► TICKET-0190 (auto-remediation for merged PRs)
+
 TICKET-0184 (usage-limit detection) — no dependencies, can run in parallel
 
 TICKET-0188 (documentation) — depends on ALL of the above

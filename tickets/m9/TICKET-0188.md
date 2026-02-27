@@ -10,7 +10,7 @@ created_at: 2026-02-27
 updated_at: 2026-02-27
 milestone: "M9"
 phase: "Orchestrator Resilience"
-depends_on: [TICKET-0182, TICKET-0183, TICKET-0184, TICKET-0185, TICKET-0186, TICKET-0187]
+depends_on: [TICKET-0182, TICKET-0183, TICKET-0184, TICKET-0185, TICKET-0186, TICKET-0187, TICKET-0189, TICKET-0190, TICKET-0191]
 blocks: []
 tags: [orchestrator, documentation, resilience, runbook, CLAUDE.md]
 ---

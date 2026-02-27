@@ -37,7 +37,7 @@ See `docs/engineering/orchestrator-resilience-plan.md` Section 2.1–2.2 for the
 
 ### Integration into Result Processing
 - [ ] `_write_checkpoint` is called in `_do_working` for every abnormal worker exit (empty stdout, timeout, non-zero exit) **before** `_queue_retry`.
-- [ ] If checkpoint writer detects ticket is DONE on disk AND PR is merged → auto-remediate: add to `completed_this_session`, delete checkpoint, log `[CLEANUP ] TICKET-NNNN auto-completed`. Do not retry. (Handles Risk R3.)
+- [ ] Checkpoint data is made available to downstream processing (auto-remediation in TICKET-0190, retry queuing) via the returned checkpoint dict.
 
 ### Checkpoint Cleanup
 - [ ] When a worker completes successfully (outcome=done, verified on disk), delete any existing checkpoint for that ticket.
@@ -67,3 +67,4 @@ See `docs/engineering/orchestrator-resilience-plan.md` Section 2.1–2.2 for the
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — checkpoint infrastructure for graceful failure and resume
+- 2026-02-27 [producer] Moved R3 auto-remediation (merged-PR detection) to dedicated TICKET-0190

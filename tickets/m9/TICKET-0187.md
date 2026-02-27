@@ -50,10 +50,6 @@ See `docs/engineering/orchestrator-resilience-plan.md` Task 3 (Logging Specifica
 - [ ] Transition to `PLANNING` instead of `GATE_BLOCKED` so the conductor can re-dispatch the suspended tickets.
 - [ ] Gate fires normally once all checkpoints for the phase are cleared.
 
-### Log Retention
-- [ ] At milestone close (when `status` transitions to `IDLE` with `milestone_complete` action), archive `suspension.log` to `orchestrator/logs/suspension-{milestone}.log`.
-- [ ] Archive `activity.log` to `orchestrator/logs/activity-{milestone}.log` at the same time.
-
 ### Testing
 - [ ] All existing conductor tests pass.
 - [ ] Add test case: checkpoint exists for phase ticket → gate is deferred, not emitted.
@@ -63,7 +59,7 @@ See `docs/engineering/orchestrator-resilience-plan.md` Task 3 (Logging Specifica
 
 - `suspension.log` is append-only, same as `activity.log`. Open in append mode, write with flush.
 - The gate deferral check is a simple directory scan + ticket-phase comparison. Keep it lightweight.
-- Log archival at milestone close should be added to the conductor's `milestone_complete` handling path (currently just sets `IDLE`).
+- Log archive rotation at milestone close is handled by TICKET-0191 (separate ticket).
 
 ## Handoff Notes
 
@@ -72,3 +68,4 @@ See `docs/engineering/orchestrator-resilience-plan.md` Task 3 (Logging Specifica
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — structured suspension logging and gate deferral
+- 2026-02-27 [producer] Moved log archive rotation to dedicated TICKET-0191

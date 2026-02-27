@@ -133,12 +133,15 @@ func _update_mining(delta: float) -> void:
 		if not _is_mining or _mining_target != aimed_deposit:
 			_start_mining(aimed_deposit)
 
-		_mining_progress += delta / EXTRACTION_DURATION
+		# Deep nodes mine slower based on yield_rate (0.1 = 10x longer)
+		var effective_yield_rate: float = maxf(aimed_deposit.yield_rate, 0.01)
+		var effective_duration: float = EXTRACTION_DURATION / effective_yield_rate
+		_mining_progress += delta / effective_duration
 		mining_progress_changed.emit(clampf(_mining_progress, 0.0, 1.0))
 
 		# Drain battery proportionally over extraction duration
 		var total_cost: float = SuitBattery.estimate_mining_cost(aimed_deposit.deposit_tier, EXTRACTION_AMOUNT)
-		var drain_per_second: float = total_cost / EXTRACTION_DURATION
+		var drain_per_second: float = total_cost / effective_duration
 		SuitBattery.drain(drain_per_second * delta)
 
 		# Check if battery depleted during mining

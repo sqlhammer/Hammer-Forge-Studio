@@ -2,7 +2,7 @@
 id: TICKET-0171
 title: "Rock Warrens biome — terrain, dense rock formations, corridors, resource placement"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -47,3 +47,4 @@ Build the Rock Warrens biome scene. Dense rock formations create tight navigable
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Gameplay phase
+- 2026-02-27 [gameplay-programmer] Starting work — implementing Rock Warrens biome with TDD (RED/GREEN/REFACTOR cycle)

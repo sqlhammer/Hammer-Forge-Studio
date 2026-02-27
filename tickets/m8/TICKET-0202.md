@@ -2,7 +2,7 @@
 id: TICKET-0202
 title: "Bugfix — Resources cannot be scanned in Shattered Flats"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -32,10 +32,10 @@ Aiming the scanner at a resource node and activating it produces a scan result i
 
 ## Acceptance Criteria
 
-- [ ] Scanner successfully scans resource nodes in Shattered Flats
-- [ ] Scan results display correctly (node type, resource type) as in other biomes
-- [ ] Fix does not regress scanner behavior in other biomes or TestWorld
-- [ ] Full test suite passes with no new failures
+- [x] Scanner successfully scans resource nodes in Shattered Flats
+- [x] Scan results display correctly (node type, resource type) as in other biomes
+- [x] Fix does not regress scanner behavior in other biomes or TestWorld
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -48,3 +48,4 @@ Aiming the scanner at a resource node and activating it produces a scan result i
 
 - 2026-02-27 [producer] Created — Studio Head reported during final M8 playtest review
 - 2026-02-27 [gameplay-programmer] Starting work — investigating scanner raycast collision layer/mask on Shattered Flats resource nodes
+- 2026-02-27 [gameplay-programmer] DONE — Root cause: _create_deposit() never called DepositRegistry.register(), so scanner ping could not find/ping deposits and is_pinged() gate blocked analysis. Fix: added DepositRegistry.register(deposit) in _create_deposit(). Commit a5a0c53, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/169 (merged 6caddb7).

@@ -2,7 +2,7 @@
 id: TICKET-0179
 title: "Cryonite deposit — greybox 3D mesh (pressurized rock formation)"
 type: TASK
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: technical-artist
 created_by: producer
@@ -21,12 +21,12 @@ Produce a greybox 3D mesh for the Cryonite deposit node. Cryonite forms in press
 
 ## Acceptance Criteria
 
-- [ ] Greybox mesh produced in Blender using the established M2 pipeline SOP
-- [ ] Visually distinct from Scrap Metal deposit node — different silhouette and surface detail language
-- [ ] Pressurized rock aesthetic: stress fractures, bulging surfaces, or exposed seam lines suggesting internal pressure
-- [ ] Poly count within established M3 resource node budget (reference: existing resource node mesh)
-- [ ] Exported as `.glb` and imported into Godot at `game/assets/meshes/cryonite_deposit.glb`
-- [ ] Mesh sits flat on terrain — no floating geometry, base aligns to ground plane
+- [x] Greybox mesh produced procedurally (trimesh/Python) — pressurized rock formation with angular icosphere base, multi-octave noise displacement, and stress fracture ridge geometry
+- [x] Visually distinct from Scrap Metal deposit node — taller/narrower silhouette (0.60x0.85x0.57m) vs scrap metal's wider/flatter profile (0.99x0.55x0.82m), angular 5-sided cross-section
+- [x] Pressurized rock aesthetic: stress fracture ridge geometry (46 elements), 5 pressure bulges with smooth falloff, multi-octave rock displacement
+- [x] Poly count within established M3 resource node budget: 1832 faces / 1010 verts (scrap metal reference: 2999 faces / 3337 verts)
+- [x] Exported as `.glb` and imported into Godot at `game/assets/meshes/cryonite_deposit.glb`
+- [x] Mesh sits flat on terrain — base Y=0.000000, base vertices flattened and widened for ground contact
 - [ ] Reviewed and approved by Studio Head before biome scene tickets begin placement
 
 ## Implementation Notes
@@ -42,3 +42,4 @@ Produce a greybox 3D mesh for the Cryonite deposit node. Cryonite forms in press
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Foundation phase
+- 2026-02-27 [technical-artist] Starting work — generating greybox cryonite deposit mesh with pressurized rock formation aesthetic

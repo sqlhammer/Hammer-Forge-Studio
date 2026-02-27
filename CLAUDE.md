@@ -133,6 +133,7 @@ When the QA phase gate passes and the Studio Head grants final sign-off, the Pro
 3. ✅ Update the **Release Goals** table in `docs/studio/prd.md` — set the milestone row to `Complete`, fill in the QA sign-off date, and confirm the description is accurate
 4. ✅ Post the final Phase Gate Summary report to `docs/studio/reports/`
 5. ✅ Commit and push all doc updates to `main`
+6. ✅ Clean up milestone branches — delete all feature branches used during the milestone (e.g., branches matching `orch/*/TICKET-*` or `feature/m<N>/`) from remote. These are safe to delete once all changes are merged to `main`
 
 ### On Gate FAIL
 

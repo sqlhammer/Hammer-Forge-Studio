@@ -2,7 +2,7 @@
 id: TICKET-0207
 title: "Bugfix — Ship boarding zone spawns at world origin; never positioned at ship on initial load"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -71,3 +71,4 @@ Option B eliminates the entire class of "zone drifts away from ship" bugs and is
 ## Activity Log
 
 - 2026-02-27 [producer] Created — Studio Head confirmed no boarding prompt or E-key response when standing against ship hull; debug collision view shows no zone near ship; root cause identified in code review of test_world.gd
+- 2026-02-27 [gameplay-programmer] Starting work — implementing Option B: reparent ShipEnterZone to _ship_exterior so zone follows ship automatically; remove manual repositioning from _on_travel_sequence_completed

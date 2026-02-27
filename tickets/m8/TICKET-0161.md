@@ -2,7 +2,7 @@
 id: TICKET-0161
 title: "Resource respawn system — biome-change trigger, surface node respawn logic"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -43,3 +43,4 @@ Surface resource nodes respawn when the ship changes biomes. When the player tra
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Foundation phase
+- 2026-02-27 [systems-programmer] Starting work — merged main (includes TICKET-0159 NavigationSystem), implementing ResourceRespawnSystem autoload

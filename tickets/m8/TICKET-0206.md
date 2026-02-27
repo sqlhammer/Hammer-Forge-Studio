@@ -2,7 +2,7 @@
 id: TICKET-0206
 title: "Bugfix — Ship boarding zone should cover full collision hull, not a single entry point"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -31,12 +31,12 @@ Any time the player is physically colliding with or within a small proximity thr
 
 ## Acceptance Criteria
 
-- [ ] Player can initiate boarding from any point where they are in contact with or near the ship's collision hull (within a small clearance, e.g. 1–2m)
-- [ ] The old single-point `ShipEnterZone` trigger is replaced or extended to cover the full ship footprint
-- [ ] Boarding prompt appears correctly when the player is near the ship from any direction
-- [ ] No double-trigger or boarding loop when the player is already inside the ship
-- [ ] Fix applies in all biomes (Shattered Flats, Rock Warrens, Debris Field) and in TestWorld
-- [ ] Full test suite passes with no new failures
+- [x] Player can initiate boarding from any point where they are in contact with or near the ship's collision hull (within a small clearance, e.g. 1–2m)
+- [x] The old single-point `ShipEnterZone` trigger is replaced or extended to cover the full ship footprint
+- [x] Boarding prompt appears correctly when the player is near the ship from any direction
+- [x] No double-trigger or boarding loop when the player is already inside the ship
+- [x] Fix applies in all biomes (Shattered Flats, Rock Warrens, Debris Field) and in TestWorld
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -49,3 +49,4 @@ Any time the player is physically colliding with or within a small proximity thr
 
 - 2026-02-27 [producer] Created — Studio Head reported during final M8 playtest review
 - 2026-02-27 [gameplay-programmer] Starting work — replacing single-point ShipEnterZone with full-hull boarding zone
+- 2026-02-27 [gameplay-programmer] DONE — commit 87d3c39, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/175. Replaced 12×6×10m entrance-only trigger with 28×14×50m hull-wrapping BoxShape3D. Updated travel callback to reposition zone at hull center. No new scripts created.

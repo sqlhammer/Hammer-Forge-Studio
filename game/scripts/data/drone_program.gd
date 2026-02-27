@@ -33,6 +33,10 @@ func accepts_deposit(deposit: Deposit) -> bool:
 	if deposit.is_depleted():
 		return false
 
+	# Drone accessibility filter — deposit must permit drone assignment.
+	if not deposit.drone_accessible:
+		return false
+
 	# Resource type filter — NONE means any type is acceptable.
 	if target_resource_type != ResourceDefs.ResourceType.NONE:
 		if deposit.resource_type != target_resource_type:

@@ -2,7 +2,7 @@
 id: TICKET-0160
 title: "Deep resource node — data layer, infinite-yield flag, slow drill rate"
 type: FEATURE
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -46,3 +46,4 @@ Define the deep resource node as a new deposit subtype. Deep nodes reside just b
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Foundation phase
+- 2026-02-27 [systems-programmer] Starting work — extending deposit data layer with infinite, yield_rate, drone_accessible flags

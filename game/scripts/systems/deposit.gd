@@ -22,6 +22,15 @@ signal depleted
 @export var density_tier: ResourceDefs.DensityTier = ResourceDefs.DensityTier.MEDIUM
 @export var deposit_tier: ResourceDefs.DepositTier = ResourceDefs.DepositTier.TIER_1
 @export var total_quantity: int = 40
+## When true, this deposit never depletes — stock is never reduced on extraction.
+## Used for deep resource nodes that yield indefinitely.
+@export var infinite: bool = false
+## Multiplier on the base extraction rate. 1.0 = normal surface speed.
+## Deep nodes use a lower value (e.g., 0.1 = 10% of surface speed).
+@export var yield_rate: float = 1.0
+## When true, automated drones may target this deposit.
+## All deposits default to drone-accessible; set false to exclude a deposit from drone targeting.
+@export var drone_accessible: bool = true
 
 # ── Private Variables ─────────────────────────────────────
 var _remaining_quantity: int = 0
@@ -43,7 +52,10 @@ func get_total() -> int:
 	return total_quantity
 
 ## Returns true if the deposit has been fully mined.
+## Infinite deposits never deplete.
 func is_depleted() -> bool:
+	if infinite:
+		return false
 	return _remaining_quantity <= 0
 
 ## Returns the current scan state.
@@ -77,8 +89,17 @@ func mark_analyzed() -> void:
 
 ## Extracts up to `amount` units from the deposit.
 ## Returns a Dictionary: { "resource_type", "purity", "quantity" } or empty dict if nothing extracted.
+## Infinite deposits always return the full requested amount without reducing stock.
 func extract(amount: int) -> Dictionary:
-	if amount <= 0 or is_depleted():
+	if amount <= 0:
+		return {}
+	if infinite:
+		return {
+			"resource_type": resource_type,
+			"purity": purity,
+			"quantity": amount,
+		}
+	if is_depleted():
 		return {}
 	var extracted: int = mini(amount, _remaining_quantity)
 	_remaining_quantity -= extracted
@@ -142,6 +163,9 @@ func serialize() -> Dictionary:
 		"total_quantity": total_quantity,
 		"remaining_quantity": _remaining_quantity,
 		"scan_state": _scan_state,
+		"infinite": infinite,
+		"yield_rate": yield_rate,
+		"drone_accessible": drone_accessible,
 		"position": {
 			"x": global_position.x,
 			"y": global_position.y,
@@ -157,6 +181,9 @@ func deserialize(data: Dictionary) -> void:
 	deposit_tier = data.get("deposit_tier", ResourceDefs.DepositTier.TIER_1) as ResourceDefs.DepositTier
 	total_quantity = data.get("total_quantity", 40) as int
 	_remaining_quantity = data.get("remaining_quantity", total_quantity) as int
+	infinite = data.get("infinite", false) as bool
+	yield_rate = data.get("yield_rate", 1.0) as float
+	drone_accessible = data.get("drone_accessible", true) as bool
 	# Backwards-compatible: accept both "scan_state" and legacy "is_analyzed"
 	if data.has("scan_state"):
 		_scan_state = data.get("scan_state", ScanState.UNDISCOVERED) as ScanState

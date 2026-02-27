@@ -2,7 +2,7 @@
 
 **Owner:** qa-engineer
 **Status:** Active
-**Last Updated:** 2026-02-26 (M7)
+**Last Updated:** 2026-02-27 (M8 scaffolding)
 
 > Execute this checklist at the end of every milestone before QA sign-off. Add new items as systems are implemented. Mark each item Pass / Fail / N/A.
 
@@ -101,6 +101,26 @@
 | 36 | Battery bar shows amber warning | Intermediate levels show amber color state | |
 | 37 | Inventory ship status icons aligned | Icons vertically centered with bars | |
 | 38 | Persistent controls panel visible | Q Ping, I Inventory in bottom-right | |
+
+---
+
+## Gameplay — Navigation & Fuel (M8)
+
+| # | Test | Expected Result | Result |
+|---|------|-----------------|--------|
+| 39 | Fuel tank initializes at capacity | Full fuel on game start | |
+| 40 | Fuel consumption on travel | Fuel decreases based on distance and ship weight | |
+| 41 | Low-fuel warning triggers | Signal emitted when fuel drops below threshold | |
+| 42 | Navigation console opens from cockpit | Modal screen with biome map and fuel display | |
+| 43 | Biome selection shows fuel cost | Cost displayed before confirming travel | |
+| 44 | Travel sequence completes | Transition animation, biome loads, player respawns | |
+| 45 | Travel blocked with insufficient fuel | Cannot travel if fuel cost exceeds tank level | |
+| 46 | Resource deposits respawn on biome re-entry | Surface nodes regenerated on return to biome | |
+| 47 | Deep resource nodes persist across visits | Infinite-yield nodes not reset on travel | |
+| 48 | World boundaries enforce hard limits | Player cannot leave biome bounds | |
+| 49 | Procedural terrain reproduces from seed | Same seed generates identical terrain | |
+| 50 | Cryonite deposits appear in biomes | New resource type mineable with hand drill | |
+| 51 | Fuel Cell craftable from Cryonite | Fabricator recipe produces Fuel Cells | |
 
 ---
 

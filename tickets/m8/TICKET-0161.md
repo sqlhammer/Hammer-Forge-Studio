@@ -2,7 +2,7 @@
 id: TICKET-0161
 title: "Resource respawn system — biome-change trigger, surface node respawn logic"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -21,14 +21,14 @@ Surface resource nodes respawn when the ship changes biomes. When the player tra
 
 ## Acceptance Criteria
 
-- [ ] Respawn system listens to `NavigationSystem.biome_changed` signal
-- [ ] On biome change, all depleted surface nodes in the **departed** biome are marked for respawn
-- [ ] On arrival back at a previously visited biome, respawned nodes are restored to full stock
-- [ ] Deep nodes (`infinite: true`) are explicitly excluded from respawn logic
-- [ ] Respawn state is tracked per-biome (departing and re-entering correctly restores the right biome's nodes)
-- [ ] Respawn does NOT trigger on the initial visit to a biome (only on return after departure)
-- [ ] Unit tests cover: respawn fires on biome change, deep nodes excluded, correct biome targeted, no respawn on first visit, repeated departure/return cycles
-- [ ] Full test suite passes
+- [x] Respawn system listens to `NavigationSystem.biome_changed` signal
+- [x] On biome change, all depleted surface nodes in the **departed** biome are marked for respawn
+- [x] On arrival back at a previously visited biome, respawned nodes are restored to full stock
+- [x] Deep nodes (`infinite: true`) are explicitly excluded from respawn logic
+- [x] Respawn state is tracked per-biome (departing and re-entering correctly restores the right biome's nodes)
+- [x] Respawn does NOT trigger on the initial visit to a biome (only on return after departure)
+- [x] Unit tests cover: respawn fires on biome change, deep nodes excluded, correct biome targeted, no respawn on first visit, repeated departure/return cycles
+- [x] Full test suite passes
 
 ## Implementation Notes
 
@@ -38,9 +38,14 @@ Surface resource nodes respawn when the ship changes biomes. When the player tra
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+ResourceRespawnSystem autoload is registered in project.godot. Biome scene tickets (TICKET-0170–0172) should:
+1. Connect to `ResourceRespawnSystem.respawn_applied` signal to receive respawn notifications
+2. Call `ResourceRespawnSystem.report_depleted(deposit_id, biome_id)` when a surface deposit depletes
+3. Call `ResourceRespawnSystem.get_pending_respawns(biome_id)` on scene load to check for queued restores
+4. Call `ResourceRespawnSystem.mark_respawns_applied(biome_id)` after physical deposit visibility is restored
 
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Foundation phase
 - 2026-02-27 [systems-programmer] Starting work — merged main (includes TICKET-0159 NavigationSystem), implementing ResourceRespawnSystem autoload
+- 2026-02-27 [systems-programmer] RETRY: Reviewed existing implementation on main. ResourceRespawnSystem autoload implemented with full signal-based respawn tracking (26 unit tests). Implementation verified correct against all acceptance criteria. Marking DONE. Commit: see PR below.

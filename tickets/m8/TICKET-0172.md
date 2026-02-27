@@ -2,7 +2,7 @@
 id: TICKET-0172
 title: "Debris Field biome — terrain, wreckage clusters, resource placement"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -44,6 +44,8 @@ Build the Debris Field biome scene. Scattered wreckage clusters on uneven ground
 ## Handoff Notes
 
 **Implemented by:** gameplay-programmer
+**Commit:** 3b1406f (merge commit on main)
+**PR:** https://github.com/sqlhammer/Hammer-Forge-Studio/pull/151
 
 **Scripts created:**
 - `game/scripts/gameplay/debris_field_biome.gd` — DebrisFieldBiome class (Node3D)
@@ -63,3 +65,4 @@ Build the Debris Field biome scene. Scattered wreckage clusters on uneven ground
 
 - 2026-02-27 [producer] Created — M8 Gameplay phase
 - 2026-02-27 [gameplay-programmer] Starting work — implementing Debris Field biome with TDD (RED/GREEN/REFACTOR cycle)
+- 2026-02-27 [gameplay-programmer] DONE — merge commit 3b1406f, PR #151 (https://github.com/sqlhammer/Hammer-Forge-Studio/pull/151) merged to main. 2 new scripts, 25 unit tests. UID commit pending Godot editor filesystem scan.

@@ -2,7 +2,7 @@
 id: TICKET-0179
 title: "Cryonite deposit — greybox 3D mesh (pressurized rock formation)"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: technical-artist
 created_by: producer
@@ -43,3 +43,4 @@ Produce a greybox 3D mesh for the Cryonite deposit node. Cryonite forms in press
 
 - 2026-02-27 [producer] Created — M8 Foundation phase
 - 2026-02-27 [technical-artist] Starting work — generating greybox cryonite deposit mesh with pressurized rock formation aesthetic
+- 2026-02-27 [technical-artist] DONE — commit 6243a87, PR #131 (https://github.com/sqlhammer/Hammer-Forge-Studio/pull/131) merged to main. Greybox cryonite deposit mesh at game/assets/meshes/cryonite_deposit.glb (1832 faces, 1010 verts, flat base Y=0). Pending Studio Head visual review before biome placement.

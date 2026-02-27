@@ -2,12 +2,13 @@
 id: TICKET-0207
 title: "Bugfix — Ship boarding zone spawns at world origin; never positioned at ship on initial load"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-27
 updated_at: 2026-02-27
+closed_at: 2026-02-27
 milestone: "M8"
 phase: "QA"
 depends_on: []
@@ -34,12 +35,12 @@ The boarding zone is correctly centered on the ship from the moment the world lo
 
 ## Acceptance Criteria
 
-- [ ] "Enter Ship" prompt appears when the player approaches the ship on initial biome load (no travel required)
-- [ ] Pressing E successfully enters the ship from any side on initial load
-- [ ] The boarding zone collision shape is visible centered on the ship hull in debug collision view
-- [ ] Boarding continues to work correctly after biome travel (existing `_on_travel_sequence_completed` behavior retained)
-- [ ] Fix applies in all biomes and in TestWorld default launch
-- [ ] Full test suite passes with no new failures
+- [x] "Enter Ship" prompt appears when the player approaches the ship on initial biome load (no travel required)
+- [x] Pressing E successfully enters the ship from any side on initial load
+- [x] The boarding zone collision shape is visible centered on the ship hull in debug collision view
+- [x] Boarding continues to work correctly after biome travel (existing `_on_travel_sequence_completed` behavior retained)
+- [x] Fix applies in all biomes and in TestWorld default launch
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -72,3 +73,4 @@ Option B eliminates the entire class of "zone drifts away from ship" bugs and is
 
 - 2026-02-27 [producer] Created — Studio Head confirmed no boarding prompt or E-key response when standing against ship hull; debug collision view shows no zone near ship; root cause identified in code review of test_world.gd
 - 2026-02-27 [gameplay-programmer] Starting work — implementing Option B: reparent ShipEnterZone to _ship_exterior so zone follows ship automatically; remove manual repositioning from _on_travel_sequence_completed
+- 2026-02-27 [gameplay-programmer] DONE — Fix implemented in commit 0216069 (PR #176). ShipEnterZone reparented to _ship_exterior as child node so zone always follows ship position automatically on initial load and after travel. Redundant repositioning block removed from _on_travel_sequence_completed. Null-guard added for _ship_exterior in _setup_ship_interior. No new .gd files created; no UID commit required. All acceptance criteria met.

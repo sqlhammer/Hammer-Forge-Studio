@@ -302,8 +302,12 @@ func _test_spawn_points_within_terrain_bounds() -> void:
 # ── Test Methods: World boundary ──────────────────────────
 
 func _test_world_boundary_active() -> void:
-	var has_boundary: bool = _biome.is_world_boundary_active()
+	var biome_scene: DebrisFieldBiome = DebrisFieldBiome.new()
+	add_child(biome_scene)
+	biome_scene.build_scene()
+	var has_boundary: bool = biome_scene.is_world_boundary_active()
 	assert_true(has_boundary, "World boundary should be active")
+	biome_scene.queue_free()
 
 
 # ── Test Methods: Feature requests ────────────────────────

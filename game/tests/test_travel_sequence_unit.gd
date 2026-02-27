@@ -200,11 +200,14 @@ func _test_get_biome_player_spawn_returns_valid_position() -> void:
 	assert_not_null(biome_node,
 		"Biome node should be created for spawn point test")
 	if biome_node:
+		add_child(biome_node)
+		if biome_node.has_method("generate"):
+			biome_node.generate()
 		var spawn: Vector3 = TravelSequenceManager.get_biome_player_spawn(biome_node)
 		var is_nonzero: bool = spawn != Vector3.ZERO
 		assert_true(is_nonzero,
 			"Player spawn position should be a non-zero Vector3")
-		biome_node.free()
+		biome_node.queue_free()
 
 
 func _test_get_biome_ship_spawn_returns_valid_position() -> void:
@@ -212,11 +215,14 @@ func _test_get_biome_ship_spawn_returns_valid_position() -> void:
 	assert_not_null(biome_node,
 		"Biome node should be created for spawn point test")
 	if biome_node:
+		add_child(biome_node)
+		if biome_node.has_method("generate"):
+			biome_node.generate()
 		var spawn: Vector3 = TravelSequenceManager.get_biome_ship_spawn(biome_node)
 		var is_nonzero: bool = spawn != Vector3.ZERO
 		assert_true(is_nonzero,
 			"Ship spawn position should be a non-zero Vector3")
-		biome_node.free()
+		biome_node.queue_free()
 
 
 # ── Test Methods: Error Handling ─────────────────────────

@@ -229,10 +229,10 @@ func _test_deterministic_layout() -> void:
 
 func _test_generation_completed_signal_emitted() -> void:
 	var biome_c: RockWarrensBiome = RockWarrensBiome.new()
-	var signal_received: bool = false
-	biome_c.generation_completed.connect(func() -> void: signal_received = true)
+	var spy: SignalSpy = SignalSpy.new()
+	spy.watch(biome_c, "generation_completed")
 	add_child(biome_c)
 	biome_c.generate()
-	assert_true(signal_received,
+	assert_true(spy.was_emitted("generation_completed"),
 		"generation_completed signal should be emitted after generate()")
 	biome_c.queue_free()

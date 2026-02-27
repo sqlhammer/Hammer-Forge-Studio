@@ -21,20 +21,20 @@ Design the modal navigation console screen, the biome map within it, and the per
 
 ## Acceptance Criteria
 
-- [ ] **Navigation console modal wireframe:**
+- [x] **Navigation console modal wireframe:**
   - Full-screen modal (consistent with Fabricator/tech tree panel pattern)
   - Biome map — top-down abstract representation of available biomes with the current location highlighted
   - Each biome entry shows: name, distance, estimated fuel cost, available/locked state
   - Confirm travel button — disabled when fuel insufficient, shows reason
   - Cancel / close button
   - Follows existing UI style guide (color palette, typography, panel borders)
-- [ ] **Fuel gauge HUD element:**
+- [x] **Fuel gauge HUD element:**
   - Persistent display showing current fuel level as a bar or numeric readout
   - Low-fuel warning state (visual change at ≤25% — consistent with battery amber warning pattern)
   - Empty state (distinct visual when fuel = 0)
   - Positioned consistently with existing HUD layout (does not overlap compass, battery, or other elements)
-- [ ] Wireframes exported/saved to `docs/art/wireframes/m8/`
-- [ ] UI style guide updated if any new patterns are introduced
+- [x] Wireframes exported/saved to `docs/art/wireframes/m8/`
+- [x] UI style guide updated if any new patterns are introduced
 
 ## Implementation Notes
 
@@ -44,7 +44,43 @@ Design the modal navigation console screen, the biome map within it, and the per
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+### For TICKET-0167 (Gameplay Programmer — Navigation Console UI)
+
+See `docs/art/wireframes/m8/navigation-console-modal.md` for full spec.
+
+**Exported properties required:**
+| Property / Signal | Type | Purpose |
+|-------------------|------|---------|
+| `@export var navigation_system: NavigationSystem` | Node ref | Biome registry, distances, travel state |
+| `@export var fuel_system: FuelSystem` | Node ref | Current fuel level, cost calculations |
+| `signal travel_confirmed(destination_biome_id: String)` | Signal | Emitted when player presses CONFIRM TRAVEL |
+| `signal panel_closed()` | Signal | Emitted when dismissed without travel |
+| `func open_panel()` | Method | Show panel, reset to no-selection state |
+| `func close_panel()` | Method | Hide panel, restore input handling |
+
+**Key implementation notes:**
+- CanvasLayer layer 2; non-pause model (game time continues, InputManager suppresses gameplay inputs)
+- Biome map uses manual node layout inside a `Control` container (not auto-layout)
+- Reactive detail panel: map nodes emit `biome_selected(biome_id)`, detail panel updates on that signal
+- CONFIRM TRAVEL disabled reason label ("Need X more Fuel Cell(s)") shown below button when insufficient
+
+---
+
+### For TICKET-0169 (Gameplay Programmer — Fuel Consumption HUD)
+
+See `docs/art/wireframes/m8/fuel-gauge-hud.md` for full spec.
+
+**Exported properties required:**
+| Property / Signal | Type | Purpose |
+|-------------------|------|---------|
+| `@export var fuel_system: FuelSystem` | Node ref | Current fuel level and max capacity |
+| `func set_fuel_level(current: float, maximum: float)` | Method | Called by fuel system to update display |
+
+**Key implementation notes:**
+- Anchored `bottom_center`, 32px from bottom edge
+- Reuses battery bar `ProgressBar` theme; state colors via `theme_override_colors`
+- States: Full (green) / Normal (teal) / Low ≤25% (amber, pulse) / Empty (coral, flash)
+- Pulse + flash via `Tween` — create on state entry, kill on state exit
 
 ## Activity Log
 

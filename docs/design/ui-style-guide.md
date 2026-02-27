@@ -2,7 +2,7 @@
 
 **Owner:** ui-ux-designer
 **Status:** Active
-**Last Updated:** 2026-02-25
+**Last Updated:** 2026-02-27
 
 > The visual and interaction standard for all game UI. All UI scenes must comply with this guide before submission.
 
@@ -186,6 +186,50 @@ Used for battery, mining progress, and any timed fill.
 - Padding: `sp-3`
 - Auto-dismiss: 3 seconds (configurable per notification type)
 - Stacks vertically (max 3 visible, oldest dismissed first)
+
+### Resource Gauge (Battery / Fuel)
+
+The canonical pattern for any persistent "resource meter" shown in the HUD. Used by the suit battery bar and the ship fuel gauge.
+
+**Structure:** `[Icon 24×24px] [sp-2] [Progress Bar 160×10px] [sp-2] [Label ~40px]`
+
+- **Container:** `HBoxContainer`, anchored per-element position (see individual wireframes for anchor)
+- **Icon:** HUD line icon, 24×24px, color matches current state
+- **Bar:** 160px wide, 10px tall. Background `#1A2736`, fill color = current state color, 2px border radius, no border
+- **Label:** `data` (18px) Mono, integer percentage format (`XX%`), color matches current state
+
+**States (shared across all resource gauges):**
+
+| State | Condition | Color | Special Behavior |
+|-------|-----------|-------|-----------------|
+| **Full** | 100% | Positive Green `#4ADE80` | Static |
+| **Normal** | 26%–99% | Primary Teal `#00D4AA` | Fill decreases as resource drains |
+| **Warning** | 1%–25% | Amber `#FFB830` | Slow pulse (opacity 70%→100%, 1.5s loop) |
+| **Empty** | 0% | Accent Coral `#FF6B5A` | No fill; icon flashes 0.5s on/off for 3s, then holds 50% opacity |
+
+**Triple-encoding rule:** State must be communicated by color + fill level + animated pulse — never color alone. Required for color-blind accessibility and TV viewing distance legibility.
+
+**Adding a new resource gauge:** Follow this pattern. Define per-element anchor position in the individual HUD wireframe. Do not introduce a new visual language for resource meters without Studio Head approval.
+
+### Biome Node Map
+
+Used by the navigation console modal. An abstract node graph representing the travel network between biomes.
+
+**Purpose:** Spatial navigation UI for selecting a travel destination. Not a geographic map — a logical graph of travel connections.
+
+**Node types:**
+
+| Node Type | Border | Background | Opacity | Notes |
+|-----------|--------|------------|---------|-------|
+| **Current location** | 2px solid Teal `#00D4AA` | Panel BG Light `#1A2736` at 90% | 100% | `◉` indicator icon; not focusable |
+| **Available destination** | 1px solid `#1A2736` (normal) / 2px solid Teal (focused/selected) | `#1A2736` at 70% | 100% | Focusable; shows name + distance + fuel cost |
+| **Locked destination** | 1px dashed Neutral `#94A3B8` | `#1A2736` at 40% | 40% | Lock icon; not focusable |
+
+**Path lines:** 1px solid Primary Dim `#007A63` connecting parent nodes to child destination nodes.
+
+**Information per node:** Name (`hud-sm` 16px), distance (`▶ X.X km`, `hud-xs` 14px), estimated fuel cost (`⛽ N cells`, `hud-xs` 14px).
+
+**Layout:** Fixed manual positioning within a `Control` container — not auto-layout. Biome graph topology is defined per milestone based on the registered biome count.
 
 ---
 

@@ -4,8 +4,8 @@
     "default_worker": "sonnet",
     "overrides": {
       "qa-engineer": "sonnet",
-      "gameplay-programmer": "sonnet",
-      "systems-programmer": "sonnet",
+      "gameplay-programmer": "opus",
+      "systems-programmer": "opus",
       "technical-artist": "opus",
       "character-animator": "opus",
       "environment-artist": "sonnet",

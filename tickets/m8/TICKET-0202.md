@@ -2,7 +2,7 @@
 id: TICKET-0202
 title: "Bugfix — Resources cannot be scanned in Shattered Flats"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -47,3 +47,4 @@ Aiming the scanner at a resource node and activating it produces a scan result i
 ## Activity Log
 
 - 2026-02-27 [producer] Created — Studio Head reported during final M8 playtest review
+- 2026-02-27 [gameplay-programmer] Starting work — investigating scanner raycast collision layer/mask on Shattered Flats resource nodes

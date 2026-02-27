@@ -5,11 +5,17 @@
     "overrides": {
       "qa-engineer": "opus",
       "gameplay-programmer": "opus",
-      "systems-programmer": "sonnet",
+      "systems-programmer": "opus",
       "technical-artist": "opus",
       "character-animator": "opus",
       "environment-artist": "opus",
-      "tools-devops-engineer": "opus"
+      "tools-devops-engineer": "opus",
+      "game-designer": "opus",
+      "narrative-designer": "opus",
+      "technical-writer": "opus",
+      "ui-ux-designer": "opus",
+      "audio-engineer": "opus",
+      "vfx-artist": "opus"
     }
   },
   "budgets": {

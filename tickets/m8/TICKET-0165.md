@@ -2,7 +2,7 @@
 id: TICKET-0165
 title: "UI/UX — navigation console modal, biome map, fuel gauge HUD designs"
 type: DESIGN
-status: PENDING
+status: IN_PROGRESS
 priority: P1
 owner: ui-ux-designer
 created_by: producer
@@ -49,3 +49,4 @@ Design the modal navigation console screen, the biome map within it, and the per
 ## Activity Log
 
 - 2026-02-27 [producer] Created — M8 Foundation phase
+- 2026-02-27 [ui-ux-designer] Starting work — authoring navigation console modal wireframe and fuel gauge HUD wireframe

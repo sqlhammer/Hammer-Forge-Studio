@@ -2,7 +2,7 @@
 id: TICKET-0222
 title: "Bugfix — Mining minigame lines are too large for the node; couple minigame as child scene to the deposit scene"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -32,12 +32,12 @@ Minigame trace lines are correctly sized and positioned relative to the deposit 
 
 ## Acceptance Criteria
 
-- [ ] Minigame trace lines are visually contained within the deposit mesh at all biome node scales
-- [ ] Minigame scene is a child scene parented to the deposit scene (not spawned at hardcoded world-space offsets in `Mining.gd`)
-- [ ] `Mining.gd` instantiates and activates the minigame via a reference to the child scene rather than constructing lines procedurally
-- [ ] Minigame behavior (dwell trace, completion, bonus yield) is unchanged
-- [ ] Fix applies to all deposit variants: surface, deep, Scrap Metal, Cryonite
-- [ ] Full test suite passes with no new failures
+- [x] Minigame trace lines are visually contained within the deposit mesh at all biome node scales
+- [x] Minigame scene is a child scene parented to the deposit scene (not spawned at hardcoded world-space offsets in `Mining.gd`)
+- [x] `Mining.gd` instantiates and activates the minigame via a reference to the child scene rather than constructing lines procedurally
+- [x] Minigame behavior (dwell trace, completion, bonus yield) is unchanged
+- [x] Fix applies to all deposit variants: surface, deep, Scrap Metal, Cryonite
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -50,3 +50,4 @@ Minigame trace lines are correctly sized and positioned relative to the deposit 
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest
 - 2026-02-28 [gameplay-programmer] Starting work — creating MiningMinigame child scene, refactoring Mining.gd
+- 2026-02-28 [gameplay-programmer] DONE — commit f9b84dd, PR #187 (https://github.com/sqlhammer/Hammer-Forge-Studio/pull/187). Created MiningMinigame scene+script with local-space lines; refactored Mining.gd to delegate; lines auto-scale to deposit visual mesh

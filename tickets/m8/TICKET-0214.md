@@ -2,12 +2,12 @@
 id: TICKET-0214
 title: "Feature — Ship marker persistently visible on compass at all times"
 type: FEATURE
-status: DONE
+status: OPEN
 priority: P2
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-28
-updated_at: 2026-02-28
+updated_at: 2026-02-28T09:00:00
 milestone: "M8"
 phase: "QA"
 depends_on: []
@@ -21,13 +21,13 @@ The ship has no marker on the compass. Players cannot determine the ship's direc
 
 ## Acceptance Criteria
 
-- [x] A persistent ship marker is always visible on the compass HUD, indicating the bearing to the ship
-- [x] The marker is visually distinct from deposit ping markers (different icon or color — e.g., use a ship icon or white/amber instead of teal)
-- [x] The marker shows the distance to the ship when the player is facing within the distance cone (consistent with deposit marker behavior)
-- [x] The marker does not require a ping — it is always present from the moment the biome loads
-- [x] The marker updates correctly as the ship repositions between biomes
-- [x] Fix does not affect existing deposit ping markers
-- [x] Full test suite passes with no new failures
+- [ ] A persistent ship marker is always visible on the compass HUD, indicating the bearing to the ship
+- [ ] The marker is visually distinct from deposit ping markers (different icon or color — e.g., use a ship icon or white/amber instead of teal)
+- [ ] The marker shows the distance to the ship when the player is facing within the distance cone (consistent with deposit marker behavior)
+- [ ] The marker does not require a ping — it is always present from the moment the biome loads
+- [ ] The marker updates correctly as the ship repositions between biomes
+- [ ] Fix does not affect existing deposit ping markers
+- [ ] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -41,3 +41,4 @@ The ship has no marker on the compass. Players cannot determine the ship's direc
 - 2026-02-28 [producer] Created — Studio Head requested during M8 playtest
 - 2026-02-28 [gameplay-programmer] IN_PROGRESS — Starting work
 - 2026-02-28 [gameplay-programmer] DONE — Commit 01abba8, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/181
+- 2026-02-28 [producer] REOPENED — Studio Head confirmed ship marker is not visible in-game despite prior DONE; reverting to OPEN for reinvestigation

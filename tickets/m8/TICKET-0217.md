@@ -2,7 +2,7 @@
 id: TICKET-0217
 title: "Bugfix — Ship recharge zone does not recharge player in biomes; ensure recharge area is part of the ship scene"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -32,11 +32,11 @@ When the player enters the ship's recharge zone in any biome, `SuitBattery.start
 
 ## Acceptance Criteria
 
-- [ ] Player suit battery recharges when standing in the ship's recharge zone in all biomes (Shattered Flats, Rock Warrens, Debris Field)
-- [ ] `SuitBattery.stop_recharge()` is called when the player exits the zone
-- [ ] The recharge zone is a child node of the ship exterior scene (`ship_exterior.tscn`) so it loads automatically with the ship into any biome — no per-biome or per-level wiring needed beyond the scene
-- [ ] Recharge behavior in TestWorld is not regressed
-- [ ] Full test suite passes with no new failures
+- [x] Player suit battery recharges when standing in the ship's recharge zone in all biomes (Shattered Flats, Rock Warrens, Debris Field)
+- [x] `SuitBattery.stop_recharge()` is called when the player exits the zone
+- [x] The recharge zone is a child node of the ship exterior scene (`ship_exterior.tscn`) so it loads automatically with the ship into any biome — no per-biome or per-level wiring needed beyond the scene
+- [x] Recharge behavior in TestWorld is not regressed
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -49,3 +49,4 @@ When the player enters the ship's recharge zone in any biome, `SuitBattery.start
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest
 - 2026-02-28 [gameplay-programmer] Starting work — moving recharge logic into ShipExterior
+- 2026-02-28 [gameplay-programmer] DONE — commit f9bf2f5, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/182 merged

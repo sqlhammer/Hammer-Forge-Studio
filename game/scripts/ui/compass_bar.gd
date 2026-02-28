@@ -141,7 +141,7 @@ func _bearing_to_screen_x(bearing: float, player_yaw: float) -> float:
 		diff += 360.0
 	# Map to compass width: center = player_yaw, edges = +/-90 degrees
 	var fov_half: float = 90.0
-	var screen_x: float = (COMPASS_WIDTH / 2.0) + (diff / fov_half) * (COMPASS_WIDTH / 2.0)
+	var screen_x: float = (COMPASS_WIDTH / 2.0) - (diff / fov_half) * (COMPASS_WIDTH / 2.0)
 	return screen_x
 
 func _draw_cardinals(player_yaw: float) -> void:

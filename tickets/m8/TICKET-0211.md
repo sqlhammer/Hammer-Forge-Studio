@@ -2,7 +2,7 @@
 id: TICKET-0211
 title: "Bugfix — Mining minigame lines are too large for the node; couple minigame as child scene to the deposit scene"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -49,3 +49,4 @@ Minigame trace lines are correctly sized and positioned relative to the deposit 
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest
+- 2026-02-28 [gameplay-programmer] Starting work — creating MiningMinigame child scene, refactoring Mining.gd

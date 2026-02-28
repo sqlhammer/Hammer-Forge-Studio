@@ -2,7 +2,7 @@
 id: TICKET-0212
 title: "Bugfix — Cryonite cannot be scanned and therefore cannot be mined"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -46,3 +46,4 @@ Aiming the scanner at a Cryonite deposit and activating it produces a scan resul
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest
+- 2026-02-28 [gameplay-programmer] Starting work — investigation complete, implementing fix

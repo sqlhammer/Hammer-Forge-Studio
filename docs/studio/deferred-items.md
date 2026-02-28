@@ -1,7 +1,7 @@
 # Deferred Work Items
 
 **Owner:** producer
-**Last Updated:** 2026-02-27 (D-026–D-029 added from TICKET-0177 code review)
+**Last Updated:** 2026-02-28 (D-030–D-032 added from M8 playtest; D-026–D-029 added from TICKET-0177 code review)
 
 > Tracks gameplay features and systems that were intentionally descoped from a milestone during planning. Each item references the design spec it originates from and the milestone where it was deferred. These items MUST be revisited and scheduled into a future milestone — they are not optional cuts, they are postponed work.
 
@@ -71,6 +71,9 @@
 | D-027 | DeepResourceNode class unused in biome scenes — biome scripts create `Deposit.new()` with `infinite = true` instead of `DeepResourceNode.new()`; class exists but is never instantiated in production code | N/A (M8 code review) | P3 finding from TICKET-0177 — behavior is correct; using DeepResourceNode would consolidate defaults | M9 | Open | — |
 | D-028 | PlayerFirstPerson uses `_process()` for physics movement — `move_and_slide()` called from `_process()` instead of `_physics_process()`; works in Godot 4 but inconsistent with CharacterBody3D best practices | N/A (pre-M8, noted during M8 review) | P3 finding from TICKET-0177 — no observed issues; migration would improve physics consistency | M9 | Open | — |
 | D-029 | NavigationConsole test null spy reference — `test_navigation_console_unit` `after_each()` calls `_spy.clear()` on null spy, producing SCRIPT ERRORs in log | N/A (QA finding from TICKET-0176) | P3 — tests pass but log is noisy; already noted in TICKET-0176 activity log | M9 | Open | — |
+| D-030 | Drop items from inventory onto the ground as physical world objects and pick them back up via interaction | `docs/design/gdd.md` | Requested during M8 playtest; inventory management feature, not required for M8 navigation loop | M9 | Scheduled | TICKET-0218 |
+| D-031 | Destroy (permanently discard) an item directly from inventory without spawning it in the world | `docs/design/gdd.md` | Requested during M8 playtest; inventory management feature, not required for M8 navigation loop | M9 | Scheduled | TICKET-0219 |
+| D-032 | Debug launcher toggle for 3× player movement speed to accelerate QA traversal of large biomes | N/A (tooling/QA) | Requested during M8 playtest; developer convenience feature, not gameplay | M9 | Scheduled | TICKET-0220 |
 
 ---
 

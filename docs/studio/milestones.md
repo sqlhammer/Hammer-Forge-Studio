@@ -34,7 +34,7 @@
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Active | 28 | 28 | 0 | — |
-| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 10 | 10 | 0 | — |
+| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 20 | 20 | 0 | — |
 | M10 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
 | M11 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
 | M12 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
@@ -451,13 +451,21 @@
 **Scope:** TBD — to be defined after M8 closes (visual asset phases). Orchestrator resilience phase is pre-scoped.
 
 **Phases:**
-- **Orchestrator Resilience** (TICKET-0182–TICKET-0188): Conductor hardening for usage-limit edge cases — checkpoint system, LIMIT_WAIT cooldown, resume dispatch, structured logging, documentation. **Parallel-eligible: this phase does not block and is not blocked by any other M9 phase.** May begin as soon as M8 closes. Touches only `orchestrator/` code and `docs/engineering/` — no game code changes.
+- **Root Game** (TICKET-0229–TICKET-0235): Game entry point architecture — root `game` scene, main menu, GameWorld, DebugLauncher refactor, TestWorld deprecation. **Must complete before all other M9 phases begin.** Introduces the canonical game launch flow: `game.tscn` routes to debug_launcher (debug builds) or main_menu (release); Play loads GameWorld using `Global.starting_biome` and `Global.starting_inventory`.
+- **Orchestrator Resilience** (TICKET-0182–TICKET-0188): Conductor hardening for usage-limit edge cases — checkpoint system, LIMIT_WAIT cooldown, resume dispatch, structured logging, documentation. Parallel-eligible within this phase; depends on Root Game completing first. Touches only `orchestrator/` code and `docs/engineering/` — no game code changes.
 - Additional visual asset phases TBD at M9 kickoff — require Studio Head approval.
 
-**Tickets:** TICKET-0182 through TICKET-0191 (Orchestrator Resilience); additional tickets TBD for visual asset phases.
+**Tickets:** TICKET-0229–TICKET-0235 (Root Game); TICKET-0182–TICKET-0191 (Orchestrator Resilience); TICKET-0218–TICKET-0220 (TBD); additional tickets TBD for visual asset phases.
 
 | Phase | Ticket | Title | Type | Priority | Owner |
 |-------|--------|-------|------|----------|-------|
+| Root Game | TICKET-0229 | Add starting_biome and starting_inventory params to Global | TASK | P1 | systems-programmer |
+| Root Game | TICKET-0230 | Create GameWorld scene — world-building extracted from DebugLauncher | TASK | P1 | gameplay-programmer |
+| Root Game | TICKET-0231 | Create Main Menu scene with Play button | TASK | P1 | gameplay-programmer |
+| Root Game | TICKET-0232 | Create game root scene with debug-mode routing; set as project main scene | TASK | P1 | gameplay-programmer |
+| Root Game | TICKET-0233 | Refactor DebugLauncher — set startup params, hand off to Main Menu | REFACTOR | P1 | gameplay-programmer |
+| Root Game | TICKET-0234 | Deprecate TestWorld — remove files and update affected tests | TASK | P1 | qa-engineer |
+| Root Game | TICKET-0235 | QA — write unit tests and validate full Root Game phase | QA | P1 | qa-engineer |
 | Orchestrator Resilience | TICKET-0182 | Fix dead-lock on IN_PROGRESS pre-claim and add silent-success detection | BUG | P0 | tools-devops-engineer |
 | Orchestrator Resilience | TICKET-0183 | Checkpoint system — write, read, and clear suspension checkpoints | FEATURE | P1 | tools-devops-engineer |
 | Orchestrator Resilience | TICKET-0184 | Usage-limit detection and LIMIT_WAIT cooldown state | FEATURE | P1 | tools-devops-engineer |
@@ -468,6 +476,17 @@
 | Orchestrator Resilience | TICKET-0190 | Auto-remediation for silently-merged PRs with IN_PROGRESS tickets | FEATURE | P3 | tools-devops-engineer |
 | Orchestrator Resilience | TICKET-0191 | Log archive rotation at milestone close | TASK | P3 | tools-devops-engineer |
 | Orchestrator Resilience | TICKET-0188 | Documentation — resilience runbook, CLAUDE.md updates, and config reference | TASK | P2 | producer |
+
+**Dependency Graph (Root Game):**
+```
+TICKET-0229 (Global startup params)
+  ├─► TICKET-0230 (GameWorld scene)
+  │     └─► TICKET-0231 (Main Menu) ◄── also depends on TICKET-0229
+  │           └─► TICKET-0232 (game root scene + main scene)
+  │                 ├─► TICKET-0233 (DebugLauncher refactor) ◄── also depends on TICKET-0229, TICKET-0231
+  │                 └─► TICKET-0234 (TestWorld deprecation) ◄── also depends on TICKET-0230, TICKET-0233
+  │                       └─► TICKET-0235 (QA gate) ◄── depends on ALL above
+```
 
 **Dependency Graph (Orchestrator Resilience):**
 ```

@@ -1,5 +1,5 @@
 ---
-id: TICKET-0210
+id: TICKET-0221
 title: "Bugfix — Cryonite nodes do not appear on compass when pinged"
 type: BUGFIX
 status: IN_PROGRESS
@@ -40,7 +40,7 @@ Cryonite deposits appear on the compass after a ping, consistent with all other 
 
 - Check whether `deposit_deep_cryonite.tscn` and its surface Cryonite variants call `DepositRegistry.register()` during instantiation — the root cause of TICKET-0201 was missing `DepositRegistry.register()` calls; Cryonite nodes may have the same omission
 - Verify Cryonite nodes are assigned the correct groups (e.g., `"scannable"`, `"resource_nodes"`) in all biomes that place them
-- Cross-reference with TICKET-0212 (Cryonite cannot be scanned) — root cause is likely shared
+- Cross-reference with TICKET-0223 (Cryonite cannot be scanned) — root cause is likely shared
 
 ## Activity Log
 

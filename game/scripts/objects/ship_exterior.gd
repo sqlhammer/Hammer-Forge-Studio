@@ -1,5 +1,7 @@
 ## Ship exterior wrapper: generates VHACD convex hull collision from the ship mesh,
 ## provides a recharge zone and entrance marker for the ship hull.
+## Drives suit battery recharge directly when the player enters the recharge zone,
+## eliminating the need for per-scene signal wiring (TICKET-0217).
 class_name ShipExterior
 extends StaticBody3D
 
@@ -12,6 +14,9 @@ const DECOMP_MAX_HULLS: int = 64
 const DECOMP_RESOLUTION: int = 100000
 const DECOMP_MAX_VERTS: int = 64
 
+# ── Private Variables ─────────────────────────────────────
+var _player_in_recharge_zone: bool = false
+
 # ── Onready Variables ─────────────────────────────────────
 @onready var _recharge_zone: Area3D = $RechargeZone
 @onready var _ship_mesh: Node3D = $ShipMesh
@@ -23,6 +28,13 @@ func _ready() -> void:
 	_recharge_zone.body_entered.connect(_on_body_entered_recharge)
 	_recharge_zone.body_exited.connect(_on_body_exited_recharge)
 	Global.log("ShipExterior: ready")
+
+func _process(delta: float) -> void:
+	if _player_in_recharge_zone:
+		if not SuitBattery.is_recharging() and SuitBattery.get_charge_percent() < 1.0:
+			SuitBattery.start_recharge()
+		if SuitBattery.is_recharging():
+			SuitBattery.process_recharge(delta)
 
 # ── Public Methods ───────────────────────────────────────
 
@@ -59,6 +71,14 @@ func _generate_hull_collision() -> void:
 
 func _on_body_entered_recharge(body: Node3D) -> void:
 	recharge_zone_entered.emit(body)
+	if body.collision_layer & PhysicsLayers.PLAYER != 0:
+		_player_in_recharge_zone = true
+		Global.log("ShipExterior: player entered recharge zone")
 
 func _on_body_exited_recharge(body: Node3D) -> void:
 	recharge_zone_exited.emit(body)
+	if body.collision_layer & PhysicsLayers.PLAYER != 0:
+		_player_in_recharge_zone = false
+		if SuitBattery.is_recharging():
+			SuitBattery.stop_recharge()
+		Global.log("ShipExterior: player exited recharge zone")

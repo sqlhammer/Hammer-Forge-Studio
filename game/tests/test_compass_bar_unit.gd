@@ -51,8 +51,8 @@ func register_tests() -> void:
 
 	# Bearing calculation
 	add_test("bearing_center_maps_to_center_x", _test_bearing_center_maps_to_center_x)
-	add_test("bearing_90_right_maps_to_right_edge", _test_bearing_90_right_maps_to_right_edge)
-	add_test("bearing_90_left_maps_to_left_edge", _test_bearing_90_left_maps_to_left_edge)
+	add_test("bearing_90_cw_maps_to_left_edge", _test_bearing_90_cw_maps_to_left_edge)
+	add_test("bearing_90_ccw_maps_to_right_edge", _test_bearing_90_ccw_maps_to_right_edge)
 	add_test("bearing_wraps_around_360", _test_bearing_wraps_around_360)
 
 
@@ -170,26 +170,26 @@ func _test_bearing_center_maps_to_center_x() -> void:
 		"Bearing matching yaw should map to center of compass")
 
 
-func _test_bearing_90_right_maps_to_right_edge() -> void:
-	# 90 degrees right of yaw should map to right edge
+func _test_bearing_90_cw_maps_to_left_edge() -> void:
+	# 90 degrees clockwise of yaw should map to left edge (negated mapping)
 	var screen_x: float = _compass._bearing_to_screen_x(180.0, 90.0)
-	var expected_right: float = CompassBar.COMPASS_WIDTH
-	assert_equal(screen_x, expected_right,
-		"Bearing 90 degrees right should map to right edge")
-
-
-func _test_bearing_90_left_maps_to_left_edge() -> void:
-	# 90 degrees left of yaw should map to left edge
-	var screen_x: float = _compass._bearing_to_screen_x(0.0, 90.0)
 	var expected_left: float = 0.0
 	assert_equal(screen_x, expected_left,
-		"Bearing 90 degrees left should map to left edge")
+		"Bearing 90 degrees CW should map to left edge")
+
+
+func _test_bearing_90_ccw_maps_to_right_edge() -> void:
+	# 90 degrees counter-clockwise of yaw should map to right edge (negated mapping)
+	var screen_x: float = _compass._bearing_to_screen_x(0.0, 90.0)
+	var expected_right: float = CompassBar.COMPASS_WIDTH
+	assert_equal(screen_x, expected_right,
+		"Bearing 90 degrees CCW should map to right edge")
 
 
 func _test_bearing_wraps_around_360() -> void:
-	# Player facing 350 degrees, bearing at 10 degrees = 20 degrees to the right
+	# Player facing 350 degrees, bearing at 10 degrees = 20 degrees CW diff
 	var screen_x: float = _compass._bearing_to_screen_x(10.0, 350.0)
-	var expected: float = (CompassBar.COMPASS_WIDTH / 2.0) + (20.0 / 90.0) * (CompassBar.COMPASS_WIDTH / 2.0)
+	var expected: float = (CompassBar.COMPASS_WIDTH / 2.0) - (20.0 / 90.0) * (CompassBar.COMPASS_WIDTH / 2.0)
 	assert_equal(screen_x, expected,
 		"Bearing wrapping around 360 should calculate correct screen position")
 

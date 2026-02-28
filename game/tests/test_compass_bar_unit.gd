@@ -36,7 +36,7 @@ func after_each() -> void:
 func register_tests() -> void:
 	# Constants
 	add_test("marker_persist_time_is_60", _test_marker_persist_time_is_60)
-	add_test("max_markers_is_10", _test_max_markers_is_10)
+	add_test("max_markers_is_30", _test_max_markers_is_30)
 	add_test("distance_cone_is_45_degrees", _test_distance_cone_is_45_degrees)
 	add_test("compass_width_is_600", _test_compass_width_is_600)
 
@@ -63,9 +63,9 @@ func _test_marker_persist_time_is_60() -> void:
 		"MARKER_PERSIST_TIME should be 60.0 seconds")
 
 
-func _test_max_markers_is_10() -> void:
-	assert_equal(CompassBar.MAX_MARKERS, 10,
-		"MAX_MARKERS should be 10")
+func _test_max_markers_is_30() -> void:
+	assert_equal(CompassBar.MAX_MARKERS, 30,
+		"MAX_MARKERS should be 30")
 
 
 func _test_distance_cone_is_45_degrees() -> void:

@@ -8,7 +8,7 @@ const COMPASS_HEIGHT: float = 32.0
 const MARKER_PERSIST_TIME: float = 60.0
 const MARKER_FADE_TIME: float = 2.0
 const DISTANCE_CONE_DEG: float = 45.0
-const MAX_MARKERS: int = 10
+const MAX_MARKERS: int = 30
 
 ## Style colors matching UI style guide
 const COLOR_BG := Color("#0F1923", 0.7)

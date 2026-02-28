@@ -2,7 +2,7 @@
 id: TICKET-0221
 title: "Bugfix — Cryonite nodes do not appear on compass when pinged"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -45,3 +45,4 @@ Cryonite deposits appear on the compass after a ping, consistent with all other 
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest
+- 2026-02-28 [gameplay-programmer] Starting work — investigating Cryonite compass visibility

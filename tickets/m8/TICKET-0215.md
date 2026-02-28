@@ -2,7 +2,7 @@
 id: TICKET-0215
 title: "Bugfix — Compass rotates opposite to desired direction"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -32,11 +32,11 @@ When the player turns right (clockwise), the compass scrolls left — East moves
 
 ## Acceptance Criteria
 
-- [ ] Turning right causes the compass to scroll left (East approaches center from the right)
-- [ ] Turning left causes the compass to scroll right (West approaches center from the left)
-- [ ] All cardinal labels (N, NE, E, SE, S, SW, W, NW) are in the correct order on the compass
-- [ ] Ping markers move consistently with the corrected compass direction
-- [ ] Full test suite passes with no new failures; update any tests asserting compass scroll direction
+- [x] Turning right causes the compass to scroll left (East approaches center from the right)
+- [x] Turning left causes the compass to scroll right (West approaches center from the left)
+- [x] All cardinal labels (N, NE, E, SE, S, SW, W, NW) are in the correct order on the compass
+- [x] Ping markers move consistently with the corrected compass direction
+- [x] Full test suite passes with no new failures; update any tests asserting compass scroll direction
 
 ## Implementation Notes
 
@@ -47,3 +47,5 @@ When the player turns right (clockwise), the compass scrolls left — East moves
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest
+- 2026-02-28 [gameplay-programmer] IN_PROGRESS — Starting work
+- 2026-02-28 [gameplay-programmer] DONE — Negated diff-to-screen_x mapping in _bearing_to_screen_x(), updated 3 unit tests. Commit 6c91260, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/185

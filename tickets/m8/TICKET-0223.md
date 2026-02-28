@@ -1,5 +1,5 @@
 ---
-id: TICKET-0212
+id: TICKET-0223
 title: "Bugfix — Cryonite cannot be scanned and therefore cannot be mined"
 type: BUGFIX
 status: IN_PROGRESS
@@ -17,7 +17,7 @@ tags: [bugfix, cryonite, scanner, scan, mining, resource-node, m8-qa]
 
 ## Summary
 
-Cryonite deposit nodes cannot be scanned by the player's scanner. Aiming at a Cryonite node and activating the scanner produces no result, meaning the deposit cannot be analyzed and is therefore unmineble. Other deposit types scan correctly.
+Cryonite deposit nodes cannot be scanned by the player's scanner. Aiming at a Cryonite node and activating the scanner produces no result, meaning the deposit cannot be analyzed and is therefore unmineable. Other deposit types scan correctly.
 
 ## Steps to Reproduce
 
@@ -39,9 +39,9 @@ Aiming the scanner at a Cryonite deposit and activating it produces a scan resul
 
 ## Implementation Notes
 
-- Likely shares the same root cause as TICKET-0210 (Cryonite missing from compass): Cryonite nodes may not be calling `DepositRegistry.register()` on instantiation, and/or may be missing the correct collision layer/mask for the scanner raycast
+- Likely shares the same root cause as TICKET-0221 (Cryonite missing from compass): Cryonite nodes may not be calling `DepositRegistry.register()` on instantiation, and/or may be missing the correct collision layer/mask for the scanner raycast
 - Check `deposit_deep_cryonite.tscn` and any surface Cryonite scene variants: confirm collision shapes are active, collision layers match the scanner's raycast mask, and `DepositRegistry.register()` is called in `_ready()` or during biome placement
-- Investigate together with TICKET-0210 — a single fix may resolve both
+- Investigate together with TICKET-0221 — a single fix may resolve both
 
 ## Activity Log
 

@@ -2,7 +2,7 @@
 id: TICKET-0216
 title: "Bugfix — Player energy bar is no longer visible"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -30,10 +30,10 @@ The player's suit energy bar is always visible in the HUD, consistent with TestW
 
 ## Acceptance Criteria
 
-- [ ] The BatteryBar is visible on-screen in all biomes from the moment the scene loads
-- [ ] The bar updates correctly as the suit battery drains and recharges
-- [ ] Fix does not regress HUD layout or other HUD elements (compass, interaction prompt, fuel gauge)
-- [ ] Full test suite passes with no new failures
+- [x] The BatteryBar is visible on-screen in all biomes from the moment the scene loads
+- [x] The bar updates correctly as the suit battery drains and recharges
+- [x] Fix does not regress HUD layout or other HUD elements (compass, interaction prompt, fuel gauge)
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -45,3 +45,5 @@ The player's suit energy bar is always visible in the HUD, consistent with TestW
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest
+- 2026-02-28 [gameplay-programmer] Starting work — root cause identified: set_anchors_preset() + position= anti-pattern (same as TICKET-0152) leaves offset_right stale at 0, giving BatteryBar a negative width (-32px), suppressing rendering
+- 2026-02-28 [gameplay-programmer] DONE — commit 9a0e3db, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/188 (merged). Moved BatteryBar and FuelGauge anchor/offsets from GDScript to game_hud.tscn

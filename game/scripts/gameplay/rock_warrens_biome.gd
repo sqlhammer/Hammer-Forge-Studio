@@ -558,6 +558,19 @@ func _create_deposit(
 
 	deposit.add_to_group("interactable")
 
+	# Add interaction collision body so scanner raycast (mask=INTERACTABLE) can hit deposits
+	var interact_body: StaticBody3D = StaticBody3D.new()
+	interact_body.name = "InteractBody"
+	interact_body.collision_layer = PhysicsLayers.INTERACTABLE
+	interact_body.collision_mask = 0
+	var interact_col: CollisionShape3D = CollisionShape3D.new()
+	interact_col.name = "CollisionShape3D"
+	var interact_box: BoxShape3D = BoxShape3D.new()
+	interact_box.size = Vector3(1.5, 1.5, 1.5)
+	interact_col.shape = interact_box
+	interact_body.add_child(interact_col)
+	deposit.add_child(interact_body)
+
 	# Register with DepositRegistry so scanner ping can detect this deposit
 	DepositRegistry.register(deposit)
 

@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" path="res://assets/meshes/cryonite_deposit.glb" id="2_mesh"]
 
 [node name="DepositDeepCryonite" instance=ExtResource("1_base")]
+collision_layer = 8
 resource_type = 4
 
 [node name="CryoniteMesh" parent="." instance=ExtResource("2_mesh")]

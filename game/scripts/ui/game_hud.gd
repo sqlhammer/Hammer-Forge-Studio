@@ -150,13 +150,8 @@ func _setup_hud_positions() -> void:
 	_scanner_readout.anchor_bottom = 0.5
 	_scanner_readout.position = Vector2(-ScannerReadout.READOUT_WIDTH - 80, -160)
 
-	# Battery bar — bottom-left
-	_battery_bar.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	_battery_bar.position = Vector2(32, -BatteryBar.TOTAL_HEIGHT - 32)
-
-	# Fuel gauge — bottom-center (32px from bottom edge, horizontally centered)
-	_fuel_gauge.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_fuel_gauge.position = Vector2(-FuelGauge.TOTAL_WIDTH / 2.0, -FuelGauge.TOTAL_HEIGHT - 32)
+	# Battery bar — anchors/offsets set in game_hud.tscn (bottom-left, 32px margin)
+	# Fuel gauge — anchors/offsets set in game_hud.tscn (bottom-center, 32px margin)
 
 	# Pickup notifications — center-right, stacking
 	_pickup_notifications.anchor_left = 1.0

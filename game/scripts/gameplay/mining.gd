@@ -24,24 +24,15 @@ const MINING_RAY_LENGTH: float = 6.0
 const BONUS_MULTIPLIER: float = 0.5
 const PARTIAL_YIELD_MULTIPLIER: float = 0.5  ## Fraction of yield kept when a pressurized resource minigame fails
 const LINE_TRACE_DWELL: float = 0.4  ## Seconds crosshair must dwell on a line to trace it
-const LINE_TRACE_RADIUS: float = 0.45  ## Max ray-to-line distance for dwell accumulation
 
-## 3D line visual dimensions
-const LINE_MESH_LENGTH: float = 1.4
-const LINE_MESH_HEIGHT: float = 0.12
-const LINE_MESH_DEPTH: float = 0.06
+## Scene reference for mining minigame visualization
+const MINING_MINIGAME_SCENE: PackedScene = preload("res://scenes/objects/mining_minigame.tscn")
 
-## Line glow colors
-const COLOR_LINE_PENDING := Color("#00D4AA")  # Teal
-const COLOR_LINE_TRACED := Color("#4ADE80")  # Green
+## Default visual mesh scale when no mesh child is found on the deposit
+const DEFAULT_VISUAL_SCALE := Vector3(3.2, 3.2, 3.2)
 
-## Line offsets in player-facing local space (X=right, Y=up, Z=toward player from deposit center)
-const LINE_OFFSETS: Array = [
-	Vector3(0.0, -0.3, 1.35),
-	Vector3(0.25, 0.5, 1.2),
-	Vector3(-0.2, 1.2, 1.0),
-	Vector3(0.4, 0.1, 1.3),
-]
+## Default vertical offset for the minigame node when no mesh child is found
+const DEFAULT_MESH_Y_OFFSET: float = 0.9
 
 # ── Private Variables ─────────────────────────────────────
 var _camera: Camera3D = null
@@ -57,9 +48,7 @@ var _minigame_active: bool = false
 var _pattern_line_count: int = 0
 var _lines_traced: Array[bool] = []
 var _line_dwell_times: Array[float] = []
-var _line_world_positions: Array[Vector3] = []
-var _line_meshes: Array[MeshInstance3D] = []
-var _line_materials: Array[StandardMaterial3D] = []
+var _minigame_node: MiningMinigame = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -230,64 +219,62 @@ func _start_minigame(deposit: Deposit) -> void:
 	_minigame_active = true
 	_lines_traced.clear()
 	_line_dwell_times.clear()
-	_line_world_positions.clear()
 
-	for i in range(_pattern_line_count):
+	for i: int in range(_pattern_line_count):
 		_lines_traced.append(false)
 		_line_dwell_times.append(0.0)
 
-	_create_pattern_lines(deposit)
+	_setup_minigame_node(deposit)
+	_minigame_node.create_lines(_pattern_line_count, _player.global_position)
 	Global.log("Mining: minigame started — %d lines to trace" % _pattern_line_count)
 	minigame_started.emit(_pattern_line_count)
 
-func _create_pattern_lines(deposit: Deposit) -> void:
-	# Compute player-facing orientation for line placement
-	var deposit_center: Vector3 = deposit.global_position + Vector3(0, 0.9, 0)
-	var to_player: Vector3 = _player.global_position - deposit_center
-	to_player.y = 0.0
-	if to_player.length_squared() < 0.01:
-		to_player = Vector3(0, 0, 1)
-	to_player = to_player.normalized()
-	var right: Vector3 = to_player.cross(Vector3.UP).normalized()
+## Finds or creates a MiningMinigame child node on the deposit, positioned and
+## scaled to match the deposit's visual mesh.
+func _setup_minigame_node(deposit: Deposit) -> void:
+	_minigame_node = deposit.get_node_or_null("MiningMinigame") as MiningMinigame
+	if _minigame_node:
+		return
 
-	for i in range(_pattern_line_count):
-		var offset: Vector3 = LINE_OFFSETS[i]
-		var world_offset: Vector3 = right * offset.x + Vector3.UP * offset.y + to_player * offset.z
-		var line_pos: Vector3 = deposit_center + world_offset
-		_line_world_positions.append(line_pos)
+	_minigame_node = MINING_MINIGAME_SCENE.instantiate() as MiningMinigame
+	_minigame_node.name = "MiningMinigame"
 
-		# Visual mesh — add to tree before setting global transforms
-		var mesh_inst := MeshInstance3D.new()
-		mesh_inst.name = "PatternLine%d" % i
-		var box := BoxMesh.new()
-		box.size = Vector3(LINE_MESH_LENGTH, LINE_MESH_HEIGHT, LINE_MESH_DEPTH)
-		mesh_inst.mesh = box
+	# Match position and scale to the deposit's visual mesh
+	var mesh_info: Dictionary = _find_deposit_mesh_info(deposit)
+	var y_offset: float = mesh_info.get("y_offset", DEFAULT_MESH_Y_OFFSET) as float
+	var visual_scale: Vector3 = mesh_info.get("scale", DEFAULT_VISUAL_SCALE) as Vector3
+	_minigame_node.position = Vector3(0.0, y_offset, 0.0)
+	_minigame_node.scale = visual_scale
 
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = COLOR_LINE_PENDING
-		mat.emission_enabled = true
-		mat.emission = COLOR_LINE_PENDING
-		mat.emission_energy_multiplier = 2.0
-		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		mesh_inst.material_override = mat
+	deposit.add_child(_minigame_node)
 
-		deposit.add_child(mesh_inst)
-		mesh_inst.global_position = line_pos
-		mesh_inst.look_at(line_pos + to_player, Vector3.UP)
-		_line_meshes.append(mesh_inst)
-		_line_materials.append(mat)
+## Searches the deposit's children for a visual mesh node and returns its
+## position Y offset and scale. Defaults to standard values if no mesh is found.
+func _find_deposit_mesh_info(deposit: Deposit) -> Dictionary:
+	for child: Node in deposit.get_children():
+		if child is Node3D and "Mesh" in child.name:
+			var child_3d: Node3D = child as Node3D
+			return {
+				"y_offset": child_3d.position.y,
+				"scale": child_3d.scale,
+			}
+	return {
+		"y_offset": DEFAULT_MESH_Y_OFFSET,
+		"scale": DEFAULT_VISUAL_SCALE,
+	}
 
 func _update_minigame_trace(delta: float) -> void:
 	var hovered_index: int = _get_hovered_line_index()
 
-	for i in range(_pattern_line_count):
+	for i: int in range(_pattern_line_count):
 		if _lines_traced[i]:
 			continue
 		if i == hovered_index:
 			_line_dwell_times[i] += delta
 			if _line_dwell_times[i] >= LINE_TRACE_DWELL:
 				_lines_traced[i] = true
-				_mark_line_visual_traced(i)
+				if _minigame_node:
+					_minigame_node.mark_line_traced(i)
 				Global.log("Mining: minigame line %d traced" % i)
 				line_traced.emit(i)
 		else:
@@ -295,17 +282,24 @@ func _update_minigame_trace(delta: float) -> void:
 			_line_dwell_times[i] = maxf(_line_dwell_times[i] - delta * 2.0, 0.0)
 
 func _get_hovered_line_index() -> int:
-	if not _camera or _line_world_positions.is_empty():
+	if not _camera or not _minigame_node:
+		return -1
+
+	var positions: Array[Vector3] = _minigame_node.get_line_world_positions()
+	if positions.is_empty():
 		return -1
 
 	var ray_origin: Vector3 = _camera.global_position
 	var ray_dir: Vector3 = -_camera.global_transform.basis.z
+	var trace_radius: float = _minigame_node.get_trace_radius()
 
 	var best_index: int = -1
-	var best_dist: float = LINE_TRACE_RADIUS
+	var best_dist: float = trace_radius
 
-	for i in range(_pattern_line_count):
-		var line_pos: Vector3 = _line_world_positions[i]
+	for i: int in range(_pattern_line_count):
+		if i >= positions.size():
+			continue
+		var line_pos: Vector3 = positions[i]
 		var to_point: Vector3 = line_pos - ray_origin
 		var along_ray: float = to_point.dot(ray_dir)
 		if along_ray < 0.0:
@@ -318,11 +312,6 @@ func _get_hovered_line_index() -> int:
 
 	return best_index
 
-func _mark_line_visual_traced(index: int) -> void:
-	if index >= 0 and index < _line_materials.size():
-		_line_materials[index].albedo_color = COLOR_LINE_TRACED
-		_line_materials[index].emission = COLOR_LINE_TRACED
-
 func _are_all_lines_traced() -> bool:
 	for traced: bool in _lines_traced:
 		if not traced:
@@ -330,12 +319,10 @@ func _are_all_lines_traced() -> bool:
 	return true
 
 func _cleanup_minigame() -> void:
-	for mesh: MeshInstance3D in _line_meshes:
-		if is_instance_valid(mesh):
-			mesh.queue_free()
-	_line_meshes.clear()
-	_line_materials.clear()
-	_line_world_positions.clear()
+	if _minigame_node and is_instance_valid(_minigame_node):
+		_minigame_node.cleanup()
+		_minigame_node.queue_free()
+	_minigame_node = null
 	_lines_traced.clear()
 	_line_dwell_times.clear()
 	_minigame_active = false

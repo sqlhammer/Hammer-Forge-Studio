@@ -58,8 +58,7 @@ func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	Global.log("TestWorld: initialization complete")
 
-func _process(delta: float) -> void:
-	_update_recharge(delta)
+func _process(_delta: float) -> void:
 	_update_ship_interact()
 	_update_use_item()
 	_update_head_lamp_toggle()
@@ -177,9 +176,6 @@ func _build_ship() -> void:
 	_ship_exterior.position = Vector3.ZERO
 	add_child(_ship_exterior)
 
-	_ship_exterior.recharge_zone_entered.connect(_on_recharge_zone_entered)
-	_ship_exterior.recharge_zone_exited.connect(_on_recharge_zone_exited)
-
 func _spawn_player() -> void:
 	var player_scene: PackedScene = load("res://player/player.tscn") as PackedScene
 	if not player_scene:
@@ -292,26 +288,6 @@ func _setup_hud() -> void:
 	_fabricator_panel = _hud.get_fabricator_panel()
 	_automation_hub_panel = _hud.get_automation_hub_panel()
 	_navigation_console = _hud.get_navigation_console()
-
-func _update_recharge(delta: float) -> void:
-	if _ship_exterior and _first_person:
-		var in_zone: bool = _ship_exterior.is_body_in_recharge_zone(_first_person)
-		if in_zone and not SuitBattery.is_recharging() and SuitBattery.get_charge_percent() < 1.0:
-			Global.log("TestWorld: player entered recharge zone")
-			SuitBattery.start_recharge()
-		elif not in_zone and SuitBattery.is_recharging():
-			Global.log("TestWorld: player exited recharge zone")
-			SuitBattery.stop_recharge()
-	if SuitBattery.is_recharging():
-		SuitBattery.process_recharge(delta)
-
-func _on_recharge_zone_entered(body: Node3D) -> void:
-	if body == _first_person:
-		Global.log("TestWorld: recharge zone signal — entered")
-
-func _on_recharge_zone_exited(body: Node3D) -> void:
-	if body == _first_person:
-		Global.log("TestWorld: recharge zone signal — exited")
 
 func _setup_ship_interior() -> void:
 	if not _ship_exterior:

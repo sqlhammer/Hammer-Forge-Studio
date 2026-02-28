@@ -2,7 +2,7 @@
 id: TICKET-0217
 title: "Bugfix — Ship recharge zone does not recharge player in biomes; ensure recharge area is part of the ship scene"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -48,3 +48,4 @@ When the player enters the ship's recharge zone in any biome, `SuitBattery.start
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest
+- 2026-02-28 [gameplay-programmer] Starting work — moving recharge logic into ShipExterior

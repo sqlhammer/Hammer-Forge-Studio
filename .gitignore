@@ -14,3 +14,6 @@ orchestrator/results/
 
 # Test harness ephemeral tickets
 tickets/_test/
+
+# AWS artifacts
+aws/

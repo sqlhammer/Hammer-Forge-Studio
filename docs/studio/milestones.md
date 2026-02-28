@@ -34,7 +34,7 @@
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Active | 28 | 28 | 0 | — |
-| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 20 | 20 | 0 | — |
+| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 21 | 21 | 0 | — |
 | M10 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
 | M11 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
 | M12 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
@@ -455,12 +455,13 @@
 - **Orchestrator Resilience** (TICKET-0182–TICKET-0188): Conductor hardening for usage-limit edge cases — checkpoint system, LIMIT_WAIT cooldown, resume dispatch, structured logging, documentation. Parallel-eligible within this phase; depends on Root Game completing first. Touches only `orchestrator/` code and `docs/engineering/` — no game code changes.
 - Additional visual asset phases TBD at M9 kickoff — require Studio Head approval.
 
-**Tickets:** TICKET-0229–TICKET-0235 (Root Game); TICKET-0182–TICKET-0191 (Orchestrator Resilience); TICKET-0218–TICKET-0220 (TBD); additional tickets TBD for visual asset phases.
+**Tickets:** TICKET-0229–TICKET-0235, TICKET-0237 (Root Game); TICKET-0182–TICKET-0191 (Orchestrator Resilience); TICKET-0218–TICKET-0220 (TBD); additional tickets TBD for visual asset phases.
 
 | Phase | Ticket | Title | Type | Priority | Owner |
 |-------|--------|-------|------|----------|-------|
 | Root Game | TICKET-0229 | Add starting_biome and starting_inventory params to Global | TASK | P1 | systems-programmer |
 | Root Game | TICKET-0230 | Create GameWorld scene — world-building extracted from DebugLauncher | TASK | P1 | gameplay-programmer |
+| Root Game | TICKET-0237 | Design — Main Menu wireframe and layout spec | DESIGN | P1 | ui-ux-designer |
 | Root Game | TICKET-0231 | Create Main Menu scene with Play button | TASK | P1 | gameplay-programmer |
 | Root Game | TICKET-0232 | Create game root scene with debug-mode routing; set as project main scene | TASK | P1 | gameplay-programmer |
 | Root Game | TICKET-0233 | Refactor DebugLauncher — set startup params, hand off to Main Menu | REFACTOR | P1 | gameplay-programmer |
@@ -479,9 +480,9 @@
 
 **Dependency Graph (Root Game):**
 ```
-TICKET-0229 (Global startup params)
-  ├─► TICKET-0230 (GameWorld scene)
-  │     └─► TICKET-0231 (Main Menu) ◄── also depends on TICKET-0229
+TICKET-0229 (Global startup params)          TICKET-0237 (Main Menu design)
+  ├─► TICKET-0230 (GameWorld scene)                 │
+  │     └─► TICKET-0231 (Main Menu impl) ◄──────────┘ ◄── also depends on TICKET-0229, TICKET-0230
   │           └─► TICKET-0232 (game root scene + main scene)
   │                 ├─► TICKET-0233 (DebugLauncher refactor) ◄── also depends on TICKET-0229, TICKET-0231
   │                 └─► TICKET-0234 (TestWorld deprecation) ◄── also depends on TICKET-0230, TICKET-0233

@@ -10,7 +10,7 @@ created_at: 2026-02-28
 updated_at: 2026-02-28
 milestone: "M9"
 phase: "Root Game"
-depends_on: [TICKET-0229, TICKET-0230]
+depends_on: [TICKET-0229, TICKET-0230, TICKET-0237]
 blocks: [TICKET-0232, TICKET-0233]
 tags: [root-game, main-menu, ui, scene]
 ---

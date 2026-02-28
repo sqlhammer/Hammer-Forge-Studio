@@ -32,3 +32,8 @@ AutomationHub="*res://scripts/systems/automation_hub.gd"
 FuelSystem="*res://scripts/systems/fuel_system.gd"
 NavigationSystem="*res://scripts/systems/navigation_system.gd"
 ResourceRespawnSystem="*res://scripts/systems/resource_respawn_system.gd"
+GDAIMCPRuntime="*res://addons/gdai-mcp-plugin-godot/gdai_mcp_runtime.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gdai-mcp-plugin-godot/plugin.cfg", "res://addons/hammer_forge_tests/plugin.cfg")

@@ -17,3 +17,6 @@ tickets/_test/
 
 # AWS artifacts
 aws/
+
+# GDAI MCP plugin
+/game/addons/gdai-mcp-plugin-godot

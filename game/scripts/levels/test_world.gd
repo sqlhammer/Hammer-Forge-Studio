@@ -280,6 +280,10 @@ func _setup_hud() -> void:
 	if _camera and _first_person and _scanner and _mining:
 		_hud.setup(_camera, _first_person, _scanner, _mining)
 
+	# Wire the ship marker on the compass bar so the player can always see the ship bearing
+	if _ship_exterior:
+		_hud.set_ship_target(_ship_exterior)
+
 	# Get panel references from the HUD
 	_inventory_screen = _hud.get_inventory_screen()
 	_module_placement_ui = _hud.get_module_placement_ui()

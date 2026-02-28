@@ -2,7 +2,7 @@
 id: TICKET-0224
 title: "Bugfix — Mining interaction prompt shows 'E' but PC uses mouse button"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -32,10 +32,10 @@ The interaction prompt displays the actual key bound to the `use_tool` action fo
 
 ## Acceptance Criteria
 
-- [ ] The Mine interaction prompt shows the key/button currently bound to `use_tool` via `InputManager`
-- [ ] Prompt updates correctly if the player switches input device (keyboard/gamepad)
-- [ ] Other interaction prompts are not affected
-- [ ] Full test suite passes with no new failures
+- [x] The Mine interaction prompt shows the key/button currently bound to `use_tool` via `InputManager`
+- [x] Prompt updates correctly if the player switches input device (keyboard/gamepad)
+- [x] Other interaction prompts are not affected
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -47,3 +47,4 @@ The interaction prompt displays the actual key bound to the `use_tool` action fo
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest (see screenshot)
 - 2026-02-28 [gameplay-programmer] Starting work — fixing hardcoded key in deposit.gd get_interaction_prompt()
+- 2026-02-28 [gameplay-programmer] DONE — fix was already merged to main via commit b70dea6 (PR #180, originally TICKET-0213 before renumbering). Code adds `_get_action_key_label()` helper and uses it in `get_interaction_prompt()` for dynamic key display. `hold: true` also corrected. All acceptance criteria met.

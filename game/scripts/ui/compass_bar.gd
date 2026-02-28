@@ -257,16 +257,36 @@ func _draw_ship_marker(player_yaw: float) -> void:
 		bearing += 360.0
 
 	var screen_x: float = _bearing_to_screen_x(bearing, player_yaw)
-	if screen_x < -10 or screen_x > COMPASS_WIDTH + 10:
-		return
 
-	# Draw amber triangle marker at top of compass bar
-	var tri_points: PackedVector2Array = PackedVector2Array([
-		Vector2(screen_x - 5, 0),
-		Vector2(screen_x + 5, 0),
-		Vector2(screen_x, 8),
-	])
-	draw_colored_polygon(tri_points, COLOR_AMBER)
+	# Clamp to compass edges so the ship marker is always visible (TICKET-0214)
+	var clamped_x: float = clampf(screen_x, 6.0, COMPASS_WIDTH - 6.0)
+	var is_off_left: bool = screen_x < 6.0
+	var is_off_right: bool = screen_x > COMPASS_WIDTH - 6.0
+
+	if is_off_left:
+		# Edge arrow pointing left — ship is further to the left
+		var arrow: PackedVector2Array = PackedVector2Array([
+			Vector2(0, 4),
+			Vector2(8, 0),
+			Vector2(8, 8),
+		])
+		draw_colored_polygon(arrow, COLOR_AMBER)
+	elif is_off_right:
+		# Edge arrow pointing right — ship is further to the right
+		var arrow: PackedVector2Array = PackedVector2Array([
+			Vector2(COMPASS_WIDTH, 4),
+			Vector2(COMPASS_WIDTH - 8, 0),
+			Vector2(COMPASS_WIDTH - 8, 8),
+		])
+		draw_colored_polygon(arrow, COLOR_AMBER)
+	else:
+		# Normal centered down-pointing triangle
+		var tri_points: PackedVector2Array = PackedVector2Array([
+			Vector2(clamped_x - 5, 0),
+			Vector2(clamped_x + 5, 0),
+			Vector2(clamped_x, 8),
+		])
+		draw_colored_polygon(tri_points, COLOR_AMBER)
 
 	# Show distance when facing within the distance cone
 	var angle_diff: float = absf(bearing - player_yaw)
@@ -278,7 +298,7 @@ func _draw_ship_marker(player_yaw: float) -> void:
 		var text_size: Vector2 = _font_mono.get_string_size(dist_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 18)
 		draw_string(
 			_font_mono,
-			Vector2(screen_x - text_size.x / 2.0, COMPASS_HEIGHT + 22),
+			Vector2(clamped_x - text_size.x / 2.0, COMPASS_HEIGHT + 22),
 			dist_text,
 			HORIZONTAL_ALIGNMENT_LEFT,
 			-1,

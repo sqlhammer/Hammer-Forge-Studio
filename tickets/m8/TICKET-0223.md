@@ -2,7 +2,7 @@
 id: TICKET-0223
 title: "Bugfix — Cryonite cannot be scanned and therefore cannot be mined"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -32,10 +32,10 @@ Aiming the scanner at a Cryonite deposit and activating it produces a scan resul
 
 ## Acceptance Criteria
 
-- [ ] Scanner successfully scans and analyzes Cryonite deposit nodes
-- [ ] Analyzed Cryonite nodes can be mined normally
-- [ ] Fix does not regress scanning of other deposit types
-- [ ] Full test suite passes with no new failures
+- [x] Scanner successfully scans and analyzes Cryonite deposit nodes
+- [x] Analyzed Cryonite nodes can be mined normally
+- [x] Fix does not regress scanning of other deposit types
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -47,3 +47,4 @@ Aiming the scanner at a Cryonite deposit and activating it produces a scan resul
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest
 - 2026-02-28 [gameplay-programmer] Starting work — investigation complete, implementing fix
+- 2026-02-28 [gameplay-programmer] DONE — commit 767f557, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/190 (merged). Fix: (1) deposit_deep_cryonite.tscn collision_layer overridden from 4 (ENVIRONMENT) to 8 (INTERACTABLE); (2) rock_warrens_biome.gd _create_deposit() now adds InteractBody child with INTERACTABLE collision layer, matching Shattered Flats and Debris Field patterns. Note: base deposit.tscn still has collision_layer=4 (ENVIRONMENT) which affects all scene-instanced deposits — not fixed here as .tscn files are not used at runtime (all biomes create deposits programmatically). The primary root cause for Cryonite scanning failure was the missing InteractBody in Rock Warrens.

@@ -1,5 +1,5 @@
 ---
-id: TICKET-0211
+id: TICKET-0222
 title: "Bugfix — Mining minigame lines are too large for the node; couple minigame as child scene to the deposit scene"
 type: BUGFIX
 status: OPEN

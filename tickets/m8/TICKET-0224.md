@@ -1,5 +1,5 @@
 ---
-id: TICKET-0213
+id: TICKET-0224
 title: "Bugfix — Mining interaction prompt shows 'E' but PC uses mouse button"
 type: BUGFIX
 status: IN_PROGRESS

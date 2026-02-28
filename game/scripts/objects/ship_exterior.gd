@@ -8,6 +8,7 @@ extends StaticBody3D
 # ── Signals ──────────────────────────────────────────────
 signal recharge_zone_entered(body: Node3D)
 signal recharge_zone_exited(body: Node3D)
+signal ship_position_changed(new_position: Vector3)
 
 # ── Constants ─────────────────────────────────────────────
 const DECOMP_MAX_HULLS: int = 64
@@ -24,6 +25,7 @@ var _player_in_recharge_zone: bool = false
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
+	add_to_group("ship")
 	_generate_hull_collision()
 	_recharge_zone.body_entered.connect(_on_body_entered_recharge)
 	_recharge_zone.body_exited.connect(_on_body_exited_recharge)

@@ -44,6 +44,10 @@ func _ready() -> void:
 	_center_icon_tex = load("res://assets/icons/hud/icon_hud_compass_center.svg") as Texture2D
 	_ping_icon_tex = load("res://assets/icons/hud/icon_hud_compass_ping.svg") as Texture2D
 
+	# Self-wire ship target: scan tree after all siblings finish _ready (TICKET-0228)
+	call_deferred("_find_ship_target")
+	get_tree().node_added.connect(_on_node_added)
+
 func _process(_delta: float) -> void:
 	_clean_expired_markers()
 	queue_redraw()
@@ -305,6 +309,20 @@ func _draw_ship_marker(player_yaw: float) -> void:
 			18,
 			COLOR_AMBER,
 		)
+
+func _find_ship_target() -> void:
+	if is_instance_valid(_ship_target):
+		return
+	var ships: Array[Node] = get_tree().get_nodes_in_group("ship")
+	if ships.size() > 0:
+		set_ship_target(ships[0] as Node3D)
+
+func _on_node_added(node: Node) -> void:
+	if is_instance_valid(_ship_target):
+		return
+	# ShipExterior adds itself to "ship" group in _ready, so defer to let _ready run
+	if node is ShipExterior:
+		call_deferred("_find_ship_target")
 
 func _clean_expired_markers() -> void:
 	# Remove markers for depleted deposits

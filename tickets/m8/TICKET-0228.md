@@ -2,7 +2,7 @@
 id: TICKET-0228
 title: "Bugfix — Ship compass marker never appears: set_ship_target not called in debug_launcher"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -60,7 +60,7 @@ External callers (`debug_launcher.gd`, `test_world.gd`) should require no change
 - [x] `CompassBar: ship target set` is logged during debug session startup
 - [x] The edge-clamped arrow behaviour (TICKET-0214) continues to work correctly
 - [x] No regression in `test_world.gd` ship marker behaviour
-- [ ] Full test suite passes with no new failures
+- [x] Full test suite passes with no new failures
 
 ## Design Note
 
@@ -79,3 +79,4 @@ The `set_ship_target` public method can be removed or kept as a fallback, but it
 - 2026-02-28 [producer] Created — Studio Head confirmed `set_ship_target` never called via debug log inspection
 - 2026-02-28 [studio-head] Added design note — HUD should self-wire to ship via _ready scan + signal listener; external callers should not own this setup
 - 2026-02-28 [gameplay-programmer] Starting work — implementing self-wiring in CompassBar
+- 2026-02-28 [gameplay-programmer] DONE — commit c268fdb, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/196

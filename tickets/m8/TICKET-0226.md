@@ -2,7 +2,7 @@
 id: TICKET-0226
 title: "Bugfix — Mining Cryonite throws error: missing icon asset icon_item_cryonite.svg"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: technical-artist
 created_by: producer
@@ -63,3 +63,4 @@ Mining Cryonite produces a pickup toast notification identical to other resource
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head reported error during M8 playtest
+- 2026-02-28 [technical-artist] Status → IN_PROGRESS. Starting work — creating cryonite icon SVG asset

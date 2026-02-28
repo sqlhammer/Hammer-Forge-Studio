@@ -72,6 +72,10 @@ func setup(camera: Camera3D, player: CharacterBody3D, scanner: Scanner, mining: 
 	mining.line_traced.connect(_on_line_traced)
 	mining.minigame_completed.connect(_on_minigame_completed)
 
+## Sets the ship target on the compass bar for the persistent ship marker.
+func set_ship_target(ship: Node3D) -> void:
+	_compass_bar.set_ship_target(ship)
+
 ## Returns the compass bar for external access.
 func get_compass_bar() -> CompassBar:
 	return _compass_bar

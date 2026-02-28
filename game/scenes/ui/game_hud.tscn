@@ -57,8 +57,22 @@ grow_vertical = 2
 [node name="ScannerReadout" parent="HUDRoot" instance=ExtResource("4_scn")]
 
 [node name="BatteryBar" parent="HUDRoot" instance=ExtResource("5_bat")]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -80.0
+offset_right = 232.0
+offset_bottom = -32.0
 
 [node name="FuelGauge" parent="HUDRoot" instance=ExtResource("17_fgl")]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -80.0
+offset_right = 100.0
+offset_bottom = -32.0
 
 [node name="PickupNotifications" parent="HUDRoot" instance=ExtResource("6_pkn")]
 

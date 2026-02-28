@@ -2,7 +2,7 @@
 id: TICKET-0216
 title: "Bugfix — Player energy bar is no longer visible"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -45,3 +45,4 @@ The player's suit energy bar is always visible in the HUD, consistent with TestW
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest
+- 2026-02-28 [gameplay-programmer] Starting work — root cause identified: set_anchors_preset() + position= anti-pattern (same as TICKET-0152) leaves offset_right stale at 0, giving BatteryBar a negative width (-32px), suppressing rendering

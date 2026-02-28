@@ -12,6 +12,7 @@ When this skill is active, follow these rules:
 - Always pull and read from the main repo (/c/repos/Hammer-Forge-Studio), not a worktree (may be stale)
 - Do not open the Godot editor for game-state info — obtain it from tickets and handoff notes only
 - Always end your summary with a bulleted list of agents who are unblocked and ready to take their next steps. Only list agents whose next ticket has all dependencies DONE — do NOT list agents who are waiting on an incomplete dependency.
+- If the milestone is fully complete except for Studio Head sign-off (all tickets DONE, QA gate passed), check for a UAT sign-off file in `docs/studio/reports/` matching the pattern `*-[milestone]-uat-signoff.md`. If found, include its relative path prominently in the summary so the Studio Head can locate it easily.
 - **Output format: plain GitHub-flavored markdown only. Paste the script's pipe table verbatim. NEVER reformat it into a Unicode box-drawing grid table — this generates 5× more tokens and is the primary cause of slow responses.**
 
 # Workflow Steps (Ordered)

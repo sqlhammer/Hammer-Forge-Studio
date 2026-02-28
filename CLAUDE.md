@@ -126,14 +126,15 @@ Producer posts a Phase Gate Summary (see `docs/studio/templates/phase-gate-summa
 
 ### On Milestone Close (QA Gate PASS)
 
-When the QA phase gate passes and the Studio Head grants final sign-off, the Producer must complete the following before the milestone is considered closed:
+When the QA phase gate passes **and** the Studio Head has completed the UAT sign-off document (all checkboxes `✅ Approved`), the Producer must complete the following before the milestone is considered closed:
 
-1. ✅ Mark all remaining tickets `DONE` and archive them to `tickets/_archive/<milestone>/` (e.g., `tickets/_archive/m4/` for M4 tickets — folder name is the lowercase milestone ID)
-2. ✅ Update the milestone row in `docs/studio/milestones.md` — set Status to `Complete` and record the QA sign-off date
-3. ✅ Update the **Release Goals** table in `docs/studio/prd.md` — set the milestone row to `Complete`, fill in the QA sign-off date, and confirm the description is accurate
-4. ✅ Post the final Phase Gate Summary report to `docs/studio/reports/`
-5. ✅ Commit and push all doc updates to `main`
-6. ✅ Clean up milestone branches — delete all feature branches used during the milestone (e.g., branches matching `orch/*/TICKET-*`, `feature/m<N>/`, or `feature/t<N>/`) from remote. These are safe to delete once all changes are merged to `main`
+1. ✅ Confirm the UAT sign-off document (`docs/studio/reports/YYYY-MM-DD-[milestone]-uat-signoff.md`) has all features marked `✅ Approved` and the final sign-off section is completed by the Studio Head
+2. ✅ Mark all remaining tickets `DONE` and archive them to `tickets/_archive/<milestone>/` (e.g., `tickets/_archive/m4/` for M4 tickets — folder name is the lowercase milestone ID)
+3. ✅ Update the milestone row in `docs/studio/milestones.md` — set Status to `Complete` and record the QA sign-off date
+4. ✅ Update the **Release Goals** table in `docs/studio/prd.md` — set the milestone row to `Complete`, fill in the QA sign-off date, and confirm the description is accurate
+5. ✅ Post the final Phase Gate Summary report to `docs/studio/reports/`
+6. ✅ Commit and push all doc updates to `main`
+7. ✅ Clean up milestone branches — delete all feature branches used during the milestone (e.g., branches matching `orch/*/TICKET-*`, `feature/m<N>/`, or `feature/t<N>/`) from remote. These are safe to delete once all changes are merged to `main`
 
 ### On Gate FAIL
 
@@ -145,7 +146,7 @@ The Studio Head is engaged at exactly three points per milestone:
 
 1. **Milestone Kickoff** — approves milestone scope and phase definitions before agents begin work
 2. **Phase Gate Failure** — paged for triage; must resolve or override before the next phase opens
-3. **Milestone QA Close** — QA sign-off is a hard gate; Studio Head grants final approval
+3. **Milestone QA Close** — QA sign-off is a hard gate; Studio Head reviews the UAT sign-off document (`docs/studio/reports/YYYY-MM-DD-[milestone]-uat-signoff.md`), marks each feature checkbox, and grants final approval once all features are `✅ Approved`
 
 The Studio Head is **not** paged at phase gate passes, individual ticket completions, or code review openings.
 
@@ -164,6 +165,26 @@ These are hard rules enforced by the Producer. They are not suggestions.
 - **QA Engineer** is responsible for writing unit tests and running the full test suite
 - The test suite must pass in full before any milestone can close — this is a hard gate on QA sign-off
 - Run tests via `res://addons/hammer_forge_tests/test_runner.tscn` in editor, or headless for CI
+
+### UAT Sign-Off Procedure
+
+During the final QA phase of each milestone, the **QA Engineer** produces a UAT sign-off document before requesting Studio Head approval. This document gives the Studio Head a structured, play-testable checklist of everything that changed in the milestone.
+
+**QA Engineer responsibilities:**
+- Populate the template at `docs/studio/templates/uat-signoff.md`
+- Save the completed file to `docs/studio/reports/YYYY-MM-DD-[milestone]-uat-signoff.md`
+- List every significant feature or change from the milestone, grouped logically
+- For each item: write a plain-language description of what changed and step-by-step instructions for how to test it in-game
+- Commit and push the document, then notify the Producer it is ready for Studio Head review
+
+**Studio Head responsibilities:**
+- Follow each feature's test steps in-game
+- Mark each checkbox `✅ Approved` or `❌ Rejected` (with notes on rejections)
+- Sign the final sign-off section once all features are approved
+
+**Producer responsibilities:**
+- Confirm sign-off by reading the UAT document — all checkboxes must be marked `✅ Approved` and the final sign-off section must be completed
+- If any item is `❌ Rejected`, do not close the milestone — triage with QA Engineer and open bug tickets as needed
 
 ## Communication Style
 

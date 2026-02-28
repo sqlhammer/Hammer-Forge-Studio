@@ -2,7 +2,7 @@
 id: TICKET-0213
 title: "Bugfix — Mining interaction prompt shows 'E' but PC uses mouse button"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -46,3 +46,4 @@ The interaction prompt displays the actual key bound to the `use_tool` action fo
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest (see screenshot)
+- 2026-02-28 [gameplay-programmer] Starting work — fixing hardcoded key in deposit.gd get_interaction_prompt()

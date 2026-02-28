@@ -138,7 +138,7 @@ func get_interaction_prompt() -> Dictionary:
 	if is_depleted():
 		return {}
 	if is_analyzed():
-		return {"key": "E", "label": "Mine", "hold": false}
+		return {"key": _get_action_key_label("use_tool"), "label": "Mine", "hold": true}
 	if is_pinged():
 		return {"key": "E", "label": "Scan", "hold": true}
 	return {}
@@ -200,6 +200,27 @@ func deserialize(data: Dictionary) -> void:
 			pos.get("y", 0.0) as float,
 			pos.get("z", 0.0) as float,
 		)
+
+## Resolves the display label for the given input action from the InputMap.
+## Handles keyboard keys and mouse buttons. Returns "?" if no event is mapped.
+func _get_action_key_label(action: String) -> String:
+	var events: Array[InputEvent] = InputMap.action_get_events(action)
+	for event: InputEvent in events:
+		if event is InputEventKey:
+			var key_event: InputEventKey = event as InputEventKey
+			return OS.get_keycode_string(key_event.keycode)
+		if event is InputEventMouseButton:
+			var mb_event: InputEventMouseButton = event as InputEventMouseButton
+			match mb_event.button_index:
+				MOUSE_BUTTON_LEFT:
+					return "LMB"
+				MOUSE_BUTTON_RIGHT:
+					return "RMB"
+				MOUSE_BUTTON_MIDDLE:
+					return "MMB"
+				_:
+					return "Mouse %d" % mb_event.button_index
+	return "?"
 
 func _calculate_pattern_lines() -> int:
 	match deposit_tier:

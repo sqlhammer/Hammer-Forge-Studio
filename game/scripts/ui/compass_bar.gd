@@ -8,7 +8,7 @@ const COMPASS_HEIGHT: float = 32.0
 const MARKER_PERSIST_TIME: float = 60.0
 const MARKER_FADE_TIME: float = 2.0
 const DISTANCE_CONE_DEG: float = 45.0
-const MAX_MARKERS: int = 10
+const MAX_MARKERS: int = 30
 
 ## Style colors matching UI style guide
 const COLOR_BG := Color("#0F1923", 0.7)
@@ -16,6 +16,7 @@ const COLOR_TEXT_PRIMARY := Color("#F1F5F9")
 const COLOR_TEXT_SECONDARY := Color("#94A3B8")
 const COLOR_TEAL := Color("#00D4AA")
 const COLOR_NEUTRAL := Color("#94A3B8", 0.4)
+const COLOR_AMBER := Color("#F59E0B")
 
 ## Cardinal directions with their degree headings
 const CARDINALS: Dictionary = {
@@ -31,6 +32,7 @@ var _font: Font = null
 var _font_mono: Font = null
 var _center_icon_tex: Texture2D = null
 var _ping_icon_tex: Texture2D = null
+var _ship_target: Node3D = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -73,6 +75,9 @@ func _draw() -> void:
 		])
 		draw_colored_polygon(indicator_points, COLOR_TEXT_PRIMARY)
 
+	# Draw ship marker (always visible)
+	_draw_ship_marker(player_yaw)
+
 	# Draw ping markers
 	_draw_ping_markers(player_yaw)
 
@@ -107,6 +112,11 @@ func remove_marker(deposit: Deposit) -> void:
 			_ping_markers.remove_at(i)
 			break
 
+## Sets the ship node for the persistent compass marker.
+func set_ship_target(ship: Node3D) -> void:
+	_ship_target = ship
+	Global.log("CompassBar: ship target set")
+
 # ── Private Methods ───────────────────────────────────────
 
 func _get_player_yaw_degrees() -> float:
@@ -131,7 +141,7 @@ func _bearing_to_screen_x(bearing: float, player_yaw: float) -> float:
 		diff += 360.0
 	# Map to compass width: center = player_yaw, edges = +/-90 degrees
 	var fov_half: float = 90.0
-	var screen_x: float = (COMPASS_WIDTH / 2.0) + (diff / fov_half) * (COMPASS_WIDTH / 2.0)
+	var screen_x: float = (COMPASS_WIDTH / 2.0) - (diff / fov_half) * (COMPASS_WIDTH / 2.0)
 	return screen_x
 
 func _draw_cardinals(player_yaw: float) -> void:
@@ -234,6 +244,47 @@ func _draw_ping_markers(player_yaw: float) -> void:
 				18,
 				COLOR_TEAL,
 			)
+
+func _draw_ship_marker(player_yaw: float) -> void:
+	if not _player or not is_instance_valid(_ship_target):
+		return
+
+	var player_pos: Vector3 = _player.global_position
+	var ship_pos: Vector3 = _ship_target.global_position
+	var to_ship: Vector3 = ship_pos - player_pos
+	var bearing: float = rad_to_deg(atan2(to_ship.x, to_ship.z))
+	if bearing < 0:
+		bearing += 360.0
+
+	var screen_x: float = _bearing_to_screen_x(bearing, player_yaw)
+	if screen_x < -10 or screen_x > COMPASS_WIDTH + 10:
+		return
+
+	# Draw amber triangle marker at top of compass bar
+	var tri_points: PackedVector2Array = PackedVector2Array([
+		Vector2(screen_x - 5, 0),
+		Vector2(screen_x + 5, 0),
+		Vector2(screen_x, 8),
+	])
+	draw_colored_polygon(tri_points, COLOR_AMBER)
+
+	# Show distance when facing within the distance cone
+	var angle_diff: float = absf(bearing - player_yaw)
+	if angle_diff > 180.0:
+		angle_diff = 360.0 - angle_diff
+	if angle_diff <= DISTANCE_CONE_DEG / 2.0:
+		var dist: float = player_pos.distance_to(ship_pos)
+		var dist_text: String = "%dm" % int(dist)
+		var text_size: Vector2 = _font_mono.get_string_size(dist_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 18)
+		draw_string(
+			_font_mono,
+			Vector2(screen_x - text_size.x / 2.0, COMPASS_HEIGHT + 22),
+			dist_text,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1,
+			18,
+			COLOR_AMBER,
+		)
 
 func _clean_expired_markers() -> void:
 	# Remove markers for depleted deposits

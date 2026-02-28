@@ -1,8 +1,8 @@
 ---
-id: TICKET-0210
+id: TICKET-0221
 title: "Bugfix — Cryonite nodes do not appear on compass when pinged"
 type: BUGFIX
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -31,17 +31,20 @@ Cryonite deposits appear on the compass after a ping, consistent with all other 
 
 ## Acceptance Criteria
 
-- [ ] Pinging in any biome causes nearby Cryonite nodes to appear on the compass HUD
-- [ ] Behavior is identical to Scrap Metal and other deposit types
-- [ ] Fix does not regress compass ping behavior for any other deposit type
-- [ ] Full test suite passes with no new failures
+- [x] Pinging in any biome causes nearby Cryonite nodes to appear on the compass HUD
+- [x] Behavior is identical to Scrap Metal and other deposit types
+- [x] Fix does not regress compass ping behavior for any other deposit type
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
 - Check whether `deposit_deep_cryonite.tscn` and its surface Cryonite variants call `DepositRegistry.register()` during instantiation — the root cause of TICKET-0201 was missing `DepositRegistry.register()` calls; Cryonite nodes may have the same omission
 - Verify Cryonite nodes are assigned the correct groups (e.g., `"scannable"`, `"resource_nodes"`) in all biomes that place them
-- Cross-reference with TICKET-0212 (Cryonite cannot be scanned) — root cause is likely shared
+- Cross-reference with TICKET-0223 (Cryonite cannot be scanned) — root cause is likely shared
 
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head reported during M8 playtest
+- 2026-02-28 [gameplay-programmer] Starting work — investigating Cryonite compass visibility
+- 2026-02-28 [gameplay-programmer] Root cause: CompassBar.MAX_MARKERS was 10 — biomes register scrap metal deposits (8-12) before cryonite (3-8), so the 10-marker cap fills with scrap before any cryonite is added. Fix: raised MAX_MARKERS from 10 to 30 to accommodate all deposit types across all biomes. Updated unit test to match.
+- 2026-02-28 [gameplay-programmer] DONE — commit 4443323, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/186 merged to main

@@ -2,7 +2,7 @@
 id: TICKET-0226
 title: "Bugfix — Mining Cryonite throws error: missing icon asset icon_item_cryonite.svg"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: technical-artist
 created_by: producer
@@ -46,11 +46,11 @@ Mining Cryonite produces a pickup toast notification identical to other resource
 
 ## Acceptance Criteria
 
-- [ ] `res://assets/icons/item/icon_item_cryonite.svg` exists and loads without error
-- [ ] Pickup toast notification displays correctly after mining Cryonite
-- [ ] Icon is visually consistent with other item icons in the M6 icon set (same style, dimensions, and color palette)
-- [ ] No errors logged during Cryonite pickup in any biome
-- [ ] Full test suite passes with no new failures
+- [x] `res://assets/icons/item/icon_item_cryonite.svg` exists and loads without error
+- [x] Pickup toast notification displays correctly after mining Cryonite
+- [x] Icon is visually consistent with other item icons in the M6 icon set (same style, dimensions, and color palette)
+- [x] No errors logged during Cryonite pickup in any biome
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -64,3 +64,4 @@ Mining Cryonite produces a pickup toast notification identical to other resource
 
 - 2026-02-28 [producer] Created — Studio Head reported error during M8 playtest
 - 2026-02-28 [technical-artist] Status → IN_PROGRESS. Starting work — creating cryonite icon SVG asset
+- 2026-02-28 [technical-artist] Status → DONE. Created icon_item_cryonite.svg (faceted crystal, M6 style, #00D4AA cyan accent). Commit: 4a3b0f5, PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/192 (merged as ab14eee)

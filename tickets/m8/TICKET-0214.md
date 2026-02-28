@@ -2,7 +2,7 @@
 id: TICKET-0214
 title: "Feature — Ship marker persistently visible on compass at all times"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -42,3 +42,4 @@ The ship has no marker on the compass. Players cannot determine the ship's direc
 - 2026-02-28 [gameplay-programmer] IN_PROGRESS — Starting work
 - 2026-02-28 [gameplay-programmer] DONE — Commit 01abba8, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/181
 - 2026-02-28 [producer] REOPENED — Studio Head confirmed ship marker is not visible in-game despite prior DONE; reverting to OPEN for reinvestigation
+- 2026-02-28 [gameplay-programmer] IN_PROGRESS — Reinvestigating: found _draw_ship_marker clips marker when ship bearing is outside ±90° compass FOV (lines 260-261); fixing to clamp to edges instead

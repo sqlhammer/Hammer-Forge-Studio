@@ -2,7 +2,7 @@
 id: TICKET-0228
 title: "Bugfix — Ship compass marker never appears: set_ship_target not called in debug_launcher"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -79,3 +79,4 @@ The `set_ship_target` public method can be removed or kept as a fallback, but it
 - 2026-02-28 [producer] Created — Studio Head confirmed `set_ship_target` never called via debug log inspection
 - 2026-02-28 [studio-head] Added design note — HUD should self-wire to ship via _ready scan + signal listener; external callers should not own this setup
 - 2026-02-28 [gameplay-programmer] RETRY — previous attempt used deferred group-based scan (failed: marker not from frame 1, required ship_exterior.gd changes); now using direct class-based tree scan + conditional node_added listener
+- 2026-02-28 [gameplay-programmer] DONE — commit 83a1d0b, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/199

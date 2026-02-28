@@ -44,9 +44,10 @@ func _ready() -> void:
 	_center_icon_tex = load("res://assets/icons/hud/icon_hud_compass_center.svg") as Texture2D
 	_ping_icon_tex = load("res://assets/icons/hud/icon_hud_compass_ping.svg") as Texture2D
 
-	# Self-wire ship target: scan tree after all siblings finish _ready (TICKET-0228)
-	call_deferred("_find_ship_target")
-	get_tree().node_added.connect(_on_node_added)
+	# Auto-wire ship target: scan for existing ship or listen for future spawns (TICKET-0228)
+	_find_ship_in_tree()
+	if not is_instance_valid(_ship_target):
+		get_tree().node_added.connect(_on_tree_node_added)
 
 func _process(_delta: float) -> void:
 	_clean_expired_markers()
@@ -118,10 +119,29 @@ func remove_marker(deposit: Deposit) -> void:
 
 ## Sets the ship node for the persistent compass marker.
 func set_ship_target(ship: Node3D) -> void:
+	if _ship_target == ship:
+		return
 	_ship_target = ship
 	Global.log("CompassBar: ship target set")
 
 # ── Private Methods ───────────────────────────────────────
+
+## Searches the scene tree for an existing ShipExterior node and wires it as ship target.
+func _find_ship_in_tree() -> void:
+	if is_instance_valid(_ship_target):
+		return
+	var ships: Array[Node] = get_tree().root.find_children("*", "ShipExterior", true, false)
+	if ships.size() > 0 and ships[0] is Node3D:
+		set_ship_target(ships[0] as Node3D)
+
+## Handles new nodes entering the scene tree — wires ship target when a ShipExterior spawns.
+func _on_tree_node_added(node: Node) -> void:
+	if is_instance_valid(_ship_target):
+		get_tree().node_added.disconnect(_on_tree_node_added)
+		return
+	if node is ShipExterior:
+		set_ship_target(node as Node3D)
+		get_tree().node_added.disconnect(_on_tree_node_added)
 
 func _get_player_yaw_degrees() -> float:
 	if not _camera:
@@ -309,20 +329,6 @@ func _draw_ship_marker(player_yaw: float) -> void:
 			18,
 			COLOR_AMBER,
 		)
-
-func _find_ship_target() -> void:
-	if is_instance_valid(_ship_target):
-		return
-	var ships: Array[Node] = get_tree().get_nodes_in_group("ship")
-	if ships.size() > 0:
-		set_ship_target(ships[0] as Node3D)
-
-func _on_node_added(node: Node) -> void:
-	if is_instance_valid(_ship_target):
-		return
-	# ShipExterior adds itself to "ship" group in _ready, so defer to let _ready run
-	if node is ShipExterior:
-		call_deferred("_find_ship_target")
 
 func _clean_expired_markers() -> void:
 	# Remove markers for depleted deposits

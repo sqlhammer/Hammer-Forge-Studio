@@ -2,7 +2,7 @@
 id: TICKET-0211
 title: "Usage data backfill from existing logs"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: tools-devops-engineer
 created_by: producer
@@ -64,3 +64,4 @@ Create a backfill script that scans existing orchestrator log files and reconstr
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — usage data backfill from existing logs
+- 2026-03-01 [tools-devops-engineer] Starting work — implementing backfill_usage.py

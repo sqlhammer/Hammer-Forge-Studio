@@ -114,11 +114,11 @@ func can_travel(distance: float, ship_weight: float) -> bool:
 	return _fuel_current >= cost
 
 ## Calculates the current total ship weight.
-## Weight = (installed module count * WEIGHT_PER_MODULE) + (total inventory item count * WEIGHT_PER_INVENTORY_ITEM)
+## Weight = BASE_SHIP_WEIGHT + (installed module count * WEIGHT_PER_MODULE) + (total inventory item count * WEIGHT_PER_INVENTORY_ITEM)
 func calculate_ship_weight() -> int:
 	var module_weight: int = ModuleManager.get_installed_count() * FuelSystemDefs.WEIGHT_PER_MODULE
 	var inventory_weight: int = _get_total_inventory_items() * FuelSystemDefs.WEIGHT_PER_INVENTORY_ITEM
-	return module_weight + inventory_weight
+	return FuelSystemDefs.BASE_SHIP_WEIGHT + module_weight + inventory_weight
 
 ## Resets fuel to maximum capacity. Clears signal-emitted flags.
 ## Used for new-game initialization and test teardown.

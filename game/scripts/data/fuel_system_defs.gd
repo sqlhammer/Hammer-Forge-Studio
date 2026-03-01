@@ -21,12 +21,18 @@ const LOW_FUEL_THRESHOLD_PERCENT: float = 0.25
 ## With default values: 1000 distance * 50 weight * 0.005 = 250 fuel per jump.
 const FUEL_COST_MULTIPLIER: float = 0.005
 
+## Base ship weight — the ship's empty mass before modules or cargo.
+## Ensures a non-zero travel cost even when nothing is installed.
+const BASE_SHIP_WEIGHT: int = 50
+
 ## Weight units contributed by each installed ship module.
 const WEIGHT_PER_MODULE: int = 10
 
 ## Weight units contributed by each item in the player inventory.
-## Each individual inventory item (not each slot) counts as one weight unit.
-const WEIGHT_PER_INVENTORY_ITEM: int = 1
+## Set to 0: inventory items no longer inflate fuel costs. Previously set to 1,
+## which caused travel costs to exceed tank capacity as the player gathered
+## resources (TICKET-0247).
+const WEIGHT_PER_INVENTORY_ITEM: int = 0
 
 ## Placeholder biome travel distance used for testing and dev until the biome
 ## registry (TICKET-0159) defines real distances.

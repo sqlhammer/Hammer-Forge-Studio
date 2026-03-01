@@ -247,7 +247,7 @@ func _test_nav_get_travel_cost_unknown_biome_returns_zero() -> void:
 # -- can_travel_to --
 
 func _test_nav_can_travel_to_true_when_enough_fuel() -> void:
-	# Full tank with zero ship weight — cost is 0, always affordable.
+	# Full tank with base ship weight — cost is affordable.
 	assert_true(NavigationSystem.can_travel_to("rock_warrens"),
 		"can_travel_to should return true when fuel is sufficient")
 
@@ -313,7 +313,7 @@ func _test_nav_travel_completed_not_emitted_when_blocked() -> void:
 # -- State machine transitions (successful travel) --
 
 func _test_nav_state_idle_after_successful_travel() -> void:
-	# Zero weight → cost is 0 → travel succeeds on full tank
+	# Base weight only → cost is affordable → travel succeeds on full tank
 	NavigationSystem.initiate_travel("rock_warrens")
 	assert_equal(NavigationSystem.get_state(),
 		NavigationSystem.TravelState.IDLE,

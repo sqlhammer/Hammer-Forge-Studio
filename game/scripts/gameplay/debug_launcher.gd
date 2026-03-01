@@ -210,7 +210,7 @@ func _launch(biome_id: String, begin_wealthy: bool) -> void:
 	old_scene.queue_free()
 
 	# With all _ready() callbacks complete, biomes are fully generated and spawn positions accurate.
-	var biome: Node3D = world.get_node("Biome") as Node3D
+	var biome: Node3D = world.get_node("BiomeContent/Biome") as Node3D
 	var spawns: Dictionary = _get_spawn_positions(biome)
 	var player_pos: Vector3 = spawns["player"] as Vector3
 	var ship_pos: Vector3 = spawns["ship"] as Vector3
@@ -250,14 +250,18 @@ func _build_debug_world(biome_id: String) -> Node3D:
 	# Environment lighting
 	_add_environment(world)
 
-	# Biome
+	# Biome container — TravelSequenceManager swaps its children on biome travel
+	var biome_container: Node3D = Node3D.new()
+	biome_container.name = "BiomeContent"
+	world.add_child(biome_container)
+
 	var biome: Node3D = _create_biome_instance(biome_id)
 	if biome == null:
 		push_error("DebugLauncher: failed to create biome '%s'" % biome_id)
 		world.queue_free()
 		return null
 	biome.name = "Biome"
-	world.add_child(biome)
+	biome_container.add_child(biome)
 
 	# Initialize biomes that require explicit generation before entering the scene tree.
 	# ShatteredFlatsBiome auto-generates in _ready() once the scene is live.
@@ -387,6 +391,10 @@ func _setup_gameplay(world: Node3D, player: Node3D) -> void:
 	# TestWorld is never used by the debug launcher, so boarding must be wired here (TICKET-0208).
 	_setup_ship_boarding(world, first_person, hud)
 
+	# Travel sequence — TravelSequenceManager handles fade-out, biome swap, fade-in when
+	# NavigationSystem.travel_completed fires. Without this, confirming travel does nothing.
+	_setup_travel_sequence(world, player)
+
 
 ## Creates a ShipEnterZone on the ship and a ShipInterior underground so the player
 ## can board the ship in a debug-launched session (mirrors TestWorld._setup_ship_interior).
@@ -433,6 +441,34 @@ func _setup_ship_boarding(world: Node3D, first_person: CharacterBody3D, hud: Gam
 	handler.setup(ship_interior, first_person, enter_zone, hud, hud.get_navigation_console())
 
 	Global.log("DebugLauncher: ship boarding zone and interior ready")
+
+
+## Creates a TravelSequenceManager so NavigationSystem.travel_completed triggers the
+## full biome transition (fade out → swap → fade in). Mirrors TestWorld._setup_travel_sequence().
+func _setup_travel_sequence(world: Node3D, player: Node3D) -> void:
+	var ship: ShipExterior = world.get_node_or_null("Ship") as ShipExterior
+	var biome_container: Node3D = world.get_node_or_null("BiomeContent") as Node3D
+	var ship_interior: ShipInterior = world.get_node_or_null("ShipInterior") as ShipInterior
+	if ship == null or biome_container == null:
+		push_error("DebugLauncher: cannot set up travel sequence — missing Ship or BiomeContent")
+		return
+
+	var travel_manager: TravelSequenceManager = TravelSequenceManager.new()
+	travel_manager.name = "TravelSequenceManager"
+	world.add_child(travel_manager)
+	travel_manager.setup(player, ship, biome_container, ship_interior)
+
+	# Update ship interior positions after biome swap (mirrors TestWorld._on_travel_sequence_completed)
+	travel_manager.travel_sequence_completed.connect(
+		func(destination_id: String) -> void:
+			if ship_interior and ship:
+				var exit_offset: Vector3 = Vector3(0.0, 0.0, 24.0)
+				ship_interior.set_exterior_position(ship.position + exit_offset)
+				var viewport_camera_pos: Vector3 = ship.position + Vector3(0.0, 8.0, -23.0)
+				ship_interior.setup_viewport_world(world.get_viewport().world_3d, viewport_camera_pos)
+			Global.log("DebugLauncher: travel sequence completed → '%s'" % destination_id)
+	)
+	Global.log("DebugLauncher: travel sequence manager ready")
 
 
 ## Adds a [DEBUG] label overlay visible during begin-wealthy sessions.

@@ -162,7 +162,7 @@ The following are explicitly **not** being built and should not be scoped into a
 | M5 | **Complete** | 2026-02-25 | Processing & Crafting: smelting, components, tech tree, build/upgrade |
 | M6 | **Complete** | 2026-02-26 | Icon Generation Pipeline: icon PoC evaluation, style guides, full icon set |
 | M7 | **Complete** | 2026-02-26 | Ship Interior: cockpit, machine room, scene architecture overhaul |
-| M8 | **Active** | — | Ship Navigation: biome-to-biome travel, fuel system |
+| M8 | **Complete** | 2026-03-01 | Ship Navigation: biome-to-biome travel, fuel system |
 | M9 | Planning | — | Visual Asset Refinement: polished art pass on existing assets |
 | M10 | Planning | — | Movement & Usability Refinement: game feel, controls, HUD/UX tuning |
 | M11 | Planning | — | Content Expansion: material resources, crafting recipes, tech tree depth |

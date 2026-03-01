@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-02-26
+**Last Updated:** 2026-03-01
 
 > Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
@@ -33,7 +33,7 @@
 | M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Complete | 38 | 0 | 38 | 2026-02-25 |
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
-| M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Active | 30 | 30 | 0 | — |
+| M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Complete | 56 | 0 | 56 | 2026-03-01 |
 | M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 25 | 25 | 0 | — |
 | M10 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
 | M11 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |

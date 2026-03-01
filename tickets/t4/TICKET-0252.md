@@ -2,7 +2,7 @@
 id: TICKET-0252
 title: "Update start_milestone.py for instance directories"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -55,3 +55,4 @@ specify a custom instance name (defaults to the milestone ID).
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
 - 2026-03-01 [systems-programmer] Starting work — updating start_milestone.py for instance directories
+- 2026-03-01 [systems-programmer] DONE — commit 0db7fe0 already on main. All acceptance criteria met: --instance arg added, resolve_instance() used, launch command updated, old flat path removed, milestone dir validation in place.

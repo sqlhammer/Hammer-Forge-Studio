@@ -2,7 +2,7 @@
 id: TICKET-0210
 title: "Usage report script with capacity gauges"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: tools-devops-engineer
 created_by: producer
@@ -68,3 +68,4 @@ Create a standalone Python reporting script that reads the JSONL usage ledger an
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — usage report script with capacity gauges
+- 2026-03-01 [tools-devops-engineer] Starting work — implementing usage_report.py with all breakdown flags, capacity gauges, and JSON output

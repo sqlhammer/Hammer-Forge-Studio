@@ -111,6 +111,7 @@ func initiate_travel(destination_id: String) -> void:
 	current_biome = destination_id
 	_set_state(TravelState.IDLE)
 
+	Global.log("NavigationSystem: emitting travel_completed for '%s'" % destination_id)
 	travel_completed.emit(destination_id)
 	biome_changed.emit(destination_id)
 	Global.log("NavigationSystem: arrived at '%s' (from '%s', fuel_cost=%.1f)" % [

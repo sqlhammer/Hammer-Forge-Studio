@@ -2,7 +2,7 @@
 id: TICKET-0207
 title: "Usage data extraction from Claude CLI output"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: tools-devops-engineer
 created_by: producer
@@ -56,3 +56,4 @@ Extract usage metadata (input tokens, output tokens, cost) from Claude CLI `--ou
 
 - 2026-02-27 [producer] Created ticket — usage data extraction from Claude CLI output
 - 2026-03-01 [tools-devops-engineer] Starting work — implementing extract_usage_from_output() and run_claude() 4-tuple extension
+- 2026-03-01 [tools-devops-engineer] DONE — commit 6f54162, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/227 merged (merge commit d6b6ef8)

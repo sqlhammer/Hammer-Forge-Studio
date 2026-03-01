@@ -19,6 +19,4 @@ tickets/_test/
 aws/
 
 # GDAI MCP plugin
-game/addons/
 game/addons/gdai-mcp-plugin-godot
-!game/addons/hammer_forge_tests

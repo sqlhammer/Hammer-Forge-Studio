@@ -50,6 +50,8 @@
 |---|-----------|-------------|--------|-------|------|------|-------------|
 | T1 | Project Reporting Dashboard — GitHub Pages status site, auto-built on push | — | Planning | 10 | 10 | 0 | — |
 | T2 | Usage & Cost Attribution — Orchestrator usage tracking, JSONL ledger, reporting | — | Planning | 7 | 7 | 0 | — |
+| T3 | Parallel Godot MCP — Per-agent headless Godot instances, remove file-based lock | — | Planning | — | — | — | — |
+| T4 | Multi-Milestone Orchestrator — Instance directories, parallel conductor support | — | Active | 8 | 8 | 0 | — |
 
 ---
 
@@ -689,6 +691,57 @@ TICKET-0212 (code review) — depends on ALL implementation tickets (0207–0211
 - T2 is informational/reporting only — it does not enforce rate limits or throttle the orchestrator. Capacity gauges are advisory.
 - The JSONL ledger is gitignored (local data). The reporting and backfill scripts are committed.
 - Opus 1.7x token weighting reflects Anthropic's rate limit accounting where Opus output tokens consume 1.7x the capacity of Sonnet/Haiku tokens.
+
+---
+
+### T4 — Multi-Milestone Orchestrator
+
+**Goal:** Isolate each `conductor.py` run into its own instance directory so multiple milestone
+orchestrators can run concurrently without file collisions. Add config layering so local overrides
+don't require editing source-controlled files.
+
+**Scope:**
+- `orchestrator/instance_paths.py` — new shared utility module (path resolution + config loading)
+- `conductor.py` — replace flat path constants with `resolve_instance()`; add `--instance` flag
+- `status.py` — `--instance` / `--all` flags; auto-detect single instance
+- `start_milestone.py` — write state to instance dir; print correct launch command
+- `approve_gate.py` — read/write gate files from instance dir
+- `resume_planning.py` — read/write state from instance dir
+- `.gitignore` — add `instances/` and `config.local.json`; remove stale flat entries
+
+**Phases:**
+- **Foundation** (TICKET-0249–TICKET-0256): All implementation + QA in a single phase
+
+**Tickets:** TICKET-0249 through TICKET-0256 (8 total)
+
+| Phase | Ticket | Title | Type | Owner |
+|-------|--------|-------|------|-------|
+| Foundation | TICKET-0249 | Create instance_paths.py shared utility module | FEATURE | systems-programmer |
+| Foundation | TICKET-0250 | Update conductor.py for instance-scoped paths + --instance flag | FEATURE | systems-programmer |
+| Foundation | TICKET-0251 | Update status.py for --instance / --all flags | FEATURE | systems-programmer |
+| Foundation | TICKET-0252 | Update start_milestone.py for instance directories | FEATURE | systems-programmer |
+| Foundation | TICKET-0253 | Update approve_gate.py for --instance flag | FEATURE | systems-programmer |
+| Foundation | TICKET-0254 | Update resume_planning.py for --instance flag | FEATURE | systems-programmer |
+| Foundation | TICKET-0255 | Update .gitignore — add instances/, remove stale flat entries | TASK | systems-programmer |
+| Foundation | TICKET-0256 | QA — integration test: two simultaneous instances + config override | TASK | qa-engineer |
+
+**Dependency Graph:**
+```
+TICKET-0249 (instance_paths.py)
+  ├─► TICKET-0250 (conductor.py)
+  ├─► TICKET-0251 (status.py)
+  ├─► TICKET-0252 (start_milestone.py)
+  ├─► TICKET-0253 (approve_gate.py)
+  └─► TICKET-0254 (resume_planning.py)
+
+TICKET-0255 (.gitignore) — no code deps, can run any time
+
+All of the above ──► TICKET-0256 (QA gate)
+```
+
+**Parallel-eligible:** T4 does not block and is not blocked by any game milestone.
+
+**Dependencies:** None
 
 ---
 

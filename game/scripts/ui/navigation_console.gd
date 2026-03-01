@@ -57,7 +57,7 @@ var _confirm_button: Button = null
 var _confirm_disabled_reason: Label = null
 var _cancel_button: Button = null
 var _detail_prompt_label: Label = null
-var _detail_container: VBoxContainer = null
+var _detail_container: ScrollContainer = null
 
 ## Ship fuel section elements
 var _fuel_tank_level_label: Label = null
@@ -141,6 +141,7 @@ func open_panel() -> void:
 	_selected_biome_id = ""
 	_selected_index = -1
 	_focus_on_map = true
+	_clamp_panel_to_viewport()
 	_refresh_biome_nodes()
 	_refresh_detail()
 	_refresh_fuel_section()
@@ -387,10 +388,17 @@ func _build_biome_node_button(biome_id: String) -> PanelContainer:
 
 	return panel
 
-func _build_detail_column() -> VBoxContainer:
+func _build_detail_column() -> ScrollContainer:
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+
 	var col := VBoxContainer.new()
-	col.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_theme_constant_override("separation", 8)
+	scroll.add_child(col)
 
 	# SHIP FUEL section — always visible when panel is open
 	var fuel_header := Label.new()
@@ -527,7 +535,7 @@ func _build_detail_column() -> VBoxContainer:
 	_confirm_disabled_reason.visible = false
 	col.add_child(_confirm_disabled_reason)
 
-	return col
+	return scroll
 
 func _build_action_bar(parent: VBoxContainer) -> void:
 	var bar := HBoxContainer.new()
@@ -552,6 +560,10 @@ func _build_action_bar(parent: VBoxContainer) -> void:
 
 func _connect_signals() -> void:
 	FuelSystem.fuel_changed.connect(_on_fuel_changed)
+
+func _clamp_panel_to_viewport() -> void:
+	var max_height: float = get_viewport().get_visible_rect().size.y * 0.92
+	_main_panel.custom_minimum_size.y = min(PANEL_HEIGHT, max_height)
 
 func _refresh_biome_nodes() -> void:
 	# Update current biome display

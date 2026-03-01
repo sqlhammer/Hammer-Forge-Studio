@@ -4,6 +4,8 @@
 Usage:
     python orchestrator/status.py
     python orchestrator/status.py --json
+    python orchestrator/status.py --instance <name>
+    python orchestrator/status.py --all
 """
 
 import argparse
@@ -11,40 +13,67 @@ import json
 import sys
 from pathlib import Path
 
+from instance_paths import resolve_instance
+
+
 ORCH_DIR = Path(__file__).resolve().parent
-STATE_PATH = ORCH_DIR / "state.json"
-PENDING_GATE = ORCH_DIR / "pending_gate.json"
-ACTIVITY_LOG = ORCH_DIR / "activity.log"
 
 
 def format_cost(usd: float) -> str:
     return f"${usd:.2f}"
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Show orchestrator status")
-    parser.add_argument("--json", action="store_true", dest="as_json",
-        help="Output raw JSON state")
-    parser.add_argument("--log", type=int, default=0, metavar="N",
-        help="Show last N lines of activity log")
-    args = parser.parse_args()
+def _discover_instances() -> list[str]:
+    """Return sorted list of instance names that have a state.json file."""
+    instances_dir = ORCH_DIR / "instances"
+    if not instances_dir.is_dir():
+        return []
+    return sorted(
+        d.name
+        for d in instances_dir.iterdir()
+        if d.is_dir() and (d / "state.json").exists()
+    )
 
-    if not STATE_PATH.exists():
-        print("No orchestrator state found. The conductor has not been started.")
-        sys.exit(0)
 
-    with open(STATE_PATH, encoding="utf-8") as f:
-        state = json.load(f)
+def _load_state(state_path: Path) -> dict | None:
+    """Load and return state dict, or None if file missing."""
+    if not state_path.exists():
+        return None
+    with open(state_path, encoding="utf-8") as f:
+        return json.load(f)
 
+
+def _print_one_line_summary(instance_name: str, state: dict) -> None:
+    """Print a single-line summary for --all output."""
+    milestone = state.get("milestone", "?")
+    phase = state.get("phase", "?")
+    wave = state.get("wave_number", 0)
+
+    # Count tickets from completed waves + active workers
+    completed_tickets = sum(
+        len(w.get("tickets", []))
+        for w in state.get("completed_waves", [])
+    )
+    active_tickets = len(state.get("active_workers", []))
+    total_tickets = completed_tickets + active_tickets
+
+    print(
+        f"  {instance_name:<12}  {milestone:<6}|  Phase: {phase:<16}|"
+        f"  Wave: {wave:<4}|  Tickets: {completed_tickets}/{total_tickets} done"
+    )
+
+
+def _print_full_status(instance_name: str, paths, state: dict, args) -> None:
+    """Print full status display for a single instance (preserves original format)."""
     if args.as_json:
         print(json.dumps(state, indent=2))
         return
 
-    # Pretty print
     print("=" * 50)
     print("  Hammer Forge Studio — Orchestrator Status")
     print("=" * 50)
     print()
+    print(f"  Instance:   {instance_name}")
     print(f"  Status:     {state.get('status', '?')}")
     print(f"  Milestone:  {state.get('milestone', '?')}")
     print(f"  Phase:      {state.get('phase', '?')}")
@@ -81,8 +110,8 @@ def main():
         print()
 
     # Pending gate
-    if PENDING_GATE.exists():
-        with open(PENDING_GATE, encoding="utf-8") as f:
+    if paths.pending_gate_path.exists():
+        with open(paths.pending_gate_path, encoding="utf-8") as f:
             gate = json.load(f)
         print("  ** PENDING GATE **")
         print(f"    Phase:      {gate.get('phase', '?')}")
@@ -92,12 +121,72 @@ def main():
         print()
 
     # Activity log tail
-    if args.log > 0 and ACTIVITY_LOG.exists():
+    if args.log > 0 and paths.activity_log.exists():
         print(f"  Last {args.log} log entries:")
-        lines = ACTIVITY_LOG.read_text(encoding="utf-8").splitlines()
+        lines = paths.activity_log.read_text(encoding="utf-8").splitlines()
         for line in lines[-args.log:]:
             print(f"    {line}")
         print()
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Show orchestrator status")
+    parser.add_argument("--json", action="store_true", dest="as_json",
+        help="Output raw JSON state")
+    parser.add_argument("--log", type=int, default=0, metavar="N",
+        help="Show last N lines of activity log")
+    parser.add_argument("--instance", type=str, default=None, metavar="NAME",
+        help="Target a specific instance by name")
+    parser.add_argument("--all", action="store_true", dest="show_all",
+        help="List all instances with a one-line summary each")
+    args = parser.parse_args()
+
+    # --all mode: list every instance with a summary line
+    if args.show_all:
+        instances = _discover_instances()
+        if not instances:
+            print("No instances found. Run start_milestone.py first.")
+            sys.exit(0)
+        print("=" * 50)
+        print("  Hammer Forge Studio — All Instances")
+        print("=" * 50)
+        print()
+        for name in instances:
+            paths = resolve_instance(name, orch_dir=ORCH_DIR)
+            state = _load_state(paths.state_path)
+            if state:
+                _print_one_line_summary(name, state)
+        print()
+        return
+
+    # Determine which instance to show
+    if args.instance:
+        instance_name = args.instance
+    else:
+        # Auto-detect
+        instances = _discover_instances()
+        if len(instances) == 0:
+            print("No instances found. Run start_milestone.py first.")
+            sys.exit(0)
+        elif len(instances) == 1:
+            instance_name = instances[0]
+        else:
+            print(f"Multiple instances found ({len(instances)}):")
+            for name in instances:
+                print(f"  - {name}")
+            print()
+            print("Specify one with --instance <name>, or use --all for a summary.")
+            sys.exit(0)
+
+    # Single-instance view
+    paths = resolve_instance(instance_name, orch_dir=ORCH_DIR)
+    state = _load_state(paths.state_path)
+    if state is None:
+        print(f"No orchestrator state found for instance '{instance_name}'.")
+        print("The conductor has not been started for this instance.")
+        sys.exit(0)
+
+    _print_full_status(instance_name, paths, state, args)
 
 
 if __name__ == "__main__":

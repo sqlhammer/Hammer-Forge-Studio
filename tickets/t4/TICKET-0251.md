@@ -2,7 +2,7 @@
 id: TICKET-0251
 title: "Update status.py for --instance and --all flags"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -57,3 +57,4 @@ instance exists, use it without requiring `--instance`).
 ## Activity Log
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
+- 2026-03-01 [systems-programmer] Starting work — updating status.py with --instance and --all flags

@@ -2,7 +2,7 @@
 id: TICKET-0253
 title: "Update approve_gate.py for --instance flag"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -52,3 +52,4 @@ Add `--instance <name>` with the same auto-detect logic as `status.py`.
 ## Activity Log
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
+- 2026-03-01 [systems-programmer] Starting work — updating approve_gate.py for instance-scoped paths

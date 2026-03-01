@@ -2,7 +2,7 @@
 id: TICKET-0253
 title: "Update approve_gate.py for --instance flag"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -25,13 +25,13 @@ Add `--instance <name>` with the same auto-detect logic as `status.py`.
 
 ## Acceptance Criteria
 
-- [ ] `--instance <name>` argument added (optional; required when multiple instances exist)
-- [ ] Auto-detect logic (same as `status.py`):
+- [x] `--instance <name>` argument added (optional; required when multiple instances exist)
+- [x] Auto-detect logic (same as `status.py`):
   - If only one instance dir exists, use it automatically
   - If multiple instances exist and no `--instance` passed, prompt user to specify
-- [ ] `resolve_instance()` used to derive `paths.pending_gate_path` and `paths.gate_response_path`
-- [ ] Old hardcoded flat paths fully removed
-- [ ] Script still validates that `pending_gate.json` exists (error if no gate is pending)
+- [x] `resolve_instance()` used to derive `paths.pending_gate_path` and `paths.gate_response_path`
+- [x] Old hardcoded flat paths fully removed
+- [x] Script still validates that `pending_gate.json` exists (error if no gate is pending)
 
 ---
 
@@ -53,3 +53,4 @@ Add `--instance <name>` with the same auto-detect logic as `status.py`.
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
 - 2026-03-01 [systems-programmer] Starting work — updating approve_gate.py for instance-scoped paths
+- 2026-03-01 [systems-programmer] DONE — commit 18a7e20, merged via PR #222 (https://github.com/sqlhammer/Hammer-Forge-Studio/pull/222)

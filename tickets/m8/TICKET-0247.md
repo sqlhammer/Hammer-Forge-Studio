@@ -69,3 +69,11 @@ Specific things to check:
 
 - 2026-03-01 [producer] Created ticket — player-reported: ship fuel full (1000/1000) but navigation blocks travel claiming only 10 fuel cells available; need 7 more for Rock Warrens (cost 17)
 - 2026-03-01 [gameplay-programmer] Starting work. Root cause identified: calculate_ship_weight() counts every inventory item as 1 weight unit with no base ship weight. In begin-wealthy mode (409 items), weight=409, cost to Rock Warrens=1636 units (17 cells), exceeding tank capacity (1000 units, 10 cells). Fix: add BASE_SHIP_WEIGHT=50, set WEIGHT_PER_INVENTORY_ITEM=0.
+- 2026-03-01 [gameplay-programmer] Fix verified on main (commit 894b37f, PR #210 merged). All acceptance criteria confirmed:
+  - ✅ Full tank (1000/1000 units) → 10 Fuel Cells displayed correctly (1000/100=10)
+  - ✅ With BASE_SHIP_WEIGHT=50, WEIGHT_PER_INVENTORY_ITEM=0: travel cost to Rock Warrens = distance*50*0.005 = 200-250 units (2-3 cells) — well within 10-cell tank
+  - ✅ CONFIRM TRAVEL enables via NavigationSystem.can_travel_to() when fuel sufficient
+  - ✅ Warning/disabled only when genuinely insufficient (detail panel lines 664-677)
+  - ✅ Conversion consistent: map buttons and detail panel both use FuelSystemDefs.FUEL_CELL_UNITS (100)
+  - ✅ Unit tests exist: _test_ship_weight_inventory_does_not_affect_weight, _test_full_tank_affords_rock_warrens_with_inventory, plus 3 additional weight tests
+  - **READY FOR STUDIO HEAD SIGN-OFF** — hold condition prevents marking DONE without explicit approval

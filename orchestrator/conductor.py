@@ -3,7 +3,8 @@
 
 Usage:
     python orchestrator/conductor.py <milestone>
-    python orchestrator/conductor.py --status
+    python orchestrator/conductor.py <milestone> --instance <name>
+    python orchestrator/conductor.py --status --instance <name>
 
 Behaviour:
   - If state.json exists, resumes automatically from saved state.
@@ -28,22 +29,14 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+from instance_paths import InstancePaths, load_config, resolve_instance
+
 # ---------------------------------------------------------------------------
-# Paths
+# Paths — only repo-level constants that are needed before arg parsing
 # ---------------------------------------------------------------------------
 
 REPO_ROOT = Path(os.environ.get("HFS_REPO_ROOT", Path(__file__).resolve().parent.parent))
 ORCH_DIR = Path(os.environ.get("HFS_ORCH_DIR", REPO_ROOT / "orchestrator"))
-CONFIG_PATH = ORCH_DIR / "config.json"
-STATE_PATH = ORCH_DIR / "state.json"
-ACTIVITY_LOG = ORCH_DIR / "activity.log"
-PENDING_GATE_PATH = ORCH_DIR / "pending_gate.json"
-GATE_RESPONSE_PATH = ORCH_DIR / "gate_response.json"
-GODOT_MCP_LOCK_PATH = ORCH_DIR / "godot_mcp.lock"
-PROMPTS_DIR = ORCH_DIR / "prompts"
-SCHEMAS_DIR = ORCH_DIR / "schemas"
-RESULTS_DIR = ORCH_DIR / "results"
-LOGS_DIR = ORCH_DIR / "logs"
 AGENTS_DIR = REPO_ROOT / "agents"
 WORKTREES_DIR = REPO_ROOT / ".claude" / "worktrees"
 
@@ -138,16 +131,17 @@ STALE_LOCK_SECONDS = 30 * 60  # 30 minutes
 
 
 def acquire_godot_mcp_lock(
-    ticket_id: str, agent_slug: str, wave: int, logger=None
+    ticket_id: str, agent_slug: str, wave: int,
+    lock_path: Path, logger=None,
 ) -> bool:
     """Try to acquire the Godot MCP lock file.
 
     Returns True if the lock was acquired, False if it is held by another agent.
     Automatically removes stale locks older than STALE_LOCK_SECONDS.
     """
-    if GODOT_MCP_LOCK_PATH.exists():
+    if lock_path.exists():
         try:
-            data = json.loads(GODOT_MCP_LOCK_PATH.read_text(encoding="utf-8"))
+            data = json.loads(lock_path.read_text(encoding="utf-8"))
             acquired_at = data.get("acquired_at", "")
             if acquired_at:
                 lock_time = datetime.fromisoformat(acquired_at)
@@ -157,14 +151,14 @@ def acquire_godot_mcp_lock(
                         logger.log("WARNING",
                             f"Stale Godot MCP lock detected (held by {data.get('holder', '?')} "
                             f"for {format_duration(age)}). Removing.")
-                    GODOT_MCP_LOCK_PATH.unlink(missing_ok=True)
+                    lock_path.unlink(missing_ok=True)
                 else:
                     return False
             else:
                 return False
         except (json.JSONDecodeError, ValueError, OSError):
             # Corrupt lock file — remove and proceed
-            GODOT_MCP_LOCK_PATH.unlink(missing_ok=True)
+            lock_path.unlink(missing_ok=True)
 
     lock_data = {
         "holder": ticket_id,
@@ -172,32 +166,32 @@ def acquire_godot_mcp_lock(
         "acquired_at": now_iso(),
         "wave": wave,
     }
-    GODOT_MCP_LOCK_PATH.write_text(
+    lock_path.write_text(
         json.dumps(lock_data, indent=2), encoding="utf-8"
     )
     return True
 
 
-def release_godot_mcp_lock(logger=None):
+def release_godot_mcp_lock(lock_path: Path, logger=None):
     """Release the Godot MCP lock file if it exists."""
-    if GODOT_MCP_LOCK_PATH.exists():
+    if lock_path.exists():
         try:
             holder = "unknown"
-            data = json.loads(GODOT_MCP_LOCK_PATH.read_text(encoding="utf-8"))
+            data = json.loads(lock_path.read_text(encoding="utf-8"))
             holder = data.get("holder", "unknown")
         except (json.JSONDecodeError, ValueError, OSError):
             pass
-        GODOT_MCP_LOCK_PATH.unlink(missing_ok=True)
+        lock_path.unlink(missing_ok=True)
         if logger:
             logger.log("UNLOCK", f"Released Godot MCP lock (was held by {holder})")
 
 
-def read_godot_mcp_lock() -> dict | None:
+def read_godot_mcp_lock(lock_path: Path) -> dict | None:
     """Read the current Godot MCP lock data. Returns None if not held."""
-    if not GODOT_MCP_LOCK_PATH.exists():
+    if not lock_path.exists():
         return None
     try:
-        return json.loads(GODOT_MCP_LOCK_PATH.read_text(encoding="utf-8"))
+        return json.loads(lock_path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, ValueError, OSError):
         return None
 
@@ -454,14 +448,14 @@ def create_initial_state(milestone: str, phase: str) -> dict:
     }
 
 
-def load_state() -> dict:
-    if STATE_PATH.exists():
-        return load_json(STATE_PATH)
+def load_state(state_path: Path) -> dict:
+    if state_path.exists():
+        return load_json(state_path)
     return None
 
 
-def save_state(state: dict):
-    write_json(STATE_PATH, state)
+def save_state(state: dict, state_path: Path):
+    write_json(state_path, state)
 
 
 # ---------------------------------------------------------------------------
@@ -699,21 +693,22 @@ def fire_toast(title: str, message: str):
 # ---------------------------------------------------------------------------
 
 class Conductor:
-    def __init__(self, config_path: Path = CONFIG_PATH, run_claude_fn=None):
-        self.config = load_json(config_path)
-        self.logger = ActivityLogger(ACTIVITY_LOG)
+    def __init__(self, paths: InstancePaths, config: dict, run_claude_fn=None):
+        self.paths = paths
+        self.config = config
+        self.logger = ActivityLogger(paths.activity_log)
         self.shutdown_requested = False
         self._active_procs: set[asyncio.subprocess.Process] = set()
         self._run_claude = run_claude_fn or run_claude
 
         # Auto-resume from saved state if it exists
-        self.state = load_state()
+        self.state = load_state(paths.state_path)
         if self.state is not None:
             self.logger.log("SYSTEM", "Resumed from saved state")
 
         # Ensure output dirs exist
-        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-        LOGS_DIR.mkdir(parents=True, exist_ok=True)
+        paths.results_dir.mkdir(parents=True, exist_ok=True)
+        paths.logs_dir.mkdir(parents=True, exist_ok=True)
 
     def _track_proc(self, proc: asyncio.subprocess.Process):
         """Callback to track active subprocesses for shutdown."""
@@ -736,7 +731,7 @@ class Conductor:
         """Main orchestration loop."""
         if self.state is None:
             self.state = create_initial_state(milestone, phase)
-            save_state(self.state)
+            save_state(self.state, self.paths.state_path)
 
         self.setup_signal_handlers()
         self.logger.log("SYSTEM",
@@ -773,11 +768,11 @@ class Conductor:
                 self.logger.log("ERROR", f"Unknown state: {status}")
                 self.state["status"] = "HALTED"
 
-            save_state(self.state)
+            save_state(self.state, self.paths.state_path)
 
             if self.shutdown_requested:
                 self.logger.log("SYSTEM", "Graceful shutdown — saving state.")
-                save_state(self.state)
+                save_state(self.state, self.paths.state_path)
                 break
 
         self.logger.log("SYSTEM", "Conductor exiting.")
@@ -826,7 +821,7 @@ class Conductor:
             "active_ticket_ids": json.dumps(active_ticket_ids),
             "completed_this_session": json.dumps(completed_this_session),
         }
-        prompt = render_template(PROMPTS_DIR / "plan_wave.md", template_vars)
+        prompt = render_template(self.paths.prompts_dir / "plan_wave.md", template_vars)
 
         # Call Producer
         model = self.config["models"]["producer"]
@@ -841,7 +836,7 @@ class Conductor:
             output_json=True,
             cwd=REPO_ROOT,
             timeout_minutes=10,
-            log_path=LOGS_DIR / f"producer-wave{wave_num}-{now_iso().replace(':', '')}.log",
+            log_path=self.paths.logs_dir / f"producer-wave{wave_num}-{now_iso().replace(':', '')}.log",
             on_proc_start=self._track_proc,
         )
 
@@ -1021,10 +1016,11 @@ class Conductor:
 
                 acquired = acquire_godot_mcp_lock(
                     ticket_id, agent_slug,
-                    self.state["wave_number"], self.logger
+                    self.state["wave_number"],
+                    self.paths.godot_mcp_lock_path, self.logger,
                 )
                 if not acquired:
-                    lock_data = read_godot_mcp_lock()
+                    lock_data = read_godot_mcp_lock(self.paths.godot_mcp_lock_path)
                     holder = lock_data["holder"] if lock_data else "unknown"
                     self.logger.log("INFO",
                         f"Deferred {ticket_id} — Godot MCP lock held by {holder}")
@@ -1043,7 +1039,7 @@ class Conductor:
                     self.logger.log("ERROR", f"Worktree creation failed for {ticket_id}: {e}")
                     # Release Godot MCP lock if this worker held it
                     if needs_godot and godot_lock_acquired_for == ticket_id:
-                        release_godot_mcp_lock(self.logger)
+                        release_godot_mcp_lock(self.paths.godot_mcp_lock_path, self.logger)
                         godot_lock_acquired_for = None
                     continue
 
@@ -1063,7 +1059,7 @@ class Conductor:
         if deferred:
             pending = self.state.setdefault("_pending_wave", [])
             pending.extend(deferred)
-            save_state(self.state)
+            save_state(self.state, self.paths.state_path)
 
         # Populate active ticket locks
         self.state["active_ticket_ids"] = [w["ticket"] for w in workers]
@@ -1073,7 +1069,7 @@ class Conductor:
 
         self.state["active_workers"] = workers
         self.state["status"] = "WORKING"
-        save_state(self.state)
+        save_state(self.state, self.paths.state_path)
 
     # ------------------------------------------------------------------
     # WORKING
@@ -1111,11 +1107,11 @@ class Conductor:
             if ticket in active_locks:
                 active_locks.remove(ticket)
                 self.state["active_ticket_ids"] = active_locks
-                save_state(self.state)
+                save_state(self.state, self.paths.state_path)
 
             # Release Godot MCP lock if this worker held it
             if worker.get("needs_godot_mcp", False):
-                release_godot_mcp_lock(self.logger)
+                release_godot_mcp_lock(self.paths.godot_mcp_lock_path, self.logger)
 
             if exit_code == 0:
                 if not stdout.strip():
@@ -1137,7 +1133,7 @@ class Conductor:
                         any_new_gd = True
 
                     # Save result file
-                    result_path = RESULTS_DIR / f"{ticket}.json"
+                    result_path = self.paths.results_dir / f"{ticket}.json"
                     write_json(result_path, result_data)
 
                     if outcome == "done":
@@ -1212,7 +1208,7 @@ class Conductor:
             "ticket_title": ticket_id,  # Will be refined by the agent after reading
             "prompt_supplement": supplement if supplement else "No additional notes.",
         }
-        prompt = render_template(PROMPTS_DIR / "worker_dispatch.md", template_vars)
+        prompt = render_template(self.paths.prompts_dir / "worker_dispatch.md", template_vars)
 
         # Determine working directory
         cwd = Path(worker["worktree_path"]) if worker.get("worktree_path") else REPO_ROOT
@@ -1245,7 +1241,7 @@ class Conductor:
         model = get_model(self.config, agent_slug)
 
         ts = now_iso().replace(":", "")
-        log_path = LOGS_DIR / f"{agent_slug}-{ticket_id}-{ts}.log"
+        log_path = self.paths.logs_dir / f"{agent_slug}-{ticket_id}-{ts}.log"
 
         self.logger.log("DISPATCH",
             f"{agent_slug} -> {ticket_id} (model={model}, budget={format_cost(budget)})")
@@ -1441,18 +1437,21 @@ class Conductor:
 
     async def _do_gate_blocked(self):
         """Handle phase gate — notify human and wait for approval."""
+        pending_gate_path = self.paths.pending_gate_path
+        gate_response_path = self.paths.gate_response_path
+
         gate = self.state.pop("_pending_gate", {})
         if not gate:
             # Check if pending_gate.json already exists (resume scenario)
-            if PENDING_GATE_PATH.exists():
-                gate = load_json(PENDING_GATE_PATH)
+            if pending_gate_path.exists():
+                gate = load_json(pending_gate_path)
             else:
                 self.state["status"] = "PLANNING"
                 return
 
         # Write gate file
         gate["requested_at"] = now_iso()
-        write_json(PENDING_GATE_PATH, gate)
+        write_json(pending_gate_path, gate)
 
         # Print notification
         phase = gate.get("phase", "?")
@@ -1480,9 +1479,9 @@ class Conductor:
 
         # Poll for response
         while not self.shutdown_requested:
-            if GATE_RESPONSE_PATH.exists():
+            if gate_response_path.exists():
                 try:
-                    response = load_json(GATE_RESPONSE_PATH)
+                    response = load_json(gate_response_path)
                 except (json.JSONDecodeError, OSError):
                     await asyncio.sleep(5)
                     continue
@@ -1507,8 +1506,8 @@ class Conductor:
                     self.state["status"] = "HALTED"
 
                 # Clean up gate files
-                _safe_delete(PENDING_GATE_PATH)
-                _safe_delete(GATE_RESPONSE_PATH)
+                _safe_delete(pending_gate_path)
+                _safe_delete(gate_response_path)
                 return
 
             await asyncio.sleep(5)
@@ -1535,22 +1534,35 @@ def main():
     parser.add_argument("milestone", nargs="?",
         help="Milestone ID (e.g., M7). Required for a fresh start; "
              "omit only with --status.")
+    parser.add_argument("--instance", type=str, default=None,
+        help="Instance name for scoped state/logs (defaults to <milestone>)")
     parser.add_argument("--status", action="store_true",
         help="Print current state and exit")
-    parser.add_argument("--config", type=Path, default=CONFIG_PATH,
-        help="Path to config.json")
 
     args = parser.parse_args()
 
+    # Resolve instance name: --instance flag, else milestone positional arg
+    instance_name = args.instance or args.milestone
+
     if args.status:
-        state = load_state()
+        if not instance_name:
+            parser.error("Provide <milestone> or --instance for --status")
+            return
+        paths = resolve_instance(instance_name, ORCH_DIR)
+        state = load_state(paths.state_path)
         if state:
             print(json.dumps(state, indent=2))
         else:
             print("No state.json found.")
         return
 
-    conductor = Conductor(config_path=args.config)
+    if not instance_name:
+        parser.error("Provide <milestone> for a fresh start (e.g., M7)")
+        return
+
+    paths = resolve_instance(instance_name, ORCH_DIR)
+    config = load_config(paths)
+    conductor = Conductor(paths, config)
 
     if conductor.state is not None:
         # Resuming — milestone and phase come from saved state

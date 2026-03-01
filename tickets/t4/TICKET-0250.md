@@ -2,7 +2,7 @@
 id: TICKET-0250
 title: "Update conductor.py for instance-scoped paths and --instance flag"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -59,3 +59,4 @@ multiple conductor processes can run concurrently on different milestones withou
 ## Activity Log
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
+- 2026-03-01 [systems-programmer] Starting work — updating conductor.py for instance-scoped paths

@@ -2,7 +2,7 @@
 id: TICKET-0254
 title: "Update resume_planning.py for --instance flag"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -25,13 +25,13 @@ and `status.py`.
 
 ## Acceptance Criteria
 
-- [ ] `--instance <name>` argument added (optional; required when multiple instances exist)
-- [ ] Auto-detect logic (same as `approve_gate.py`):
+- [x] `--instance <name>` argument added (optional; required when multiple instances exist)
+- [x] Auto-detect logic (same as `approve_gate.py`):
   - If only one instance dir exists, use it automatically
   - If multiple instances exist and no `--instance` passed, prompt user to specify
-- [ ] `resolve_instance()` used to derive `paths.state_path`
-- [ ] All reads/writes of `state.json` in this script use `paths.state_path`
-- [ ] Old hardcoded flat paths fully removed
+- [x] `resolve_instance()` used to derive `paths.state_path`
+- [x] All reads/writes of `state.json` in this script use `paths.state_path`
+- [x] Old hardcoded flat paths fully removed
 
 ---
 
@@ -51,3 +51,4 @@ and `status.py`.
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
 - 2026-03-01 [systems-programmer] Starting work — updating resume_planning.py for instance paths
+- 2026-03-01 [systems-programmer] DONE — committed 94b6bfe (merge commit), PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/216. All acceptance criteria met.

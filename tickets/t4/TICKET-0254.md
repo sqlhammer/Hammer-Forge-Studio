@@ -2,7 +2,7 @@
 id: TICKET-0254
 title: "Update resume_planning.py for --instance flag"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -50,3 +50,4 @@ and `status.py`.
 ## Activity Log
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
+- 2026-03-01 [systems-programmer] Starting work — updating resume_planning.py for instance paths

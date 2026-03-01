@@ -59,6 +59,12 @@ var _cancel_button: Button = null
 var _detail_prompt_label: Label = null
 var _detail_container: VBoxContainer = null
 
+## Ship fuel section elements
+var _fuel_tank_level_label: Label = null
+var _fuel_inventory_count_label: Label = null
+var _load_fuel_button: Button = null
+var _fuel_status_label: Label = null
+
 ## Current biome node display
 var _current_biome_label: Label = null
 
@@ -137,6 +143,7 @@ func open_panel() -> void:
 	_focus_on_map = true
 	_refresh_biome_nodes()
 	_refresh_detail()
+	_refresh_fuel_section()
 	# Auto-focus first available destination node
 	if _biome_node_ids.size() > 0:
 		_selected_index = 0
@@ -385,6 +392,39 @@ func _build_detail_column() -> VBoxContainer:
 	col.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
 	col.add_theme_constant_override("separation", 8)
 
+	# SHIP FUEL section — always visible when panel is open
+	var fuel_header := Label.new()
+	fuel_header.text = "SHIP FUEL"
+	fuel_header.add_theme_font_size_override("font_size", 14)
+	fuel_header.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
+	col.add_child(fuel_header)
+
+	_fuel_tank_level_label = Label.new()
+	_fuel_tank_level_label.add_theme_font_size_override("font_size", 20)
+	_fuel_tank_level_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
+	col.add_child(_fuel_tank_level_label)
+
+	_fuel_inventory_count_label = Label.new()
+	_fuel_inventory_count_label.add_theme_font_size_override("font_size", 14)
+	_fuel_inventory_count_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
+	col.add_child(_fuel_inventory_count_label)
+
+	_load_fuel_button = Button.new()
+	_load_fuel_button.text = "LOAD FUEL CELLS"
+	_load_fuel_button.custom_minimum_size = Vector2(200, 40)
+	_load_fuel_button.add_theme_font_size_override("font_size", 16)
+	_style_teal_button(_load_fuel_button)
+	_load_fuel_button.pressed.connect(_on_load_fuel_pressed)
+	col.add_child(_load_fuel_button)
+
+	_fuel_status_label = Label.new()
+	_fuel_status_label.add_theme_font_size_override("font_size", 14)
+	_fuel_status_label.add_theme_color_override("font_color", COLOR_GREEN)
+	_fuel_status_label.visible = false
+	col.add_child(_fuel_status_label)
+
+	_add_divider(col)
+
 	# Section header
 	var header := Label.new()
 	header.text = "DESTINATION"
@@ -447,7 +487,7 @@ func _build_detail_column() -> VBoxContainer:
 
 	# Your fuel row
 	_detail_your_fuel_label = Label.new()
-	_detail_your_fuel_label.text = "Your Fuel"
+	_detail_your_fuel_label.text = "Ship Tank"
 	_detail_your_fuel_label.add_theme_font_size_override("font_size", 14)
 	_detail_your_fuel_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 	_detail_your_fuel_label.visible = false
@@ -650,6 +690,34 @@ func _on_confirm_pressed() -> void:
 func _on_fuel_changed(_current: float, _maximum: float) -> void:
 	if _is_open:
 		_refresh_detail()
+		_refresh_fuel_section()
+
+func _refresh_fuel_section() -> void:
+	var current_fuel: float = FuelSystem.fuel_current
+	var max_fuel: float = FuelSystem.fuel_max
+	_fuel_tank_level_label.text = "%d / %d units" % [int(current_fuel), int(max_fuel)]
+
+	var cells_in_inventory: int = PlayerInventory.get_total_count(ResourceDefs.ResourceType.FUEL_CELL)
+	_fuel_inventory_count_label.text = "Cells in backpack: %d" % cells_in_inventory
+
+	var tank_is_full: bool = current_fuel >= max_fuel
+	_load_fuel_button.disabled = cells_in_inventory == 0 or tank_is_full
+
+func _on_load_fuel_pressed() -> void:
+	var cells_available: int = PlayerInventory.get_total_count(ResourceDefs.ResourceType.FUEL_CELL)
+	if cells_available == 0:
+		return
+	var cells_consumed: int = FuelSystem.refuel(cells_available)
+	if cells_consumed > 0:
+		var units_added: float = cells_consumed * FuelSystemDefs.FUEL_CELL_UNITS
+		_fuel_status_label.text = "Loaded %d cell(s) (+%d units)" % [cells_consumed, int(units_added)]
+		_fuel_status_label.add_theme_color_override("font_color", COLOR_GREEN)
+		_fuel_status_label.visible = true
+		Global.log("NavigationConsole: loaded %d fuel cell(s) into ship tank" % cells_consumed)
+	else:
+		_fuel_status_label.text = "Tank is already full"
+		_fuel_status_label.add_theme_color_override("font_color", COLOR_AMBER)
+		_fuel_status_label.visible = true
 
 func _style_teal_button(button: Button) -> void:
 	var normal_style := StyleBoxFlat.new()

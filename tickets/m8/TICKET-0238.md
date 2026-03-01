@@ -2,7 +2,7 @@
 id: TICKET-0238
 title: "Bugfix — Player cannot access navigation console in debug-launched sessions"
 type: BUGFIX
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer

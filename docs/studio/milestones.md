@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-03-01 (M9 redefined; Visual Asset Refinement moved to M10; M10–M15 shifted to M11–M16)
+**Last Updated:** 2026-03-01 (M9 kicked off — Active)
 
 > Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
@@ -34,7 +34,7 @@
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Complete | 56 | 0 | 56 | 2026-03-01 |
-| M9 | Foundation & Hardening — Canonical game launch architecture, orchestrator hardening, gamepad fixes, and M8 playtest polish | — | Planning | 29 | 29 | 0 | — |
+| M9 | Foundation & Hardening — Canonical game launch architecture, orchestrator hardening, gamepad fixes, and M8 playtest polish | — | Active | 29 | 29 | 0 | — |
 | M10 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
 | M11 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
 | M12 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |

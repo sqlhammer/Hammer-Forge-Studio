@@ -2,7 +2,7 @@
 id: TICKET-0245
 title: "BUG — Navigation console interaction prompt appears before player can actually interact"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -63,3 +63,4 @@ Option B is simpler to implement but couples the two shapes — any future resiz
 ## Activity Log
 
 - 2026-03-01 [producer] Created ticket — player-reported: prompt shows too early, E press does nothing at distance
+- 2026-03-01 [gameplay-programmer] Starting work — implementing Option A (area-based prompt detection)

@@ -39,6 +39,17 @@ REPO_ROOT = Path(os.environ.get("HFS_REPO_ROOT", Path(__file__).resolve().parent
 ORCH_DIR = Path(os.environ.get("HFS_ORCH_DIR", REPO_ROOT / "orchestrator"))
 AGENTS_DIR = REPO_ROOT / "agents"
 WORKTREES_DIR = REPO_ROOT / ".claude" / "worktrees"
+USAGE_LOG = ORCH_DIR / "usage.jsonl"
+
+# ---------------------------------------------------------------------------
+# Pricing constants — USD per million tokens
+# ---------------------------------------------------------------------------
+
+MODEL_PRICING = {
+    "opus":   {"input": 15.0,  "output": 75.0},
+    "sonnet": {"input":  3.0,  "output": 15.0},
+    "haiku":  {"input":  0.80, "output":  4.0},
+}
 
 # ---------------------------------------------------------------------------
 # Godot MCP tool names by tier
@@ -121,6 +132,27 @@ def format_duration(seconds: float) -> str:
 
 def format_cost(usd: float) -> str:
     return f"${usd:.2f}"
+
+
+def calc_cost_usd(model: str, input_tokens: int, output_tokens: int) -> float:
+    """Calculate cost in USD from token counts using MODEL_PRICING."""
+    model_lower = (model or "").lower()
+    rates = MODEL_PRICING.get("sonnet")  # default if no match
+    for key in MODEL_PRICING:
+        if key in model_lower:
+            rates = MODEL_PRICING[key]
+            break
+    return (input_tokens * rates["input"] + output_tokens * rates["output"]) / 1_000_000
+
+
+def append_usage_record(record: dict):
+    """Append a single JSON line to the JSONL usage ledger. Never raises."""
+    try:
+        with open(USAGE_LOG, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record) + "\n")
+            f.flush()
+    except Exception:
+        pass
 
 
 # ---------------------------------------------------------------------------
@@ -893,7 +925,7 @@ class Conductor:
         budget = self.config["budgets"]["producer_usd"]
         blocked = get_blocked_tools(self.config, "producer")
 
-        exit_code, stdout, stderr, _usage = await self._run_claude(
+        exit_code, stdout, stderr, usage_meta = await self._run_claude(
             prompt=prompt,
             model=model,
             budget=budget,
@@ -918,6 +950,30 @@ class Conductor:
             return
 
         self.state.pop("_producer_retries", None)
+
+        # Write usage record for this planning call
+        if usage_meta:
+            input_tok = usage_meta.get("input_tokens", 0)
+            output_tok = usage_meta.get("output_tokens", 0)
+            model_used = usage_meta.get("model", model)
+            cost = calc_cost_usd(model_used, input_tok, output_tok)
+            append_usage_record({
+                "timestamp": now_iso(),
+                "agent": "producer",
+                "ticket_id": f"PLAN_WAVE_{wave_num}",
+                "milestone": self.state.get("milestone", ""),
+                "phase": self.state.get("phase", ""),
+                "model": model_used,
+                "input_tokens": input_tok,
+                "output_tokens": output_tok,
+                "cost_usd": cost,
+                "duration_seconds": usage_meta.get("duration_seconds", 0.0),
+                "call_type": "planning",
+            })
+            self.state["total_cost_usd"] = (
+                self.state.get("total_cost_usd", 0.0) + cost
+            )
+            save_state(self.state, self.paths.state_path)
 
         # Parse plan
         try:
@@ -1163,9 +1219,32 @@ class Conductor:
         all_succeeded = True
         any_new_gd = False
 
-        for worker, (exit_code, stdout, stderr, _usage_meta) in results:
+        for worker, (exit_code, stdout, stderr, usage_meta) in results:
             agent = worker["agent"]
             ticket = worker["ticket"]
+
+            # Write usage record for this worker call
+            if usage_meta:
+                input_tok = usage_meta.get("input_tokens", 0)
+                output_tok = usage_meta.get("output_tokens", 0)
+                model_used = usage_meta.get("model", "")
+                cost = calc_cost_usd(model_used, input_tok, output_tok)
+                append_usage_record({
+                    "timestamp": now_iso(),
+                    "agent": agent,
+                    "ticket_id": ticket,
+                    "milestone": self.state.get("milestone", ""),
+                    "phase": self.state.get("phase", ""),
+                    "model": model_used,
+                    "input_tokens": input_tok,
+                    "output_tokens": output_tok,
+                    "cost_usd": cost,
+                    "duration_seconds": usage_meta.get("duration_seconds", 0.0),
+                    "call_type": "worker",
+                })
+                self.state["total_cost_usd"] = (
+                    self.state.get("total_cost_usd", 0.0) + cost
+                )
 
             # Release ticket lock (defensive — only remove if present)
             active_locks = self.state.get("active_ticket_ids", [])

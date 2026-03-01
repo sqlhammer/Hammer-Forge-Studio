@@ -430,7 +430,7 @@ func _setup_ship_boarding(world: Node3D, first_person: CharacterBody3D, hud: Gam
 	var handler := DebugShipBoardingHandler.new()
 	handler.name = "ShipBoardingHandler"
 	world.add_child(handler)
-	handler.setup(ship_interior, first_person, enter_zone, hud)
+	handler.setup(ship_interior, first_person, enter_zone, hud, hud.get_navigation_console())
 
 	Global.log("DebugLauncher: ship boarding zone and interior ready")
 

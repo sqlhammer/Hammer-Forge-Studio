@@ -1,6 +1,6 @@
 ---
 id: TICKET-0247
-title: "BUG — Navigation console shows insufficient fuel despite full ship tank (unit mismatch)"
+title: "BUG — Ship cannot take off: fuel gate fixed but confirming travel does nothing"
 type: BUG
 status: IN_PROGRESS
 priority: P1
@@ -8,6 +8,7 @@ owner: gameplay-programmer
 created_by: producer
 created_at: 2026-03-01
 updated_at: 2026-03-01
+updated_note: "Scope expanded — fuel gate fixed; new defect: CONFIRM TRAVEL does nothing"
 milestone: "M8"
 phase: "Bug Fix"
 depends_on: []
@@ -55,11 +56,12 @@ Specific things to check:
 
 ## Acceptance Criteria
 
-- [ ] With a full ship tank (1000 / 1000 units) the navigation console correctly represents available fuel in terms of fuel cells.
-- [ ] CONFIRM TRAVEL is enabled when the ship has enough fuel to reach the selected destination.
-- [ ] "Not enough fuel" warning and disabled button only appear when the tank genuinely cannot cover the journey cost.
-- [ ] The fuel unit ↔ fuel cell conversion is consistent between the SHIP FUEL display and the Ship Tank row in the detail panel.
-- [ ] Existing unit tests pass; new unit tests added for the fuel conversion and travel eligibility logic if not already covered.
+- [x] With a full ship tank (1000 / 1000 units) the navigation console correctly represents available fuel in terms of fuel cells. *(Fixed — commit 894b37f)*
+- [x] CONFIRM TRAVEL is enabled when the ship has enough fuel to reach the selected destination. *(Fixed — commit 894b37f)*
+- [x] "Not enough fuel" warning and disabled button only appear when the tank genuinely cannot cover the journey cost. *(Fixed — commit 894b37f)*
+- [x] The fuel unit ↔ fuel cell conversion is consistent between the SHIP FUEL display and the Ship Tank row in the detail panel. *(Fixed — commit 894b37f)*
+- [x] Existing unit tests pass; new unit tests added for the fuel conversion and travel eligibility logic. *(Fixed — commit 894b37f)*
+- [ ] Pressing CONFIRM TRAVEL triggers the biome transition — the game loads the selected biome.
 
 ## Hold Condition
 
@@ -77,3 +79,4 @@ Specific things to check:
   - ✅ Conversion consistent: map buttons and detail panel both use FuelSystemDefs.FUEL_CELL_UNITS (100)
   - ✅ Unit tests exist: _test_ship_weight_inventory_does_not_affect_weight, _test_full_tank_affords_rock_warrens_with_inventory, plus 3 additional weight tests
   - **READY FOR STUDIO HEAD SIGN-OFF** — hold condition prevents marking DONE without explicit approval
+- 2026-03-01 [producer] New defect observed during Studio Head review: CONFIRM TRAVEL button now enables correctly, but pressing it does nothing — the biome transition does not trigger. Navigation is still fully blocked. Ticket remains open; scope expanded to include travel confirmation bug.

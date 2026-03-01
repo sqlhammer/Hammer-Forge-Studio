@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-03-01
+**Last Updated:** 2026-03-01 (M9 redefined; Visual Asset Refinement moved to M10; M10–M15 shifted to M11–M16)
 
 > Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
@@ -34,13 +34,14 @@
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Complete | 56 | 0 | 56 | 2026-03-01 |
-| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 29 | 29 | 0 | — |
-| M10 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
-| M11 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
-| M12 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
-| M13 | Mega-Project Arc — Full tech tree, endgame sequence | — | Planning | — | — | — | — |
-| M14 | Alpha — Full playthrough possible | — | Planning | — | — | — | — |
-| M15 | Beta — External testing | — | Planning | — | — | — | — |
+| M9 | Foundation & Hardening — Canonical game launch architecture, orchestrator hardening, gamepad fixes, and M8 playtest polish | — | Planning | 29 | 29 | 0 | — |
+| M10 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
+| M11 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
+| M12 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
+| M13 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
+| M14 | Mega-Project Arc — Full tech tree, endgame sequence | — | Planning | — | — | — | — |
+| M15 | Alpha — Full playthrough possible | — | Planning | — | — | — | — |
+| M16 | Beta — External testing | — | Planning | — | — | — | — |
 
 ### Tooling Milestones
 
@@ -449,11 +450,11 @@
 
 ---
 
-### M9 — Visual Asset Refinement
+### M9 — Foundation & Hardening
 
-**Goal:** Polished art pass on all existing game assets.
+**Goal:** Establish the canonical game launch architecture, harden the orchestrator against usage-limit edge cases, resolve player-reported gamepad bugs, and incorporate M8 playtest polish. This milestone closes all deferred and backlogged work from M8 before the project enters visual and content expansion phases.
 
-**Scope:** TBD — to be defined after M8 closes (visual asset phases). Orchestrator resilience phase is pre-scoped.
+**Scope:** Fully scoped. 29 tickets across 5 phases.
 
 **Phases:**
 - **Root Game** (TICKET-0229–TICKET-0235, TICKET-0237): Game entry point architecture — root `game` scene, main menu, GameWorld, DebugLauncher refactor, TestWorld deprecation. **Must complete before Gameplay Polish and Orchestrator Resilience phases begin.** Introduces the canonical game launch flow: `game.tscn` routes to debug_launcher (debug builds) or main_menu (release); Play loads GameWorld using `Global.starting_biome` and `Global.starting_inventory`.
@@ -461,9 +462,8 @@
 - **Gamepad Bugs** (TICKET-0241–TICKET-0244): Player-reported gamepad issues — left stick Y-axis inversion, turn sensitivity, no interact button mapped, interaction prompt not switching to gamepad hints. Parallel-eligible with Root Game (touches only `InputManager.gd`, `player_first_person.gd`, and `interaction_prompt_hud.gd`; no dependency on Root Game architecture).
 - **Code Quality** (TICKET-0258–TICKET-0261): M8 code review findings — section header mislabeling in biome data classes, DeepResourceNode adoption in biome scenes, move_and_slide() migration to `_physics_process()`, NavigationConsole null spy teardown. Parallel-eligible with Root Game; no dependency on Root Game architecture changes.
 - **Gameplay Polish** (TICKET-0218–TICKET-0220): Inventory management features and debug tooling from M8 playtest feedback — drop items to ground, destroy items from inventory, debug 3× speed toggle. Depends on Root Game completing first (TICKET-0220 specifically depends on the DebugLauncher refactor in TICKET-0233).
-- Additional visual asset phases TBD at M9 kickoff — require Studio Head approval.
 
-**Tickets:** TICKET-0229–TICKET-0235, TICKET-0237 (Root Game); TICKET-0182–TICKET-0191 (Orchestrator Resilience); TICKET-0241–TICKET-0244 (Gamepad Bugs); TICKET-0258–TICKET-0261 (Code Quality); TICKET-0218–TICKET-0220 (Gameplay Polish); additional tickets TBD for visual asset phases.
+**Tickets:** TICKET-0229–TICKET-0235, TICKET-0237 (Root Game); TICKET-0182–TICKET-0191 (Orchestrator Resilience); TICKET-0241–TICKET-0244 (Gamepad Bugs); TICKET-0258–TICKET-0261 (Code Quality); TICKET-0218–TICKET-0220 (Gameplay Polish).
 
 | Phase | Ticket | Title | Type | Priority | Owner |
 |-------|--------|-------|------|----------|-------|
@@ -542,11 +542,11 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M10 — Movement & Usability Refinement
+### M10 — Visual Asset Refinement
 
-**Goal:** Game feel, first-person controls, and HUD/UX tuning pass.
+**Goal:** Polished art pass on all existing game assets — terrain, ship interior, player character, resource nodes, and UI surfaces.
 
-**Scope:** TBD — to be defined after M9 closes.
+**Scope:** TBD — to be defined at M10 kickoff following M9 close.
 
 **Phases:** To be defined at M10 kickoff — requires Studio Head approval before agents begin work.
 
@@ -554,9 +554,9 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M11 — Content Expansion
+### M11 — Movement & Usability Refinement
 
-**Goal:** Additional material resources, crafting recipes, and tech tree depth.
+**Goal:** Game feel, first-person controls, and HUD/UX tuning pass.
 
 **Scope:** TBD — to be defined after M10 closes.
 
@@ -566,9 +566,9 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M12 — Biome Progression
+### M12 — Content Expansion
 
-**Goal:** Full Tier 1–3 biome progression with escalating threats and resource gates.
+**Goal:** Additional material resources, crafting recipes, and tech tree depth.
 
 **Scope:** TBD — to be defined after M11 closes.
 
@@ -578,11 +578,11 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M13 — Mega-Project Arc
+### M13 — Biome Progression
 
-**Goal:** Complete tech tree and endgame sequence playable end-to-end.
+**Goal:** Full Tier 1–3 biome progression with escalating threats and resource gates.
 
-**Scope:** TBD
+**Scope:** TBD — to be defined after M12 closes.
 
 **Phases:** To be defined at M13 kickoff — requires Studio Head approval before agents begin work.
 
@@ -590,9 +590,9 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M14 — Alpha
+### M14 — Mega-Project Arc
 
-**Goal:** Full playthrough from ship start to Naer-Reth activation is possible.
+**Goal:** Complete tech tree and endgame sequence playable end-to-end.
 
 **Scope:** TBD
 
@@ -602,15 +602,27 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M15 — Beta / External Testing
+### M15 — Alpha
 
-**Goal:** External testers can complete the game. Polish and bug-fix pass.
+**Goal:** Full playthrough from ship start to Naer-Reth activation is possible.
 
 **Scope:** TBD
 
 **Phases:** To be defined at M15 kickoff — requires Studio Head approval before agents begin work.
 
 **Dependencies:** M14
+
+---
+
+### M16 — Beta / External Testing
+
+**Goal:** External testers can complete the game. Polish and bug-fix pass.
+
+**Scope:** TBD
+
+**Phases:** To be defined at M16 kickoff — requires Studio Head approval before agents begin work.
+
+**Dependencies:** M15
 
 ---
 

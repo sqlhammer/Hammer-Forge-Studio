@@ -163,13 +163,14 @@ The following are explicitly **not** being built and should not be scoped into a
 | M6 | **Complete** | 2026-02-26 | Icon Generation Pipeline: icon PoC evaluation, style guides, full icon set |
 | M7 | **Complete** | 2026-02-26 | Ship Interior: cockpit, machine room, scene architecture overhaul |
 | M8 | **Complete** | 2026-03-01 | Ship Navigation: biome-to-biome travel, fuel system |
-| M9 | Planning | — | Visual Asset Refinement: polished art pass on existing assets |
-| M10 | Planning | — | Movement & Usability Refinement: game feel, controls, HUD/UX tuning |
-| M11 | Planning | — | Content Expansion: material resources, crafting recipes, tech tree depth |
-| M12 | Planning | — | Biome Progression: Tier 1–3 biomes, escalating threats |
-| M13 | Planning | — | Mega-Project Arc: full tech tree, endgame sequence |
-| M14 | Planning | — | Alpha: full playthrough possible |
-| M15 | Planning | — | Beta: external testing |
+| M9 | Planning | — | Foundation & Hardening: canonical game launch architecture, orchestrator hardening, gamepad fixes, and M8 playtest polish |
+| M10 | Planning | — | Visual Asset Refinement: polished art pass on existing assets |
+| M11 | Planning | — | Movement & Usability Refinement: game feel, controls, HUD/UX tuning |
+| M12 | Planning | — | Content Expansion: material resources, crafting recipes, tech tree depth |
+| M13 | Planning | — | Biome Progression: Tier 1–3 biomes, escalating threats |
+| M14 | Planning | — | Mega-Project Arc: full tech tree, endgame sequence |
+| M15 | Planning | — | Alpha: full playthrough possible |
+| M16 | Planning | — | Beta: external testing |
 | Launch | TBD | — | Steam release |
 
 ### Tooling Milestones

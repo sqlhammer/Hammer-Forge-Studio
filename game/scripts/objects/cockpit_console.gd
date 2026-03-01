@@ -7,6 +7,8 @@ extends StaticBody3D
 
 
 func _ready() -> void:
+	collision_layer = PhysicsLayers.INTERACTABLE
+	collision_mask = 0
 	add_to_group("interactable")
 	Global.log("CockpitConsole: ready")
 

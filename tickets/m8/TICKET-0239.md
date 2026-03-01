@@ -2,7 +2,7 @@
 id: TICKET-0239
 title: "Bugfix — Navigation console missing interaction prompt: wrong collision layer"
 type: BUGFIX
-status: TODO
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -68,11 +68,13 @@ Alternatively, the `.tscn` value can be corrected directly (`collision_layer = 8
 
 ## Acceptance Criteria
 
-- [ ] Aiming at the cockpit console displays the "E — Navigate" prompt in the interaction prompt HUD
-- [ ] Pressing E while the prompt is visible opens the navigation console modal (TICKET-0238 fix)
-- [ ] No other interaction prompts are affected (deposits, ship enter zone, etc.)
-- [ ] Full test suite passes with no new failures
+- [x] Aiming at the cockpit console displays the "E — Navigate" prompt in the interaction prompt HUD
+- [x] Pressing E while the prompt is visible opens the navigation console modal (TICKET-0238 fix)
+- [x] No other interaction prompts are affected (deposits, ship enter zone, etc.)
+- [x] Full test suite passes with no new failures
 
 ## Activity Log
 
 - 2026-03-01 [producer] Created — Studio Head reported console targeting produces no prompt; root cause traced to collision_layer = 4 (ENVIRONMENT) instead of 8 (INTERACTABLE) in cockpit_console.tscn
+- 2026-03-01 [gameplay-programmer] Starting work — no dependencies, applying collision_layer fix in CockpitConsole._ready()
+- 2026-03-01 [gameplay-programmer] DONE — commit a73085e, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/202 (merged). Set collision_layer = PhysicsLayers.INTERACTABLE and collision_mask = 0 in CockpitConsole._ready().

@@ -534,8 +534,8 @@ async def run_claude(
     timeout_minutes: int = 30,
     log_path: Path | None = None,
     on_proc_start: callable = None,
-) -> tuple[int, str, str]:
-    """Run claude -p as a subprocess. Returns (exit_code, stdout, stderr)."""
+) -> tuple[int, str, str, dict]:
+    """Run claude -p as a subprocess. Returns (exit_code, stdout, stderr, usage_meta)."""
     cmd = ["claude", "-p", "--model", model, "--verbose"]
 
     if budget > 0:
@@ -569,6 +569,7 @@ async def run_claude(
         log_file = None
 
     try:
+        call_start = time.time()
         proc = await asyncio.create_subprocess_exec(
             *cmd,
             cwd=effective_cwd,
@@ -586,7 +587,8 @@ async def run_claude(
         except asyncio.TimeoutError:
             proc.kill()
             await proc.communicate()
-            return (-1, "", f"TIMEOUT after {timeout_minutes}m")
+            return (-1, "", f"TIMEOUT after {timeout_minutes}m", {})
+        duration_seconds = time.time() - call_start
 
         stdout = stdout_bytes.decode("utf-8", errors="replace")
         stderr = stderr_bytes.decode("utf-8", errors="replace")
@@ -596,7 +598,10 @@ async def run_claude(
             log_file.write(f"=== STDERR ===\n{stderr}\n")
             log_file.write(f"=== EXIT CODE: {proc.returncode} ===\n")
 
-        return (proc.returncode, stdout, stderr)
+        usage_meta = extract_usage_from_output(stdout)
+        usage_meta["duration_seconds"] = duration_seconds
+
+        return (proc.returncode, stdout, stderr, usage_meta)
 
     finally:
         if log_file:
@@ -635,6 +640,55 @@ def extract_json_from_output(output: str) -> dict:
         pass
 
     return _extract_dict_from_text(output)
+
+
+def extract_usage_from_output(stdout: str) -> dict:
+    """Parse token/model/stop_reason usage metadata from Claude CLI JSON stdout.
+
+    Returns a dict with keys: input_tokens, output_tokens, model, stop_reason.
+    Returns empty dict on any parse failure — never crashes the caller.
+    """
+    if not stdout or not stdout.strip():
+        return {}
+    try:
+        parsed = json.loads(stdout.strip())
+    except (json.JSONDecodeError, ValueError):
+        return {}
+
+    # --output-format json produces a JSON array of message objects.
+    # The result item contains usage data.
+    if isinstance(parsed, list):
+        for item in reversed(parsed):
+            if not isinstance(item, dict):
+                continue
+            if item.get("type") == "result":
+                usage = {}
+                raw_usage = item.get("usage", {})
+                if isinstance(raw_usage, dict):
+                    if "input_tokens" in raw_usage:
+                        usage["input_tokens"] = raw_usage["input_tokens"]
+                    if "output_tokens" in raw_usage:
+                        usage["output_tokens"] = raw_usage["output_tokens"]
+                if "model" in item:
+                    usage["model"] = item["model"]
+                if "stop_reason" in item:
+                    usage["stop_reason"] = item["stop_reason"]
+                return usage
+    elif isinstance(parsed, dict):
+        usage = {}
+        raw_usage = parsed.get("usage", {})
+        if isinstance(raw_usage, dict):
+            if "input_tokens" in raw_usage:
+                usage["input_tokens"] = raw_usage["input_tokens"]
+            if "output_tokens" in raw_usage:
+                usage["output_tokens"] = raw_usage["output_tokens"]
+        if "model" in parsed:
+            usage["model"] = parsed["model"]
+        if "stop_reason" in parsed:
+            usage["stop_reason"] = parsed["stop_reason"]
+        return usage
+
+    return {}
 
 
 def _extract_dict_from_text(text: str) -> dict:
@@ -839,7 +893,7 @@ class Conductor:
         budget = self.config["budgets"]["producer_usd"]
         blocked = get_blocked_tools(self.config, "producer")
 
-        exit_code, stdout, stderr = await self._run_claude(
+        exit_code, stdout, stderr, _usage = await self._run_claude(
             prompt=prompt,
             model=model,
             budget=budget,
@@ -1109,7 +1163,7 @@ class Conductor:
         all_succeeded = True
         any_new_gd = False
 
-        for worker, (exit_code, stdout, stderr) in results:
+        for worker, (exit_code, stdout, stderr, _usage_meta) in results:
             agent = worker["agent"]
             ticket = worker["ticket"]
 
@@ -1203,7 +1257,7 @@ class Conductor:
 
         self.state["status"] = "EVALUATING"
 
-    async def _run_worker(self, worker: dict) -> tuple[int, str, str]:
+    async def _run_worker(self, worker: dict) -> tuple[int, str, str, dict]:
         """Run a single worker agent."""
         agent_slug = worker["agent"]
         ticket_id = worker["ticket"]
@@ -1229,7 +1283,7 @@ class Conductor:
             if not cwd.exists():
                 self.logger.log("ERROR",
                     f"Worktree {cwd} does not exist — aborting {ticket_id}")
-                return (-2, "", "worktree missing")
+                return (-2, "", "worktree missing", {})
             status_check = subprocess.run(
                 ["git", "status", "--porcelain"],
                 cwd=str(cwd), capture_output=True, text=True
@@ -1237,7 +1291,7 @@ class Conductor:
             if status_check.returncode != 0:
                 self.logger.log("ERROR",
                     f"Worktree {cwd} git status failed — aborting {ticket_id}")
-                return (-2, "", "worktree git error")
+                return (-2, "", "worktree git error", {})
 
         # Agent CLAUDE.md
         agent_md = AGENTS_DIR / agent_slug / "CLAUDE.md"
@@ -1258,7 +1312,7 @@ class Conductor:
             f"{agent_slug} -> {ticket_id} (model={model}, budget={format_cost(budget)})")
 
         start = time.time()
-        exit_code, stdout, stderr = await self._run_claude(
+        exit_code, stdout, stderr, usage_meta = await self._run_claude(
             prompt=prompt,
             model=model,
             budget=budget,
@@ -1277,7 +1331,7 @@ class Conductor:
             f"{agent_slug} <- {ticket_id} ({format_duration(elapsed)}, exit={exit_code})"
         )
 
-        return (exit_code, stdout, stderr)
+        return (exit_code, stdout, stderr, usage_meta)
 
     def _queue_retry(self, ticket_id: str):
         """Queue a ticket for retry if under the max retry count."""

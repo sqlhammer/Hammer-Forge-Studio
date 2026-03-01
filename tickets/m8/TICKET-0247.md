@@ -69,3 +69,4 @@ Specific things to check:
 
 - 2026-03-01 [producer] Created ticket — player-reported: ship fuel full (1000/1000) but navigation blocks travel claiming only 10 fuel cells available; need 7 more for Rock Warrens (cost 17)
 - 2026-03-01 [gameplay-programmer] Starting work. Root cause identified: calculate_ship_weight() counts every inventory item as 1 weight unit with no base ship weight. In begin-wealthy mode (409 items), weight=409, cost to Rock Warrens=1636 units (17 cells), exceeding tank capacity (1000 units, 10 cells). Fix: add BASE_SHIP_WEIGHT=50, set WEIGHT_PER_INVENTORY_ITEM=0.
+- 2026-03-01 [gameplay-programmer] Fix committed (894b37f), PR #210 merged. Status remains IN_PROGRESS — awaiting Studio Head sign-off per hold condition.

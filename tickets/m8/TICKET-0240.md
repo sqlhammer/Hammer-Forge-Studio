@@ -2,7 +2,7 @@
 id: TICKET-0240
 title: "Feature — Nav console: load fuel cells into ship tank to enable multi-trip refueling"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -89,3 +89,4 @@ To verify the full loop in-game (debug session, begin-wealthy):
 
 - 2026-03-01 [producer] Created — Studio Head identified soft-lock: no refueling UI; `FuelSystem.refuel()` exists but is never called; nav console does not expose fuel loading to the player
 - 2026-03-01 [gameplay-programmer] Starting work — implementing SHIP FUEL section in navigation console
+- 2026-03-01 [gameplay-programmer] DONE — commit b45f1d5, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/204

@@ -2,7 +2,7 @@
 id: TICKET-0249
 title: "Create instance_paths.py shared utility module"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -25,7 +25,7 @@ ticket depends on this module existing first.
 
 ## Acceptance Criteria
 
-- [ ] `orchestrator/instance_paths.py` created with:
+- [x] `orchestrator/instance_paths.py` created with:
   - `InstancePaths` dataclass containing all path fields:
     - `orch_dir`, `instance_dir`
     - `config_path` (`orch_dir/config.json`)
@@ -44,8 +44,8 @@ ticket depends on this module existing first.
     - Returns merged dict
   - `_deep_merge(base: dict, override: dict) -> dict` — private recursive merge helper
     - Merges leaf values: override wins; sub-dicts are merged recursively, not replaced
-- [ ] Module has no external dependencies beyond stdlib (`pathlib`, `json`, `os`, `dataclasses`)
-- [ ] Module is importable from any script in `orchestrator/`
+- [x] Module has no external dependencies beyond stdlib (`pathlib`, `json`, `os`, `dataclasses`)
+- [x] Module is importable from any script in `orchestrator/`
 
 ---
 
@@ -68,3 +68,4 @@ ticket depends on this module existing first.
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
 - 2026-03-01 [systems-programmer] Starting work — implementing instance_paths.py
+- 2026-03-01 [systems-programmer] DONE — committed 81254c1, pushed to main. All acceptance criteria met.

@@ -2,12 +2,12 @@
 id: TICKET-0225
 title: "Feature — Parallel milestone orchestration via isolated per-instance state directories"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P2
 owner: tools-devops-engineer
 created_by: producer
 created_at: 2026-02-28
-updated_at: 2026-02-28
+updated_at: 2026-03-01
 milestone: "T2"
 phase: "TBD"
 depends_on: []
@@ -80,3 +80,4 @@ When two instances both need the Godot editor, they must serialize. Options:
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head asked whether parallel milestone orchestration (e.g., T2 alongside M8) is currently possible; it is not; this ticket tracks the fix
+- 2026-03-01 [producer] Closed as DONE — fully superseded by T4 (Multi-Milestone Orchestrator, TICKET-0249 through TICKET-0257). All acceptance criteria met by T4's `instance_paths.py` and `--instance` flag implementation

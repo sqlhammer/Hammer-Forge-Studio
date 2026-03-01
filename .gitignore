@@ -5,6 +5,7 @@ __pycache__/
 # Orchestrator runtime artifacts
 orchestrator/instances/
 orchestrator/config.local.json
+orchestrator/usage.jsonl
 
 # Test harness ephemeral tickets
 tickets/_test/

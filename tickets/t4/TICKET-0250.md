@@ -2,7 +2,7 @@
 id: TICKET-0250
 title: "Update conductor.py for instance-scoped paths and --instance flag"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -25,20 +25,20 @@ multiple conductor processes can run concurrently on different milestones withou
 
 ## Acceptance Criteria
 
-- [ ] All top-level path constants (`STATE_PATH`, `ACTIVITY_LOG`, `RESULTS_DIR`, `LOGS_DIR`,
+- [x] All top-level path constants (`STATE_PATH`, `ACTIVITY_LOG`, `RESULTS_DIR`, `LOGS_DIR`,
   `LOCK_FILE`, `PENDING_GATE_PATH`, `GATE_RESPONSE_PATH`, etc.) removed from module scope
-- [ ] `REPO_ROOT` and `ORCH_DIR` retained as module-level constants (needed before arg parsing)
-- [ ] `main()` updated:
+- [x] `REPO_ROOT` and `ORCH_DIR` retained as module-level constants (needed before arg parsing)
+- [x] `main()` updated:
   - `--instance <name>` argument added (optional; defaults to the `<milestone>` positional arg value)
   - Calls `resolve_instance(instance_name)` → `paths`
   - Calls `load_config(paths)` → `config`
   - Passes `paths` and `config` into `Conductor.__init__`
-- [ ] `Conductor.__init__` updated:
+- [x] `Conductor.__init__` updated:
   - Accepts `paths: InstancePaths` and `config: dict`
   - All internal references to old path constants replaced with `self.paths.*`
   - All `config` dict accesses updated to use the passed-in `config` (no re-loading)
-- [ ] All existing conductor behavior is preserved — no logic changes, only path/config sourcing changes
-- [ ] `godot_instances.json` (T3 artifact) path updated to live in `instance_dir` if conductor references it
+- [x] All existing conductor behavior is preserved — no logic changes, only path/config sourcing changes
+- [x] `godot_instances.json` (T3 artifact) path updated to live in `instance_dir` if conductor references it (N/A — no references found in conductor.py)
 
 ---
 
@@ -60,3 +60,4 @@ multiple conductor processes can run concurrently on different milestones withou
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
 - 2026-03-01 [systems-programmer] Starting work — updating conductor.py for instance-scoped paths
+- 2026-03-01 [systems-programmer] DONE — committed 9bbb338, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/221 merged to main. All acceptance criteria met.

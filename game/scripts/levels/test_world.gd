@@ -549,7 +549,7 @@ func _setup_travel_sequence() -> void:
 	_travel_manager = TravelSequenceManager.new()
 	_travel_manager.name = "TravelSequenceManager"
 	add_child(_travel_manager)
-	_travel_manager.setup(_player, _ship_exterior, _biome_content)
+	_travel_manager.setup(_player, _ship_exterior, _biome_content, _ship_interior)
 	_travel_manager.travel_sequence_started.connect(_on_travel_sequence_started)
 	_travel_manager.travel_sequence_completed.connect(_on_travel_sequence_completed)
 	Global.log("TestWorld: travel sequence manager ready")
@@ -566,6 +566,9 @@ func _on_travel_sequence_completed(destination_id: String) -> void:
 	if _ship_interior and _ship_exterior:
 		var exit_offset: Vector3 = Vector3(0.0, 0.0, 24.0)
 		_ship_interior.set_exterior_position(_ship_exterior.position + exit_offset)
+		# Update the cockpit viewport camera so the window shows the new exterior
+		var viewport_camera_pos: Vector3 = _ship_exterior.position + Vector3(0.0, 8.0, -23.0)
+		_ship_interior.setup_viewport_world(get_viewport().world_3d, viewport_camera_pos)
 	Global.log("TestWorld: travel sequence completed → '%s'" % destination_id)
 
 func _on_drone_deployed(drone_id: int, program: DroneProgram) -> void:

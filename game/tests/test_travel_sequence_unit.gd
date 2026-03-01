@@ -10,6 +10,20 @@ class_name TestTravelSequenceUnit
 extends TestSuite
 
 
+# ── Mock Classes ─────────────────────────────────────────
+
+## Lightweight mock for ShipInterior — provides is_player_inside() without
+## needing the full ship interior scene and geometry.
+class MockShipInterior extends Node3D:
+	var _player_inside: bool = false
+
+	func is_player_inside() -> bool:
+		return _player_inside
+
+	func set_player_inside(value: bool) -> void:
+		_player_inside = value
+
+
 # ── Private Variables ─────────────────────────────────────
 
 var _manager: TravelSequenceManager = null
@@ -94,6 +108,11 @@ func register_tests() -> void:
 	add_test("invalid_biome_swap_returns_false", _test_invalid_biome_swap_returns_false)
 	add_test("input_stays_enabled_after_failed_swap", _test_input_stays_enabled_after_failed_swap)
 	add_test("sequential_travel_works_correctly", _test_sequential_travel_works_correctly)
+
+	# Player reposition when inside ship (BUGFIX: player locked after travel)
+	add_test("reposition_skips_player_when_inside_ship", _test_reposition_skips_player_when_inside_ship)
+	add_test("reposition_moves_player_when_not_inside_ship", _test_reposition_moves_player_when_not_inside_ship)
+	add_test("reposition_moves_player_when_no_ship_interior", _test_reposition_moves_player_when_no_ship_interior)
 
 
 # ── Test Methods: Biome Creation ─────────────────────────
@@ -252,3 +271,64 @@ func _test_sequential_travel_works_correctly() -> void:
 	var biome_node: Node3D = _manager.get_current_biome_node()
 	assert_not_null(biome_node,
 		"Current biome node should be set after sequential travel")
+
+
+# ── Test Methods: Player Reposition When Inside Ship ─────
+
+## Helper: creates a TravelSequenceManager with a mock player and optional
+## mock ship interior, runs a biome swap, and returns the player node so the
+## caller can inspect its position. Cleans up the manager on return.
+func _swap_with_player(player_inside_ship: bool, include_ship_interior: bool) -> Node3D:
+	var player: Node3D = Node3D.new()
+	player.name = "MockPlayer"
+	player.position = Vector3(99.0, 99.0, 99.0)
+
+	var container: Node3D = Node3D.new()
+
+	var mock_interior: MockShipInterior = null
+	if include_ship_interior:
+		mock_interior = MockShipInterior.new()
+		mock_interior.set_player_inside(player_inside_ship)
+
+	var mgr: TravelSequenceManager = TravelSequenceManager.new()
+	mgr.setup(player, null, container, mock_interior)
+
+	# Execute biome swap directly — this calls _reposition_at_spawn internally
+	mgr.execute_biome_swap("rock_warrens")
+
+	# Teardown manager and container (but keep player alive for assertions)
+	mgr.teardown()
+	mgr.free()
+	for child: Node in container.get_children():
+		child.free()
+	container.free()
+	if mock_interior:
+		mock_interior.free()
+
+	return player
+
+
+func _test_reposition_skips_player_when_inside_ship() -> void:
+	var player: Node3D = _swap_with_player(true, true)
+	# Player was at (99, 99, 99) and should NOT have been moved
+	assert_equal(player.position, Vector3(99.0, 99.0, 99.0),
+		"Player position should be unchanged when inside ship during travel")
+	player.free()
+
+
+func _test_reposition_moves_player_when_not_inside_ship() -> void:
+	var player: Node3D = _swap_with_player(false, true)
+	# Player was at (99, 99, 99) and SHOULD have been moved to the biome spawn
+	var was_moved: bool = player.position != Vector3(99.0, 99.0, 99.0)
+	assert_true(was_moved,
+		"Player position should change to biome spawn when not inside ship")
+	player.free()
+
+
+func _test_reposition_moves_player_when_no_ship_interior() -> void:
+	var player: Node3D = _swap_with_player(false, false)
+	# No ship interior reference — backward compat: player SHOULD be repositioned
+	var was_moved: bool = player.position != Vector3(99.0, 99.0, 99.0)
+	assert_true(was_moved,
+		"Player position should change when no ship interior is set (backward compat)")
+	player.free()

@@ -2,13 +2,13 @@
 id: TICKET-0247
 title: "BUG — Ship cannot take off: fuel gate fixed but confirming travel does nothing"
 type: BUG
-status: IN_PROGRESS
+status: OPEN
 priority: P1
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-03-01
 updated_at: 2026-03-01
-updated_note: "Scope expanded — fuel gate fixed; new defect: CONFIRM TRAVEL does nothing"
+updated_note: "Retry 4 — Studio Head reports travel still broken after 3 fix attempts"
 milestone: "M8"
 phase: "Bug Fix"
 depends_on: []
@@ -91,3 +91,4 @@ Specific things to check:
   - ✅ Existing unit tests pass — tests exercise synchronous path (no fade overlay in test setup), all assertions verified
   - ✅ Comprehensive logging added at every transition phase for future debugging
   - **READY FOR STUDIO HEAD SIGN-OFF** — hold condition prevents marking DONE without explicit Studio Head approval
+- 2026-03-01 [producer] **REOPENED (retry 4)** — Studio Head reports travel is STILL broken after 3 fix attempts. The biome transition does not trigger when CONFIRM TRAVEL is pressed. Previous fixes addressed fuel gate math, close_panel input conflict, and signal-handler coroutine context — none have resolved the core issue. Agent must test in-game (not just unit tests) before claiming fixed. Focus on the full travel sequence end-to-end: NavigationConsole → NavigationSystem.initiate_travel() → TravelSequenceManager → biome swap.

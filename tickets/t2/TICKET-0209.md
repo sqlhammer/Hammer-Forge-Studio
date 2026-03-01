@@ -2,7 +2,7 @@
 id: TICKET-0209
 title: "Plan capacity configuration"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: tools-devops-engineer
 created_by: producer
@@ -53,3 +53,4 @@ Add a `plan_limits` configuration section to `orchestrator/config.json` that dec
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — plan capacity configuration
+- 2026-03-01 [tools-devops-engineer] Starting work — adding plan_limits to config.json and conductor startup warning

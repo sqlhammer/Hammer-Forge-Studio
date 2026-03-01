@@ -706,6 +706,17 @@ class Conductor:
         if self.state is not None:
             self.logger.log("SYSTEM", "Resumed from saved state")
 
+        # Warn if plan_limits is absent — conductor uses defaults; reporting will lack capacity gauges
+        if "plan_limits" not in self.config:
+            print(
+                "WARNING: 'plan_limits' section missing from config.json. "
+                "Capacity reporting will use defaults "
+                "(plan_tier='Max 20', five_hour_output_token_limit=220000, "
+                "weekly_output_token_limit=3080000). "
+                "Add a 'plan_limits' section to orchestrator/config.json to silence this warning.",
+                file=sys.stderr,
+            )
+
         # Ensure output dirs exist
         paths.results_dir.mkdir(parents=True, exist_ok=True)
         paths.logs_dir.mkdir(parents=True, exist_ok=True)

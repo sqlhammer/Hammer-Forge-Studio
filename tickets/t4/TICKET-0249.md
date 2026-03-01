@@ -2,7 +2,7 @@
 id: TICKET-0249
 title: "Create instance_paths.py shared utility module"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -67,3 +67,4 @@ ticket depends on this module existing first.
 ## Activity Log
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
+- 2026-03-01 [systems-programmer] Starting work — implementing instance_paths.py

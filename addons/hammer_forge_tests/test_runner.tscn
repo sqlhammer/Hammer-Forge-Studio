@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bsabjba3v571m"]
-
-[ext_resource type="Script" uid="uid://das1lafln0hpl" path="res://addons/hammer_forge_tests/test_runner.gd" id="1_c5wav"]
-
-[node name="TestRunner" type="Node"]
-script = ExtResource("1_c5wav")

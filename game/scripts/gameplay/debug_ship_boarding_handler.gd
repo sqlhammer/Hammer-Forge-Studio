@@ -12,6 +12,7 @@ var _ship_interior: ShipInterior = null
 var _first_person: CharacterBody3D = null
 var _ship_enter_zone: ShipEnterZone = null
 var _hud: GameHUD = null
+var _navigation_console: NavigationConsole = null
 var _player_near_ship_entrance: bool = false
 var _transitioning: bool = false
 
@@ -28,6 +29,14 @@ func _process(_delta: float) -> void:
 			_begin_enter_ship()
 			return
 
+	# Cockpit navigation console — must be checked before exit zone for TestWorld parity
+	if _ship_interior.is_player_inside() and not (_navigation_console and _navigation_console.is_open()):
+		if _ship_interior.is_player_near_cockpit_console():
+			if InputManager.is_action_just_pressed("interact"):
+				if _navigation_console:
+					_navigation_console.open_panel()
+				return
+
 	# Exit ship from interior exit zone
 	if _ship_interior.is_player_inside() and _ship_interior.is_player_in_exit_zone():
 		if InputManager.is_action_just_pressed("interact"):
@@ -37,18 +46,20 @@ func _process(_delta: float) -> void:
 
 # ── Public Methods ────────────────────────────────────────
 
-## Wires the handler to the ship interior, player, enter zone, and HUD.
+## Wires the handler to the ship interior, player, enter zone, HUD, and navigation console.
 ## Must be called after all nodes are in the scene tree.
 func setup(
 	ship_interior: ShipInterior,
 	first_person: CharacterBody3D,
 	enter_zone: ShipEnterZone,
 	hud: GameHUD,
+	navigation_console: NavigationConsole = null,
 ) -> void:
 	_ship_interior = ship_interior
 	_first_person = first_person
 	_ship_enter_zone = enter_zone
 	_hud = hud
+	_navigation_console = navigation_console
 	enter_zone.body_entered.connect(_on_ship_enter_zone_entered)
 	enter_zone.body_exited.connect(_on_ship_enter_zone_exited)
 	ship_interior.player_entered_ship.connect(_on_player_entered_ship)

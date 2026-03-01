@@ -49,9 +49,9 @@
 | # | Milestone | Target Date | Status | Total | Open | Done | QA Sign-off |
 |---|-----------|-------------|--------|-------|------|------|-------------|
 | T1 | Project Reporting Dashboard — GitHub Pages status site, auto-built on push | — | Planning | 10 | 10 | 0 | — |
-| T2 | Usage & Cost Attribution — Orchestrator usage tracking, JSONL ledger, reporting | — | Planning | 7 | 7 | 0 | — |
+| T2 | Usage & Cost Attribution — Orchestrator usage tracking, JSONL ledger, reporting | — | Active | 7 | 7 | 0 | — |
 | T3 | Parallel Godot MCP — Per-agent headless Godot instances, remove file-based lock | — | Planning | — | — | — | — |
-| T4 | Multi-Milestone Orchestrator — Instance directories, parallel conductor support | — | Active | 8 | 8 | 0 | — |
+| T4 | Multi-Milestone Orchestrator — Instance directories, parallel conductor support | — | Complete | 9 | 0 | 9 | 2026-03-01 |
 
 ---
 

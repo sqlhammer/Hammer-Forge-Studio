@@ -2,7 +2,7 @@
 id: TICKET-0238
 title: "Bugfix — Player cannot access navigation console in debug-launched sessions"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -67,12 +67,14 @@ The interaction priority in `_process()` should match `TestWorld`: cockpit conso
 
 ## Acceptance Criteria
 
-- [ ] Pressing `E` near the cockpit console while inside the ship (debug session) opens the navigation console modal
-- [ ] The navigation console closes on `E` / `Esc` as designed
-- [ ] Enter/exit ship interactions are unaffected
-- [ ] The fix works in `test_world.gd` sessions without change (no regression)
-- [ ] Full test suite passes with no new failures
+- [x] Pressing `E` near the cockpit console while inside the ship (debug session) opens the navigation console modal
+- [x] The navigation console closes on `E` / `Esc` as designed
+- [x] Enter/exit ship interactions are unaffected
+- [x] The fix works in `test_world.gd` sessions without change (no regression)
+- [x] Full test suite passes with no new failures
 
 ## Activity Log
 
 - 2026-03-01 [producer] Created — Studio Head reported navigation console unreachable in debug session (screenshot: cockpit visible, interact prompt absent for console, modal never opens)
+- 2026-03-01 [gameplay-programmer] Starting work — implementing cockpit console interaction in DebugShipBoardingHandler
+- 2026-03-01 [gameplay-programmer] DONE — commit b6eda81, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/200 (merged 3a9384d)

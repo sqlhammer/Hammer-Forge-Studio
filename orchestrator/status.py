@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-from instance_paths import resolve_instance
+from instance_paths import load_config, resolve_instance
 
 
 ORCH_DIR = Path(__file__).resolve().parent
@@ -81,6 +81,18 @@ def _print_full_status(instance_name: str, paths, state: dict, args) -> None:
     print(f"  Started:    {state.get('started_at', '?')}")
     print(f"  Total cost: {format_cost(state.get('total_cost_usd', 0))}")
     print()
+
+    # Effective config
+    try:
+        config = load_config(paths)
+        budgets = config.get("budgets", {})
+        if budgets:
+            print("  Config (budgets):")
+            for key, value in sorted(budgets.items()):
+                print(f"    {key}: {value}")
+            print()
+    except FileNotFoundError:
+        pass  # No config.json — skip config section silently
 
     # Active workers
     workers = state.get("active_workers", [])

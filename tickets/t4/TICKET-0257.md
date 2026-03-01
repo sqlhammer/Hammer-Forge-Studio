@@ -2,7 +2,7 @@
 id: TICKET-0257
 title: "BUG: status.py does not display effective config values (session_ceiling_usd not visible)"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: systems-programmer
 created_by: qa-engineer
@@ -96,3 +96,4 @@ section) when not in `--json` mode.
 
 - 2026-03-01 [qa-engineer] Created — filed during TICKET-0256 integration smoke test; config
   layering display criterion failed against status.py output
+- 2026-03-01 [systems-programmer] Status → IN_PROGRESS. Starting work.

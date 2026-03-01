@@ -90,8 +90,10 @@ func register_tests() -> void:
 	# Ship weight calculation
 	add_test("ship_weight_no_modules_no_inventory", _test_ship_weight_no_modules_no_inventory)
 	add_test("weight_per_module_constant_is_10", _test_weight_per_module_constant_is_10)
-	add_test("ship_weight_counts_inventory_items", _test_ship_weight_counts_inventory_items)
+	add_test("ship_weight_base_weight_is_50", _test_ship_weight_base_weight_is_50)
+	add_test("ship_weight_inventory_does_not_affect_weight", _test_ship_weight_inventory_does_not_affect_weight)
 	add_test("ship_weight_module_weight_formula_constants", _test_ship_weight_module_weight_formula_constants)
+	add_test("full_tank_affords_rock_warrens_with_inventory", _test_full_tank_affords_rock_warrens_with_inventory)
 
 
 # ── Helpers ───────────────────────────────────────────────
@@ -412,8 +414,8 @@ func _test_can_travel_true_at_exact_fuel_cost() -> void:
 
 func _test_ship_weight_no_modules_no_inventory() -> void:
 	var weight: int = FuelSystem.calculate_ship_weight()
-	assert_equal(weight, 0,
-		"Ship weight with no modules and empty inventory should be 0")
+	assert_equal(weight, FuelSystemDefs.BASE_SHIP_WEIGHT,
+		"Ship weight with no modules and empty inventory should equal BASE_SHIP_WEIGHT (50)")
 
 
 func _test_weight_per_module_constant_is_10() -> void:
@@ -421,22 +423,37 @@ func _test_weight_per_module_constant_is_10() -> void:
 		"WEIGHT_PER_MODULE should be 10 weight units per installed module")
 
 
-func _test_ship_weight_counts_inventory_items() -> void:
-	# Add 5 items to inventory and check weight contribution (5 items * 1 weight unit = 5)
-	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 5)
+func _test_ship_weight_base_weight_is_50() -> void:
+	assert_equal(FuelSystemDefs.BASE_SHIP_WEIGHT, 50,
+		"BASE_SHIP_WEIGHT should be 50 weight units")
+
+
+func _test_ship_weight_inventory_does_not_affect_weight() -> void:
+	# Add items to inventory — weight should remain at BASE_SHIP_WEIGHT (TICKET-0247 fix)
+	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 50)
 	var weight: int = FuelSystem.calculate_ship_weight()
-	assert_equal(weight, 5,
-		"Ship weight should count 1 weight unit per inventory item (5 items = 5 weight)")
+	assert_equal(weight, FuelSystemDefs.BASE_SHIP_WEIGHT,
+		"Inventory items should not affect ship weight (WEIGHT_PER_INVENTORY_ITEM=0)")
 
 
 func _test_ship_weight_module_weight_formula_constants() -> void:
 	# Validate formula constants are consistent with expected game balance
-	# 3 modules * 10 weight + 20 items * 1 = 50 weight units total
+	# BASE_SHIP_WEIGHT (50) + 3 modules * 10 weight = 80 weight units total
 	var expected_module_weight: int = 3 * FuelSystemDefs.WEIGHT_PER_MODULE
-	var expected_inventory_weight: int = 20 * FuelSystemDefs.WEIGHT_PER_INVENTORY_ITEM
+	var expected_total: int = FuelSystemDefs.BASE_SHIP_WEIGHT + expected_module_weight
 	assert_equal(expected_module_weight, 30,
 		"3 modules * 10 weight/module = 30 weight units")
-	assert_equal(expected_inventory_weight, 20,
-		"20 inventory items * 1 weight/item = 20 weight units")
-	assert_equal(expected_module_weight + expected_inventory_weight, 50,
-		"Combined weight of 3 modules and 20 items should equal 50")
+	assert_equal(expected_total, 80,
+		"Base weight (50) + 3 modules (30) should equal 80")
+
+
+func _test_full_tank_affords_rock_warrens_with_inventory() -> void:
+	# TICKET-0247 regression: full tank must afford Rock Warrens even with heavy inventory
+	PlayerInventory.add_item(ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR, 100)
+	PlayerInventory.add_item(ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.THREE_STAR, 100)
+	PlayerInventory.add_item(ResourceDefs.ResourceType.CRYONITE, ResourceDefs.Purity.THREE_STAR, 100)
+	var ship_weight: float = FuelSystem.calculate_ship_weight()
+	var cost: float = FuelSystem.calculate_cost(800.0, ship_weight)
+	assert_true(FuelSystem.fuel_current >= cost,
+		"Full tank (%.0f) should afford Rock Warrens (cost=%.0f, weight=%.0f) with heavy inventory" % [
+			FuelSystem.fuel_current, cost, ship_weight])

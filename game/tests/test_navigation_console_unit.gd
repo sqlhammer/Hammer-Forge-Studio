@@ -160,7 +160,7 @@ func _test_console_confirm_disabled_when_fuel_empty() -> void:
 
 
 func _test_console_confirm_enabled_when_fuel_sufficient() -> void:
-	# Full tank with zero ship weight — cost is 0, always affordable
+	# Full tank with base ship weight — cost is affordable
 	_console.open_panel()
 	_select_destination("rock_warrens")
 	assert_false(_console._confirm_button.disabled,

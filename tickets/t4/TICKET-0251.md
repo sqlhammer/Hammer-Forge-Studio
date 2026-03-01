@@ -2,7 +2,7 @@
 id: TICKET-0251
 title: "Update status.py for --instance and --all flags"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -25,18 +25,18 @@ instance exists, use it without requiring `--instance`).
 
 ## Acceptance Criteria
 
-- [ ] `--instance <name>` argument added (optional)
-- [ ] `--all` flag added: iterates `orchestrator/instances/*/state.json`, prints a one-line
+- [x] `--instance <name>` argument added (optional)
+- [x] `--all` flag added: iterates `orchestrator/instances/*/state.json`, prints a one-line
   summary per instance (instance name, milestone, phase, current wave, ticket counts)
-- [ ] Auto-detect logic:
+- [x] Auto-detect logic:
   - If `--all` passed: show all instances
   - If `--instance` passed: show that instance
   - If neither and exactly one instance dir exists: use it automatically
   - If neither and multiple instance dirs exist: print a helpful message listing instances and
     ask user to specify `--instance <name>` or `--all`
   - If neither and no instance dirs exist: print "No instances found. Run start_milestone.py first."
-- [ ] `resolve_instance()` used for all path resolution (replaces any hardcoded flat paths)
-- [ ] Existing status display output format preserved for single-instance view
+- [x] `resolve_instance()` used for all path resolution (replaces any hardcoded flat paths)
+- [x] Existing status display output format preserved for single-instance view
 
 ---
 
@@ -58,3 +58,4 @@ instance exists, use it without requiring `--instance`).
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
 - 2026-03-01 [systems-programmer] Starting work — updating status.py with --instance and --all flags
+- 2026-03-01 [systems-programmer] DONE — committed 8c7b730, merged PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/218

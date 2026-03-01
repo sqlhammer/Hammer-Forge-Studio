@@ -538,7 +538,8 @@ func _build_terminal() -> void:
 
 func _build_cockpit_console_area() -> void:
 	# Interaction area around the cockpit navigation console (instanced at Z=-11.5 in scene)
-	_cockpit_console_area = Area3D.new()
+	# Uses CockpitConsolePromptArea so the HUD prompt is area-gated, not raycast-gated (TICKET-0245)
+	_cockpit_console_area = CockpitConsolePromptArea.new()
 	_cockpit_console_area.name = "CockpitConsoleArea"
 	_cockpit_console_area.collision_layer = 0
 	_cockpit_console_area.collision_mask = PhysicsLayers.PLAYER
@@ -549,6 +550,7 @@ func _build_cockpit_console_area() -> void:
 	col.shape = shape
 	col.position = Vector3(0.0, 1.0, -11.5)
 	_cockpit_console_area.add_child(col)
+	_cockpit_console_area.add_to_group("interaction_prompt_source")
 	add_child(_cockpit_console_area)
 	Global.log("ShipInterior: cockpit console interaction area built")
 

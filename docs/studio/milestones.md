@@ -34,7 +34,7 @@
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Complete | 56 | 0 | 56 | 2026-03-01 |
-| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 25 | 25 | 0 | — |
+| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 29 | 29 | 0 | — |
 | M10 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
 | M11 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
 | M12 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
@@ -456,12 +456,14 @@
 **Scope:** TBD — to be defined after M8 closes (visual asset phases). Orchestrator resilience phase is pre-scoped.
 
 **Phases:**
-- **Root Game** (TICKET-0229–TICKET-0235): Game entry point architecture — root `game` scene, main menu, GameWorld, DebugLauncher refactor, TestWorld deprecation. **Must complete before all other M9 phases begin.** Introduces the canonical game launch flow: `game.tscn` routes to debug_launcher (debug builds) or main_menu (release); Play loads GameWorld using `Global.starting_biome` and `Global.starting_inventory`.
-- **Orchestrator Resilience** (TICKET-0182–TICKET-0188): Conductor hardening for usage-limit edge cases — checkpoint system, LIMIT_WAIT cooldown, resume dispatch, structured logging, documentation. Parallel-eligible within this phase; depends on Root Game completing first. Touches only `orchestrator/` code and `docs/engineering/` — no game code changes.
+- **Root Game** (TICKET-0229–TICKET-0235, TICKET-0237): Game entry point architecture — root `game` scene, main menu, GameWorld, DebugLauncher refactor, TestWorld deprecation. **Must complete before Gameplay Polish and Orchestrator Resilience phases begin.** Introduces the canonical game launch flow: `game.tscn` routes to debug_launcher (debug builds) or main_menu (release); Play loads GameWorld using `Global.starting_biome` and `Global.starting_inventory`.
+- **Orchestrator Resilience** (TICKET-0182–TICKET-0191): Conductor hardening for usage-limit edge cases — checkpoint system, LIMIT_WAIT cooldown, resume dispatch, structured logging, documentation. Parallel-eligible within this phase; depends on Root Game completing first. Touches only `orchestrator/` code and `docs/engineering/` — no game code changes.
 - **Gamepad Bugs** (TICKET-0241–TICKET-0244): Player-reported gamepad issues — left stick Y-axis inversion, turn sensitivity, no interact button mapped, interaction prompt not switching to gamepad hints. Parallel-eligible with Root Game (touches only `InputManager.gd`, `player_first_person.gd`, and `interaction_prompt_hud.gd`; no dependency on Root Game architecture).
+- **Code Quality** (TICKET-0258–TICKET-0261): M8 code review findings — section header mislabeling in biome data classes, DeepResourceNode adoption in biome scenes, move_and_slide() migration to `_physics_process()`, NavigationConsole null spy teardown. Parallel-eligible with Root Game; no dependency on Root Game architecture changes.
+- **Gameplay Polish** (TICKET-0218–TICKET-0220): Inventory management features and debug tooling from M8 playtest feedback — drop items to ground, destroy items from inventory, debug 3× speed toggle. Depends on Root Game completing first (TICKET-0220 specifically depends on the DebugLauncher refactor in TICKET-0233).
 - Additional visual asset phases TBD at M9 kickoff — require Studio Head approval.
 
-**Tickets:** TICKET-0229–TICKET-0235, TICKET-0237 (Root Game); TICKET-0182–TICKET-0191 (Orchestrator Resilience); TICKET-0218–TICKET-0220 (TBD); TICKET-0241–TICKET-0244 (Gamepad Bugs); additional tickets TBD for visual asset phases.
+**Tickets:** TICKET-0229–TICKET-0235, TICKET-0237 (Root Game); TICKET-0182–TICKET-0191 (Orchestrator Resilience); TICKET-0241–TICKET-0244 (Gamepad Bugs); TICKET-0258–TICKET-0261 (Code Quality); TICKET-0218–TICKET-0220 (Gameplay Polish); additional tickets TBD for visual asset phases.
 
 | Phase | Ticket | Title | Type | Priority | Owner |
 |-------|--------|-------|------|----------|-------|
@@ -487,6 +489,13 @@
 | Gamepad Bugs | TICKET-0242 | BUG — Gamepad right stick turn sensitivity too slow | BUG | P1 | gameplay-programmer |
 | Gamepad Bugs | TICKET-0243 | BUG — Interaction prompt HUD does not switch to gamepad button hint | BUG | P2 | gameplay-programmer |
 | Gamepad Bugs | TICKET-0244 | BUG — No gamepad button mapped to interact action | BUG | P0 | gameplay-programmer |
+| Code Quality | TICKET-0258 | Fix section header mislabeling in M8 data classes | TASK | P3 | systems-programmer |
+| Code Quality | TICKET-0259 | Use DeepResourceNode in biome scenes instead of Deposit.new(infinite=true) | TASK | P3 | systems-programmer |
+| Code Quality | TICKET-0260 | Move PlayerFirstPerson move_and_slide() from _process() to _physics_process() | TASK | P3 | gameplay-programmer |
+| Code Quality | TICKET-0261 | Fix NavigationConsole null spy reference in test after_each() | BUG | P3 | qa-engineer |
+| Gameplay Polish | TICKET-0218 | Feature — Drop items from inventory onto the ground and pick them back up | FEATURE | P2 | gameplay-programmer |
+| Gameplay Polish | TICKET-0219 | Feature — Destroy (discard) an item directly from inventory | FEATURE | P2 | gameplay-programmer |
+| Gameplay Polish | TICKET-0220 | Feature — Debug launcher toggle for 3× player movement speed | FEATURE | P3 | gameplay-programmer |
 
 **Dependency Graph (Root Game):**
 ```
@@ -495,8 +504,20 @@ TICKET-0229 (Global startup params)          TICKET-0237 (Main Menu design)
   │     └─► TICKET-0231 (Main Menu impl) ◄──────────┘ ◄── also depends on TICKET-0229, TICKET-0230
   │           └─► TICKET-0232 (game root scene + main scene)
   │                 ├─► TICKET-0233 (DebugLauncher refactor) ◄── also depends on TICKET-0229, TICKET-0231
+  │                 │     └─► TICKET-0220 (Gameplay Polish — debug 3× speed toggle)
   │                 └─► TICKET-0234 (TestWorld deprecation) ◄── also depends on TICKET-0230, TICKET-0233
   │                       └─► TICKET-0235 (QA gate) ◄── depends on ALL above
+```
+
+**Dependency Graph (Code Quality):** No inter-ticket dependencies. All four tickets are independent and parallel-eligible with Root Game.
+
+**Dependency Graph (Gameplay Polish):**
+```
+TICKET-0233 (DebugLauncher refactor — Root Game)
+  └─► TICKET-0220 (debug 3× speed toggle)
+
+TICKET-0218 (drop items) — no upstream dependencies
+TICKET-0219 (destroy items) — no upstream dependencies
 ```
 
 **Dependency Graph (Orchestrator Resilience):**

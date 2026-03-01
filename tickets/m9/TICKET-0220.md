@@ -7,10 +7,10 @@ priority: P3
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-28
-updated_at: 2026-02-28
+updated_at: 2026-03-01
 milestone: "M9"
-phase: "TBD"
-depends_on: []
+phase: "Gameplay Polish"
+depends_on: [TICKET-0233]
 blocks: []
 tags: [feature, debug, debug-launcher, player, movement, m9]
 ---

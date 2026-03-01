@@ -7,11 +7,11 @@ priority: P1
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-28
-updated_at: 2026-02-28
+updated_at: 2026-03-01
 milestone: "M9"
 phase: "Root Game"
 depends_on: [TICKET-0229, TICKET-0231, TICKET-0232]
-blocks: [TICKET-0234]
+blocks: [TICKET-0234, TICKET-0220]
 tags: [root-game, debug-launcher, refactor, begin-wealthy]
 ---
 

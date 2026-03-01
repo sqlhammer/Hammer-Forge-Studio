@@ -9,7 +9,7 @@ created_by: producer
 created_at: 2026-02-28
 updated_at: 2026-02-28
 milestone: "M9"
-phase: "TBD"
+phase: "Gameplay Polish"
 depends_on: []
 blocks: []
 tags: [feature, inventory, items, ui, m9]

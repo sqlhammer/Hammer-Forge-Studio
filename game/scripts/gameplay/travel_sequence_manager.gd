@@ -32,6 +32,9 @@ var _player: Node3D = null
 ## Reference to the ship exterior for repositioning on arrival.
 var _ship_exterior: ShipExterior = null
 
+## Reference to the ship interior for checking if the player is aboard during travel.
+var _ship_interior: Node3D = null
+
 ## Container node whose children are replaced on biome swap.
 var _biome_container: Node3D = null
 
@@ -48,11 +51,14 @@ var _fade_rect: ColorRect = null
 # ── Public Methods ────────────────────────────────────────
 
 ## Initialises the travel sequence manager with references to the player,
-## ship exterior, and biome container. Connects to NavigationSystem signals.
-func setup(player: Node3D, ship_exterior: ShipExterior, biome_container: Node3D) -> void:
+## ship exterior, biome container, and optionally the ship interior.
+## When ship_interior is provided, the player is not repositioned during travel
+## if they are aboard — exit_ship() handles surface placement on disembark.
+func setup(player: Node3D, ship_exterior: ShipExterior, biome_container: Node3D, ship_interior: Node3D = null) -> void:
 	_player = player
 	_ship_exterior = ship_exterior
 	_biome_container = biome_container
+	_ship_interior = ship_interior
 	NavigationSystem.travel_completed.connect(_on_travel_completed)
 	_build_fade_overlay()
 	Global.log("TravelSequenceManager: setup complete")
@@ -249,18 +255,31 @@ func _clear_biome_container() -> void:
 	Global.log("TravelSequenceManager: biome container cleared")
 
 
-## Repositions the player and ship exterior at the biome spawn points.
+## Repositions the ship exterior at the biome ship spawn point. If the player
+## is inside the ship, their position is left unchanged — exit_ship() will
+## teleport them to the exterior marker when they disembark. If the player is
+## NOT inside the ship (edge case), they are repositioned to the biome player
+## spawn point as before.
 func _reposition_at_spawn(biome_node: Node3D) -> void:
 	var player_spawn: Vector3 = get_biome_player_spawn(biome_node)
 	var ship_spawn: Vector3 = get_biome_ship_spawn(biome_node)
 
-	if _player:
+	# Check whether the player is aboard the ship interior
+	var player_in_ship: bool = (
+		_ship_interior != null
+		and _ship_interior.has_method("is_player_inside")
+		and _ship_interior.call("is_player_inside")
+	)
+
+	if _player and not player_in_ship:
 		_player.position = player_spawn
 		# Reset velocity on the active character controller
 		var first_person: CharacterBody3D = _player.get_node_or_null("FirstPersonController") as CharacterBody3D
 		if first_person:
 			first_person.velocity = Vector3.ZERO
 		Global.log("TravelSequenceManager: player repositioned to %s" % str(player_spawn))
+	elif player_in_ship:
+		Global.log("TravelSequenceManager: player is inside ship — skipping reposition")
 
 	if _ship_exterior:
 		_ship_exterior.position = ship_spawn

@@ -2,7 +2,7 @@
 id: TICKET-0245
 title: "BUG — Navigation console interaction prompt appears before player can actually interact"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -31,10 +31,10 @@ The player is inside the raycast range long before they are inside `CockpitConso
 
 ## Acceptance Criteria
 
-- [ ] The interaction prompt only appears when the player is close enough that pressing E will actually open the navigation console.
-- [ ] No dead zone exists where the prompt is visible but the interact action does nothing.
-- [ ] The fix does not affect the raycast-based prompt for other interactables (deposits, etc.).
-- [ ] Existing unit tests pass.
+- [x] The interaction prompt only appears when the player is close enough that pressing E will actually open the navigation console.
+- [x] No dead zone exists where the prompt is visible but the interact action does nothing.
+- [x] The fix does not affect the raycast-based prompt for other interactables (deposits, etc.).
+- [x] Existing unit tests pass (no tests reference CockpitConsole or get_interaction_prompt).
 
 ## Implementation Notes
 
@@ -64,3 +64,4 @@ Option B is simpler to implement but couples the two shapes — any future resiz
 
 - 2026-03-01 [producer] Created ticket — player-reported: prompt shows too early, E press does nothing at distance
 - 2026-03-01 [gameplay-programmer] Starting work — implementing Option A (area-based prompt detection)
+- 2026-03-01 [gameplay-programmer] DONE — commit f69e88c, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/206 (merged). Created CockpitConsolePromptArea for area-based prompt; removed raycast prompt from CockpitConsole. UID pending Godot editor scan.

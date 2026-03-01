@@ -2,7 +2,7 @@
 id: TICKET-0208
 title: "Usage JSONL ledger and cost accumulation"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: tools-devops-engineer
 created_by: producer
@@ -64,3 +64,4 @@ Persist usage data to a JSONL ledger file after every Claude CLI call. Each line
 
 - 2026-02-27 [producer] Created ticket — JSONL ledger and cost accumulation
 - 2026-03-01 [tools-devops-engineer] Starting work — implementing JSONL ledger, append_usage_record, worker/planning usage recording, total_cost_usd fix
+- 2026-03-01 [tools-devops-engineer] DONE — commit 0656d03, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/229 merged (merge commit 308915c)

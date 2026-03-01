@@ -75,6 +75,8 @@
 | D-031 | Destroy (permanently discard) an item directly from inventory without spawning it in the world | `docs/design/gdd.md` | Requested during M8 playtest; inventory management feature, not required for M8 navigation loop | M9 | Scheduled | TICKET-0219 |
 | D-032 | Debug launcher toggle for 3× player movement speed to accelerate QA traversal of large biomes | N/A (tooling/QA) | Requested during M8 playtest; developer convenience feature, not gameplay | M9 | Scheduled | TICKET-0220 |
 
+| D-033 | Replace non-functional per-agent USD budget caps in orchestrator with per-agent `--max-turns` limits — the `budget_usd` values in `config.json` and `get_budget()` in `conductor.py` are passed through `run_claude()` but only used as a boolean (`if budget > 0`) to set a hardcoded `--max-turns 200`; the Claude CLI has no `--budget` flag so USD caps are never enforced; replace with configurable per-agent turn limits and remove dead budget plumbing | N/A (orchestrator tooling) | Non-blocking code smell; session ceiling is the only real cost gate and it works; per-agent USD tracking is aspirational until the CLI exposes a spend hook | Tooling sprint (T3 or standalone) | Open | — |
+
 ---
 
 ## Review Cadence

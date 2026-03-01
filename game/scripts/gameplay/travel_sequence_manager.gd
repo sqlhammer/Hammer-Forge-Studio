@@ -142,20 +142,33 @@ static func get_biome_ship_spawn(biome_node: Node3D) -> Vector3:
 
 # ── Private Methods ───────────────────────────────────────
 
-## Handles NavigationSystem.travel_completed — runs the full async travel
-## transition: disable input, fade out, swap biome, fade in, re-enable input.
+## Handles NavigationSystem.travel_completed — guards against double-entry,
+## then delegates the async transition to _execute_travel_transition.
+## This handler is intentionally NOT a coroutine: the signal fires
+## synchronously inside NavigationSystem.initiate_travel(), and a coroutine
+## that suspends mid-signal-emission can prevent the tween's finished signal
+## from resuming it. Separating the sync handler from the async worker
+## ensures the await chain runs in a clean call context.
 func _on_travel_completed(destination_id: String) -> void:
 	if _is_transitioning:
 		Global.log("TravelSequenceManager: ignoring travel_completed — already transitioning")
 		return
-
 	_is_transitioning = true
+	Global.log("TravelSequenceManager: travel_completed received for '%s' — starting transition" % destination_id)
+	_execute_travel_transition(destination_id)
+
+
+## Runs the full async travel transition: disable input, fade out, swap biome,
+## fade in, re-enable input. Called from _on_travel_completed as a separate
+## coroutine so the await chain is not nested inside the signal emission stack.
+func _execute_travel_transition(destination_id: String) -> void:
 	travel_sequence_started.emit(destination_id)
 	InputManager.set_gameplay_inputs_enabled(false)
 	Global.log("TravelSequenceManager: travel sequence started → '%s'" % destination_id)
 
 	# Fade to black
 	await _fade_out()
+	Global.log("TravelSequenceManager: fade-out complete for '%s'" % destination_id)
 
 	# Swap biome content
 	var success: bool = execute_biome_swap(destination_id)
@@ -168,8 +181,11 @@ func _on_travel_completed(destination_id: String) -> void:
 		_is_transitioning = false
 		return
 
+	Global.log("TravelSequenceManager: biome swap succeeded for '%s'" % destination_id)
+
 	# Fade back in
 	await _fade_in()
+	Global.log("TravelSequenceManager: fade-in complete for '%s'" % destination_id)
 
 	# Restore input and mark transition complete
 	InputManager.set_gameplay_inputs_enabled(true)

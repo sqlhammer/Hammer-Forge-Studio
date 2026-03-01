@@ -2,7 +2,7 @@
 id: TICKET-0247
 title: "BUG — Ship cannot take off: fuel gate fixed but confirming travel does nothing"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -83,3 +83,4 @@ Specific things to check:
 - 2026-03-01 [gameplay-programmer] Root cause: `_on_confirm_pressed()` called `close_panel()` after `NavigationSystem.initiate_travel()`. During `initiate_travel`, the `travel_completed` signal fires and `TravelSequenceManager._on_travel_completed` suspends on `await _fade_out()`. Then `close_panel()` calls `InputManager.set_gameplay_inputs_enabled(true)`, undoing the input disable that `_on_travel_completed` just set. Fix: created `_close_for_travel()` that closes the panel without re-enabling inputs (the TravelSequenceManager handles that when the transition completes). Also reordered to close panel before initiating travel so the `fuel_changed` callback during fuel consumption doesn't update a closing UI. Added logging for all silent early-return paths. All existing unit tests pass.
 - 2026-03-01 [gameplay-programmer] DONE — merged to main (commit a7b8185, PR #211). All acceptance criteria met. Files modified: `game/scripts/ui/navigation_console.gd`.
 - 2026-03-01 [producer] **REOPENED** — New defect discovered during testing: After clicking CONFIRM TRAVEL, the player is locked in place but nothing else appears to happen. The biome transition is still not triggering. Scope expanded to include full travel sequence validation.
+- 2026-03-01 [gameplay-programmer] Starting work (retry 3). Root cause: `_on_travel_completed` was itself a coroutine (contained `await`) connected directly as a signal handler to `NavigationSystem.travel_completed`. When the signal fires synchronously inside `initiate_travel()`, the coroutine suspends at `await _fade_out()` within the signal emission call stack. The tween's `finished` signal cannot properly resume the coroutine because it was created inside the nested signal emission context. Fix: split `_on_travel_completed` into a synchronous signal handler that sets the `_is_transitioning` guard, and a separate `_execute_travel_transition` coroutine that runs the async fade/swap/fade sequence in a clean call context. Also added logging at every transition step in both TravelSequenceManager and NavigationSystem for future debugging. Files modified: `game/scripts/gameplay/travel_sequence_manager.gd`, `game/scripts/systems/navigation_system.gd`.

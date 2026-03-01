@@ -2,7 +2,7 @@
 id: TICKET-0246
 title: "BUG — Navigation console panel too tall; CONFIRM TRAVEL button cut off below viewport"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -91,3 +91,4 @@ Call this in `open_panel()` before making the panel visible.
 
 - 2026-03-01 [producer] Created ticket — player-reported: CONFIRM TRAVEL button cut off; cannot interact with lower half of navigation console
 - 2026-03-01 [gameplay-programmer] Starting work — wrapping detail column in ScrollContainer and adding viewport height clamp
+- 2026-03-01 [gameplay-programmer] DONE — commit 491780c, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/208 (merged)

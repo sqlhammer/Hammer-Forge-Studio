@@ -1,0 +1,60 @@
+# Playtest Script: Mine a Resource Node
+# Core gameplay loop — mine scrap metal from a surface deposit.
+# Machine-executable when Godot MCP is available; human-readable for Studio Head when not.
+
+name: "Mine a Resource Node"
+scene: "res://scenes/debug/debug_launcher.tscn"
+preconditions:
+  - "Player is spawned in Shattered Flats biome"
+  - "Hand drill is in inventory"
+  - "At least one Scrap Metal deposit is visible"
+
+steps:
+  - step: 1
+    action: "Walk toward the nearest Scrap Metal deposit"
+    input: { action: "move_forward", type: "hold", duration_seconds: 3.0 }
+    context: "Navigate to the deposit"
+    expected: "Player moves toward the deposit"
+
+  - step: 2
+    action: "Look at the deposit until interaction prompt appears"
+    input: { action: "look_at", target: "nearest Deposit" }
+    context: "Aim at the deposit"
+    expected: "Interaction prompt HUD shows 'E - Mine' or 'E - Interact'"
+    assert_state:
+      query: "InteractionPromptHUD visible"
+      expected: true
+      failure_message: "Interaction prompt should appear when looking at deposit"
+
+  - step: 3
+    action: "Press interact to begin mining"
+    input: { action: "interact", type: "press" }
+    context: "Start mining the deposit"
+    wait_after_seconds: 0.5
+    expected: "Mining progress bar appears on HUD"
+    assert_state:
+      query: "MiningProgress visible"
+      expected: true
+      failure_message: "Mining progress bar should be visible during mining"
+
+  - step: 4
+    action: "Hold interact until mining completes"
+    input: { action: "interact", type: "hold", duration_seconds: 5.0 }
+    context: "Complete the mining action"
+    expected: "Mining completes, resource added to inventory"
+    assert_state:
+      query: "Inventory contains Scrap Metal"
+      expected: true
+      failure_message: "Scrap Metal should be in inventory after mining"
+
+  - step: 5
+    action: "Open inventory to verify"
+    input: { action: "inventory_toggle", type: "press" }
+    context: "Verify resource was collected"
+    expected: "Inventory screen shows Scrap Metal with quantity >= 1"
+
+on_failure:
+  file_bug: true
+  severity: P1
+  owner: gameplay-programmer
+  tags: [mining, core-loop, resource]

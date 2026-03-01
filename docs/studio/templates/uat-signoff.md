@@ -23,11 +23,18 @@
 ## How to Use This Document
 
 1. Launch the game from the Godot editor (`res://game.tscn` or the debug launcher as noted per feature).
-2. For each feature, follow the **How to Test** steps.
-3. Mark the checkbox:
+2. For each feature, check the **Verification Method** tag:
+   - `unit-test` — Covered by unit tests (automated, no manual action needed)
+   - `scene-validation` — Covered by scene property tests (automated, no manual action needed)
+   - `integration-test` — Covered by integration tests (automated, no manual action needed)
+   - **`manual-playtest`** — **Requires hands-on testing by Studio Head.** Follow the test steps.
+3. For `manual-playtest` items, follow the **How to Test** steps.
+4. Mark the checkbox:
    - `✅ Approved` — feature works as described, no blocking issues
    - `❌ Rejected` — feature is broken or missing; add a note describing the problem
-4. Once all features are marked, sign off at the bottom of this document.
+5. Once all features are marked, sign off at the bottom of this document.
+
+> **Note:** Items tagged `manual-playtest` are highlighted because they have NOT been verified by automated tests. These require the most attention during review.
 
 ---
 
@@ -39,6 +46,8 @@
 
 #### [Feature Name] (TICKET-NNNN)
 
+**Verification Method:** `manual-playtest` | `unit-test` | `scene-validation` | `integration-test`
+
 **What changed:** Brief description of what was implemented or changed.
 
 **How to test:**
@@ -48,11 +57,15 @@
 
 **Expected result:** What the Studio Head should see/experience if working correctly.
 
+**Automated coverage:** <!-- e.g., "test_navigation_unit: 12 tests, test_scene_properties_unit: 3 tests" or "None — manual only" -->
+
 - [ ] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
 #### [Feature Name] (TICKET-NNNN)
+
+**Verification Method:** `manual-playtest` | `unit-test` | `scene-validation` | `integration-test`
 
 **What changed:** Brief description.
 
@@ -61,6 +74,8 @@
 2. Step two
 
 **Expected result:** Description.
+
+**Automated coverage:** <!-- test references or "None — manual only" -->
 
 - [ ] ✅ Approved / ❌ Rejected — _Notes:_
 
@@ -72,6 +87,8 @@
 
 #### [Feature Name] (TICKET-NNNN)
 
+**Verification Method:** `manual-playtest` | `unit-test` | `scene-validation` | `integration-test`
+
 **What changed:** Brief description.
 
 **How to test:**
@@ -79,6 +96,8 @@
 2. Step two
 
 **Expected result:** Description.
+
+**Automated coverage:** <!-- test references or "None — manual only" -->
 
 - [ ] ✅ Approved / ❌ Rejected — _Notes:_
 

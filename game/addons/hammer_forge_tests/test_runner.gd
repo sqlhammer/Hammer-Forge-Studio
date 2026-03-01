@@ -24,7 +24,7 @@ var _is_headless: bool = false
 func _ready() -> void:
 	_is_headless = DisplayServer.get_name() == "headless"
 	_parse_command_line_args()
-	run_all_suites()
+	await run_all_suites()
 
 
 # ── Public Methods ────────────────────────────────────────
@@ -40,7 +40,7 @@ func run_all_suites() -> void:
 
 	var suite_scripts: Array[String] = _discover_suite_scripts()
 	for script_path: String in suite_scripts:
-		_run_suite_from_path(script_path)
+		await _run_suite_from_path(script_path)
 
 	_print_summary()
 	_write_json_report()
@@ -93,7 +93,7 @@ func _run_suite_from_path(script_path: String) -> void:
 
 	# Add to scene tree so Node lifecycle methods and groups work
 	add_child(suite_instance)
-	var results: Array[TestResult] = suite_instance.run_all_tests()
+	var results: Array[TestResult] = await suite_instance.run_all_tests()
 
 	for result: TestResult in results:
 		_all_results.append(result)

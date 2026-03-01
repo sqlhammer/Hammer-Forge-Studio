@@ -96,7 +96,23 @@ If any blockers exist, the gate **cannot pass**. Resolve all blockers before sig
 
 ---
 
-## 7. Gate Decision
+## 8. Scene Property Validation
+
+Scene property tests (`test_scene_properties_unit.gd`) validate `.tscn` file properties that unit tests cannot catch: anchor presets, collision shape types, group memberships, and node existence. This section is **mandatory** — a FAIL here is a gate blocker.
+
+| Check Category | Tests Run | Tests Passed | Tests Failed | Pass/Fail |
+|----------------|-----------|-------------|-------------|-----------|
+| HUD anchor presets | | | 0 | |
+| Collision shape types | | | 0 | |
+| Node existence / wiring | | | 0 | |
+| Group memberships | | | 0 | |
+| **Total scene property tests** | | | **0** | |
+
+> Any scene property test failure is a **gate blocker**. The implementing agent must fix the `.tscn` file and re-run before the gate can pass.
+
+---
+
+## 9. Gate Decision
 
 | Condition | Status |
 |-----------|--------|
@@ -104,6 +120,7 @@ If any blockers exist, the gate **cannot pass**. Resolve all blockers before sig
 | Zero test failures | ☐ |
 | Coverage targets met | ☐ |
 | Zero cross-milestone regressions | ☐ |
+| Scene property validation tests pass with zero failures | ☐ |
 | All failure case categories covered | ☐ |
 | TDD compliance verified for all tickets | ☐ |
 | No open blockers | ☐ |

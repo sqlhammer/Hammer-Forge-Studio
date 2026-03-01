@@ -1,0 +1,71 @@
+# Playtest Script: Craft Fuel Cells
+# Core gameplay loop — use the fabricator to craft Fuel Cells from Metal + Cryonite.
+# Machine-executable when Godot MCP is available; human-readable for Studio Head when not.
+
+name: "Craft Fuel Cells"
+scene: "res://scenes/debug/debug_launcher.tscn"
+preconditions:
+  - "Player has Metal in inventory (>= 1)"
+  - "Player has Cryonite in inventory (>= 1)"
+  - "Player is inside the ship near the fabricator"
+
+steps:
+  - step: 1
+    action: "Walk to the fabricator"
+    input: { action: "move_toward", target: "Fabricator" }
+    context: "Navigate to fabricator module"
+    expected: "Player reaches the fabricator"
+
+  - step: 2
+    action: "Look at the fabricator"
+    input: { action: "look_at", target: "Fabricator" }
+    context: "Aim at the fabricator"
+    expected: "Interaction prompt shows 'E - Fabricator'"
+    assert_state:
+      query: "InteractionPromptHUD visible"
+      expected: true
+      failure_message: "Interaction prompt should appear at fabricator"
+
+  - step: 3
+    action: "Press interact to open fabricator panel"
+    input: { action: "interact", type: "press" }
+    context: "Open the fabricator UI"
+    wait_after_seconds: 0.5
+    expected: "Fabricator panel opens showing available recipes"
+    assert_state:
+      query: "FabricatorPanel visible"
+      expected: true
+      failure_message: "Fabricator panel should be visible after interact"
+
+  - step: 4
+    action: "Select Fuel Cell recipe"
+    input: { action: "click", target: "Fuel Cell recipe button" }
+    context: "Choose the Fuel Cell recipe"
+    expected: "Fuel Cell recipe is selected, showing Metal + Cryonite requirements"
+
+  - step: 5
+    action: "Confirm crafting"
+    input: { action: "ui_accept", type: "press" }
+    context: "Start crafting"
+    wait_after_seconds: 2.0
+    expected: "Crafting completes, Fuel Cell added to inventory"
+    assert_state:
+      query: "Inventory contains Fuel Cell"
+      expected: true
+      failure_message: "Fuel Cell should be in inventory after crafting"
+
+  - step: 6
+    action: "Close fabricator panel"
+    input: { action: "ui_cancel", type: "press" }
+    context: "Return to gameplay"
+    expected: "Fabricator panel closes, player controls restored"
+    assert_state:
+      query: "InputManager.is_gameplay_inputs_enabled()"
+      expected: true
+      failure_message: "Gameplay inputs should be re-enabled after closing fabricator"
+
+on_failure:
+  file_bug: true
+  severity: P1
+  owner: gameplay-programmer
+  tags: [crafting, fabricator, fuel, core-loop]

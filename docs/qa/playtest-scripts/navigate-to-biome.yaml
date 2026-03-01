@@ -1,0 +1,89 @@
+# Playtest Script: Navigate to a Different Biome
+# Core gameplay loop — use the navigation console to travel between biomes.
+# Machine-executable when Godot MCP is available; human-readable for Studio Head when not.
+
+name: "Navigate to Rock Warrens"
+scene: "res://scenes/debug/debug_launcher.tscn"
+preconditions:
+  - "Player starts in Shattered Flats biome"
+  - "Fuel tank is full (FuelSystem.fuel_current == FuelSystem.fuel_max)"
+  - "Player is inside the ship"
+
+steps:
+  - step: 1
+    action: "Walk to the cockpit console"
+    input: { action: "move_forward", type: "hold", duration_seconds: 2.0 }
+    context: "Navigate to cockpit area"
+    expected: "Player reaches the cockpit console area"
+
+  - step: 2
+    action: "Look at the cockpit console"
+    input: { action: "look_at", target: "CockpitConsole" }
+    context: "Aim at the navigation console"
+    expected: "Interaction prompt shows 'E - Navigation Console' or similar"
+    assert_state:
+      query: "InteractionPromptHUD visible"
+      expected: true
+      failure_message: "Interaction prompt should appear at cockpit console"
+
+  - step: 3
+    action: "Press interact to open navigation console"
+    input: { action: "interact", type: "press" }
+    context: "Open the navigation console modal"
+    wait_after_seconds: 0.5
+    expected: "Navigation console UI opens"
+    assert_state:
+      query: "NavigationConsole visible"
+      expected: true
+      failure_message: "Navigation console should be visible after interact"
+
+  - step: 4
+    action: "Select Rock Warrens as destination"
+    input: { action: "click", target: "Rock Warrens button" }
+    context: "Choose destination biome"
+    expected: "Rock Warrens is highlighted as selected destination"
+
+  - step: 5
+    action: "Confirm travel"
+    input: { action: "ui_accept", type: "press" }
+    context: "Initiate biome travel"
+    wait_after_seconds: 3.0
+    expected: "Travel sequence plays, biome transitions to Rock Warrens"
+    assert_state:
+      query: "NavigationSystem.current_biome"
+      expected: "rock_warrens"
+      failure_message: "Should have arrived at Rock Warrens"
+
+  - step: 6
+    action: "Verify player controls are re-enabled"
+    context: "Check that gameplay inputs work after travel"
+    expected: "Player can walk and look around normally"
+    assert_state:
+      query: "InputManager.is_gameplay_inputs_enabled()"
+      expected: true
+      failure_message: "Gameplay inputs should be re-enabled after travel"
+
+  - step: 7
+    action: "Verify fuel was consumed"
+    context: "Check fuel gauge shows reduced fuel"
+    expected: "Fuel level is less than maximum"
+    assert_state:
+      query: "FuelSystem.fuel_current < FuelSystem.fuel_max"
+      expected: true
+      failure_message: "Fuel should be consumed after travel"
+
+  - step: 8
+    action: "Verify terrain is walkable"
+    input: { action: "move_forward", type: "hold", duration_seconds: 2.0 }
+    context: "Walk on the new biome terrain"
+    expected: "Player walks normally without falling through terrain"
+    assert_state:
+      query: "Player.global_position.y > -10.0"
+      expected: true
+      failure_message: "Player should not fall through terrain"
+
+on_failure:
+  file_bug: true
+  severity: P1
+  owner: gameplay-programmer
+  tags: [navigation, travel, biome, core-loop]

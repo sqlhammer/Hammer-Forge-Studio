@@ -71,7 +71,7 @@ func run_all_tests() -> Array[TestResult]:
 	for test_entry: Dictionary in _registered_tests:
 		var test_name: String = test_entry["name"]
 		var test_callable: Callable = test_entry["callable"]
-		_run_single_test(test_name, test_callable)
+		await _run_single_test(test_name, test_callable)
 
 	after_all()
 	suite_completed.emit(get_suite_name(), _results)
@@ -184,7 +184,7 @@ func _run_single_test(test_name: String, test_callable: Callable) -> void:
 
 	var start_time: float = Time.get_ticks_msec()
 	before_each()
-	test_callable.call()
+	await test_callable.call()
 	after_each()
 	var elapsed: float = Time.get_ticks_msec() - start_time
 	_current_test_result.execution_time_milliseconds = elapsed

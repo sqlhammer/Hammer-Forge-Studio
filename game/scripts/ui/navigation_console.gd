@@ -165,6 +165,19 @@ func close_panel() -> void:
 	panel_closed.emit()
 	Global.log("NavigationConsole: closed")
 
+## Closes the panel for travel without re-enabling gameplay inputs.
+## The TravelSequenceManager owns the input state during the transition
+## and will call InputManager.set_gameplay_inputs_enabled(true) when the
+## travel sequence completes.
+func _close_for_travel() -> void:
+	if not _is_open:
+		return
+	_is_open = false
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	_animate_close()
+	panel_closed.emit()
+	Global.log("NavigationConsole: closed for travel (inputs left disabled)")
+
 ## Returns true if the panel is currently open.
 func is_open() -> bool:
 	return _is_open
@@ -691,13 +704,26 @@ func _on_biome_node_clicked(biome_id: String) -> void:
 
 func _on_confirm_pressed() -> void:
 	if _selected_biome_id.is_empty():
+		Global.log("NavigationConsole: confirm pressed — no destination selected")
 		return
 	if not NavigationSystem.can_travel_to(_selected_biome_id):
+		Global.log("NavigationConsole: confirm pressed — cannot afford travel to '%s'" % _selected_biome_id)
 		return
-	travel_confirmed.emit(_selected_biome_id)
-	NavigationSystem.initiate_travel(_selected_biome_id)
-	close_panel()
-	Global.log("NavigationConsole: travel confirmed to '%s'" % _selected_biome_id)
+
+	var destination: String = _selected_biome_id
+	Global.log("NavigationConsole: confirming travel to '%s'" % destination)
+	travel_confirmed.emit(destination)
+
+	# Close the panel first without re-enabling gameplay inputs — the
+	# TravelSequenceManager owns the input state during the transition and
+	# will re-enable inputs when the sequence completes.
+	_close_for_travel()
+
+	# Initiate travel — the NavigationSystem state machine runs synchronously,
+	# emitting travel_completed which triggers TravelSequenceManager's async
+	# biome transition (fade out -> swap -> fade in -> re-enable inputs).
+	NavigationSystem.initiate_travel(destination)
+	Global.log("NavigationConsole: travel initiated to '%s'" % destination)
 
 func _on_fuel_changed(_current: float, _maximum: float) -> void:
 	if _is_open:

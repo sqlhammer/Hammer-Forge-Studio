@@ -2,7 +2,7 @@
 id: TICKET-0252
 title: "Update start_milestone.py for instance directories"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -25,14 +25,14 @@ specify a custom instance name (defaults to the milestone ID).
 
 ## Acceptance Criteria
 
-- [ ] `--instance <name>` argument added (defaults to milestone positional arg value)
-- [ ] Calls `resolve_instance(instance_name)` → `paths`; writes fresh `state.json` to `paths.state_path`
-- [ ] Printed launch command at end of script updated to include `--instance <name>`
+- [x] `--instance <name>` argument added (defaults to milestone positional arg value)
+- [x] Calls `resolve_instance(instance_name)` → `paths`; writes fresh `state.json` to `paths.state_path`
+- [x] Printed launch command at end of script updated to include `--instance <name>`
   so the user can copy-paste the correct `conductor.py` invocation
-- [ ] Old hardcoded flat path (`orchestrator/state.json`) fully removed
-- [ ] `resolve_instance()` creates `instance_dir`, `results/`, and `logs/` automatically —
+- [x] Old hardcoded flat path (`orchestrator/state.json`) fully removed
+- [x] `resolve_instance()` creates `instance_dir`, `results/`, and `logs/` automatically —
   no manual `mkdir` needed in this script
-- [ ] Script still validates that the specified milestone directory exists under `tickets/`
+- [x] Script still validates that the specified milestone directory exists under `tickets/`
   before writing state
 
 ---
@@ -54,3 +54,4 @@ specify a custom instance name (defaults to the milestone ID).
 ## Activity Log
 
 - 2026-03-01 [producer] Created — T4 Foundation phase
+- 2026-03-01 [systems-programmer] Starting work — updating start_milestone.py for instance directories

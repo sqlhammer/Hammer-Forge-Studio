@@ -48,5 +48,16 @@
     "1": ["game-designer", "narrative-designer", "technical-writer"],
     "2": ["environment-artist", "character-animator", "ui-ux-designer", "audio-engineer", "vfx-artist", "qa-engineer"],
     "3": ["systems-programmer", "gameplay-programmer", "tools-devops-engineer", "technical-artist"]
+  },
+  "plan_limits": {
+    "plan_tier": "Max 20",
+    "five_hour_output_token_limit": 220000,
+    "weekly_output_token_limit": 3080000,
+    "_docs": {
+      "plan_tier": "Claude plan name — used as a label in capacity reports.",
+      "five_hour_output_token_limit": "Max 20 plan: 220K output tokens per 5-hour rolling window.",
+      "weekly_output_token_limit": "Max 20 plan: 3.08M output tokens per week (14x the daily ~220K limit).",
+      "opus_weighting_note": "Opus tokens count at 1.7x for capacity calculations — this weighting is applied by the reporting script, not stored here."
+    }
   }
 }

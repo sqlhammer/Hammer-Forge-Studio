@@ -33,8 +33,8 @@
 | M5 | Processing & Crafting — Smelting, components, tech tree, build/upgrade | — | Complete | 38 | 0 | 38 | 2026-02-25 |
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
-| M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Active | 28 | 28 | 0 | — |
-| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 21 | 21 | 0 | — |
+| M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Active | 30 | 30 | 0 | — |
+| M9 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | 25 | 25 | 0 | — |
 | M10 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
 | M11 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
 | M12 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
@@ -397,8 +397,9 @@
 - **Navigation & Fuel** (TBD): Navigation system, fuel consumption logic, travel mechanics
 - **Integration** (TBD): Biome templates, travel sequences, console UI
 - **QA** (TBD): Code review and full loop QA
+- **Bug Fix** (TICKET-0245–TICKET-0246): Post-QA player-reported bugs — navigation console interaction prompt distance mismatch and panel overflow. Parallel-eligible with QA if QA has already passed; otherwise runs after QA gate.
 
-**Tickets:** TICKET-0131–0132, TICKET-0149, TICKET-0153, TICKET-0157–0180 (28 total)
+**Tickets:** TICKET-0131–0132, TICKET-0149, TICKET-0153, TICKET-0157–0180, TICKET-0245–0246 (30 total)
 
 | Phase | Ticket | Title | Type | Owner |
 |-------|--------|-------|------|-------|
@@ -430,6 +431,8 @@
 | Gameplay | TICKET-0180 | Debug scene — biome spawn selector and begin-wealthy toggle | FEATURE | gameplay-programmer |
 | QA | TICKET-0177 | Code review — M8 systems | REVIEW | systems-programmer |
 | QA | TICKET-0178 | QA testing — M8 full loop | TASK | qa-engineer |
+| Bug Fix | TICKET-0245 | BUG — Navigation console interaction prompt appears before player can interact | BUG | gameplay-programmer |
+| Bug Fix | TICKET-0246 | BUG — Navigation console panel too tall; CONFIRM TRAVEL button cut off below viewport | BUG | gameplay-programmer |
 
 **Dependencies:** M7 (must complete before M8 kickoff)
 
@@ -453,9 +456,10 @@
 **Phases:**
 - **Root Game** (TICKET-0229–TICKET-0235): Game entry point architecture — root `game` scene, main menu, GameWorld, DebugLauncher refactor, TestWorld deprecation. **Must complete before all other M9 phases begin.** Introduces the canonical game launch flow: `game.tscn` routes to debug_launcher (debug builds) or main_menu (release); Play loads GameWorld using `Global.starting_biome` and `Global.starting_inventory`.
 - **Orchestrator Resilience** (TICKET-0182–TICKET-0188): Conductor hardening for usage-limit edge cases — checkpoint system, LIMIT_WAIT cooldown, resume dispatch, structured logging, documentation. Parallel-eligible within this phase; depends on Root Game completing first. Touches only `orchestrator/` code and `docs/engineering/` — no game code changes.
+- **Gamepad Bugs** (TICKET-0241–TICKET-0244): Player-reported gamepad issues — left stick Y-axis inversion, turn sensitivity, no interact button mapped, interaction prompt not switching to gamepad hints. Parallel-eligible with Root Game (touches only `InputManager.gd`, `player_first_person.gd`, and `interaction_prompt_hud.gd`; no dependency on Root Game architecture).
 - Additional visual asset phases TBD at M9 kickoff — require Studio Head approval.
 
-**Tickets:** TICKET-0229–TICKET-0235, TICKET-0237 (Root Game); TICKET-0182–TICKET-0191 (Orchestrator Resilience); TICKET-0218–TICKET-0220 (TBD); additional tickets TBD for visual asset phases.
+**Tickets:** TICKET-0229–TICKET-0235, TICKET-0237 (Root Game); TICKET-0182–TICKET-0191 (Orchestrator Resilience); TICKET-0218–TICKET-0220 (TBD); TICKET-0241–TICKET-0244 (Gamepad Bugs); additional tickets TBD for visual asset phases.
 
 | Phase | Ticket | Title | Type | Priority | Owner |
 |-------|--------|-------|------|----------|-------|
@@ -477,6 +481,10 @@
 | Orchestrator Resilience | TICKET-0190 | Auto-remediation for silently-merged PRs with IN_PROGRESS tickets | FEATURE | P3 | tools-devops-engineer |
 | Orchestrator Resilience | TICKET-0191 | Log archive rotation at milestone close | TASK | P3 | tools-devops-engineer |
 | Orchestrator Resilience | TICKET-0188 | Documentation — resilience runbook, CLAUDE.md updates, and config reference | TASK | P2 | producer |
+| Gamepad Bugs | TICKET-0241 | BUG — Gamepad left stick Y-axis inverted (push down goes forward) | BUG | P1 | gameplay-programmer |
+| Gamepad Bugs | TICKET-0242 | BUG — Gamepad right stick turn sensitivity too slow | BUG | P1 | gameplay-programmer |
+| Gamepad Bugs | TICKET-0243 | BUG — Interaction prompt HUD does not switch to gamepad button hint | BUG | P2 | gameplay-programmer |
+| Gamepad Bugs | TICKET-0244 | BUG — No gamepad button mapped to interact action | BUG | P0 | gameplay-programmer |
 
 **Dependency Graph (Root Game):**
 ```

@@ -1,0 +1,13 @@
+{
+  "ticket": "TICKET-0254",
+  "outcome": "done",
+  "summary": "Updated resume_planning.py to use instance-scoped paths via instance_paths.py. Added --instance <name> argument with auto-detect logic (single instance auto-selected, multiple require explicit flag). Replaced hardcoded STATE_FILE with resolve_instance() paths. All state.json reads/writes now use paths.state_path. Old flat path constants removed.",
+  "commit_hash": "94b6bfe",
+  "pr_url": "https://github.com/sqlhammer/Hammer-Forge-Studio/pull/216",
+  "files_changed": [
+    "orchestrator/resume_planning.py",
+    "tickets/T4/TICKET-0254.md"
+  ],
+  "new_gd_scripts": false,
+  "blockers": []
+}

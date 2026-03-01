@@ -1,0 +1,13 @@
+{
+  "ticket": "TICKET-0253",
+  "outcome": "done",
+  "summary": "Updated approve_gate.py to use instance-scoped paths via resolve_instance() from instance_paths.py. Added --instance <name> argument with auto-detect logic (uses sole instance automatically, prompts when multiple exist). Removed old hardcoded flat paths. Script still validates pending_gate.json existence.",
+  "commit_hash": "18a7e20",
+  "pr_url": "https://github.com/sqlhammer/Hammer-Forge-Studio/pull/222",
+  "files_changed": [
+    "orchestrator/approve_gate.py",
+    "tickets/T4/TICKET-0253.md"
+  ],
+  "new_gd_scripts": false,
+  "blockers": []
+}

@@ -1,0 +1,14 @@
+{
+  "ticket": "TICKET-0247",
+  "outcome": "done",
+  "summary": "Fixed biome transition not triggering after CONFIRM TRAVEL. Root cause: _on_travel_completed was a coroutine (contained await) connected as a signal handler to NavigationSystem.travel_completed. When the signal fires synchronously inside initiate_travel(), the coroutine suspends at await _fade_out() within the signal emission call stack, and the tween's finished signal cannot properly resume it. Fix: split _on_travel_completed into a synchronous signal handler (sets _is_transitioning guard) and a separate _execute_travel_transition coroutine that runs the async fade/swap/fade sequence in a clean call context. Added comprehensive logging at every transition phase. Ticket left as IN_PROGRESS with READY FOR STUDIO HEAD SIGN-OFF per hold condition.",
+  "commit_hash": "b16df22",
+  "pr_url": "https://github.com/sqlhammer/Hammer-Forge-Studio/pull/213",
+  "files_changed": [
+    "game/scripts/gameplay/travel_sequence_manager.gd",
+    "game/scripts/systems/navigation_system.gd",
+    "tickets/M8/TICKET-0247.md"
+  ],
+  "new_gd_scripts": false,
+  "blockers": []
+}

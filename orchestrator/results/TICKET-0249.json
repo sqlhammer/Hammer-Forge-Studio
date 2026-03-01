@@ -1,0 +1,13 @@
+{
+  "ticket": "TICKET-0249",
+  "outcome": "done",
+  "summary": "Created orchestrator/instance_paths.py with: InstancePaths frozen dataclass (all 13 path fields), resolve_instance() with fallback chain (explicit \u2192 $HFS_ORCH_DIR \u2192 repo default, auto-creates instance dirs), load_config() with FileNotFoundError guard and deep-merge of config.local.json, _deep_merge() recursive helper. Stdlib only, all 9 unit tests pass. Committed directly to main and pushed.",
+  "commit_hash": "81254c1",
+  "pr_url": null,
+  "files_changed": [
+    "orchestrator/instance_paths.py",
+    "tickets/T4/TICKET-0249.md"
+  ],
+  "new_gd_scripts": false,
+  "blockers": []
+}

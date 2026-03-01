@@ -1,0 +1,13 @@
+{
+  "ticket": "TICKET-0255",
+  "outcome": "done",
+  "summary": "Updated .gitignore for T4 instance directory model: added orchestrator/instances/ and orchestrator/config.local.json, removed 8 stale flat entries (state.json, pending_gate.json, gate_response.json, godot_mcp.lock, godot_instances.json, activity.log, logs/, results/). Committed directly to main and pushed. Note: old runtime artifacts at orchestrator root now appear as untracked \u2014 these are transient files that will be migrated under instances/ by other T4 tickets.",
+  "commit_hash": "fb07ff5",
+  "pr_url": null,
+  "files_changed": [
+    ".gitignore",
+    "tickets/T4/TICKET-0255.md"
+  ],
+  "new_gd_scripts": false,
+  "blockers": []
+}

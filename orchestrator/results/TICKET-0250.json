@@ -1,0 +1,13 @@
+{
+  "ticket": "TICKET-0250",
+  "outcome": "done",
+  "summary": "Updated conductor.py to use instance-scoped paths via instance_paths.py. Removed all flat path constants (STATE_PATH, ACTIVITY_LOG, RESULTS_DIR, LOGS_DIR, PENDING_GATE_PATH, GATE_RESPONSE_PATH, GODOT_MCP_LOCK_PATH, PROMPTS_DIR, SCHEMAS_DIR) from module scope. Retained REPO_ROOT and ORCH_DIR as module-level constants. Added --instance CLI flag defaulting to milestone arg. Updated main() to call resolve_instance() and load_config(). Updated Conductor.__init__ to accept paths: InstancePaths and config: dict. Updated all free functions and internal references to use explicit path parameters. All existing behavior preserved \u2014 no logic changes.",
+  "commit_hash": "9bbb338",
+  "pr_url": "https://github.com/sqlhammer/Hammer-Forge-Studio/pull/221",
+  "files_changed": [
+    "orchestrator/conductor.py",
+    "tickets/t4/TICKET-0250.md"
+  ],
+  "new_gd_scripts": false,
+  "blockers": []
+}

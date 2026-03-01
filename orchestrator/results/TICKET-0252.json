@@ -1,0 +1,12 @@
+{
+  "ticket": "TICKET-0252",
+  "outcome": "done",
+  "summary": "All acceptance criteria were already implemented by prior agent (commit 0db7fe0) and pushed to main. Verified: --instance arg added, resolve_instance() used for path resolution, launch command includes --instance, old hardcoded flat path removed, milestone dir validation present. Marked ticket DONE and pushed status update.",
+  "commit_hash": "4208be4",
+  "pr_url": "",
+  "files_changed": [
+    "tickets/t4/TICKET-0252.md"
+  ],
+  "new_gd_scripts": false,
+  "blockers": []
+}

@@ -1,0 +1,13 @@
+{
+  "ticket": "TICKET-0251",
+  "outcome": "done",
+  "summary": "Updated orchestrator/status.py to support --instance <name> and --all flags using resolve_instance() from instance_paths.py. Implemented auto-detect logic (single instance auto-selects, multiple lists choices, none shows helpful message). Preserved existing single-instance display format. All acceptance criteria met.",
+  "commit_hash": "8c7b730",
+  "pr_url": "https://github.com/sqlhammer/Hammer-Forge-Studio/pull/218",
+  "files_changed": [
+    "orchestrator/status.py",
+    "tickets/t4/TICKET-0251.md"
+  ],
+  "new_gd_scripts": false,
+  "blockers": []
+}

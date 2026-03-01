@@ -1,0 +1,13 @@
+{
+  "ticket": "TICKET-0257",
+  "outcome": "done",
+  "summary": "Imported load_config from instance_paths in status.py and added a Config (budgets) section to _print_full_status() that displays all effective merged budget values. Config section is shown in default text mode but omitted from --json output. Missing config.json is handled gracefully. Verified session_ceiling_usd: 10 appears when config.local.json override is present.",
+  "commit_hash": "1c598d0",
+  "pr_url": "",
+  "files_changed": [
+    "orchestrator/status.py",
+    "tickets/T4/TICKET-0257.md"
+  ],
+  "new_gd_scripts": false,
+  "blockers": []
+}

@@ -1,0 +1,65 @@
+{
+  "status": "IDLE",
+  "milestone": "T4",
+  "phase": "Bug Fix",
+  "wave_number": 10,
+  "started_at": "2026-03-01T16:05:56",
+  "active_workers": [],
+  "active_ticket_ids": [],
+  "completed_waves": [
+    {
+      "wave": 5,
+      "tickets": [
+        "TICKET-0249",
+        "TICKET-0255"
+      ],
+      "completed_at": "2026-03-01T20:57:11"
+    },
+    {
+      "wave": 6,
+      "tickets": [
+        "TICKET-0250",
+        "TICKET-0251",
+        "TICKET-0253",
+        "TICKET-0254"
+      ],
+      "completed_at": "2026-03-01T21:11:31"
+    },
+    {
+      "wave": 7,
+      "tickets": [
+        "TICKET-0252"
+      ],
+      "completed_at": "2026-03-01T21:13:34"
+    },
+    {
+      "wave": 8,
+      "tickets": [
+        "TICKET-0256"
+      ],
+      "completed_at": "2026-03-01T21:20:27"
+    },
+    {
+      "wave": 9,
+      "tickets": [
+        "TICKET-0257"
+      ],
+      "completed_at": "2026-03-01T21:22:22"
+    }
+  ],
+  "completed_this_session": [
+    "TICKET-0249",
+    "TICKET-0255",
+    "TICKET-0250",
+    "TICKET-0251",
+    "TICKET-0253",
+    "TICKET-0254",
+    "TICKET-0252",
+    "TICKET-0256",
+    "TICKET-0257"
+  ],
+  "total_cost_usd": 0.0,
+  "retries": {
+    "TICKET-0252": 1
+  }
+}

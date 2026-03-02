@@ -1,0 +1,92 @@
+# dashboard.yml — Build and deploy the Hammer Forge Studio project dashboard
+#
+# Triggers on every push to `main` and supports manual on-demand rebuilds via
+# workflow_dispatch. Runs dashboard/build.py to parse ticket/milestone data into
+# JSON, assembles the static site, and deploys to GitHub Pages.
+#
+# ── ONE-TIME SETUP (must be done by repo admin before first deployment) ──────
+#
+# 1. Go to repo Settings → Pages.
+# 2. Under "Build and deployment", set Source to "GitHub Actions".
+#    (This enables the artifact-based deployment used by actions/deploy-pages.)
+# 3. Save. The URL for the deployed site will be:
+#    https://<org-or-user>.github.io/<repo-name>/
+#
+# No secrets or tokens are required — the workflow reads only from the repo
+# checkout itself.
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Dashboard Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Required permissions for the artifact-based GitHub Pages deployment method.
+# pages: write  — allows deploy-pages to push the artifact to Pages.
+# id-token: write — allows OIDC token creation for trusted deployment.
+# contents: read  — allows checkout of repo contents.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Prevent concurrent deployments. If a push triggers a new run while a
+# previous deployment is still in progress, cancel the in-progress run so
+# the latest commit always wins.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build dashboard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run dashboard data parser
+        # Generates JSON data files to dashboard/dist/data/
+        # Exits 0 on success, non-zero on fatal error.
+        # Gracefully handles missing ticket files — outputs empty arrays.
+        run: python dashboard/build.py
+
+      - name: Assemble static site
+        # Copy the static HTML/CSS/JS source files into the build output
+        # directory alongside the generated data/ subdirectory so the full
+        # site is rooted at dashboard/dist/.
+        run: cp -r dashboard/src/. dashboard/dist/
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload the assembled output directory.
+          # Only dashboard/dist/ is uploaded — no source files, no repo
+          # metadata, and no unnecessary files are deployed.
+          path: dashboard/dist/
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        # Deploys the artifact uploaded in the build job to GitHub Pages.
+        # This artifact-based method does NOT create or modify a gh-pages
+        # branch — deployment is handled entirely through the Pages API.

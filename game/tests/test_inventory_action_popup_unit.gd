@@ -65,6 +65,10 @@ func register_tests() -> void:
 	# Reopening resets state
 	add_test("reopen_resets_focus_and_hold", _test_reopen_resets_focus_and_hold)
 
+	# Gamepad input mapping regression guards (TICKET-0270 / TICKET-0271)
+	add_test("ui_accept_includes_joypad_a", _test_ui_accept_includes_joypad_a)
+	add_test("ui_cancel_includes_joypad_b", _test_ui_cancel_includes_joypad_b)
+
 
 # ── Test Methods ──────────────────────────────────────────
 
@@ -268,6 +272,30 @@ func _test_reopen_resets_focus_and_hold() -> void:
 		"Focus should reset to Drop on reopen")
 	assert_equal(_popup.get_hold_progress(), 0.0,
 		"Hold progress should reset on reopen")
+
+
+func _test_ui_accept_includes_joypad_a() -> void:
+	var found: bool = false
+	for event: InputEvent in InputMap.action_get_events("ui_accept"):
+		if event is InputEventJoypadButton:
+			var joy_event: InputEventJoypadButton = event as InputEventJoypadButton
+			if joy_event.button_index == JOY_BUTTON_A:
+				found = true
+				break
+	assert_true(found,
+		"ui_accept must include JOY_BUTTON_A for gamepad popup confirm (TICKET-0270)")
+
+
+func _test_ui_cancel_includes_joypad_b() -> void:
+	var found: bool = false
+	for event: InputEvent in InputMap.action_get_events("ui_cancel"):
+		if event is InputEventJoypadButton:
+			var joy_event: InputEventJoypadButton = event as InputEventJoypadButton
+			if joy_event.button_index == JOY_BUTTON_B:
+				found = true
+				break
+	assert_true(found,
+		"ui_cancel must include JOY_BUTTON_B for gamepad popup cancel (TICKET-0271)")
 
 
 # ── Helper Methods ───────────────────────────────────────

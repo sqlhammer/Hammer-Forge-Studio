@@ -2,7 +2,7 @@
 id: TICKET-0259
 title: "Code Quality: Use DeepResourceNode in biome scenes instead of Deposit.new(infinite=true)"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P3
 owner: systems-programmer
 created_by: producer
@@ -38,3 +38,4 @@ Biome scripts currently instantiate deep resource nodes using `Deposit.new()` wi
 
 - 2026-03-01 [producer] Created — deferred item D-027 from M8 code review (TICKET-0177); scheduled for M9 Code Quality phase
 - 2026-03-01 [systems-programmer] Starting work — dependency TICKET-0235 verified DONE. Three biome scripts identified: rock_warrens_biome.gd, shattered_flats_biome.gd, debris_field_biome.gd all use Deposit.new() with manual infinite=true instead of DeepResourceNode.new().
+- 2026-03-01 [systems-programmer] DONE — commit 011a55f, PR #272 (https://github.com/sqlhammer/Hammer-Forge-Studio/pull/272) merged to main. All three biome scripts updated to use DeepResourceNode.new() for deep deposits. DeepResourceNode encapsulates meaningful defaults (infinite=true, drone_accessible=true, yield_rate=0.1, submerge offset). Removed unused DEEP_NODE_YIELD_RATE constants from rock_warrens and shattered_flats. Fixed debris_field naming logic to use local is_deep flag.

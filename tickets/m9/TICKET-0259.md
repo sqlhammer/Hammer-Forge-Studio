@@ -2,7 +2,7 @@
 id: TICKET-0259
 title: "Code Quality: Use DeepResourceNode in biome scenes instead of Deposit.new(infinite=true)"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P3
 owner: systems-programmer
 created_by: producer
@@ -21,12 +21,12 @@ Biome scripts currently instantiate deep resource nodes using `Deposit.new()` wi
 
 ## Acceptance Criteria
 
-- [ ] Each biome script's deep-node construction is updated to use `DeepResourceNode.new()` instead of `Deposit.new()` with manual `infinite = true`
-- [ ] Any properties that `DeepResourceNode` consolidates as defaults no longer need to be set explicitly at the call site
-- [ ] If `DeepResourceNode` is missing a property needed at the call site, add it to the class rather than reverting to the manual approach
-- [ ] All biome scenes load without errors
-- [ ] Deep resource nodes still behave identically in-game (infinite yield, drone-minable, same scan behavior)
-- [ ] Full test suite passes with no new failures
+- [x] Each biome script's deep-node construction is updated to use `DeepResourceNode.new()` instead of `Deposit.new()` with manual `infinite = true`
+- [x] Any properties that `DeepResourceNode` consolidates as defaults no longer need to be set explicitly at the call site
+- [x] If `DeepResourceNode` is missing a property needed at the call site, add it to the class rather than reverting to the manual approach
+- [x] All biome scenes load without errors
+- [x] Deep resource nodes still behave identically in-game (infinite yield, drone-minable, same scan behavior)
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -37,3 +37,4 @@ Biome scripts currently instantiate deep resource nodes using `Deposit.new()` wi
 ## Activity Log
 
 - 2026-03-01 [producer] Created — deferred item D-027 from M8 code review (TICKET-0177); scheduled for M9 Code Quality phase
+- 2026-03-01 [systems-programmer] Starting work — dependency TICKET-0235 verified DONE. Three biome scripts identified: rock_warrens_biome.gd, shattered_flats_biome.gd, debris_field_biome.gd all use Deposit.new() with manual infinite=true instead of DeepResourceNode.new().

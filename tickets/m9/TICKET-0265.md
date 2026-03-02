@@ -2,7 +2,7 @@
 id: TICKET-0265
 title: "BUG: Gamepad stick menu navigation fires continuously while held — should require return-to-center between moves"
 type: BUG
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -77,3 +77,4 @@ The latch resets only when the stick magnitude drops below the dead zone. Separa
 ## Activity Log
 
 - 2026-03-02 [producer] Filed — UAT rejection. Studio Head reported inventory navigation races when stick is held; discrete step behavior required.
+- 2026-03-02 [gameplay-programmer] Starting work — implementing edge-triggered stick latch in inventory_screen.gd and navigation_console.gd.

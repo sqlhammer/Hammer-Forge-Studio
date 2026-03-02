@@ -32,6 +32,7 @@ const COLOR_DIM := Color("#000000", 0.5)
 const COLOR_PANEL_BG := Color("#0F1923", 0.85)
 const COLOR_NODE_BG := Color("#1A2736", 0.7)
 const COLOR_NODE_BG_SELECTED := Color("#1A2736", 0.9)
+const STICK_DEAD_ZONE: float = 0.5
 
 # ── Private Variables ─────────────────────────────────────
 var _is_open: bool = false
@@ -42,6 +43,10 @@ var _biome_node_buttons: Dictionary = {}
 var _biome_node_ids: Array[String] = []
 var _selected_index: int = -1
 var _focus_on_map: bool = true
+
+## Edge-triggered latch for analog stick navigation (per-axis)
+var _stick_latched_x: bool = false
+var _stick_latched_y: bool = false
 
 ## Detail panel elements
 var _detail_name_label: Label = null
@@ -80,6 +85,12 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if not _is_open:
 		return
+
+	# Analog stick uses edge-triggered latch to prevent continuous scrolling
+	if event is InputEventJoypadMotion:
+		_handle_stick_input(event as InputEventJoypadMotion)
+		return
+
 	if event.is_action_pressed("ui_cancel"):
 		close_panel()
 		get_viewport().set_input_as_handled()
@@ -141,6 +152,8 @@ func open_panel() -> void:
 	_selected_biome_id = ""
 	_selected_index = -1
 	_focus_on_map = true
+	_stick_latched_x = false
+	_stick_latched_y = false
 	_clamp_panel_to_viewport()
 	_refresh_biome_nodes()
 	_refresh_detail()
@@ -689,6 +702,47 @@ func _refresh_detail() -> void:
 		_confirm_disabled_reason.text = "Need %d more Fuel Cell(s)" % deficit
 		_confirm_disabled_reason.visible = true
 	_detail_sufficiency_label.visible = true
+
+func _handle_stick_input(event: InputEventJoypadMotion) -> void:
+	var axis: int = event.axis
+	var value: float = event.axis_value
+
+	if axis == JOY_AXIS_LEFT_X:
+		if absf(value) < STICK_DEAD_ZONE:
+			_stick_latched_x = false
+			return
+		if _stick_latched_x:
+			get_viewport().set_input_as_handled()
+			return
+		_stick_latched_x = true
+		var direction: int = 1 if value > 0 else -1
+		if _focus_on_map:
+			_move_map_focus(direction)
+		get_viewport().set_input_as_handled()
+	elif axis == JOY_AXIS_LEFT_Y:
+		if absf(value) < STICK_DEAD_ZONE:
+			_stick_latched_y = false
+			return
+		if _stick_latched_y:
+			get_viewport().set_input_as_handled()
+			return
+		_stick_latched_y = true
+		# Stick down moves from map to buttons; stick up returns to map
+		if value > 0:
+			if _focus_on_map:
+				_focus_on_map = false
+				if _confirm_button and not _confirm_button.disabled:
+					_confirm_button.grab_focus()
+				elif _cancel_button:
+					_cancel_button.grab_focus()
+			else:
+				if _cancel_button:
+					_cancel_button.grab_focus()
+		else:
+			if not _focus_on_map:
+				_focus_on_map = true
+				_update_map_visuals()
+		get_viewport().set_input_as_handled()
 
 func _move_map_focus(direction: int) -> void:
 	if _biome_node_ids.is_empty():

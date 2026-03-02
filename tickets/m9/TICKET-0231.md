@@ -2,12 +2,12 @@
 id: TICKET-0231
 title: "Root Game: Create Main Menu scene with Play button"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-28
-updated_at: 2026-02-28
+updated_at: 2026-03-01
 milestone: "M9"
 phase: "Root Game"
 depends_on: [TICKET-0229, TICKET-0230, TICKET-0237]
@@ -42,3 +42,4 @@ Create the game's main menu — a minimal `Control`-based scene with a single "P
 
 - 2026-02-28 [producer] Created ticket — main menu scene for Root Game phase
 - 2026-03-01 [gameplay-programmer] Starting work — creating MainMenu scene and script per wireframe spec
+- 2026-03-01 [gameplay-programmer] DONE — Implementation merged via PR #250 (commit 52bf968, merge commit e9de2df). UID sidecar committed (1e4be2a). All acceptance criteria verified.

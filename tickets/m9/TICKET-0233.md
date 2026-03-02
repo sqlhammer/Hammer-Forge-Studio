@@ -2,7 +2,7 @@
 id: TICKET-0233
 title: "Root Game: Refactor DebugLauncher — set startup params, hand off to Main Menu"
 type: REFACTOR
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -63,3 +63,4 @@ Additionally, the begin-wealthy inventory set is revised: instead of a flat 200 
 ## Activity Log
 
 - 2026-02-28 [producer] Created ticket — DebugLauncher refactor for Root Game phase
+- 2026-03-01 [gameplay-programmer] Starting work — all dependencies DONE (0229, 0231, 0232)

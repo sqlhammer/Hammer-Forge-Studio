@@ -18,6 +18,7 @@ func get_interaction_prompt() -> Dictionary:
 	var key_label: String = _get_interact_key_label()
 	return {
 		"key": key_label,
+		"action": "interact",
 		"label": "Exit Ship",
 		"hold": false,
 	}

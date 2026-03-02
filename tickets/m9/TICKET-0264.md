@@ -2,7 +2,7 @@
 id: TICKET-0264
 title: "BUG: Dropping item from inventory deletes it instead of spawning a physical world object"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -50,3 +50,5 @@ Verify that `test_dropped_item_unit.gd` unit tests still pass — if they do, th
 ## Activity Log
 
 - 2026-03-02 [producer] Filed — UAT rejection on TICKET-0218. Studio Head confirmed item is removed from inventory but no world object appears. Item is lost on drop.
+- 2026-03-02 [gameplay-programmer] Starting work — investigating drop path in inventory_screen.gd and dropped_item.gd.
+- 2026-03-02 [gameplay-programmer] Root cause: `_setup_item_drop` in game_world.gd hardcoded `drop_position.y = 0.0`, assuming flat terrain at Y=0. Procedural terrain (ShatteredFlatsBiome terrain generator with height_scale=8.0) places the ground surface at non-zero Y. The DroppedItem was spawning underground. Fix: use player's Y coordinate for ground level and project forward direction to horizontal plane.

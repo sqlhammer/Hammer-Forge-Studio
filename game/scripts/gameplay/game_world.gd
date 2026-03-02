@@ -340,9 +340,14 @@ func _setup_item_drop(first_person: CharacterBody3D, hud: GameHUD) -> void:
 			item.name = "DroppedItem_%s" % ResourceDefs.get_resource_name(resource_type).replace(" ", "")
 			# Place item 1.5m in front of the player at ground level
 			var forward_dir: Vector3 = -first_person.global_transform.basis.z
+			forward_dir.y = 0.0
+			if forward_dir.length_squared() > 0.001:
+				forward_dir = forward_dir.normalized()
+			else:
+				forward_dir = Vector3.FORWARD
 			var drop_offset: Vector3 = forward_dir * 1.5
 			var drop_position: Vector3 = first_person.global_position + drop_offset
-			drop_position.y = 0.0
+			drop_position.y = first_person.global_position.y
 			item.position = drop_position
 			parent_node.add_child(item)
 			Global.debug_log("GameWorld: dropped item spawned at %s" % str(drop_position))

@@ -2,7 +2,7 @@
 id: TICKET-0227
 title: "Feature — Atmospheric lighting: reduce harsh shadows via simulated sky diffusion"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: technical-artist
 created_by: producer
@@ -60,3 +60,5 @@ The current biome lighting uses a harsh directional sun with no atmospheric diff
     - `light_angular_distance`: 0.0 → 1.5 degrees — softened shadow penumbras
     - All other sun properties unchanged (energy 1.2, color #ffe0c0, rotation -45/30/0)
   - **Removed hardcoded values** from `game_world.gd`, `test_world.gd`, `debug_launcher.gd` — all three now `preload()` the shared resource
+  - Note: `debug_launcher.gd` was refactored on main (TICKET-0233) and no longer builds a 3D world — only `game_world.gd` and `test_world.gd` needed the lighting change
+- 2026-03-01 [technical-artist] DONE — commit c8c8be2, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/257 (merged)

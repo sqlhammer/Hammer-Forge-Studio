@@ -1003,6 +1003,397 @@ async def test_merged_pr_auto_remediation_on_startup() -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
+# Gate detection unit tests (TICKET-0189)
+# ---------------------------------------------------------------------------
+
+async def test_gate_emitted_when_all_done_and_producer_fails() -> tuple[bool, str]:
+    """All phase tickets DONE on disk + Producer unavailable → conductor emits gate.
+
+    Scenario: a milestone has two tickets in the same phase, both DONE on disk.
+    The conductor's _do_evaluating call (with Producer already failed) should
+    detect completion and write pending_gate.json, transitioning to GATE_BLOCKED.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_gate_emit_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        milestone = "_gtest"
+        phase = "Alpha"
+
+        # Create ticket files — both DONE in the same phase
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        for tid in ("TICKET-8801", "TICKET-8802"):
+            (ticket_dir / f"{tid}.md").write_text(
+                f"---\nid: {tid}\nstatus: DONE\nphase: {phase}\n---\n",
+                encoding="utf-8",
+            )
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state(milestone, phase)
+        # Mark at least one completed wave so _do_evaluating doesn't short-circuit
+        conductor.state["completed_waves"] = [{"wave": 1, "tickets": ["TICKET-8801"]}]
+
+        # Patch out git operations — not relevant for this unit test
+        async def _noop_merge():
+            pass
+        conductor._merge_pending_branches = _noop_merge
+
+        await conductor._do_evaluating()
+
+        status = conductor.state.get("status")
+        gate_path = paths.pending_gate_path
+
+        if status != "GATE_BLOCKED":
+            return False, (
+                f"Gate fallback: expected status=GATE_BLOCKED, got {status!r}"
+            )
+        if not gate_path.exists():
+            return False, "Gate fallback: pending_gate.json was not written"
+
+        gate_data = json.loads(gate_path.read_text(encoding="utf-8"))
+        required = ["milestone", "phase", "next_phase", "summary", "requested_at"]
+        missing = [f for f in required if f not in gate_data]
+        if missing:
+            return False, f"Gate fallback: pending_gate.json missing fields: {missing}"
+        if "Conductor fallback" not in gate_data.get("summary", ""):
+            return False, (
+                f"Gate fallback: unexpected summary: {gate_data.get('summary')!r}"
+            )
+
+        return True, "Gate fallback: pending_gate.json written with correct schema"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_gate_not_double_emitted() -> tuple[bool, str]:
+    """When _gate_emitted_this_wave is True, conductor does not re-emit the gate.
+
+    Scenario: pending_gate.json already exists (Producer or a prior cycle already
+    emitted).  _gate_emitted_this_wave should be set True in _do_planning,
+    preventing _check_fallback_gate from firing again in _do_evaluating.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_gate_no_double_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        milestone = "_gtest2"
+        phase = "Beta"
+
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        for tid in ("TICKET-8803", "TICKET-8804"):
+            (ticket_dir / f"{tid}.md").write_text(
+                f"---\nid: {tid}\nstatus: DONE\nphase: {phase}\n---\n",
+                encoding="utf-8",
+            )
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state(milestone, phase)
+        conductor.state["completed_waves"] = [{"wave": 1, "tickets": ["TICKET-8803"]}]
+
+        # Pre-write pending_gate.json (simulating Producer already emitted)
+        write_json(paths.pending_gate_path, {
+            "milestone": milestone,
+            "phase": phase,
+            "next_phase": "",
+            "summary": "Producer emitted gate",
+            "requested_at": "2026-03-02T00:00:00",
+        })
+
+        # Simulate what _do_planning does: detect existing gate → set flag
+        conductor._gate_emitted_this_wave = paths.pending_gate_path.exists()
+
+        async def _noop_merge():
+            pass
+        conductor._merge_pending_branches = _noop_merge
+
+        # Capture the mtime of pending_gate.json before evaluating
+        mtime_before = paths.pending_gate_path.stat().st_mtime
+
+        await conductor._do_evaluating()
+
+        # File should not have been rewritten (mtime unchanged)
+        mtime_after = paths.pending_gate_path.stat().st_mtime
+        if mtime_before != mtime_after:
+            return False, (
+                "Gate no-double-emit: pending_gate.json was rewritten even though "
+                "_gate_emitted_this_wave was True"
+            )
+
+        # Status should be PLANNING (gate already handled — conductor skips fallback)
+        status = conductor.state.get("status")
+        if status not in ("PLANNING", "GATE_BLOCKED"):
+            return False, f"Gate no-double-emit: unexpected status {status!r}"
+
+        return True, "Gate no-double-emit: pending_gate.json not rewritten when flag set"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
+# Resume dispatch unit tests (TICKET-0185)
+# ---------------------------------------------------------------------------
+
+async def test_checkpoint_context_injected_in_dispatch() -> tuple[bool, str]:
+    """Checkpoint exists for ticket → dispatch prompt includes checkpoint context.
+
+    Scenario: a checkpoint file exists for TICKET-9995 before _run_worker is called.
+    The conductor reads the checkpoint and builds a resume briefing, which is injected
+    into the prompt passed to _run_claude.  The [RESUME ] dispatch log is also emitted.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_resume_dispatch_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = REPO_ROOT
+    c.ORCH_DIR = orch_dir
+
+    try:
+        ticket_id = "TICKET-9995"
+
+        # Create checkpoint file for the ticket
+        checkpoints_dir = orch_dir / "checkpoints"
+        checkpoints_dir.mkdir()
+        checkpoint_path = checkpoints_dir / f"{ticket_id}.checkpoint.json"
+        checkpoint_path.write_text(json.dumps({
+            "ticket": ticket_id,
+            "agent": "gameplay-programmer",
+            "milestone": "_test",
+            "phase": "Alpha",
+            "wave": 2,
+            "suspended_at": "2026-03-02T10:00:00",
+            "reason": "timeout",
+            "progress": {
+                "steps_completed": ["read_ticket", "verified_deps", "marked_in_progress", "committed"],
+                "commit_hash": "deadbeef",
+                "branch": f"orch/gameplay-programmer/{ticket_id}",
+                "uncommitted_changes": False,
+                "pr_url": None,
+                "pr_merged": False,
+                "pr_state": None,
+                "ticket_status_on_disk": "IN_PROGRESS",
+                "files_changed": [],
+                "new_gd_scripts": False,
+            },
+            "notes": "exit_code=-1",
+        }), encoding="utf-8")
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state("_test", "Alpha")
+
+        # Capture the prompt passed to _run_claude
+        captured_prompts: list[str] = []
+        resume_logs: list[str] = []
+
+        async def mock_run_claude(prompt, **kwargs):
+            captured_prompts.append(prompt)
+            return (0, "", "", {})
+
+        conductor._run_claude = mock_run_claude
+
+        # Capture RESUME log events
+        original_log = conductor.logger.log
+        def capturing_log(level, msg):
+            if level == "RESUME":
+                resume_logs.append(msg)
+            original_log(level, msg)
+        conductor.logger.log = capturing_log
+
+        worker = {
+            "agent": "gameplay-programmer",
+            "ticket": ticket_id,
+            "budget_usd": 0.5,
+            "needs_worktree": False,
+            "needs_godot_mcp": False,
+            "worktree_path": None,
+            "branch": None,
+            "prompt_supplement": "",
+            "started_at": "2026-03-02T10:00:00",
+        }
+
+        await conductor._run_worker(worker)
+
+        # Verify the prompt contains resume briefing content
+        if not captured_prompts:
+            return False, "Resume dispatch: _run_claude was not called"
+
+        prompt = captured_prompts[0]
+        if "Resume Context" not in prompt:
+            return False, f"Resume dispatch: prompt missing 'Resume Context' section"
+        if ticket_id not in prompt:
+            return False, f"Resume dispatch: prompt missing ticket ID {ticket_id}"
+        if "deadbeef" not in prompt:
+            return False, f"Resume dispatch: prompt missing commit hash from checkpoint"
+
+        # Verify [RESUME ] dispatch log was emitted
+        dispatch_logs = [m for m in resume_logs if "Dispatching" in m and ticket_id in m]
+        if not dispatch_logs:
+            return False, "Resume dispatch: [RESUME ] dispatch log not emitted"
+
+        # Verify worker was flagged as resumed
+        if not worker.get("_was_resumed"):
+            return False, "Resume dispatch: worker['_was_resumed'] not set"
+
+        return True, "Resume dispatch: checkpoint context injected in prompt, [RESUME ] logged"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_resumed_worker_done_clears_checkpoint() -> tuple[bool, str]:
+    """Resumed worker reports done → checkpoint file deleted, [RESUME ] success logged.
+
+    Scenario: a checkpoint file exists for TICKET-9994 (worker was previously resumed).
+    The worker reports outcome=done and the ticket file is DONE on disk.
+    _do_working should delete the checkpoint and emit [RESUME ] {ticket} resumed successfully.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_resume_done_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        ticket_id = "TICKET-9994"
+        milestone = "_test"
+
+        # Create ticket file with status DONE
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        (ticket_dir / f"{ticket_id}.md").write_text(
+            f"---\nid: {ticket_id}\nstatus: DONE\n---\n", encoding="utf-8"
+        )
+
+        # Create checkpoint file (simulates an existing suspended checkpoint)
+        checkpoints_dir = orch_dir / "checkpoints"
+        checkpoints_dir.mkdir()
+        checkpoint_path = checkpoints_dir / f"{ticket_id}.checkpoint.json"
+        checkpoint_path.write_text(json.dumps({
+            "ticket": ticket_id,
+            "agent": "gameplay-programmer",
+            "milestone": milestone,
+            "phase": "Alpha",
+            "wave": 2,
+            "suspended_at": "2026-03-02T09:00:00",
+            "reason": "usage_limit",
+            "progress": {
+                "steps_completed": ["read_ticket", "verified_deps", "marked_in_progress"],
+                "commit_hash": None,
+                "branch": f"orch/gameplay-programmer/{ticket_id}",
+                "uncommitted_changes": False,
+                "pr_url": None,
+                "pr_merged": False,
+                "pr_state": None,
+                "ticket_status_on_disk": "IN_PROGRESS",
+                "files_changed": [],
+                "new_gd_scripts": False,
+            },
+            "notes": "exit_code=0",
+        }), encoding="utf-8")
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state(milestone, "Alpha")
+
+        # Build a worker pre-flagged as resumed (as _run_worker would set it)
+        worker = {
+            "agent": "gameplay-programmer",
+            "ticket": ticket_id,
+            "budget_usd": 0.5,
+            "needs_worktree": False,
+            "needs_godot_mcp": False,
+            "worktree_path": None,
+            "branch": None,
+            "prompt_supplement": "",
+            "started_at": "2026-03-02T09:30:00",
+            "_was_resumed": True,
+        }
+        conductor.state["active_workers"] = [worker]
+        conductor.state["active_ticket_ids"] = [ticket_id]
+
+        # Capture RESUME log events
+        resume_logs: list[str] = []
+        original_log = conductor.logger.log
+        def capturing_log(level, msg):
+            if level == "RESUME":
+                resume_logs.append(msg)
+            original_log(level, msg)
+        conductor.logger.log = capturing_log
+
+        # Mock _run_worker to return done outcome
+        done_json = json.dumps({
+            "ticket": ticket_id,
+            "outcome": "done",
+            "summary": "Resumed and completed successfully.",
+        })
+        async def mock_run_worker(_worker):
+            return (0, done_json, "", {})
+        conductor._run_worker = mock_run_worker
+
+        await conductor._do_working()
+
+        # Checkpoint file should be deleted
+        if checkpoint_path.exists():
+            return False, "Resume done: checkpoint file not deleted after successful resume"
+
+        # [RESUME ] success log should have been emitted
+        success_logs = [m for m in resume_logs if "resumed successfully" in m and ticket_id in m]
+        if not success_logs:
+            return False, "Resume done: [RESUME ] 'resumed successfully' log not emitted"
+
+        return True, "Resume done: checkpoint cleared, [RESUME ] resumed successfully logged"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
 
@@ -1258,6 +1649,56 @@ def main():
         print(f"  Result: {r3_passed}/{r3_total} PASSED, {r3_total - r3_passed} FAILED")
     print("=" * 60)
 
+    # Run gate detection unit tests (TICKET-0189)
+    async def _run_gate_tests():
+        return [
+            await test_gate_emitted_when_all_done_and_producer_fails(),
+            await test_gate_not_double_emitted(),
+        ]
+
+    gate_checks = asyncio.run(_run_gate_tests())
+
+    print()
+    print("=" * 60)
+    print("  Gate Detection Unit Tests (TICKET-0189)")
+    print("=" * 60)
+    for ok, msg in gate_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    gate_passed = sum(1 for ok, _ in gate_checks if ok)
+    gate_total = len(gate_checks)
+    print()
+    if gate_passed == gate_total:
+        print(f"  Result: {gate_passed}/{gate_total} PASSED")
+    else:
+        print(f"  Result: {gate_passed}/{gate_total} PASSED, {gate_total - gate_passed} FAILED")
+    print("=" * 60)
+
+    # Run resume dispatch unit tests (TICKET-0185)
+    async def _run_resume_tests():
+        return [
+            await test_checkpoint_context_injected_in_dispatch(),
+            await test_resumed_worker_done_clears_checkpoint(),
+        ]
+
+    resume_checks = asyncio.run(_run_resume_tests())
+
+    print()
+    print("=" * 60)
+    print("  Resume Dispatch Unit Tests (TICKET-0185)")
+    print("=" * 60)
+    for ok, msg in resume_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    res_passed = sum(1 for ok, _ in resume_checks if ok)
+    res_total = len(resume_checks)
+    print()
+    if res_passed == res_total:
+        print(f"  Result: {res_passed}/{res_total} PASSED")
+    else:
+        print(f"  Result: {res_passed}/{res_total} PASSED, {res_total - res_passed} FAILED")
+    print("=" * 60)
+
     # Exit non-zero if any test suite failed
     all_passed = (
         harness_exit == 0
@@ -1265,6 +1706,8 @@ def main():
         and susp_passed == susp_total
         and uid_passed == uid_total
         and r3_passed == r3_total
+        and gate_passed == gate_total
+        and res_passed == res_total
     )
     sys.exit(0 if all_passed else 1)
 

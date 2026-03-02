@@ -2,7 +2,7 @@
 id: TICKET-0185
 title: "Resume dispatch with checkpoint context injection"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P1
 owner: tools-devops-engineer
 created_by: producer
@@ -24,32 +24,32 @@ See `docs/engineering/orchestrator-resilience-plan.md` Section 2.3 (R8) and Sect
 ## Acceptance Criteria
 
 ### Worker Dispatch Prompt Changes
-- [ ] Add `{checkpoint_context}` template variable to `orchestrator/prompts/worker_dispatch.md`.
-- [ ] When no checkpoint exists: `{checkpoint_context}` is empty string (no change to existing behavior).
-- [ ] When a checkpoint exists: `{checkpoint_context}` is populated with a structured resume briefing including:
+- [x] Add `{checkpoint_context}` template variable to `orchestrator/prompts/worker_dispatch.md`.
+- [x] When no checkpoint exists: `{checkpoint_context}` is empty string (no change to existing behavior).
+- [x] When a checkpoint exists: `{checkpoint_context}` is populated with a structured resume briefing including:
   - Previous session's commit hash (if any)
   - Branch name and push status
   - PR URL and merge status (if any)
   - Current ticket status on disk
   - List of completed steps from the checkpoint
   - Explicit instructions for remaining steps
-- [ ] The resume briefing must override the IN_PROGRESS pre-claim check (coordinated with TICKET-0182).
+- [x] The resume briefing must override the IN_PROGRESS pre-claim check (coordinated with TICKET-0182).
 
 ### Conductor Dispatch Logic
-- [ ] In `_run_worker` (or its caller), before rendering the dispatch prompt, check for `orchestrator/checkpoints/{ticket_id}.checkpoint.json`.
-- [ ] If checkpoint exists: read it, render `{checkpoint_context}` with the resume briefing, log `[RESUME ] Dispatching {ticket} with checkpoint context`.
-- [ ] After successful completion of a resumed ticket: log `[RESUME ] {ticket} resumed successfully`, delete the checkpoint file.
-- [ ] After failed completion of a resumed ticket: log `[RESUME ] {ticket} resume failed`, update checkpoint with new attempt info.
+- [x] In `_run_worker` (or its caller), before rendering the dispatch prompt, check for `orchestrator/checkpoints/{ticket_id}.checkpoint.json`.
+- [x] If checkpoint exists: read it, render `{checkpoint_context}` with the resume briefing, log `[RESUME ] Dispatching {ticket} with checkpoint context`.
+- [x] After successful completion of a resumed ticket: log `[RESUME ] {ticket} resumed successfully`, delete the checkpoint file.
+- [x] After failed completion of a resumed ticket: log `[RESUME ] {ticket} resume failed`, update checkpoint with new attempt info.
 
 ### Producer Planning Integration
-- [ ] Add `{pending_checkpoints}` template variable to `orchestrator/prompts/plan_wave.md`.
-- [ ] Conductor populates it by scanning `orchestrator/checkpoints/` and listing each checkpoint's ticket ID, agent, and progress summary.
-- [ ] Producer uses this information to prioritize resumed tickets and avoid re-dispatching tickets that have unresolved checkpoint states.
+- [x] Add `{pending_checkpoints}` template variable to `orchestrator/prompts/plan_wave.md`.
+- [x] Conductor populates it by scanning `orchestrator/checkpoints/` and listing each checkpoint's ticket ID, agent, and progress summary.
+- [x] Producer uses this information to prioritize resumed tickets and avoid re-dispatching tickets that have unresolved checkpoint states.
 
 ### Testing
-- [ ] All existing conductor tests pass.
-- [ ] Add test case: checkpoint exists for ticket → dispatch prompt includes checkpoint context.
-- [ ] Add test case: resumed worker reports done → checkpoint file is deleted, `[RESUME ]` logged.
+- [x] All existing conductor tests pass.
+- [x] Add test case: checkpoint exists for ticket → dispatch prompt includes checkpoint context.
+- [x] Add test case: resumed worker reports done → checkpoint file is deleted, `[RESUME ]` logged.
 
 ## Implementation Notes
 
@@ -80,3 +80,5 @@ See `docs/engineering/orchestrator-resilience-plan.md` Section 2.3 (R8) and Sect
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — resume dispatch with checkpoint context
+- 2026-03-02 [tools-devops-engineer] Starting work — dependencies TICKET-0182 and TICKET-0183 both DONE
+- 2026-03-02 [tools-devops-engineer] DONE — commit 8dc0ce2, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/283 merged. Implemented _build_resume_briefing, checkpoint context injection in _run_worker, [RESUME] logging for success/failure paths, _get_pending_checkpoints_summary, {pending_checkpoints} in plan_wave.md. Added 2 unit tests. All test suites pass (13+2+2+3+2+2=24 total).

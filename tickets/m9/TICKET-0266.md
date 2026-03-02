@@ -2,7 +2,7 @@
 id: TICKET-0266
 title: "DESIGN: Gamepad controls for Drop and Destroy inventory actions — propose options for Studio Head review"
 type: TASK
-status: TODO
+status: DONE
 priority: P2
 owner: ui-ux-designer
 created_by: producer
@@ -94,3 +94,5 @@ The Studio Head will select an option; the Producer will then open an implementa
 ## Activity Log
 
 - 2026-03-02 [producer] Filed — UAT rejection. Inventory controls descriptor only shows keyboard/mouse bindings; no gamepad equivalent for Drop or Destroy exists. Designer to propose options before implementation.
+- 2026-03-02 [ui-ux-designer] Starting work. Evaluating options A, B, C plus an additional Option D. Will produce proposal at docs/studio/design-proposals/gamepad-inventory-actions.md.
+- 2026-03-02 [ui-ux-designer] Proposal complete. Recommendation: **Option B — Context Popup on Y Button** (modified: single popup, hold-A-within-popup for Destroy rather than double dialog). Rationale: best extensibility for future item actions, single face-button commitment (Y only), familiar console pattern consistent with Outer Wilds/Hades references, strong accident protection without friction overhead of a second dialog. Proposal committed to docs/studio/design-proposals/gamepad-inventory-actions.md. Awaiting Studio Head decision; Producer to route for review.

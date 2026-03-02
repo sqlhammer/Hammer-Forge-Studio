@@ -443,6 +443,168 @@ body {
   margin-right: 0.25rem;
 }
 
+/* ── Milestone Detail View — TICKET-0194 ─────────────────────────────────── */
+
+.detail-summary-card {
+  margin-bottom: 1.25rem;
+}
+
+.detail-summary-header h3 {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+}
+
+.detail-summary-counts {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.summary-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+
+.summary-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+
+.summary-stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 0.25rem;
+}
+
+/* Phase groups using <details> */
+.phase-group {
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  overflow: hidden;
+}
+
+.phase-group > summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  list-style: none;
+}
+
+.phase-group > summary::-webkit-details-marker {
+  display: none;
+}
+
+.phase-group > summary::before {
+  content: "\25B6";
+  display: inline-block;
+  font-size: 0.65rem;
+  transition: transform 0.15s ease;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.phase-group[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.phase-group > summary:hover {
+  background: rgba(74, 158, 255, 0.05);
+}
+
+.phase-group:not([open]) > summary {
+  border-bottom: none;
+}
+
+.phase-group-name {
+  flex: 0 0 auto;
+}
+
+.phase-group-stats {
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+}
+
+.phase-group-bar {
+  flex: 1;
+  min-width: 80px;
+  max-width: 200px;
+}
+
+.phase-group-bar .progress-bar {
+  margin: 0;
+}
+
+.phase-group-bar .progress-label {
+  display: none;
+}
+
+.phase-group-body {
+  padding: 0;
+}
+
+.phase-group-body .data-table {
+  margin-top: 0;
+}
+
+/* Ticket title truncation */
+.title-truncate {
+  display: inline-block;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.ticket-title {
+  cursor: default;
+}
+
+/* Dependency links */
+.dep-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.dep-link:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+/* Highlighted ticket row (when scrolled to via dependency link) */
+.ticket-row-highlight td {
+  background: rgba(74, 158, 255, 0.15) !important;
+  transition: background 0.3s ease;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* Ticket detail table — ensure full width in phase groups */
+.ticket-detail-table {
+  width: 100%;
+}
+
 /* ── No Data State ────────────────────────────────────────────────────────── */
 
 .no-data {

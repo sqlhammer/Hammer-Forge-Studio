@@ -333,7 +333,83 @@ function renderSidebarMilestones() {
   });
 }
 
-/* ── Render: Milestone Detail ─────────────────────────────────────────────── */
+/* ── Render: Milestone Detail — TICKET-0194 ──────────────────────────────── */
+
+/**
+ * Look up the milestone ID for a given ticket ID by scanning all tickets.
+ * Returns the milestone string or null if not found.
+ */
+function findTicketMilestone(ticketId) {
+  var tickets = DashboardData.tickets;
+  if (!tickets) return null;
+  var t = tickets.find(function (tk) { return tk.id === ticketId; });
+  return t ? t.milestone : null;
+}
+
+/**
+ * Build a dependency cell value. Shows each dependency ticket ID; if the
+ * dependency belongs to a different milestone, prefixes with "MS: ".
+ * Each ID is a clickable link that scrolls to / highlights the target row.
+ */
+function renderDependencyCell(depends, currentMilestone) {
+  if (!depends || depends.length === 0) return '<span class="text-muted">—</span>';
+
+  var parts = [];
+  depends.forEach(function (depId) {
+    var depMs = findTicketMilestone(depId);
+    var label = depId;
+    if (depMs && depMs !== currentMilestone) {
+      label = depMs + ": " + depId;
+    }
+    parts.push(
+      '<a href="#" class="dep-link" data-dep-ticket="' + escapeHtml(depId) + '">' +
+      escapeHtml(label) + "</a>"
+    );
+  });
+  return parts.join(", ");
+}
+
+/**
+ * Sort tickets by ID string (natural sort on the numeric suffix).
+ */
+function sortTicketsById(tickets) {
+  return tickets.slice().sort(function (a, b) {
+    var numA = parseInt(a.id.replace(/\D+/g, ""), 10) || 0;
+    var numB = parseInt(b.id.replace(/\D+/g, ""), 10) || 0;
+    return numA - numB;
+  });
+}
+
+/**
+ * Build the ticket table rows for a set of tickets.
+ */
+function buildTicketRows(tickets, milestoneId) {
+  var html = "";
+  tickets.forEach(function (t) {
+    html +=
+      '<tr id="ticket-row-' + escapeHtml(t.id) + '" class="ticket-row">' +
+      '<td class="ticket-id">' + escapeHtml(t.id) + "</td>" +
+      '<td class="ticket-title" title="' + escapeHtml(t.title) + '">' +
+      '<span class="title-truncate">' + escapeHtml(t.title) + "</span></td>" +
+      "<td>" + statusBadge(t.status) + "</td>" +
+      "<td>" + escapeHtml(t.owner) + "</td>" +
+      "<td>" + escapeHtml(t.phase || "—") + "</td>" +
+      "<td>" + renderDependencyCell(t.depends_on, milestoneId) + "</td>" +
+      "</tr>";
+  });
+  return html;
+}
+
+/**
+ * Build the standard ticket table header row.
+ */
+function ticketTableHeader() {
+  return (
+    '<table class="data-table ticket-detail-table"><thead><tr>' +
+    "<th>Ticket ID</th><th>Title</th><th>Status</th><th>Owner</th><th>Phase</th><th>Dependencies</th>" +
+    "</tr></thead><tbody>"
+  );
+}
 
 function renderMilestoneDetail(msId) {
   var container = document.getElementById("milestone-detail");
@@ -355,58 +431,148 @@ function renderMilestoneDetail(msId) {
   var msTickets = tickets.filter(function (t) { return t.milestone === msId; });
   var msPhases = phases ? phases.filter(function (p) { return p.milestone === msId; }) : [];
 
+  // Compute per-status counts from actual ticket data
+  var countDone = msTickets.filter(function (t) { return t.status === "DONE"; }).length;
+  var countInProgress = msTickets.filter(function (t) { return t.status === "IN_PROGRESS"; }).length;
+  var countOpen = msTickets.length - countDone - countInProgress;
+  var pct = msTickets.length > 0 ? Math.round((countDone / msTickets.length) * 100) : 0;
+
+  /* ── Summary Header ──────────────────────────────────────────────────── */
   var html =
-    '<div class="card" style="margin-bottom:1.25rem">' +
+    '<div class="card detail-summary-card">' +
+    '<div class="detail-summary-header">' +
     "<h3>" + escapeHtml(ms.id + " — " + ms.name) + " " + statusBadge(ms.status) + "</h3>" +
-    '<div class="card-stat">' +
-    '<span class="card-stat-label">Completion</span>' +
-    '<span class="card-stat-value">' + ms.completion_pct + "%</span>" +
     "</div>" +
-    progressBar(ms.completion_pct) +
-    '<div class="card-stat">' +
-    '<span class="card-stat-label">Target Date</span>' +
-    '<span class="card-stat-value">' + (ms.target_date || "—") + "</span>" +
+    '<div class="detail-summary-counts">' +
+    '<div class="summary-stat">' +
+    '<span class="summary-stat-value">' + msTickets.length + "</span>" +
+    '<span class="summary-stat-label">Total</span></div>' +
+    '<div class="summary-stat">' +
+    '<span class="summary-stat-value" style="color:var(--status-done)">' + countDone + "</span>" +
+    '<span class="summary-stat-label">Done</span></div>' +
+    '<div class="summary-stat">' +
+    '<span class="summary-stat-value" style="color:var(--status-in-progress)">' + countInProgress + "</span>" +
+    '<span class="summary-stat-label">In Progress</span></div>' +
+    '<div class="summary-stat">' +
+    '<span class="summary-stat-value" style="color:var(--status-open)">' + countOpen + "</span>" +
+    '<span class="summary-stat-label">Open</span></div>' +
     "</div>" +
+    progressBar(pct) +
     "</div>";
 
-  // Phase breakdown
-  if (msPhases.length > 0) {
-    html += '<div class="card" style="margin-bottom:1.25rem"><h3>Phases</h3>';
-    msPhases.forEach(function (phase) {
-      var phasePct = phase.total > 0 ? Math.round((phase.done / phase.total) * 100) : 0;
-      html +=
-        '<div style="margin-bottom:0.75rem">' +
-        '<div class="card-stat">' +
-        '<span class="card-stat-label">' + escapeHtml(phase.phase) + "</span>" +
-        '<span class="card-stat-value">' + phase.done + "/" + phase.total +
-        (phase.gate_passed ? ' <span class="badge badge-done">GATE PASSED</span>' : "") +
-        "</span></div>" +
-        progressBar(phasePct) +
-        "</div>";
-    });
-    html += "</div>";
+  /* ── No Tickets Edge Case ────────────────────────────────────────────── */
+  if (msTickets.length === 0) {
+    html += '<div class="card"><p class="no-data">No tickets found</p></div>';
+    container.innerHTML = html;
+    return;
   }
 
-  // Tickets table
-  html +=
-    '<div class="card"><h3>Tickets</h3>' +
-    '<table class="data-table"><thead><tr>' +
-    "<th>ID</th><th>Title</th><th>Status</th><th>Owner</th><th>Priority</th>" +
-    "</tr></thead><tbody>";
+  /* ── Phase-Grouped Ticket Tables ─────────────────────────────────────── */
+  if (msPhases.length > 0) {
+    msPhases.forEach(function (phase) {
+      var phaseTickets = sortTicketsById(
+        msTickets.filter(function (t) { return t.phase === phase.phase; })
+      );
+      if (phaseTickets.length === 0) return;
 
-  msTickets.forEach(function (t) {
+      var phaseStatus = computePhaseStatus(phase);
+      var phasePct = phase.total > 0 ? Math.round((phase.done / phase.total) * 100) : 0;
+      var isAllDone = phase.done === phase.total && phase.total > 0;
+
+      html +=
+        "<details" + (isAllDone ? "" : " open") + ' class="phase-group">' +
+        "<summary>" +
+        '<span class="phase-group-name">' + escapeHtml(phase.phase) + "</span>" +
+        '<span class="phase-group-stats">' +
+        phase.done + "/" + phase.total +
+        (phase.gate_passed ? ' <span class="badge badge-done">GATE PASSED</span>' : "") +
+        "</span>" +
+        '<span class="phase-group-bar">' + progressBar(phasePct) + "</span>" +
+        "</summary>" +
+        '<div class="phase-group-body">' +
+        ticketTableHeader() +
+        buildTicketRows(phaseTickets, msId) +
+        "</tbody></table></div></details>";
+    });
+
+    // Tickets without a matching phase (orphans)
+    var phasedNames = msPhases.map(function (p) { return p.phase; });
+    var orphans = sortTicketsById(
+      msTickets.filter(function (t) {
+        return !t.phase || phasedNames.indexOf(t.phase) === -1;
+      })
+    );
+    if (orphans.length > 0) {
+      html +=
+        '<details open class="phase-group">' +
+        "<summary>" +
+        '<span class="phase-group-name">Unassigned Phase</span>' +
+        '<span class="phase-group-stats">' + orphans.length + " tickets</span>" +
+        "</summary>" +
+        '<div class="phase-group-body">' +
+        ticketTableHeader() +
+        buildTicketRows(orphans, msId) +
+        "</tbody></table></div></details>";
+    }
+  } else {
+    // No phase data — render a single flat table
+    var sorted = sortTicketsById(msTickets);
     html +=
-      "<tr>" +
-      "<td>" + escapeHtml(t.id) + "</td>" +
-      "<td>" + escapeHtml(t.title) + "</td>" +
-      "<td>" + statusBadge(t.status) + "</td>" +
-      "<td>" + escapeHtml(t.owner) + "</td>" +
-      "<td>" + escapeHtml(t.priority) + "</td>" +
-      "</tr>";
-  });
+      '<div class="card">' +
+      ticketTableHeader() +
+      buildTicketRows(sorted, msId) +
+      "</tbody></table></div>";
+  }
 
-  html += "</tbody></table></div>";
   container.innerHTML = html;
+
+  /* ── Bind dependency link click handlers ──────────────────────────────── */
+  container.querySelectorAll(".dep-link").forEach(function (link) {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      var depId = this.getAttribute("data-dep-ticket");
+      var targetRow = document.getElementById("ticket-row-" + depId);
+
+      // Remove any previous highlight
+      container.querySelectorAll(".ticket-row-highlight").forEach(function (el) {
+        el.classList.remove("ticket-row-highlight");
+      });
+
+      if (targetRow) {
+        // Ticket is in the current milestone view — scroll and highlight
+        // Expand parent <details> if collapsed
+        var parentDetails = targetRow.closest("details");
+        if (parentDetails && !parentDetails.open) {
+          parentDetails.open = true;
+        }
+        targetRow.scrollIntoView({ behavior: "smooth", block: "center" });
+        targetRow.classList.add("ticket-row-highlight");
+        setTimeout(function () {
+          targetRow.classList.remove("ticket-row-highlight");
+        }, 2000);
+      } else {
+        // Ticket is in a different milestone — navigate there
+        var depMs = findTicketMilestone(depId);
+        if (depMs) {
+          navigateTo("milestones", depMs);
+          renderMilestoneDetail(depMs);
+          // After re-render, try to scroll to the ticket
+          setTimeout(function () {
+            var row = document.getElementById("ticket-row-" + depId);
+            if (row) {
+              var pd = row.closest("details");
+              if (pd && !pd.open) pd.open = true;
+              row.scrollIntoView({ behavior: "smooth", block: "center" });
+              row.classList.add("ticket-row-highlight");
+              setTimeout(function () {
+                row.classList.remove("ticket-row-highlight");
+              }, 2000);
+            }
+          }, 100);
+        }
+      }
+    });
+  });
 }
 
 /* ── Render: Diagrams ─────────────────────────────────────────────────────── */

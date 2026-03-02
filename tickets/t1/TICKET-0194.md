@@ -2,7 +2,7 @@
 id: TICKET-0194
 title: "Ticket detail views — per-milestone tables with status, owner, dependencies"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -56,3 +56,4 @@ Build per-milestone detail views that display all tickets in a structured table 
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — per-milestone ticket detail views
+- 2026-03-01 [systems-programmer] Starting work — implementing per-milestone ticket detail views with phase grouping, status badges, and dependency links

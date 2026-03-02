@@ -2,7 +2,7 @@
 id: TICKET-0267
 title: "BUG: HUD controls indicator shows keyboard keys when gamepad is the active controller"
 type: BUG
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -75,3 +75,4 @@ A helper function `get_action_label(action_name: String, device: String) -> Stri
 ## Activity Log
 
 - 2026-03-02 [producer] Filed — UAT rejection. Studio Head reported HUD bottom-right controls indicator always shows keyboard keys (I, Q, Space, F) even when gamepad is the active controller. Labels must be device-aware.
+- 2026-03-02 [gameplay-programmer] Starting work — implementing device-aware persistent control labels in InteractionPromptHUD.

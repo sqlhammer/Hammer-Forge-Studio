@@ -2,7 +2,7 @@
 id: TICKET-0268
 title: "FEATURE: Implement InventoryActionPopup scene for gamepad item actions"
 type: FEATURE
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -76,3 +76,4 @@ signal cancelled()
 ## Activity Log
 
 - 2026-03-02 [producer] Filed — Studio Head approved Option B (Modified) from design proposal TICKET-0266. This ticket implements the popup component; TICKET-0269 handles integration.
+- 2026-03-02 [gameplay-programmer] Starting work — all dependencies satisfied (none), implementing InventoryActionPopup scene and script.

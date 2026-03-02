@@ -2,7 +2,7 @@
 id: TICKET-0230
 title: "Root Game: Create GameWorld scene — world-building extracted from DebugLauncher"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -23,17 +23,17 @@ Extract the world-building logic currently embedded in `DebugLauncher._launch()`
 
 ## Acceptance Criteria
 
-- [ ] New script `game/scripts/gameplay/game_world.gd` with `class_name GameWorld extends Node3D`.
-- [ ] New scene `game/scenes/gameplay/game_world.tscn` using `GameWorld` as its script.
-- [ ] On `_ready()`, `GameWorld` reads `Global.starting_biome` and uses it to instantiate the correct biome (Shattered Flats, Rock Warrens, or Debris Field) — same biome instantiation logic as `DebugLauncher._create_biome_instance()`.
-- [ ] On `_ready()`, `GameWorld` reads `Global.starting_inventory`. If non-empty, it calls `PlayerInventory.add_item()` for each entry (resource_type → quantity). Empty dict = no grants.
-- [ ] Environment lighting setup (sky, sun, ambient) matches what `DebugLauncher._add_environment()` currently produces.
-- [ ] Ship exterior is instantiated at the biome's ship spawn position.
-- [ ] Player is instantiated at the biome's player spawn position.
-- [ ] Scanner, Mining, GameHUD, and ShipBoarding are set up — identical to `DebugLauncher._setup_gameplay()` and `_setup_ship_boarding()`.
-- [ ] Mouse is captured on load (`Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)`).
-- [ ] `Global.log()` calls at key steps (biome loaded, inventory applied, scene ready).
-- [ ] `GameWorld` does **not** depend on `DebugLauncher` at all — no references to the launcher.
+- [x] New script `game/scripts/gameplay/game_world.gd` with `class_name GameWorld extends Node3D`.
+- [x] New scene `game/scenes/gameplay/game_world.tscn` using `GameWorld` as its script.
+- [x] On `_ready()`, `GameWorld` reads `Global.starting_biome` and uses it to instantiate the correct biome (Shattered Flats, Rock Warrens, or Debris Field) — same biome instantiation logic as `DebugLauncher._create_biome_instance()`.
+- [x] On `_ready()`, `GameWorld` reads `Global.starting_inventory`. If non-empty, it calls `PlayerInventory.add_item()` for each entry (resource_type → quantity). Empty dict = no grants.
+- [x] Environment lighting setup (sky, sun, ambient) matches what `DebugLauncher._add_environment()` currently produces.
+- [x] Ship exterior is instantiated at the biome's ship spawn position.
+- [x] Player is instantiated at the biome's player spawn position.
+- [x] Scanner, Mining, GameHUD, and ShipBoarding are set up — identical to `DebugLauncher._setup_gameplay()` and `_setup_ship_boarding()`.
+- [x] Mouse is captured on load (`Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)`).
+- [x] `Global.log()` calls at key steps (biome loaded, inventory applied, scene ready).
+- [x] `GameWorld` does **not** depend on `DebugLauncher` at all — no references to the launcher.
 
 ## Implementation Notes
 
@@ -48,3 +48,4 @@ Extract the world-building logic currently embedded in `DebugLauncher._launch()`
 
 - 2026-02-28 [producer] Created ticket — extract world-building from DebugLauncher into proper GameWorld scene
 - 2026-03-01 [gameplay-programmer] Starting work — extracting world-building logic from DebugLauncher into GameWorld scene
+- 2026-03-01 [gameplay-programmer] DONE — commit 728c857 (merge 6641a75), PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/245 (merged). Created game_world.gd and game_world.tscn. Note: test suite has pre-existing Global.gd parse error (log() method name conflicts with Godot 4.5.1 built-in) from TICKET-0229 — not caused by this ticket's additive-only changes. UID commit pending Godot editor scan.

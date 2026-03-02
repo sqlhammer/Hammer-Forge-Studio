@@ -43,7 +43,7 @@ DEFAULT_PLAN_LIMITS = {
 }
 
 # Opus output token weighting multiplier for capacity calculations
-OPUS_CAPACITY_WEIGHT = 1.7
+OPUS_CAPACITY_WEIGHT = 1.0
 
 # Session gap threshold: records more than this many minutes apart start a new session
 SESSION_GAP_MINUTES = 30

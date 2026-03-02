@@ -103,6 +103,8 @@ func _update_movement(delta: float) -> void:
 	# Get analog input from InputManager (works for both keyboard and gamepad)
 	if InputManager.get_current_input_device() == "gamepad":
 		input_vector = InputManager.get_analog_input("left")
+		# Negate Y: hardware stick-up = negative Y, but forward movement expects positive Y
+		input_vector.y = -input_vector.y
 	else:
 		# Keyboard input via actions
 		input_vector.x = InputManager.get_action_strength("move_right") - InputManager.get_action_strength("move_left")

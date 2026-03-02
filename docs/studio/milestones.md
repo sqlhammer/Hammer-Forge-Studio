@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-03-01 (T1 kicked off — Active)
+**Last Updated:** 2026-03-01 (T1 closed — Complete)
 
 > Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
@@ -49,7 +49,7 @@
 
 | # | Milestone | Target Date | Status | Total | Open | Done | QA Sign-off |
 |---|-----------|-------------|--------|-------|------|------|-------------|
-| T1 | Project Reporting Dashboard — GitHub Pages status site, auto-built on push | — | Active | 10 | 10 | 0 | — |
+| T1 | Project Reporting Dashboard — GitHub Pages status site, auto-built on push | — | Complete | 10 | 0 | 10 | 2026-03-01 |
 | T2 | Usage & Cost Attribution — Orchestrator usage tracking, JSONL ledger, reporting | — | Complete | 8 | 0 | 8 | 2026-03-01 |
 | T3 | Parallel Godot MCP — Per-agent headless Godot instances, remove file-based lock | — | Planning | — | — | — | — |
 | T4 | Multi-Milestone Orchestrator — Instance directories, parallel conductor support | — | Complete | 9 | 0 | 9 | 2026-03-01 |
@@ -669,6 +669,8 @@ TICKET-0188 (documentation) — depends on ALL of the above
 - T1 is the first tooling milestone. T-series milestones run parallel to the M-series game development milestones and use independent ticket numbering within the shared TICKET-NNNN sequence.
 - The dashboard reads project files at build time — it does not require agents to manually update a separate data store. Data freshness matches commit cadence.
 - Solution selected: Static Site + GitHub Actions Build Step (Solution B from the evaluation report). See the T1 evaluation report for alternatives considered.
+
+**Closed:** 2026-03-01 — Studio Head sign-off by Derik Hammer
 
 ---
 

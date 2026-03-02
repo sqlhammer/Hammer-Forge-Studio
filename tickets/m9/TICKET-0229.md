@@ -2,7 +2,7 @@
 id: TICKET-0229
 title: "Root Game: Add starting_biome and starting_inventory params to Global"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -26,11 +26,11 @@ These properties are intentionally simple value holders with no logic. They are 
 
 ## Acceptance Criteria
 
-- [ ] `Global` has a `starting_biome: String` property initialized to `"shattered_flats"`.
-- [ ] `Global` has a `starting_inventory: Dictionary` property initialized to `{}`.
-- [ ] Both properties are exported or clearly accessible to other scenes and scripts via `Global.starting_biome` / `Global.starting_inventory`.
-- [ ] No existing behavior changes — these are additive properties only.
-- [ ] `Global.log()` call on autoload `_ready()` or similar notes the default values at startup (optional but encouraged for debuggability).
+- [x] `Global` has a `starting_biome: String` property initialized to `"shattered_flats"`.
+- [x] `Global` has a `starting_inventory: Dictionary` property initialized to `{}`.
+- [x] Both properties are exported or clearly accessible to other scenes and scripts via `Global.starting_biome` / `Global.starting_inventory`.
+- [x] No existing behavior changes — these are additive properties only.
+- [x] `Global.log()` call on autoload `_ready()` or similar notes the default values at startup (optional but encouraged for debuggability).
 
 ## Implementation Notes
 
@@ -42,3 +42,4 @@ These properties are intentionally simple value holders with no logic. They are 
 ## Activity Log
 
 - 2026-02-28 [producer] Created ticket — foundation for Root Game phase startup parameter flow
+- 2026-03-01 [systems-programmer] Starting work — adding starting_biome and starting_inventory properties to Global

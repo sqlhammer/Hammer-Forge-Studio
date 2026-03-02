@@ -2,7 +2,7 @@
 id: TICKET-0196
 title: "Architecture and game loop diagrams — curated Mermaid source files"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: producer
 created_by: producer
@@ -22,29 +22,29 @@ Create hand-curated Mermaid diagram source files that visualize the game's archi
 ## Acceptance Criteria
 
 ### Diagram Source Files
-- [ ] Directory at `dashboard/diagrams/` for hand-curated Mermaid `.mmd` files
-- [ ] At minimum 3 diagrams created:
+- [x] Directory at `dashboard/diagrams/` for hand-curated Mermaid `.mmd` files
+- [x] At minimum 3 diagrams created:
 
 ### Diagram 1: Game Core Loop
-- [ ] Visualizes the main gameplay loop: Land → Scan → Mine → Return to Ship → Process → Craft → Upgrade → Travel → (repeat)
-- [ ] Shows branching paths (e.g., mine surface vs. deep nodes, recycle vs. fabricate)
-- [ ] Labels key systems at each step (Scanner, Hand Drill, Recycler, Fabricator, Tech Tree, Navigation Console)
+- [x] Visualizes the main gameplay loop: Land → Scan → Mine → Return to Ship → Process → Craft → Upgrade → Travel → (repeat)
+- [x] Shows branching paths (e.g., mine surface vs. deep nodes, recycle vs. fabricate)
+- [x] Labels key systems at each step (Scanner, Hand Drill, Recycler, Fabricator, Tech Tree, Navigation Console)
 
 ### Diagram 2: System Architecture Overview
-- [ ] Shows the autoload/singleton layer (Global, InputManager, ShipState, Inventory, etc.)
-- [ ] Shows the scene hierarchy (main scene → ship exterior/interior → modules → player)
-- [ ] Shows data flow between systems (e.g., Inventory ↔ Recycler, ShipState ↔ FuelSystem)
+- [x] Shows the autoload/singleton layer (Global, InputManager, ShipState, Inventory, etc.)
+- [x] Shows the scene hierarchy (main scene → ship exterior/interior → modules → player)
+- [x] Shows data flow between systems (e.g., Inventory ↔ Recycler, ShipState ↔ FuelSystem)
 
 ### Diagram 3: Agent Orchestration Flow
-- [ ] Shows the producer → conductor → agent dispatch → ticket lifecycle flow
-- [ ] Includes phase gate checkpoints
-- [ ] Shows agent roles and their primary responsibilities
+- [x] Shows the producer → conductor → agent dispatch → ticket lifecycle flow
+- [x] Includes phase gate checkpoints
+- [x] Shows agent roles and their primary responsibilities
 
 ### Dashboard Integration
-- [ ] Dedicated "Architecture" section/page in the dashboard navigation
-- [ ] All diagrams rendered via Mermaid.js
-- [ ] Each diagram has a title and brief description
-- [ ] Build script copies diagram files from `dashboard/diagrams/` to the dist output
+- [x] Dedicated "Architecture" section/page in the dashboard navigation
+- [x] All diagrams rendered via Mermaid.js
+- [x] Each diagram has a title and brief description
+- [x] Build script copies diagram files from `dashboard/diagrams/` to the dist output
 
 ## Implementation Notes
 
@@ -55,9 +55,15 @@ Create hand-curated Mermaid diagram source files that visualize the game's archi
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+Delivered via PR #244 (commit dcdbfb9). Three hand-curated Mermaid diagram source files created in `dashboard/diagrams/`:
+- `game-core-loop.mmd` — flowchart of the full gameplay loop with branching paths (surface vs. deep mining, recycle vs. fabricate) and labeled key systems
+- `system-architecture.mmd` — graph showing autoload singletons, scene hierarchy, and data flow between game systems
+- `agent-orchestration-flow.mmd` — flowchart of the producer → conductor → worker dispatch pipeline with ticket lifecycle and phase gate checkpoints
+
+Dashboard integration added in `dashboard/src/index.html` (Architecture nav group + section) and `dashboard/src/js/app.js` (`loadArchitectureDiagrams()` function, `ARCHITECTURE_DIAGRAMS` registry, Mermaid initialization). Build script `dashboard/build.py` copies `.mmd` files from `dashboard/diagrams/` to `dashboard/dist/data/architecture/` on each build run.
 
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — hand-curated architecture and game loop diagrams
 - 2026-03-01 [producer] Starting work — creating Mermaid diagram source files and dashboard integration
+- 2026-03-01 [producer] Marking DONE — all acceptance criteria satisfied by commit dcdbfb9 (PR #244). Ticket file updated to reflect completed state.

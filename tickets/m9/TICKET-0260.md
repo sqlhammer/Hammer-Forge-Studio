@@ -2,7 +2,7 @@
 id: TICKET-0260
 title: "Code Quality: Move PlayerFirstPerson move_and_slide() from _process() to _physics_process()"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P3
 owner: gameplay-programmer
 created_by: producer
@@ -36,3 +36,4 @@ tags: [code-quality, m8-cleanup, player, physics, movement, godot-best-practices
 ## Activity Log
 
 - 2026-03-01 [producer] Created — deferred item D-028 from M8 code review (TICKET-0177); scheduled for M9 Code Quality phase
+- 2026-03-01 [gameplay-programmer] Starting work — dependency TICKET-0235 verified DONE

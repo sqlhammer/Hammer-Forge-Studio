@@ -2,12 +2,12 @@
 id: TICKET-0244
 title: "BUG — No gamepad button mapped to interact action; cannot enter ship with controller"
 type: BUG
-status: OPEN
+status: DONE
 priority: P0
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-03-01
-updated_at: 2026-03-01
+updated_at: 2026-03-02
 milestone: "M9"
 phase: "Gamepad Bugs"
 depends_on: [TICKET-0235]
@@ -31,11 +31,11 @@ _add_action_if_missing("interact", [KEY_E])
 
 ## Acceptance Criteria
 
-- [ ] The `interact` action fires when the bottom face button is pressed on a connected gamepad (`JOY_BUTTON_A` — Xbox A / PlayStation Cross).
-- [ ] The player can enter the ship using the gamepad without touching the keyboard.
-- [ ] Keyboard `E` binding is preserved alongside the new gamepad binding.
-- [ ] The same `_add_action_if_missing()` extension (or a new helper) is available for use by other actions that need gamepad bindings in the future.
-- [ ] Existing unit tests pass.
+- [x] The `interact` action fires when the bottom face button is pressed on a connected gamepad (`JOY_BUTTON_A` — Xbox A / PlayStation Cross).
+- [x] The player can enter the ship using the gamepad without touching the keyboard.
+- [x] Keyboard `E` binding is preserved alongside the new gamepad binding.
+- [x] The same `_add_action_if_missing()` extension (or a new helper) is available for use by other actions that need gamepad bindings in the future.
+- [x] Existing unit tests pass.
 
 ## Implementation Notes
 
@@ -83,3 +83,4 @@ Only `interact` is in scope for this ticket. Additional gamepad bindings for oth
 ## Activity Log
 
 - 2026-03-01 [producer] Created ticket — P0: gamepad has no interact binding; blocks TICKET-0243 (prompt label fix depends on a button existing to display)
+- 2026-03-02 [gameplay-programmer] Verified implementation already committed and merged (fc76396, PR #264). _add_action_if_missing() extended with joy_buttons parameter, JOY_BUTTON_A added to interact action. All acceptance criteria met. Marking DONE.

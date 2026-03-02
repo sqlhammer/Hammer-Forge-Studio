@@ -2,7 +2,7 @@
 id: TICKET-0186
 title: "UID commit idempotency — make _handle_uid_commits restartable"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: tools-devops-engineer
 created_by: producer
@@ -56,3 +56,4 @@ See `docs/engineering/orchestrator-resilience-plan.md` Risk R5.
 - 2026-02-27 [producer] Created ticket — UID idempotency and conductor gate fallback
 - 2026-02-27 [producer] Split conductor-level gate detection into TICKET-0189 — this ticket now covers UID idempotency only
 - 2026-03-02 [tools-devops-engineer] Starting work — implementing _uid_commit_pending flag, precondition checks, startup resume, and unit tests
+- 2026-03-02 [tools-devops-engineer] DONE — commit b7c905d, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/280 merged. Added _uid_commit_pending to state, precondition checks to each UID step, startup resume before main loop, and 2 unit tests. All 13+2+2 tests pass.

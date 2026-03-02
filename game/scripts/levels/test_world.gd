@@ -289,6 +289,26 @@ func _setup_hud() -> void:
 	_automation_hub_panel = _hud.get_automation_hub_panel()
 	_navigation_console = _hud.get_navigation_console()
 
+	# Connect inventory drop signal so items spawn in the biome
+	if _inventory_screen:
+		_inventory_screen.item_drop_requested.connect(_on_item_drop_requested)
+
+func _on_item_drop_requested(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Purity, quantity: int) -> void:
+	var parent_node: Node3D = _biome_content if _biome_content else self
+	var item := DroppedItem.new()
+	item.setup(resource_type, purity, quantity)
+	var resource_name: String = ResourceDefs.get_resource_name(resource_type)
+	item.name = "DroppedItem_%s" % resource_name.replace(" ", "")
+	# Place item 1.5m in front of the player at ground level
+	if _first_person:
+		var forward_dir: Vector3 = -_first_person.global_transform.basis.z
+		var drop_offset: Vector3 = forward_dir * 1.5
+		var drop_position: Vector3 = _first_person.global_position + drop_offset
+		drop_position.y = 0.0
+		item.position = drop_position
+	parent_node.add_child(item)
+	Global.log("TestWorld: dropped item spawned — %s x%d" % [resource_name, quantity])
+
 func _setup_ship_interior() -> void:
 	if not _ship_exterior:
 		push_error("TestWorld: _ship_exterior is null — cannot setup ship interior!")

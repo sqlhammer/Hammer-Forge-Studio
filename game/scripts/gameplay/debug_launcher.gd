@@ -395,6 +395,9 @@ func _setup_gameplay(world: Node3D, player: Node3D) -> void:
 	# NavigationSystem.travel_completed fires. Without this, confirming travel does nothing.
 	_setup_travel_sequence(world, player)
 
+	# Item drop — connect inventory screen drop signal to spawn DroppedItem in the biome
+	_setup_item_drop(world, first_person, hud)
+
 
 ## Creates a ShipEnterZone on the ship and a ShipInterior underground so the player
 ## can board the ship in a debug-launched session (mirrors TestWorld._setup_ship_interior).
@@ -469,6 +472,33 @@ func _setup_travel_sequence(world: Node3D, player: Node3D) -> void:
 			Global.log("DebugLauncher: travel sequence completed → '%s'" % destination_id)
 	)
 	Global.log("DebugLauncher: travel sequence manager ready")
+
+
+## Connects the inventory screen's drop signal to spawn a DroppedItem at the player's feet.
+## Dropped items are parented to BiomeContent so they are cleared on biome travel.
+func _setup_item_drop(world: Node3D, first_person: CharacterBody3D, hud: GameHUD) -> void:
+	var inventory_screen: InventoryScreen = hud.get_inventory_screen()
+	if inventory_screen == null:
+		push_warning("DebugLauncher: no inventory screen found — item drop disabled")
+		return
+	inventory_screen.item_drop_requested.connect(
+		func(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Purity, quantity: int) -> void:
+			var biome_container: Node3D = world.get_node_or_null("BiomeContent") as Node3D
+			# Fall back to world root if no biome container exists
+			var parent_node: Node3D = biome_container if biome_container else world
+			var item := DroppedItem.new()
+			item.setup(resource_type, purity, quantity)
+			item.name = "DroppedItem_%s" % ResourceDefs.get_resource_name(resource_type).replace(" ", "")
+			# Place item 1.5m in front of the player at ground level
+			var forward_dir: Vector3 = -first_person.global_transform.basis.z
+			var drop_offset: Vector3 = forward_dir * 1.5
+			var drop_position: Vector3 = first_person.global_position + drop_offset
+			drop_position.y = 0.0
+			item.position = drop_position
+			parent_node.add_child(item)
+			Global.log("DebugLauncher: dropped item spawned at %s" % str(drop_position))
+	)
+	Global.log("DebugLauncher: item drop handler ready")
 
 
 ## Adds a [DEBUG] label overlay visible during begin-wealthy sessions.

@@ -5,13 +5,17 @@ Usage:
     python tools/usage_report.py [options]
 
 Options:
-    --by-agent      Per-agent breakdown (cost, tokens, call count)
-    --by-ticket     Per-ticket breakdown (cost, tokens, duration)
-    --by-phase      Per-phase breakdown within each milestone (cost, tokens, ticket count)
-    --capacity      Capacity utilization gauges (5hr rolling, per-session, weekly)
-    --json          Output entire report as a single JSON object to stdout
-    --no-color      Disable ANSI color output
-    --help          Show this help message
+    --by-agent          Per-agent breakdown (cost, tokens, call count)
+    --by-ticket         Per-ticket breakdown (cost, tokens, duration)
+    --by-phase          Per-phase breakdown within each milestone (cost, tokens, ticket count)
+    --capacity          Capacity utilization gauges (5hr rolling, per-session, weekly)
+    --window-reset STR  Time remaining in the current 5-hour capacity window, e.g.
+                        "Resets in 1 hr 4 min". When provided, the 5-hour window start
+                        is calculated as (now + time_remaining - 5h) rather than
+                        (latest_record_ts - 5h), giving a more accurate capacity reading.
+    --json              Output entire report as a single JSON object to stdout
+    --no-color          Disable ANSI color output
+    --help              Show this help message
 
 Reads orchestrator/usage.jsonl and orchestrator/config.json from the repo root.
 Uses only Python standard library — no external dependencies.
@@ -19,6 +23,7 @@ Uses only Python standard library — no external dependencies.
 
 import argparse
 import json
+import re
 import sys
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
@@ -43,7 +48,7 @@ DEFAULT_PLAN_LIMITS = {
 }
 
 # Opus output token weighting multiplier for capacity calculations
-OPUS_CAPACITY_WEIGHT = 1.7
+OPUS_CAPACITY_WEIGHT = 1.0
 
 # Session gap threshold: records more than this many minutes apart start a new session
 SESSION_GAP_MINUTES = 30
@@ -140,6 +145,33 @@ def parse_ts(ts_str: str | None) -> datetime | None:
             return dt
         except ValueError:
             continue
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Window-reset parsing
+# ---------------------------------------------------------------------------
+
+def parse_window_reset(text: str) -> int | None:
+    """Parse a 'Resets in ...' string and return total minutes remaining.
+
+    Accepted formats (case-insensitive):
+      "Resets in 1 hr 4 min"   → 64
+      "Resets in 2 hr"         → 120
+      "Resets in 45 min"       → 45
+
+    Returns None if the string cannot be parsed.
+    """
+    text = text.strip()
+    m = re.search(r"(\d+)\s*hr\s+(\d+)\s*min", text, re.IGNORECASE)
+    if m:
+        return int(m.group(1)) * 60 + int(m.group(2))
+    m = re.search(r"(\d+)\s*hr", text, re.IGNORECASE)
+    if m:
+        return int(m.group(1)) * 60
+    m = re.search(r"(\d+)\s*min", text, re.IGNORECASE)
+    if m:
+        return int(m.group(1))
     return None
 
 
@@ -330,8 +362,14 @@ def compute_by_phase(records: list[dict]) -> dict:
 # Capacity computations
 # ---------------------------------------------------------------------------
 
-def compute_capacity(records: list[dict], plan_limits: dict) -> dict:
-    """Compute capacity utilization metrics."""
+def compute_capacity(records: list[dict], plan_limits: dict, window_reset_minutes: int | None = None) -> dict:
+    """Compute capacity utilization metrics.
+
+    If *window_reset_minutes* is provided (parsed from --window-reset), the
+    5-hour window start is anchored to the real reset time:
+        window_start = now + window_reset_minutes - 5h
+    Otherwise the window is computed as latest_record_ts - 5h.
+    """
     five_hour_limit = safe_int(plan_limits.get("five_hour_output_token_limit", DEFAULT_PLAN_LIMITS["five_hour_output_token_limit"]))
     weekly_limit = safe_int(plan_limits.get("weekly_output_token_limit", DEFAULT_PLAN_LIMITS["weekly_output_token_limit"]))
 
@@ -354,7 +392,13 @@ def compute_capacity(records: list[dict], plan_limits: dict) -> dict:
     latest_ts = timed_records[-1][0]
 
     # --- Rolling 5-hour window ---
-    cutoff_5h = latest_ts - timedelta(hours=5)
+    if window_reset_minutes is not None:
+        # Anchor to the real reset clock: now + time_remaining - 5h
+        now = datetime.now(timezone.utc)
+        window_reset_ts = now + timedelta(minutes=window_reset_minutes)
+        cutoff_5h = window_reset_ts - timedelta(hours=5)
+    else:
+        cutoff_5h = latest_ts - timedelta(hours=5)
     used_5h = sum(
         weighted_output_tokens(r)
         for dt, r in timed_records
@@ -571,6 +615,12 @@ def main():
     parser.add_argument("--by-ticket", action="store_true", help="Show per-ticket cost/token breakdown")
     parser.add_argument("--by-phase", action="store_true", help="Show per-phase breakdown within each milestone")
     parser.add_argument("--capacity", action="store_true", help="Show capacity utilization gauges")
+    parser.add_argument(
+        "--window-reset",
+        metavar="STR",
+        default=None,
+        help='Time remaining in the current 5-hour window, e.g. "Resets in 1 hr 4 min"',
+    )
     parser.add_argument("--json", action="store_true", dest="json_out", help="Output report as JSON")
     parser.add_argument(
         "--no-color",
@@ -594,6 +644,18 @@ def main():
     # Load plan limits (for capacity)
     plan_limits, _used_defaults = load_plan_limits()
 
+    # Parse optional window-reset string
+    window_reset_minutes: int | None = None
+    if args.window_reset:
+        window_reset_minutes = parse_window_reset(args.window_reset)
+        if window_reset_minutes is None:
+            print(
+                f"WARNING: Could not parse --window-reset value: {args.window_reset!r}\n"
+                "  Expected format: \"Resets in 1 hr 4 min\", \"Resets in 45 min\", etc.\n"
+                "  Falling back to latest-record-based 5-hour window.",
+                file=sys.stderr,
+            )
+
     # Compute all sections
     summary = compute_summary(records)
 
@@ -605,7 +667,7 @@ def main():
     if args.by_phase:
         breakdowns["by_phase"] = compute_by_phase(records)
 
-    capacity = compute_capacity(records, plan_limits) if args.capacity else None
+    capacity = compute_capacity(records, plan_limits, window_reset_minutes) if args.capacity else None
 
     # JSON output path
     if args.json_out:

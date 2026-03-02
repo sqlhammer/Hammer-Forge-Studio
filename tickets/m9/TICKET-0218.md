@@ -2,7 +2,7 @@
 id: TICKET-0218
 title: "Feature — Drop items from inventory onto the ground and pick them back up"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -21,14 +21,14 @@ Players have no way to discard or reposition items carried in their inventory. T
 
 ## Acceptance Criteria
 
-- [ ] Player can drop a selected inventory item from the inventory UI — item is removed from inventory and spawned as a physical object at the player's feet / in front of the player
-- [ ] Dropped items have a visible mesh appropriate to the resource type and show an interaction prompt when the player is close
-- [ ] Player can pick up a dropped item by interacting with it (E or configured interact key) — item is added back to inventory if space allows
-- [ ] If inventory is full when attempting to pick up, the pick-up fails gracefully with an appropriate feedback message
-- [ ] Dropped items persist in the biome until picked up or until the biome is unloaded (travel clears dropped items — no cross-biome persistence required)
-- [ ] Dropped items do not interfere with deposit scanning or mining raycasts
-- [ ] Unit tests cover: drop removes item from inventory, pickup adds item to inventory, full-inventory pick-up rejection, item despawn on biome unload
-- [ ] Full test suite passes with no new failures
+- [x] Player can drop a selected inventory item from the inventory UI — item is removed from inventory and spawned as a physical object at the player's feet / in front of the player
+- [x] Dropped items have a visible mesh appropriate to the resource type and show an interaction prompt when the player is close
+- [x] Player can pick up a dropped item by interacting with it (E or configured interact key) — item is added back to inventory if space allows
+- [x] If inventory is full when attempting to pick up, the pick-up fails gracefully with an appropriate feedback message
+- [x] Dropped items persist in the biome until picked up or until the biome is unloaded (travel clears dropped items — no cross-biome persistence required)
+- [x] Dropped items do not interfere with deposit scanning or mining raycasts
+- [x] Unit tests cover: drop removes item from inventory, pickup adds item to inventory, full-inventory pick-up rejection, item despawn on biome unload
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -40,3 +40,5 @@ Players have no way to discard or reposition items carried in their inventory. T
 ## Activity Log
 
 - 2026-02-28 [producer] Created — deferred from M8; Studio Head requested during M8 playtest
+- 2026-03-01 [gameplay-programmer] Starting work — implementing drop/pickup system
+- 2026-03-01 [gameplay-programmer] DONE — commit a9daa28, PR #234 (https://github.com/sqlhammer/Hammer-Forge-Studio/pull/234) merged. Created DroppedItem (Area3D) with mesh, bobbing animation, proximity pickup via interact key. InventoryScreen emits item_drop_requested signal (G key or right-click). 19 unit tests added. Integrated into debug_launcher.gd and test_world.gd.

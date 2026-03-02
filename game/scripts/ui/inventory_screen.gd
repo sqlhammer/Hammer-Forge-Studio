@@ -1,10 +1,11 @@
 ## Inventory overlay: 15-slot grid with item display, gamepad navigation, item details,
-## and destroy action with confirmation dialog. Owner: gameplay-programmer
+## drop action, and destroy action with confirmation dialog. Owner: gameplay-programmer
 class_name InventoryScreen
 extends CanvasLayer
 
 # ── Signals ──────────────────────────────────────────────
 signal item_destroyed(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Purity, quantity: int)
+signal item_drop_requested(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Purity, quantity: int)
 
 # ── Constants ─────────────────────────────────────────────
 const SLOT_SIZE: float = 80.0
@@ -42,7 +43,7 @@ var _detail_icon: TextureRect = null
 var _detail_name_label: Label = null
 var _detail_stars_container: HBoxContainer = null
 var _detail_quantity_label: Label = null
-var _destroy_hint_label: Label = null
+var _detail_drop_hint: Label = null
 var _dim_rect: ColorRect = null
 var _main_panel: PanelContainer = null
 var _combined_container: HBoxContainer = null
@@ -115,6 +116,10 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_cancel"):
 		close_inventory()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("use_item"):
+		# G key drops the focused slot's item onto the ground
+		_drop_focused_slot()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_accept"):
 		_request_destroy()
@@ -310,13 +315,14 @@ func _build_ui() -> void:
 	_detail_quantity_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	detail_hbox.add_child(_detail_quantity_label)
 
-	# Destroy action hint in the detail area
-	_destroy_hint_label = Label.new()
-	_destroy_hint_label.text = "[Enter] Destroy"
-	_destroy_hint_label.add_theme_font_size_override("font_size", 14)
-	_destroy_hint_label.add_theme_color_override("font_color", COLOR_CORAL)
-	_destroy_hint_label.visible = false
-	detail_hbox.add_child(_destroy_hint_label)
+	# Drop and destroy hints below the detail area
+	_detail_drop_hint = Label.new()
+	_detail_drop_hint.add_theme_font_size_override("font_size", 14)
+	_detail_drop_hint.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
+	_detail_drop_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_detail_drop_hint.text = "[G] Drop  |  [Enter] Destroy  |  [Right-Click] Drop"
+	_detail_drop_hint.visible = false
+	vbox.add_child(_detail_drop_hint)
 
 	# Build destroy confirmation dialog on top of everything
 	_build_destroy_confirm_dialog(dim_layer)
@@ -478,7 +484,8 @@ func _update_detail_area() -> void:
 		_detail_name_label.text = "Empty Slot"
 		_detail_name_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 		_detail_quantity_label.text = ""
-		_destroy_hint_label.visible = false
+		if _detail_drop_hint:
+			_detail_drop_hint.visible = false
 		for i: int in range(5):
 			(_detail_stars_container.get_child(i) as Label).visible = false
 		return
@@ -499,8 +506,9 @@ func _update_detail_area() -> void:
 	_detail_name_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
 	_detail_quantity_label.text = "x %d" % quantity
 
-	# Show the destroy hint when a slot has items
-	_destroy_hint_label.visible = true
+	# Show drop/destroy hints for non-empty slots
+	if _detail_drop_hint:
+		_detail_drop_hint.visible = true
 
 	# Update stars
 	var purity_val: int = purity as int
@@ -548,6 +556,20 @@ func _on_destroy_confirmed() -> void:
 	item_destroyed.emit(resource_type, purity, quantity)
 	Global.log("InventoryScreen: destroyed %d %s from slot %d" % [quantity, ResourceDefs.get_resource_name(resource_type), _focused_slot])
 	_close_destroy_confirm()
+	_update_detail_area()
+
+func _drop_focused_slot() -> void:
+	var slot_data: Dictionary = PlayerInventory.get_slot(_focused_slot)
+	if slot_data.is_empty():
+		return
+	var resource_type: ResourceDefs.ResourceType = slot_data.get("resource_type") as ResourceDefs.ResourceType
+	var purity: ResourceDefs.Purity = slot_data.get("purity") as ResourceDefs.Purity
+	var quantity: int = slot_data.get("quantity", 0) as int
+	PlayerInventory.remove_from_slot(_focused_slot, quantity)
+	var resource_name: String = ResourceDefs.get_resource_name(resource_type)
+	Global.log("InventoryScreen: drop requested — %s x%d" % [resource_name, quantity])
+	item_drop_requested.emit(resource_type, purity, quantity)
+	_refresh_slot(_focused_slot)
 	_update_detail_area()
 
 func _style_button(button: Button, accent_color: Color) -> void:
@@ -600,6 +622,9 @@ func _on_slot_gui_input(event: InputEvent, index: int) -> void:
 		return
 	if mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_LEFT:
 		select_slot(index)
+	elif mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_RIGHT:
+		select_slot(index)
+		_drop_focused_slot()
 
 func _on_slot_changed(slot_index: int) -> void:
 	Global.log("InventoryScreen: slot %d changed" % slot_index)

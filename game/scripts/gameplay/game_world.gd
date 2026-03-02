@@ -33,7 +33,7 @@ func _ready() -> void:
 
 	var biome_id: String = Global.starting_biome
 	NavigationSystem.current_biome = biome_id
-	Global.log("GameWorld: building world with biome '%s'" % biome_id)
+	Global.debug_log("GameWorld: building world with biome '%s'" % biome_id)
 
 	# Apply starting inventory if non-empty
 	var starting_inv: Dictionary = Global.starting_inventory
@@ -53,7 +53,7 @@ func _ready() -> void:
 	# Defer positioning and gameplay setup until all _ready() callbacks have fired
 	_position_entities_and_setup.call_deferred(biome)
 
-	Global.log("GameWorld: scene ready")
+	Global.debug_log("GameWorld: scene ready")
 
 
 # ── Private Methods: World Construction ──────────────────
@@ -65,8 +65,8 @@ func _apply_starting_inventory(inventory: Dictionary) -> void:
 		var quantity: int = inventory[resource_key] as int
 		PlayerInventory.add_item(resource_type, DEFAULT_PURITY, quantity)
 		var resource_name: String = ResourceDefs.get_resource_name(resource_type)
-		Global.log("GameWorld: granted %d %s" % [quantity, resource_name])
-	Global.log("GameWorld: starting inventory applied")
+		Global.debug_log("GameWorld: granted %d %s" % [quantity, resource_name])
+	Global.debug_log("GameWorld: starting inventory applied")
 
 
 ## Adds environment lighting (sky, ambient, directional light) to this world.
@@ -104,7 +104,7 @@ func _build_biome(biome_id: String) -> Node3D:
 	# ShatteredFlatsBiome auto-generates in _ready() once the scene is live.
 	_initialize_biome(biome)
 
-	Global.log("GameWorld: biome '%s' loaded" % biome_id)
+	Global.debug_log("GameWorld: biome '%s' loaded" % biome_id)
 	return biome
 
 
@@ -172,7 +172,7 @@ func _position_entities_and_setup(biome: Node3D) -> void:
 	# Capture mouse for first-person gameplay
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
-	Global.log("GameWorld: entities positioned, gameplay systems active")
+	Global.debug_log("GameWorld: entities positioned, gameplay systems active")
 
 
 ## Retrieves player and ship spawn positions from a biome using duck-typing
@@ -215,7 +215,7 @@ func _setup_gameplay(player: Node3D) -> void:
 	# Apply debug speed multiplier if set in DebugLauncher (debug builds only)
 	if OS.is_debug_build() and Global.debug_speed_multiplier != 1.0:
 		first_person.debug_speed_multiplier = Global.debug_speed_multiplier
-		Global.log("GameWorld: debug_speed_multiplier set to %.1f" % Global.debug_speed_multiplier)
+		Global.debug_log("GameWorld: debug_speed_multiplier set to %.1f" % Global.debug_speed_multiplier)
 
 	# Set player collision layers
 	first_person.collision_layer = PhysicsLayers.PLAYER
@@ -292,7 +292,7 @@ func _setup_ship_boarding(first_person: CharacterBody3D, hud: GameHUD) -> void:
 	add_child(handler)
 	handler.setup(ship_interior, first_person, enter_zone, hud, hud.get_navigation_console())
 
-	Global.log("GameWorld: ship boarding zone and interior ready")
+	Global.debug_log("GameWorld: ship boarding zone and interior ready")
 
 
 ## Creates a TravelSequenceManager so NavigationSystem.travel_completed triggers
@@ -318,9 +318,9 @@ func _setup_travel_sequence(player: Node3D) -> void:
 				ship_interior.set_exterior_position(ship.position + exit_offset)
 				var viewport_camera_pos: Vector3 = ship.position + Vector3(0.0, 8.0, -23.0)
 				ship_interior.setup_viewport_world(get_viewport().world_3d, viewport_camera_pos)
-			Global.log("GameWorld: travel sequence completed → '%s'" % destination_id)
+			Global.debug_log("GameWorld: travel sequence completed → '%s'" % destination_id)
 	)
-	Global.log("GameWorld: travel sequence manager ready")
+	Global.debug_log("GameWorld: travel sequence manager ready")
 
 
 ## Connects the inventory screen's drop signal to spawn a DroppedItem at the player's feet.
@@ -345,9 +345,9 @@ func _setup_item_drop(first_person: CharacterBody3D, hud: GameHUD) -> void:
 			drop_position.y = 0.0
 			item.position = drop_position
 			parent_node.add_child(item)
-			Global.log("GameWorld: dropped item spawned at %s" % str(drop_position))
+			Global.debug_log("GameWorld: dropped item spawned at %s" % str(drop_position))
 	)
-	Global.log("GameWorld: item drop handler ready")
+	Global.debug_log("GameWorld: item drop handler ready")
 
 
 ## Adds a [DEBUG] label overlay visible during sessions with modified starting inventory.

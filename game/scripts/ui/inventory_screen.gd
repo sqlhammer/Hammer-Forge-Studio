@@ -67,7 +67,7 @@ func _ready() -> void:
 	_font = ThemeDB.fallback_font
 	_build_ui()
 	PlayerInventory.slot_changed.connect(_on_slot_changed)
-	Global.log("InventoryScreen: ready")
+	Global.debug_log("InventoryScreen: ready")
 
 func _process(_delta: float) -> void:
 	if _is_open:
@@ -136,7 +136,7 @@ func toggle() -> void:
 
 ## Opens the inventory.
 func open_inventory() -> void:
-	Global.log("InventoryScreen: opened")
+	Global.debug_log("InventoryScreen: opened")
 	_is_open = true
 	visible = true
 	_focused_slot = 0
@@ -162,7 +162,7 @@ func open_inventory() -> void:
 func close_inventory() -> void:
 	if _confirm_visible:
 		_close_destroy_confirm()
-	Global.log("InventoryScreen: closed")
+	Global.debug_log("InventoryScreen: closed")
 	_is_open = false
 	InputManager.set_gameplay_inputs_enabled(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -537,12 +537,12 @@ func _open_destroy_confirm() -> void:
 	_confirm_visible = true
 	# CANCEL focused by default to prevent accidental destruction
 	_cancel_confirm_button.grab_focus()
-	Global.log("InventoryScreen: destroy confirm opened for slot %d" % _focused_slot)
+	Global.debug_log("InventoryScreen: destroy confirm opened for slot %d" % _focused_slot)
 
 func _close_destroy_confirm() -> void:
 	_confirm_overlay.visible = false
 	_confirm_visible = false
-	Global.log("InventoryScreen: destroy confirm cancelled")
+	Global.debug_log("InventoryScreen: destroy confirm cancelled")
 
 func _on_destroy_confirmed() -> void:
 	var slot_data: Dictionary = PlayerInventory.get_slot(_focused_slot)
@@ -554,7 +554,7 @@ func _on_destroy_confirmed() -> void:
 	var quantity: int = slot_data.get("quantity", 0) as int
 	PlayerInventory.remove_from_slot(_focused_slot, quantity)
 	item_destroyed.emit(resource_type, purity, quantity)
-	Global.log("InventoryScreen: destroyed %d %s from slot %d" % [quantity, ResourceDefs.get_resource_name(resource_type), _focused_slot])
+	Global.debug_log("InventoryScreen: destroyed %d %s from slot %d" % [quantity, ResourceDefs.get_resource_name(resource_type), _focused_slot])
 	_close_destroy_confirm()
 	_update_detail_area()
 
@@ -567,7 +567,7 @@ func _drop_focused_slot() -> void:
 	var quantity: int = slot_data.get("quantity", 0) as int
 	PlayerInventory.remove_from_slot(_focused_slot, quantity)
 	var resource_name: String = ResourceDefs.get_resource_name(resource_type)
-	Global.log("InventoryScreen: drop requested — %s x%d" % [resource_name, quantity])
+	Global.debug_log("InventoryScreen: drop requested — %s x%d" % [resource_name, quantity])
 	item_drop_requested.emit(resource_type, purity, quantity)
 	_refresh_slot(_focused_slot)
 	_update_detail_area()
@@ -627,7 +627,7 @@ func _on_slot_gui_input(event: InputEvent, index: int) -> void:
 		_drop_focused_slot()
 
 func _on_slot_changed(slot_index: int) -> void:
-	Global.log("InventoryScreen: slot %d changed" % slot_index)
+	Global.debug_log("InventoryScreen: slot %d changed" % slot_index)
 	if _is_open:
 		_refresh_slot(slot_index)
 		if slot_index == _focused_slot:

@@ -74,7 +74,7 @@ func set_ship_visible(show: bool) -> void:
 	if show == _is_visible:
 		return
 	_is_visible = show
-	Global.log("ShipGlobalsHUD: %s" % ("showing" if show else "hiding"))
+	Global.debug_log("ShipGlobalsHUD: %s" % ("showing" if show else "hiding"))
 	if show:
 		_refresh_all_values()
 		var tween: Tween = create_tween()
@@ -283,9 +283,9 @@ func _on_power_changed(current: float, _maximum: float) -> void:
 	_values[0] = current
 	var is_critical: bool = current <= POWER_CRITICAL
 	if is_critical and not was_critical:
-		Global.log("ShipGlobalsHUD: power entered critical state (%.0f%%)" % current)
+		Global.debug_log("ShipGlobalsHUD: power entered critical state (%.0f%%)" % current)
 	elif not is_critical and was_critical:
-		Global.log("ShipGlobalsHUD: power exited critical state (%.0f%%)" % current)
+		Global.debug_log("ShipGlobalsHUD: power exited critical state (%.0f%%)" % current)
 	if _is_visible:
 		_bars[0].value = current
 		_labels[0].text = "%d%%" % int(current)
@@ -295,9 +295,9 @@ func _on_integrity_changed(current: float, _maximum: float) -> void:
 	_values[1] = current
 	var is_critical: bool = current <= INTEGRITY_CRITICAL
 	if is_critical and not was_critical:
-		Global.log("ShipGlobalsHUD: integrity entered critical state (%.0f%%)" % current)
+		Global.debug_log("ShipGlobalsHUD: integrity entered critical state (%.0f%%)" % current)
 	elif not is_critical and was_critical:
-		Global.log("ShipGlobalsHUD: integrity exited critical state (%.0f%%)" % current)
+		Global.debug_log("ShipGlobalsHUD: integrity exited critical state (%.0f%%)" % current)
 	if _is_visible:
 		_bars[1].value = current
 		_labels[1].text = "%d%%" % int(current)
@@ -307,9 +307,9 @@ func _on_heat_changed(current: float, _maximum: float) -> void:
 	_values[2] = current
 	var is_critical: bool = current >= HEAT_HOT
 	if is_critical and not was_critical:
-		Global.log("ShipGlobalsHUD: heat entered critical state (%.0f%%)" % current)
+		Global.debug_log("ShipGlobalsHUD: heat entered critical state (%.0f%%)" % current)
 	elif not is_critical and was_critical:
-		Global.log("ShipGlobalsHUD: heat exited critical state (%.0f%%)" % current)
+		Global.debug_log("ShipGlobalsHUD: heat exited critical state (%.0f%%)" % current)
 	if _is_visible:
 		_bars[2].value = current
 		_labels[2].text = "%d%%" % int(current)
@@ -319,9 +319,9 @@ func _on_oxygen_changed(current: float, _maximum: float) -> void:
 	_values[3] = current
 	var is_critical: bool = current <= OXYGEN_CRITICAL
 	if is_critical and not was_critical:
-		Global.log("ShipGlobalsHUD: oxygen entered critical state (%.0f%%)" % current)
+		Global.debug_log("ShipGlobalsHUD: oxygen entered critical state (%.0f%%)" % current)
 	elif not is_critical and was_critical:
-		Global.log("ShipGlobalsHUD: oxygen exited critical state (%.0f%%)" % current)
+		Global.debug_log("ShipGlobalsHUD: oxygen exited critical state (%.0f%%)" % current)
 	if _is_visible:
 		_bars[3].value = current
 		_labels[3].text = "%d%%" % int(current)

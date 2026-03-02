@@ -89,7 +89,7 @@ func try_jump() -> bool:
 	_velocity.y = get_jump_velocity()
 	player_jumped.emit()
 	var log_message: String = "PlayerFirstPerson: jumped — velocity=%.2f" % get_jump_velocity()
-	Global.log(log_message)
+	Global.debug_log(log_message)
 	return true
 
 # ── Private Methods ───────────────────────────────────────

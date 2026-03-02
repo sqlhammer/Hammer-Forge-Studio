@@ -116,39 +116,39 @@ func _run_suite_from_path(script_path: String) -> void:
 
 
 func _print_header() -> void:
-	Global.log("==============================================")
-	Global.log("  Hammer Forge Tests")
-	Global.log("==============================================")
+	Global.debug_log("==============================================")
+	Global.debug_log("  Hammer Forge Tests")
+	Global.debug_log("==============================================")
 
 
 func _print_suite_header(suite_name: String, passed: int, failed: int, skipped: int) -> void:
 	var total: int = passed + failed + skipped
-	Global.log("--- Suite: %s --- %d/%d passed" % [suite_name, passed, total])
+	Global.debug_log("--- Suite: %s --- %d/%d passed" % [suite_name, passed, total])
 
 
 func _print_test_result(result: TestResult) -> void:
 	match result.status:
 		TestResult.Status.PASSED:
-			Global.log("  PASS: %s (%.1fms)" % [
+			Global.debug_log("  PASS: %s (%.1fms)" % [
 				result.test_name, result.execution_time_milliseconds])
 		TestResult.Status.FAILED:
-			Global.log("  FAIL: %s -- %s" % [result.test_name, result.message])
+			Global.debug_log("  FAIL: %s -- %s" % [result.test_name, result.message])
 			if result.stack_info != "":
-				Global.log("        at %s" % result.stack_info)
+				Global.debug_log("        at %s" % result.stack_info)
 		TestResult.Status.SKIPPED:
-			Global.log("  SKIP: %s -- %s" % [result.test_name, result.message])
+			Global.debug_log("  SKIP: %s -- %s" % [result.test_name, result.message])
 
 
 func _print_summary() -> void:
 	var total: int = _total_passed + _total_failed + _total_skipped
-	Global.log("==============================================")
-	Global.log("  Results: %d passed, %d failed, %d skipped (of %d)" % [
+	Global.debug_log("==============================================")
+	Global.debug_log("  Results: %d passed, %d failed, %d skipped (of %d)" % [
 		_total_passed, _total_failed, _total_skipped, total])
 	if _total_failed > 0:
-		Global.log("  STATUS: FAILED")
+		Global.debug_log("  STATUS: FAILED")
 	else:
-		Global.log("  STATUS: ALL PASSED")
-	Global.log("==============================================")
+		Global.debug_log("  STATUS: ALL PASSED")
+	Global.debug_log("==============================================")
 
 
 func _write_json_report() -> void:
@@ -185,7 +185,7 @@ func _write_json_report() -> void:
 	if file != null:
 		file.store_string(json_string)
 		file.close()
-		Global.log("Report written to: %s" % report_path)
+		Global.debug_log("Report written to: %s" % report_path)
 	else:
 		push_error("TestRunner: Failed to write report to '%s'" % report_path)
 

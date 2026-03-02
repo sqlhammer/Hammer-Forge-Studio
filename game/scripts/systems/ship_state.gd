@@ -28,7 +28,7 @@ var _total_module_draw: float = 0.0
 
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
-	Global.log("ShipState: initialized (Power=%.1f, Integrity=%.1f, Heat=%.1f, Oxygen=%.1f)" % [_power, _integrity, _heat, _oxygen])
+	Global.debug_log("ShipState: initialized (Power=%.1f, Integrity=%.1f, Heat=%.1f, Oxygen=%.1f)" % [_power, _integrity, _heat, _oxygen])
 
 # ── Public Methods ────────────────────────────────────────
 
@@ -99,16 +99,16 @@ func would_exceed_capacity(additional_draw: float) -> bool:
 ## Registers a module's power draw. Returns true if successful, false if it would overload.
 func register_module_draw(draw: float) -> bool:
 	if would_exceed_capacity(draw):
-		Global.log("ShipState: power overload — cannot register draw %.1f (current=%.1f, baseline=%.1f)" % [draw, _total_module_draw, BASELINE_POWER])
+		Global.debug_log("ShipState: power overload — cannot register draw %.1f (current=%.1f, baseline=%.1f)" % [draw, _total_module_draw, BASELINE_POWER])
 		return false
 	_total_module_draw += draw
-	Global.log("ShipState: registered module draw %.1f (total=%.1f/%.1f)" % [draw, _total_module_draw, BASELINE_POWER])
+	Global.debug_log("ShipState: registered module draw %.1f (total=%.1f/%.1f)" % [draw, _total_module_draw, BASELINE_POWER])
 	return true
 
 ## Deregisters a module's power draw.
 func deregister_module_draw(draw: float) -> void:
 	_total_module_draw = maxf(_total_module_draw - draw, 0.0)
-	Global.log("ShipState: deregistered module draw %.1f (total=%.1f/%.1f)" % [draw, _total_module_draw, BASELINE_POWER])
+	Global.debug_log("ShipState: deregistered module draw %.1f (total=%.1f/%.1f)" % [draw, _total_module_draw, BASELINE_POWER])
 
 ## Adjusts power by a delta amount (positive or negative), clamped.
 func adjust_power(delta: float) -> void:
@@ -133,4 +133,4 @@ func reset() -> void:
 	set_heat(50.0)
 	set_oxygen(MAX_VALUE)
 	_total_module_draw = 0.0
-	Global.log("ShipState: reset to defaults")
+	Global.debug_log("ShipState: reset to defaults")

@@ -21,7 +21,7 @@ func _ready() -> void:
 	_build_ui()
 	_populate_biome_selector()
 	_apply_biome_selection()
-	Global.log("DebugLauncher: ready")
+	Global.debug_log("DebugLauncher: ready")
 
 
 # ── Public Methods ────────────────────────────────────────
@@ -143,7 +143,7 @@ func _apply_biome_selection() -> void:
 		return
 	var biome_id: String = _biome_selector.get_item_metadata(selected_idx) as String
 	Global.starting_biome = biome_id
-	Global.log("DebugLauncher: starting_biome set to '%s'" % biome_id)
+	Global.debug_log("DebugLauncher: starting_biome set to '%s'" % biome_id)
 
 
 ## Updates Global.starting_inventory when the begin-wealthy checkbox is toggled.
@@ -156,23 +156,23 @@ func _on_begin_wealthy_toggled(toggled_on: bool) -> void:
 				continue
 			inventory[resource_type] = ResourceDefs.get_stack_size(resource_type)
 		Global.starting_inventory = inventory
-		Global.log("DebugLauncher: begin-wealthy ON — starting_inventory populated")
+		Global.debug_log("DebugLauncher: begin-wealthy ON — starting_inventory populated")
 	else:
 		Global.starting_inventory = {}
-		Global.log("DebugLauncher: begin-wealthy OFF — starting_inventory cleared")
+		Global.debug_log("DebugLauncher: begin-wealthy OFF — starting_inventory cleared")
 
 
 ## Updates Global.debug_speed_multiplier when the fast-move checkbox is toggled.
 func _on_fast_move_toggled(toggled_on: bool) -> void:
 	if toggled_on:
 		Global.debug_speed_multiplier = 3.0
-		Global.log("DebugLauncher: fast-move ON — debug_speed_multiplier set to 3.0")
+		Global.debug_log("DebugLauncher: fast-move ON — debug_speed_multiplier set to 3.0")
 	else:
 		Global.debug_speed_multiplier = 1.0
-		Global.log("DebugLauncher: fast-move OFF — debug_speed_multiplier reset to 1.0")
+		Global.debug_log("DebugLauncher: fast-move OFF — debug_speed_multiplier reset to 1.0")
 
 
 ## Transitions to the main menu scene. Game root handles scene lifecycle.
 func _on_launch_pressed() -> void:
-	Global.log("DebugLauncher: launching — transitioning to MainMenu")
+	Global.debug_log("DebugLauncher: launching — transitioning to MainMenu")
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")

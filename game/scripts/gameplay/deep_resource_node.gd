@@ -24,5 +24,5 @@ func _ready() -> void:
 	if yield_rate >= 1.0:
 		yield_rate = DEEP_YIELD_RATE
 	super._ready()
-	Global.log("DeepResourceNode: ready at %s (resource=%s, yield_rate=%f)" % [
+	Global.debug_log("DeepResourceNode: ready at %s (resource=%s, yield_rate=%f)" % [
 		str(global_position), ResourceDefs.get_resource_name(resource_type), yield_rate])

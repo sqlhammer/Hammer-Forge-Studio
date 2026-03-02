@@ -79,7 +79,7 @@ func open(zone_index: int) -> void:
 	InputManager.set_gameplay_inputs_enabled(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	_animate_open()
-	Global.log("ModulePlacementUI: opened for zone %d" % zone_index)
+	Global.debug_log("ModulePlacementUI: opened for zone %d" % zone_index)
 
 ## Closes the placement UI.
 func close() -> void:
@@ -90,7 +90,7 @@ func close() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_animate_close()
 	closed.emit()
-	Global.log("ModulePlacementUI: closed")
+	Global.debug_log("ModulePlacementUI: closed")
 
 ## Returns true if the UI is open.
 func is_open() -> bool:
@@ -386,7 +386,7 @@ func _attempt_install() -> void:
 	var module_id: String = _module_ids[_selected_index]
 	var success: bool = ModuleManager.install_module(module_id)
 	if success:
-		Global.log("ModulePlacementUI: installed '%s' in zone %d" % [module_id, _zone_index])
+		Global.debug_log("ModulePlacementUI: installed '%s' in zone %d" % [module_id, _zone_index])
 		_is_open = false
 		InputManager.set_gameplay_inputs_enabled(true)
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -423,7 +423,7 @@ func _on_install_failed(module_id: String, reason: String) -> void:
 		_:
 			_feedback_label.text = "Cannot install — check resources and power"
 	_feedback_label.add_theme_color_override("font_color", COLOR_CORAL)
-	Global.log("ModulePlacementUI: install failed for '%s' (%s)" % [module_id, reason])
+	Global.debug_log("ModulePlacementUI: install failed for '%s' (%s)" % [module_id, reason])
 
 func _style_close_button(button: Button) -> void:
 	var normal_style := StyleBoxFlat.new()

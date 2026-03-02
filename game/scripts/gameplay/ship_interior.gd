@@ -71,7 +71,7 @@ func _ready() -> void:
 	_build_fade_overlay()
 	_build_terminal()
 	_build_cockpit_console_area()
-	Global.log("ShipInterior: initialized — 24m×12m multi-room layout")
+	Global.debug_log("ShipInterior: initialized — 24m×12m multi-room layout")
 
 # ── Public Methods ────────────────────────────────────────
 
@@ -88,26 +88,26 @@ func enter_ship(player: CharacterBody3D) -> void:
 	if _is_player_inside:
 		return
 	_player_ref = player
-	Global.log("ShipInterior: player entering ship")
+	Global.debug_log("ShipInterior: player entering ship")
 	await _fade_out()
 	player.global_position = _enter_marker.global_position
 	_is_player_inside = true
 	player_entered_ship.emit()
 	await _fade_in()
-	Global.log("ShipInterior: player entered ship")
+	Global.debug_log("ShipInterior: player entered ship")
 
 ## Transitions the player out of the ship with a fade.
 func exit_ship() -> void:
 	if not _is_player_inside or not _player_ref:
 		return
-	Global.log("ShipInterior: player exiting ship")
+	Global.debug_log("ShipInterior: player exiting ship")
 	await _fade_out()
 	_player_ref.velocity = Vector3.ZERO
 	_player_ref.global_position = _exterior_marker.global_position
 	_is_player_inside = false
 	player_exited_ship.emit()
 	await _fade_in()
-	Global.log("ShipInterior: player exited ship")
+	Global.debug_log("ShipInterior: player exited ship")
 
 ## Returns the exterior marker position for the test world to set.
 func get_exterior_marker() -> Marker3D:
@@ -137,7 +137,7 @@ func place_module_in_zone(zone_index: int, module_mesh: Node3D) -> void:
 	add_child(module_mesh)
 	_zone_module_nodes[zone_index] = module_mesh
 	_update_zone_visual(zone_index)
-	Global.log("ShipInterior: module placed in zone %d" % zone_index)
+	Global.debug_log("ShipInterior: module placed in zone %d" % zone_index)
 
 ## Removes a module from the given zone.
 func remove_module_from_zone(zone_index: int) -> void:
@@ -148,7 +148,7 @@ func remove_module_from_zone(zone_index: int) -> void:
 		_zone_module_nodes[zone_index] = null
 	_zone_occupied[zone_index] = false
 	_update_zone_visual(zone_index)
-	Global.log("ShipInterior: module removed from zone %d" % zone_index)
+	Global.debug_log("ShipInterior: module removed from zone %d" % zone_index)
 
 ## Returns the module node at a given zone, or null.
 func get_module_at_zone(zone_index: int) -> Node3D:
@@ -201,7 +201,7 @@ func setup_viewport_world(world: World3D, camera_position: Vector3) -> void:
 		_sub_viewport.world_3d = world
 	if _viewport_camera:
 		_viewport_camera.position = camera_position
-		Global.log("ShipInterior: viewport camera positioned at %s" % str(camera_position))
+		Global.debug_log("ShipInterior: viewport camera positioned at %s" % str(camera_position))
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -467,7 +467,7 @@ func _build_viewport_window() -> void:
 	window_mesh.material_override = mat
 	window_mesh.position = Vector3(0.0, 2.25, -11.97)
 	add_child(window_mesh)
-	Global.log("ShipInterior: viewport window built (SubViewport exterior camera)")
+	Global.debug_log("ShipInterior: viewport window built (SubViewport exterior camera)")
 
 func _build_lighting() -> void:
 	# Machine room light — centered overhead at Y=2.8
@@ -534,7 +534,7 @@ func _build_terminal() -> void:
 	col.position = Vector3(-4.0, 1.0, -3.0)
 	_terminal_area.add_child(col)
 	add_child(_terminal_area)
-	Global.log("ShipInterior: tech tree terminal built")
+	Global.debug_log("ShipInterior: tech tree terminal built")
 
 func _build_cockpit_console_area() -> void:
 	# Interaction area around the cockpit navigation console (instanced at Z=-11.5 in scene)
@@ -552,7 +552,7 @@ func _build_cockpit_console_area() -> void:
 	_cockpit_console_area.add_child(col)
 	_cockpit_console_area.add_to_group("interaction_prompt_source")
 	add_child(_cockpit_console_area)
-	Global.log("ShipInterior: cockpit console interaction area built")
+	Global.debug_log("ShipInterior: cockpit console interaction area built")
 
 func _create_static_surface(surface_name: String, size: Vector3, pos: Vector3, color: Color, roughness: float) -> void:
 	var body := StaticBody3D.new()
@@ -604,9 +604,9 @@ func _fade_in() -> Signal:
 func _on_exit_zone_entered(body: Node3D) -> void:
 	if body == _player_ref:
 		_player_in_exit_zone = true
-		Global.log("ShipInterior: player in exit zone")
+		Global.debug_log("ShipInterior: player in exit zone")
 
 func _on_exit_zone_exited(body: Node3D) -> void:
 	if body == _player_ref:
 		_player_in_exit_zone = false
-		Global.log("ShipInterior: player left exit zone")
+		Global.debug_log("ShipInterior: player left exit zone")

@@ -88,7 +88,7 @@ func _do_ping() -> void:
 	_ping_cooldown_timer = PING_COOLDOWN
 	var player_pos: Vector3 = _player.global_position
 	var deposits: Array[Deposit] = DepositRegistry.get_in_range(player_pos, PING_RANGE)
-	Global.log("Scanner: ping fired — %d deposits in range" % deposits.size())
+	Global.debug_log("Scanner: ping fired — %d deposits in range" % deposits.size())
 	for deposit: Deposit in deposits:
 		if not deposit.is_pinged():
 			deposit.ping()
@@ -114,19 +114,19 @@ func _start_analysis(deposit: Deposit) -> void:
 	_analysis_target = deposit
 	_analysis_progress = 0.0
 	_is_analyzing = true
-	Global.log("Scanner: analysis started on deposit at %s" % str(deposit.global_position))
+	Global.debug_log("Scanner: analysis started on deposit at %s" % str(deposit.global_position))
 	analysis_started.emit(deposit)
 
 func _complete_analysis() -> void:
 	if _analysis_target:
 		_analysis_target.mark_analyzed()
-		Global.log("Scanner: analysis completed on deposit at %s" % str(_analysis_target.global_position))
+		Global.debug_log("Scanner: analysis completed on deposit at %s" % str(_analysis_target.global_position))
 		analysis_completed.emit(_analysis_target)
 	_is_analyzing = false
 	_analysis_progress = 0.0
 
 func _cancel_analysis() -> void:
-	Global.log("Scanner: analysis cancelled")
+	Global.debug_log("Scanner: analysis cancelled")
 	_is_analyzing = false
 	_analysis_progress = 0.0
 	_analysis_target = null
@@ -204,4 +204,4 @@ func _spawn_ping_ring() -> void:
 	tween.tween_property(mat, "emission_energy_multiplier", 0.0, PING_RING_DURATION)
 	tween.set_parallel(false)
 	tween.tween_callback(ring.queue_free)
-	Global.log("Scanner: ping ring spawned")
+	Global.debug_log("Scanner: ping ring spawned")

@@ -20,17 +20,17 @@ const RECIPE_DURATION: float = 8.0
 static func use() -> bool:
 	var total: int = PlayerInventory.get_total_count(ResourceDefs.ResourceType.SPARE_BATTERY)
 	if total <= 0:
-		Global.log("SpareBattery: use failed — no batteries in inventory")
+		Global.debug_log("SpareBattery: use failed — no batteries in inventory")
 		return false
 
 	# Remove one battery from the lowest-purity slot first.
 	var removed: int = _remove_one_battery()
 	if removed <= 0:
-		Global.log("SpareBattery: use failed — removal returned 0 unexpectedly")
+		Global.debug_log("SpareBattery: use failed — removal returned 0 unexpectedly")
 		return false
 
 	SuitBattery.restore_full()
-	Global.log("SpareBattery: used — suit battery restored to 100%%")
+	Global.debug_log("SpareBattery: used — suit battery restored to 100%%")
 	return true
 
 ## Returns the quantity of Spare Batteries currently in the player's inventory.

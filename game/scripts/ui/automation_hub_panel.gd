@@ -147,7 +147,7 @@ func open() -> void:
 	InputManager.set_gameplay_inputs_enabled(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	_animate_open()
-	Global.log("AutomationHubPanel: opened")
+	Global.debug_log("AutomationHubPanel: opened")
 
 ## Closes the panel.
 func close() -> void:
@@ -158,7 +158,7 @@ func close() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_animate_close()
 	closed.emit()
-	Global.log("AutomationHubPanel: closed")
+	Global.debug_log("AutomationHubPanel: closed")
 
 ## Returns true if the panel is open.
 func is_open() -> bool:
@@ -709,7 +709,7 @@ func _on_activate_pressed() -> void:
 
 	if deployed_count > 0:
 		_drones_active = true
-		Global.log("AutomationHubPanel: deployed %d drones" % deployed_count)
+		Global.debug_log("AutomationHubPanel: deployed %d drones" % deployed_count)
 	_refresh_all()
 
 func _on_deactivate_pressed() -> void:
@@ -722,7 +722,7 @@ func _on_deactivate_pressed() -> void:
 			AutomationHub.recall_drone(drone_id)
 	drones_recalled.emit()
 	_drones_active = false
-	Global.log("AutomationHubPanel: recalled all drones")
+	Global.debug_log("AutomationHubPanel: recalled all drones")
 	_refresh_all()
 
 func _on_drone_started(_deposit_id: String) -> void:

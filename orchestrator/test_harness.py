@@ -398,6 +398,187 @@ async def test_checkpoint_auto_remediated_on_startup() -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
+# Suspension logging + gate deferral unit tests (TICKET-0187)
+# ---------------------------------------------------------------------------
+
+async def test_gate_deferred_when_checkpoint_exists() -> tuple[bool, str]:
+    """Checkpoint exists for a phase ticket → conductor defers gate (stays PLANNING).
+
+    Scenario: the conductor is in PLANNING; the mock Producer returns 'no_work'.
+    A checkpoint file exists for a ticket in the current phase.  The conductor
+    must log a WARNING and NOT transition to IDLE — it must stay in PLANNING so
+    that the suspended ticket can be re-dispatched.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_gate_defer_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = REPO_ROOT
+    c.ORCH_DIR = orch_dir
+
+    try:
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state("_test", "TestPhase")
+
+        # Write a checkpoint for a ticket in "TestPhase"
+        checkpoints_dir = orch_dir / "checkpoints"
+        checkpoints_dir.mkdir()
+        (checkpoints_dir / "TICKET-9995.checkpoint.json").write_text(
+            json.dumps({
+                "ticket": "TICKET-9995",
+                "agent": "gameplay-programmer",
+                "milestone": "_test",
+                "phase": "TestPhase",
+                "wave": 2,
+                "suspended_at": "2026-03-01T10:00:00",
+                "reason": "usage_limit",
+                "progress": {"steps_completed": [], "commit_hash": None,
+                             "branch": None, "uncommitted_changes": False,
+                             "pr_url": None, "pr_merged": False, "pr_state": None,
+                             "ticket_status_on_disk": "IN_PROGRESS",
+                             "files_changed": [], "new_gd_scripts": False},
+                "notes": "exit_code=0",
+            }),
+            encoding="utf-8",
+        )
+
+        # Patch _run_claude to return 'no_work' from Producer
+        async def mock_no_work(*args, **kwargs):
+            plan = json.dumps({"action": "no_work", "summary": "No workable tickets."})
+            return (0, plan, "", {})
+
+        conductor._run_claude = mock_no_work
+
+        # Run one planning cycle
+        await conductor._do_planning()
+
+        # Gate must be deferred — status stays PLANNING (not IDLE)
+        status = conductor.state.get("status", "?")
+        if status == "IDLE":
+            return False, "Gate deferral: conductor went IDLE despite unresolved checkpoint"
+        if status != "PLANNING":
+            return False, f"Gate deferral: unexpected status={status!r} (expected PLANNING)"
+
+        # activity.log must contain the WARNING entry
+        log_text = paths.activity_log.read_text(encoding="utf-8") if paths.activity_log.exists() else ""
+        if "Gate deferred" not in log_text:
+            return False, "Gate deferral: WARNING not found in activity.log"
+        if "TICKET-9995" not in log_text:
+            return False, "Gate deferral: deferred ticket ID not listed in activity.log"
+
+        return True, "Gate deferral: gate deferred (stayed PLANNING) with unresolved checkpoint"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_suspension_event_logged_to_both_logs() -> tuple[bool, str]:
+    """Suspension event → entry appears in both activity.log and suspension.log.
+
+    Scenario: a worker exits with empty stdout (usage-limit pattern) and the
+    ticket is not DONE on disk.  _write_checkpoint is called, which must write
+    a CHECKPOINT line to activity.log AND a JSON entry to suspension.log.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_susp_log_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = REPO_ROOT
+    c.ORCH_DIR = orch_dir
+
+    try:
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state("_test", "Alpha")
+
+        ticket_id = "TICKET-9994"
+        worker = {
+            "agent": "gameplay-programmer",
+            "ticket": ticket_id,
+            "budget_usd": 0.5,
+            "needs_worktree": False,
+            "needs_godot_mcp": False,
+            "worktree_path": None,
+            "branch": None,
+            "prompt_supplement": "",
+            "started_at": "2026-03-02T00:00:00",
+        }
+        conductor.state["active_workers"] = [worker]
+        conductor.state["active_ticket_ids"] = [ticket_id]
+
+        # Mock _run_worker to return exit=0, empty stdout (usage-limit pattern)
+        async def mock_run_worker(_worker):
+            return (0, "", "", {})
+
+        conductor._run_worker = mock_run_worker
+        await conductor._do_working()
+
+        # Check activity.log for CHECKPOINT entry
+        activity_log_path = paths.activity_log
+        if not activity_log_path.exists():
+            return False, "Suspension log: activity.log not created"
+        activity_text = activity_log_path.read_text(encoding="utf-8")
+        if "CHECKPOINT" not in activity_text or ticket_id not in activity_text:
+            return False, "Suspension log: CHECKPOINT entry not found in activity.log"
+
+        # Check suspension.log for JSON entry
+        suspension_log_path = paths.activity_log.parent / "suspension.log"
+        if not suspension_log_path.exists():
+            return False, "Suspension log: suspension.log not created"
+
+        suspension_text = suspension_log_path.read_text(encoding="utf-8")
+        if not suspension_text.strip():
+            return False, "Suspension log: suspension.log is empty"
+
+        # Parse the first non-empty line as JSON
+        entry = None
+        for line in suspension_text.splitlines():
+            line = line.strip()
+            if line:
+                try:
+                    entry = json.loads(line)
+                    break
+                except json.JSONDecodeError:
+                    pass
+
+        if entry is None:
+            return False, "Suspension log: no valid JSON lines in suspension.log"
+
+        if entry.get("ticket") != ticket_id:
+            return False, f"Suspension log: expected ticket={ticket_id!r}, got {entry.get('ticket')!r}"
+
+        if entry.get("event") not in ("suspended", "limit_hit"):
+            return False, f"Suspension log: expected event in (suspended, limit_hit), got {entry.get('event')!r}"
+
+        required_fields = ["timestamp", "event", "agent", "ticket", "milestone",
+                           "phase", "wave", "checkpoint_path", "retry_count",
+                           "retry_reason", "notes"]
+        missing = [f for f in required_fields if f not in entry]
+        if missing:
+            return False, f"Suspension log: missing fields: {missing}"
+
+        return True, "Suspension log: event written to both activity.log and suspension.log"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
 # UID commit idempotency unit tests (TICKET-0186)
 # ---------------------------------------------------------------------------
 
@@ -1392,6 +1573,31 @@ def main():
         print(f"  Result: {cp_passed}/{cp_total} PASSED, {cp_total - cp_passed} FAILED")
     print("=" * 60)
 
+    # Run suspension logging + gate deferral unit tests (TICKET-0187)
+    async def _run_suspension_tests():
+        return [
+            await test_gate_deferred_when_checkpoint_exists(),
+            await test_suspension_event_logged_to_both_logs(),
+        ]
+
+    suspension_checks = asyncio.run(_run_suspension_tests())
+
+    print()
+    print("=" * 60)
+    print("  Suspension Logging + Gate Deferral Tests (TICKET-0187)")
+    print("=" * 60)
+    for ok, msg in suspension_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    susp_passed = sum(1 for ok, _ in suspension_checks if ok)
+    susp_total = len(suspension_checks)
+    print()
+    if susp_passed == susp_total:
+        print(f"  Result: {susp_passed}/{susp_total} PASSED")
+    else:
+        print(f"  Result: {susp_passed}/{susp_total} PASSED, {susp_total - susp_passed} FAILED")
+    print("=" * 60)
+
     # Run UID commit idempotency unit tests (TICKET-0186)
     async def _run_uid_tests():
         return [
@@ -1497,6 +1703,7 @@ def main():
     all_passed = (
         harness_exit == 0
         and cp_passed == cp_total
+        and susp_passed == susp_total
         and uid_passed == uid_total
         and r3_passed == r3_total
         and gate_passed == gate_total

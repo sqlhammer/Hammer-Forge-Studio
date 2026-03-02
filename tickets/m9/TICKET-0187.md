@@ -2,7 +2,7 @@
 id: TICKET-0187
 title: "Structured suspension logging and gate deferral on unresolved checkpoints"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: tools-devops-engineer
 created_by: producer
@@ -69,3 +69,4 @@ See `docs/engineering/orchestrator-resilience-plan.md` Task 3 (Logging Specifica
 
 - 2026-02-27 [producer] Created ticket — structured suspension logging and gate deferral
 - 2026-02-27 [producer] Moved log archive rotation to dedicated TICKET-0191
+- 2026-03-02 [tools-devops-engineer] Starting work — implementing SuspensionLogger, suspension event logging, and gate deferral

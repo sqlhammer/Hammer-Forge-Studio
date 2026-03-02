@@ -2,7 +2,7 @@
 id: TICKET-0183
 title: "Checkpoint system — write, read, and clear suspension checkpoints"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: tools-devops-engineer
 created_by: producer
@@ -69,3 +69,4 @@ See `docs/engineering/orchestrator-resilience-plan.md` Section 2.1–2.2 for the
 - 2026-02-27 [producer] Created ticket — checkpoint infrastructure for graceful failure and resume
 - 2026-02-27 [producer] Moved R3 auto-remediation (merged-PR detection) to dedicated TICKET-0190
 - 2026-03-02 [tools-devops-engineer] Starting work — implementing checkpoint system per resilience plan sections 2.1–2.2
+- 2026-03-02 [tools-devops-engineer] DONE — commit 051c2b1, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/278 merged. Implemented _write_checkpoint, _delete_checkpoint, _scan_checkpoints_on_startup; integrated into _do_working and run(); added orchestrator/checkpoints/ to .gitignore; added 2 unit tests to test_harness.py. All 13+2 harness tests and 6/6 usage-limit tests pass.

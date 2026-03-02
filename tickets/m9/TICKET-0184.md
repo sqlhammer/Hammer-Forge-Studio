@@ -2,7 +2,7 @@
 id: TICKET-0184
 title: "Usage-limit detection and LIMIT_WAIT cooldown state"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: tools-devops-engineer
 created_by: producer
@@ -62,3 +62,4 @@ See `docs/engineering/orchestrator-resilience-plan.md` Risks R4 and R6.
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — usage-limit detection and cooldown state
+- 2026-03-01 [tools-devops-engineer] Starting work — implementing _detect_usage_limit, LIMIT_WAIT state, retry_reason tracking, and configuration

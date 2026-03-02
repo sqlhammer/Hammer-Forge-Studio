@@ -2,7 +2,7 @@
 id: TICKET-0227
 title: "Feature — Atmospheric lighting: reduce harsh shadows via simulated sky diffusion"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: technical-artist
 created_by: producer
@@ -43,3 +43,20 @@ The current biome lighting uses a harsh directional sun with no atmospheric diff
 ## Activity Log
 
 - 2026-02-28 [producer] Created — Studio Head reported lighting too harsh during M8 playtest; deferred to M9 visual pass
+- 2026-03-01 [technical-artist] Starting work — creating shared Environment resource with ProceduralSky, sky-based ambient lighting, and softened shadows
+- 2026-03-01 [technical-artist] Implementation complete. Parameter values changed:
+  - **Environment resource** (`game/environments/default_environment.tres`):
+    - `background_mode`: BG_COLOR → BG_SKY (2) — sky replaces flat color backdrop
+    - `ambient_light_source`: AMBIENT_SOURCE_COLOR → AMBIENT_SOURCE_SKY (3) — sky-based directional fill instead of flat color
+    - `ambient_light_energy`: 0.4 → 0.8 — doubled ambient fill brightness for shadow areas
+    - `tonemap_mode`: ACES (unchanged)
+    - Added `ProceduralSkyMaterial` with alien palette:
+      - `sky_top_color`: Color(0.15, 0.1, 0.35) — deep indigo/purple zenith
+      - `sky_horizon_color`: Color(0.55, 0.4, 0.3) — warm dusty amber horizon
+      - `ground_bottom_color`: Color(0.1, 0.08, 0.06) — dark alien ground
+      - `ground_horizon_color`: Color(0.45, 0.35, 0.25) — warm haze
+  - **DirectionalLight3D** (Sun, in all 3 scripts):
+    - `shadow_opacity`: 1.0 → 0.6 — shadows 60% opaque, allowing ambient fill through
+    - `light_angular_distance`: 0.0 → 1.5 degrees — softened shadow penumbras
+    - All other sun properties unchanged (energy 1.2, color #ffe0c0, rotation -45/30/0)
+  - **Removed hardcoded values** from `game_world.gd`, `test_world.gd`, `debug_launcher.gd` — all three now `preload()` the shared resource

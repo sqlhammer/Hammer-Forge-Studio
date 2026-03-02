@@ -22,6 +22,7 @@ import json
 import os
 import platform
 import re
+import shutil
 import signal
 import subprocess
 import sys
@@ -1294,6 +1295,7 @@ class Conductor:
             self.logger.log("SYSTEM",
                 f"Milestone {self.state['milestone']} complete!")
             self.state["status"] = "IDLE"
+            self._rotate_logs_on_milestone_complete()
 
         elif action == "error":
             self.logger.log("ERROR", f"Producer reported error: {summary}")
@@ -2208,6 +2210,62 @@ class Conductor:
                     deferred.append(ticket_id)
 
         return (len(deferred) > 0, deferred)
+
+    def _rotate_logs_on_milestone_complete(self):
+        """Archive activity.log and suspension.log at milestone close (TICKET-0191).
+
+        Called after status is set to IDLE via milestone_complete, before save_state.
+        - Scans checkpoints/ for anomalies and logs a warning if any remain.
+        - Logs the archive action to activity.log (so it is the last entry in the archive).
+        - Copies active logs to logs/activity-{milestone}.log (appending if archive exists).
+        - Truncates the active logs so the next milestone starts clean.
+        - Uses copy-then-truncate (not move) to prevent data loss if interrupted.
+        - Creates logs/ directory if it does not exist (defensive).
+        """
+        milestone = self.state.get("milestone", "unknown").lower()
+        logs_dir = self.paths.logs_dir
+        logs_dir.mkdir(parents=True, exist_ok=True)
+
+        # --- Checkpoint anomaly scan (informational — does NOT block archive) ---
+        checkpoints_dir = ORCH_DIR / "checkpoints"
+        if checkpoints_dir.exists():
+            remaining = list(checkpoints_dir.glob("*.checkpoint.json"))
+            if remaining:
+                n = len(remaining)
+                ticket_ids = []
+                for cp_file in remaining:
+                    try:
+                        cp_data = json.loads(cp_file.read_text(encoding="utf-8"))
+                        tid = cp_data.get("ticket", "")
+                        ticket_ids.append(tid if tid else cp_file.name)
+                    except (json.JSONDecodeError, OSError):
+                        ticket_ids.append(cp_file.name)
+                self.logger.log("WARNING",
+                    f"{n} unresolved checkpoint(s) found at milestone close — "
+                    f"investigate before proceeding: {', '.join(ticket_ids)}")
+
+        # --- Archive activity.log ---
+        activity_log = self.paths.activity_log
+        archive_activity = logs_dir / f"activity-{milestone}.log"
+
+        # Log the archive action BEFORE truncating (this entry ends up in the archive)
+        self.logger.log("SYSTEM",
+            f"Archived activity.log -> logs/activity-{milestone}.log")
+
+        if activity_log.exists():
+            content = activity_log.read_bytes()
+            with open(archive_activity, "ab") as af:
+                af.write(content)
+            activity_log.write_bytes(b"")
+
+        # --- Archive suspension.log (if it exists; skip if absent) ---
+        suspension_log = self.paths.activity_log.parent / "suspension.log"
+        if suspension_log.exists():
+            archive_suspension = logs_dir / f"suspension-{milestone}.log"
+            content = suspension_log.read_bytes()
+            with open(archive_suspension, "ab") as af:
+                af.write(content)
+            suspension_log.write_bytes(b"")
 
     def _check_merged_pr(self, ticket_id: str, branch: str) -> dict | None:
         """Check whether a PR for *branch* has been merged to main.

@@ -2,7 +2,7 @@
 id: TICKET-0242
 title: "BUG — Gamepad right stick turn sensitivity too slow"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -34,11 +34,11 @@ var pitch_delta: float = look_input.y * camera_sensitivity * 60.0
 
 ## Acceptance Criteria
 
-- [ ] Right stick produces a comfortable turn rate at default settings (full deflection completes a 360° horizontal rotation in approximately 2–4 seconds).
-- [ ] `InputManager.gamepad_sensitivity_x` and `gamepad_sensitivity_y` are applied to the gamepad look calculation.
-- [ ] Default values for `InputManager.gamepad_sensitivity_x` and `gamepad_sensitivity_y` are raised to a playable baseline (suggested: `3.0` horizontal, `2.0` vertical).
-- [ ] Mouse look speed is unaffected.
-- [ ] Existing unit tests pass.
+- [x] Right stick produces a comfortable turn rate at default settings (full deflection completes a 360° horizontal rotation in approximately 2–4 seconds).
+- [x] `InputManager.gamepad_sensitivity_x` and `gamepad_sensitivity_y` are applied to the gamepad look calculation.
+- [x] Default values for `InputManager.gamepad_sensitivity_x` and `gamepad_sensitivity_y` are raised to a playable baseline (suggested: `3.0` horizontal, `2.0` vertical).
+- [x] Mouse look speed is unaffected.
+- [x] Existing unit tests pass.
 
 ## Implementation Notes
 
@@ -66,3 +66,4 @@ These remain `@export` so they can be tuned from the editor inspector without co
 
 - 2026-03-01 [producer] Created ticket — player-reported: right stick turning is far too slow
 - 2026-03-01 [gameplay-programmer] Starting work — dependency TICKET-0235 verified DONE
+- 2026-03-01 [gameplay-programmer] DONE — raised gamepad_sensitivity_x to 3.0, gamepad_sensitivity_y to 2.0, applied InputManager sensitivities in _update_camera(). Mouse look unaffected. Commit e740fc0, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/266

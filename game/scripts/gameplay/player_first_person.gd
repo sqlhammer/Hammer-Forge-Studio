@@ -156,8 +156,8 @@ func _update_camera(delta: float) -> void:
 
 	# Apply gamepad look
 	if look_input.length() > 0.01:
-		var yaw_delta: float = look_input.x * camera_sensitivity * 60.0  # Framerate-independent
-		var pitch_delta: float = look_input.y * camera_sensitivity * 60.0
+		var yaw_delta: float = look_input.x * camera_sensitivity * 60.0 * InputManager.gamepad_sensitivity_x
+		var pitch_delta: float = look_input.y * camera_sensitivity * 60.0 * InputManager.gamepad_sensitivity_y
 
 		# Rotate camera yaw (left/right)
 		global_transform.basis = global_transform.basis.rotated(Vector3.UP, -yaw_delta * delta)

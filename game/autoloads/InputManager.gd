@@ -149,7 +149,7 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("move_right", [KEY_D, KEY_RIGHT])
 	_add_action_if_missing("camera_look_horizontal", [])  # Mouse only
 	_add_action_if_missing("camera_look_vertical", [])  # Mouse only
-	_add_action_if_missing("interact", [KEY_E])
+	_add_action_if_missing("interact", [KEY_E], [], [JOY_BUTTON_A])
 	_add_action_if_missing("scan", [KEY_Q])
 	_add_action_if_missing("use_tool", [], [MOUSE_BUTTON_LEFT])
 	_add_action_if_missing("switch_view", [KEY_TAB])
@@ -168,7 +168,7 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("ship_emergency_stop", [KEY_X])
 
 ## Adds an input action if it doesn't already exist.
-func _add_action_if_missing(action_name: String, keys: Array = [], mouse_buttons: Array = []) -> void:
+func _add_action_if_missing(action_name: String, keys: Array = [], mouse_buttons: Array = [], joy_buttons: Array = []) -> void:
 	if InputMap.has_action(action_name):
 		return
 
@@ -180,6 +180,10 @@ func _add_action_if_missing(action_name: String, keys: Array = [], mouse_buttons
 	for button in mouse_buttons:
 		var event := InputEventMouseButton.new()
 		event.button_index = button
+		InputMap.action_add_event(action_name, event)
+	for joy_button in joy_buttons:
+		var event := InputEventJoypadButton.new()
+		event.button_index = joy_button
 		InputMap.action_add_event(action_name, event)
 
 ## Applies dead zone to a 2D axis input (typically from analog stick).

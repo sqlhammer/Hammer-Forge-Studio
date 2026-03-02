@@ -43,6 +43,11 @@
   "retries": {
     "max_per_ticket": 3
   },
+  "limit_wait": {
+    "cooldown_minutes": 15,
+    "mass_threshold_pct": 50,
+    "max_cooldown_cycles": 3
+  },
   "tool_tiers": {
     "0": ["producer"],
     "1": ["game-designer", "narrative-designer", "technical-writer"],

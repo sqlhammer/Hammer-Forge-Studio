@@ -161,7 +161,10 @@ class TestConductor(Conductor):
 
         # Check for failed workers by looking at retry queue
         retries = self.state.get("retries", {})
-        for tid, count in retries.items():
+        for tid, entry in retries.items():
+            # entry may be the new dict format {"count": N, "reasons": [...]}
+            # or the legacy int format
+            count = entry["count"] if isinstance(entry, dict) else entry
             if count > 0:
                 # Only record first failure
                 already = any(

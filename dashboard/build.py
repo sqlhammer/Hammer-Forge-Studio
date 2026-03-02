@@ -281,31 +281,119 @@ STATUS_COLORS = {
 }
 
 
+def detect_circular_deps(tickets: list) -> set:
+    """Detect tickets involved in circular dependencies via DFS cycle detection.
+
+    Returns a set of ticket IDs that participate in at least one cycle.
+    """
+    ticket_ids: set = {t["id"] for t in tickets}
+    # Build adjacency: dependency -> dependent (follows depends_on edges)
+    adj: dict = {t["id"]: [] for t in tickets}
+    for t in tickets:
+        for dep in t["depends_on"]:
+            if dep in ticket_ids:
+                adj[dep].append(t["id"])
+
+    WHITE, GRAY, BLACK = 0, 1, 2
+    color: dict = {tid: WHITE for tid in ticket_ids}
+    cycle_members: set = set()
+
+    def dfs(node: str, path: list) -> None:
+        color[node] = GRAY
+        path.append(node)
+        for neighbor in adj.get(node, []):
+            if color[neighbor] == GRAY:
+                # Found a cycle — collect all nodes on the cycle
+                cycle_start = path.index(neighbor)
+                cycle_members.update(path[cycle_start:])
+            elif color[neighbor] == WHITE:
+                dfs(neighbor, path)
+        path.pop()
+        color[node] = BLACK
+
+    for tid in ticket_ids:
+        if color[tid] == WHITE:
+            dfs(tid, [])
+
+    return cycle_members
+
+
 def generate_mermaid_diagram(milestone_id: str, tickets: list) -> str:
-    """Generate a Mermaid flowchart definition for a milestone's dependency graph."""
+    """Generate a Mermaid flowchart definition for a milestone's dependency graph.
+
+    Handles orphan nodes (separate subgraph), cross-milestone dependencies
+    (dashed edges labeled with source milestone), and circular dependency
+    detection (red node borders).
+    """
     ms_tickets = [t for t in tickets if t["milestone"] == milestone_id]
     if not ms_tickets:
         return ""
 
-    # Build lookup for status
-    status_map: dict = {t["id"]: t["status"] for t in ms_tickets}
+    # Build lookups
+    all_ticket_map: dict = {t["id"]: t for t in tickets}
     ms_ticket_ids: set = {t["id"] for t in ms_tickets}
 
-    lines: list = ["graph LR"]
-
-    # Define nodes with short labels
+    # Identify which nodes have edges (connected vs orphans)
+    connected: set = set()
     for t in ms_tickets:
+        for dep in t["depends_on"]:
+            connected.add(t["id"])
+            connected.add(dep)
+        # Also check if this ticket is depended on by another in the milestone
+        for other in ms_tickets:
+            if t["id"] in other["depends_on"]:
+                connected.add(t["id"])
+
+    orphans = [t for t in ms_tickets if t["id"] not in connected]
+    non_orphans = [t for t in ms_tickets if t["id"] in connected]
+
+    # Detect circular dependencies
+    circular_ids: set = detect_circular_deps(ms_tickets)
+
+    lines: list = ["flowchart LR"]
+
+    # Orphan tickets in a separate subgraph at the top
+    if orphans:
+        lines.append('    subgraph orphans ["No Dependencies"]')
+        for t in orphans:
+            tid = t["id"]
+            title = t["title"][:40].replace('"', "'")
+            label = f"{tid}\\n{title}"
+            lines.append(f'        {tid}["{label}"]')
+        lines.append("    end")
+
+    # Connected ticket nodes
+    for t in non_orphans:
         tid = t["id"]
-        # Sanitize title for Mermaid — truncate and escape quotes
         title = t["title"][:40].replace('"', "'")
         label = f"{tid}\\n{title}"
         lines.append(f'    {tid}["{label}"]')
 
-    # Define edges from depends_on
+    # Cross-milestone dependency nodes (external tickets referenced by depends_on)
+    cross_ms_deps: dict = {}
+    for t in ms_tickets:
+        for dep in t["depends_on"]:
+            if dep not in ms_ticket_ids and dep in all_ticket_map:
+                ext = all_ticket_map[dep]
+                cross_ms_deps[dep] = ext
+
+    for dep_id, ext in cross_ms_deps.items():
+        title = ext["title"][:30].replace('"', "'")
+        ms_label = ext["milestone"] or "?"
+        label = f"{dep_id}\\n({ms_label}) {title}"
+        lines.append(f'    {dep_id}["{label}"]:::crossMs')
+
+    # Edges: intra-milestone (solid)
     for t in ms_tickets:
         for dep in t["depends_on"]:
             if dep in ms_ticket_ids:
                 lines.append(f"    {dep} --> {t['id']}")
+
+    # Edges: cross-milestone (dashed)
+    for t in ms_tickets:
+        for dep in t["depends_on"]:
+            if dep not in ms_ticket_ids and dep in all_ticket_map:
+                lines.append(f"    {dep} -.-> {t['id']}")
 
     # Style nodes by status
     for status, color in STATUS_COLORS.items():
@@ -313,6 +401,17 @@ def generate_mermaid_diagram(milestone_id: str, tickets: list) -> str:
         if styled:
             node_list = ",".join(styled)
             lines.append(f"    style {node_list} fill:{color},color:#fff")
+
+    # Style cross-milestone nodes (dimmed)
+    if cross_ms_deps:
+        cross_list = ",".join(cross_ms_deps.keys())
+        lines.append(f"    style {cross_list} fill:#3a3a5a,color:#a0a0b0,stroke-dasharray:5 5")
+
+    # Style circular dependency nodes with red border
+    circular_in_ms = circular_ids & ms_ticket_ids
+    if circular_in_ms:
+        circ_list = ",".join(circular_in_ms)
+        lines.append(f"    style {circ_list} stroke:#ff4444,stroke-width:3px")
 
     return "\n".join(lines) + "\n"
 

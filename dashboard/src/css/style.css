@@ -605,6 +605,68 @@ body {
   width: 100%;
 }
 
+/* ── Diagram Toggle (Collapsible) ────────────────────────────────────────── */
+
+.diagram-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  transition: color 0.15s;
+}
+
+.diagram-toggle:hover {
+  color: var(--accent-hover);
+}
+
+.diagram-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.diagram-collapsible {
+  overflow: hidden;
+  max-height: 2000px;
+  transition: max-height 0.3s ease;
+}
+
+.diagram-collapsible.collapsed {
+  max-height: 0;
+}
+
+.diagram-content {
+  padding: 0.5rem 0;
+}
+
+.mermaid-diagram-wrapper {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.mermaid-diagram-wrapper .mermaid {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
 /* ── No Data State ────────────────────────────────────────────────────────── */
 
 .no-data {

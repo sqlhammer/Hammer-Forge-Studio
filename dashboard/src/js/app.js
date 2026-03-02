@@ -524,6 +524,17 @@ function renderMilestoneDetail(msId) {
       "</tbody></table></div>";
   }
 
+  // Dependency graph diagram — collapsible section
+  html +=
+    '<div class="card" style="margin-bottom:1.25rem">' +
+    '<div class="diagram-toggle" id="diagram-toggle-' + escapeHtml(msId) + '">' +
+    '<span class="diagram-toggle-icon">+</span> Show Dependency Graph' +
+    "</div>" +
+    '<div class="diagram-collapsible collapsed" id="diagram-container-' + escapeHtml(msId) + '">' +
+    '<div class="diagram-content" id="diagram-content-' + escapeHtml(msId) + '">' +
+    '<p class="no-data">Loading diagram...</p>' +
+    "</div></div></div>";
+
   container.innerHTML = html;
 
   /* ── Bind dependency link click handlers ──────────────────────────────── */
@@ -573,6 +584,75 @@ function renderMilestoneDetail(msId) {
       }
     });
   });
+
+  // Bind toggle handler for the dependency graph
+  var toggle = document.getElementById("diagram-toggle-" + msId);
+  var collapsible = document.getElementById("diagram-container-" + msId);
+  if (toggle && collapsible) {
+    toggle.addEventListener("click", function () {
+      var icon = toggle.querySelector(".diagram-toggle-icon");
+      var isCollapsed = collapsible.classList.contains("collapsed");
+      collapsible.classList.toggle("collapsed");
+      icon.textContent = isCollapsed ? "-" : "+";
+      toggle.childNodes[1].textContent = isCollapsed
+        ? " Hide Dependency Graph"
+        : " Show Dependency Graph";
+      // Load and render diagram on first open
+      if (isCollapsed) {
+        loadMilestoneDiagram(msId);
+      }
+    });
+  }
+}
+
+/* ── Load Milestone Diagram (inline in detail view) ──────────────────────── */
+
+var diagramRenderCounter = 0;
+
+async function loadMilestoneDiagram(msId) {
+  var contentEl = document.getElementById("diagram-content-" + msId);
+  if (!contentEl) return;
+
+  // Check cache first
+  var mmdContent = DashboardData.diagrams[msId];
+  if (!mmdContent) {
+    // Fetch the .mmd file
+    var mmdUrl = DATA_BASE + "diagrams/" + msId + ".mmd";
+    try {
+      var resp = await fetch(mmdUrl);
+      if (!resp.ok) {
+        contentEl.innerHTML =
+          '<p class="no-data">No dependency diagram available for this milestone.</p>';
+        return;
+      }
+      mmdContent = await resp.text();
+      DashboardData.diagrams[msId] = mmdContent;
+    } catch (err) {
+      contentEl.innerHTML =
+        '<p class="no-data">Failed to load diagram.</p>';
+      return;
+    }
+  }
+
+  // Use a unique ID for the Mermaid container to avoid conflicts on re-render
+  diagramRenderCounter++;
+  var mermaidId = "mermaid-ms-" + msId + "-" + diagramRenderCounter;
+  contentEl.innerHTML =
+    '<div class="mermaid-diagram-wrapper">' +
+    '<pre class="mermaid" id="' + mermaidId + '">' +
+    escapeHtml(mmdContent) +
+    "</pre></div>";
+
+  // Render the diagram via Mermaid
+  if (typeof mermaid !== "undefined") {
+    try {
+      await mermaid.run({ nodes: [document.getElementById(mermaidId)] });
+    } catch (err) {
+      console.warn("Mermaid render failed for " + msId + ":", err);
+      contentEl.innerHTML =
+        '<p class="no-data">Diagram rendering failed — possible circular dependency or syntax error.</p>';
+    }
+  }
 }
 
 /* ── Render: Diagrams ─────────────────────────────────────────────────────── */
@@ -628,7 +708,10 @@ async function renderDiagrams() {
 
   // Re-initialize Mermaid to render newly added diagrams
   if (typeof mermaid !== "undefined") {
-    mermaid.contentLoaded();
+    var nodes = container.querySelectorAll(".mermaid");
+    if (nodes.length > 0) {
+      mermaid.run({ nodes: Array.from(nodes) });
+    }
   }
 }
 
@@ -693,7 +776,10 @@ async function loadArchitectureDiagrams() {
   container.innerHTML = html;
 
   if (typeof mermaid !== "undefined") {
-    mermaid.contentLoaded();
+    var nodes = container.querySelectorAll(".mermaid");
+    if (nodes.length > 0) {
+      mermaid.run({ nodes: Array.from(nodes) });
+    }
   }
 }
 
@@ -709,7 +795,7 @@ function renderBuildTimestamp() {
 function initMermaid() {
   if (typeof mermaid !== "undefined") {
     mermaid.initialize({
-      startOnLoad: true,
+      startOnLoad: false,
       theme: "dark",
       securityLevel: "loose",
       flowchart: {

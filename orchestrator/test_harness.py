@@ -20,10 +20,12 @@ import asyncio
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 # Ensure the repo root is importable
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -391,6 +393,156 @@ async def test_checkpoint_auto_remediated_on_startup() -> tuple[bool, str]:
             return False, f"Checkpoint: {ticket_id} not cleared from active_ticket_ids"
 
         return True, "Checkpoint: auto-remediated on startup — file deleted, ticket added to session"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
+# UID commit idempotency unit tests (TICKET-0186)
+# ---------------------------------------------------------------------------
+
+async def test_uid_commit_pending_with_staged_files() -> tuple[bool, str]:
+    """Conductor restarted with _uid_commit_pending=True and staged .uid files.
+
+    Scenario: previous session staged .gd.uid files but was interrupted before
+    commit.  On startup the conductor detects _uid_commit_pending=True and runs
+    _handle_uid_commits.  The method should commit and push, then clear the flag.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_uid_staged_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = REPO_ROOT
+    c.ORCH_DIR = orch_dir
+
+    try:
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state("_test", "Alpha")
+        conductor.state["_uid_commit_pending"] = True
+
+        git_calls: list[list[str]] = []
+
+        def mock_subprocess_run(args, **kwargs):
+            git_calls.append(list(args))
+            result = MagicMock()
+            result.returncode = 0
+            result.stdout = ""
+            result.stderr = ""
+            cmd = args[1] if len(args) > 1 else ""
+
+            if args[1:4] == ["diff", "--cached", "--name-only"]:
+                # Some files already staged
+                result.stdout = "game/scripts/foo.gd.uid\n"
+            elif args[1:4] == ["ls-files", "--others", "--exclude-standard"]:
+                # One more untracked .uid file
+                result.stdout = "game/scripts/bar.gd.uid\n"
+            elif args[1:3] == ["diff", "--cached"]:
+                # Staged changes exist → returncode=1
+                result.returncode = 1
+            elif args[1:3] == ["rev-list", "--count"]:
+                # 1 commit ahead of origin/main
+                result.stdout = "1\n"
+            return result
+
+        with patch("orchestrator.conductor.subprocess.run", side_effect=mock_subprocess_run):
+            await conductor._handle_uid_commits()
+
+        # Flag must be cleared
+        if conductor.state.get("_uid_commit_pending") is not False:
+            return False, "UID-idempotency: _uid_commit_pending not cleared after staged-file run"
+
+        # Verify git commit and git push were called
+        commit_called = any(c[1:3] == ["commit", "-m"] for c in git_calls)
+        push_called = any(c[1:3] == ["push", "origin"] for c in git_calls)
+
+        if not commit_called:
+            return False, "UID-idempotency: git commit not called when staged changes present"
+        if not push_called:
+            return False, "UID-idempotency: git push not called when 1 commit ahead"
+
+        return True, "UID-idempotency: staged .uid files — committed, pushed, flag cleared"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_uid_commit_pending_already_pushed() -> tuple[bool, str]:
+    """Conductor restarted with _uid_commit_pending=True and already-pushed commit.
+
+    Scenario: previous session committed and pushed but crashed before clearing
+    the flag.  On startup the conductor detects _uid_commit_pending=True and runs
+    _handle_uid_commits.  The method must detect that origin/main is up-to-date
+    and skip commit + push without creating an empty commit.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_uid_pushed_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = REPO_ROOT
+    c.ORCH_DIR = orch_dir
+
+    try:
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state("_test", "Alpha")
+        conductor.state["_uid_commit_pending"] = True
+
+        git_calls: list[list[str]] = []
+
+        def mock_subprocess_run(args, **kwargs):
+            git_calls.append(list(args))
+            result = MagicMock()
+            result.returncode = 0
+            result.stdout = ""
+            result.stderr = ""
+
+            if args[1:4] == ["diff", "--cached", "--name-only"]:
+                # Nothing staged
+                result.stdout = ""
+            elif args[1:4] == ["ls-files", "--others", "--exclude-standard"]:
+                # No untracked .uid files
+                result.stdout = ""
+            elif args[1:3] == ["diff", "--cached"]:
+                # No staged changes → returncode=0 (nothing to commit)
+                result.returncode = 0
+            elif args[1:3] == ["rev-list", "--count"]:
+                # 0 commits ahead — already pushed
+                result.stdout = "0\n"
+            return result
+
+        with patch("orchestrator.conductor.subprocess.run", side_effect=mock_subprocess_run):
+            await conductor._handle_uid_commits()
+
+        # Flag must be cleared
+        if conductor.state.get("_uid_commit_pending") is not False:
+            return False, "UID-idempotency: _uid_commit_pending not cleared after already-pushed run"
+
+        # Verify git commit and git push were NOT called
+        commit_called = any(c[1:3] == ["commit", "-m"] for c in git_calls)
+        push_called = any(c[1:3] == ["push", "origin"] for c in git_calls)
+
+        if commit_called:
+            return False, "UID-idempotency: git commit called when no staged changes (empty commit risk)"
+        if push_called:
+            return False, "UID-idempotency: git push called when already up-to-date with origin/main"
+
+        return True, "UID-idempotency: already-pushed — commit and push skipped, flag cleared"
     finally:
         c.REPO_ROOT = orig_repo_root
         c.ORCH_DIR = orig_orch_dir
@@ -811,6 +963,31 @@ def main():
         print(f"  Result: {cp_passed}/{cp_total} PASSED, {cp_total - cp_passed} FAILED")
     print("=" * 60)
 
+    # Run UID commit idempotency unit tests (TICKET-0186)
+    async def _run_uid_tests():
+        return [
+            await test_uid_commit_pending_with_staged_files(),
+            await test_uid_commit_pending_already_pushed(),
+        ]
+
+    uid_checks = asyncio.run(_run_uid_tests())
+
+    print()
+    print("=" * 60)
+    print("  UID Commit Idempotency Unit Tests (TICKET-0186)")
+    print("=" * 60)
+    for ok, msg in uid_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    uid_passed = sum(1 for ok, _ in uid_checks if ok)
+    uid_total = len(uid_checks)
+    print()
+    if uid_passed == uid_total:
+        print(f"  Result: {uid_passed}/{uid_total} PASSED")
+    else:
+        print(f"  Result: {uid_passed}/{uid_total} PASSED, {uid_total - uid_passed} FAILED")
+    print("=" * 60)
+
     # Run resume dispatch unit tests (TICKET-0185)
     async def _run_resume_tests():
         return [
@@ -840,6 +1017,7 @@ def main():
     all_passed = (
         harness_exit == 0
         and cp_passed == cp_total
+        and uid_passed == uid_total
         and res_passed == res_total
     )
     sys.exit(0 if all_passed else 1)

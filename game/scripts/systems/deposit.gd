@@ -138,9 +138,9 @@ func get_interaction_prompt() -> Dictionary:
 	if is_depleted():
 		return {}
 	if is_analyzed():
-		return {"key": _get_action_key_label("use_tool"), "label": "Mine", "hold": true}
+		return {"key": _get_action_key_label("use_tool"), "action": "use_tool", "label": "Mine", "hold": true}
 	if is_pinged():
-		return {"key": "E", "label": "Scan", "hold": true}
+		return {"key": "E", "action": "interact", "label": "Scan", "hold": true}
 	return {}
 
 ## Initializes deposit from parameters (for procedural generation).

@@ -208,7 +208,7 @@ func _run_camera_within_capsule_test() -> void:
 func _build_model_configs() -> void:
 	_configs.clear()
 
-	# Ship exterior — VHACD convex decomposition matching test_world.gd ship collision
+	# Ship exterior — VHACD convex decomposition matching game_world.gd ship collision
 	var ship := ModelConfig.new()
 	ship.label = "ship_exterior"
 	ship.scene_path = "res://assets/meshes/vehicles/mesh_ship_exterior.glb"
@@ -257,7 +257,7 @@ func _build_model_configs() -> void:
 		)
 	_configs.append(fabricator)
 
-	# Resource node (scrap) — SphereShape3D matching test_world.gd deposit collision
+	# Resource node (scrap) — SphereShape3D matching game_world.gd deposit collision
 	var resource_node := ModelConfig.new()
 	resource_node.label = "resource_node"
 	resource_node.scene_path = "res://assets/meshes/props/mesh_resource_node_scrap.glb"
@@ -351,7 +351,7 @@ func _create_sphere_collision(
 	return body
 
 
-## Creates VHACD convex decomposition collision matching the ship's test_world.gd setup.
+## Creates VHACD convex decomposition collision matching the ship's game_world.gd setup.
 func _create_vhacd_collision(root: Node3D) -> StaticBody3D:
 	var mesh_node: Node3D = root.get_node("Mesh")
 	var decomp := MeshConvexDecompositionSettings.new()

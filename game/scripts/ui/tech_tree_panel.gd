@@ -117,7 +117,7 @@ func open() -> void:
 	InputManager.set_gameplay_inputs_enabled(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	_animate_open()
-	Global.log("TechTreePanel: opened")
+	Global.debug_log("TechTreePanel: opened")
 
 ## Closes the tech tree panel.
 func close() -> void:
@@ -129,7 +129,7 @@ func close() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_animate_close()
 	closed.emit()
-	Global.log("TechTreePanel: closed")
+	Global.debug_log("TechTreePanel: closed")
 
 ## Returns true if the panel is open.
 func is_open() -> bool:
@@ -731,7 +731,7 @@ func _on_confirm_pressed() -> void:
 	_close_confirm_dialog()
 	if success:
 		_refresh_all()
-		Global.log("TechTreePanel: unlocked node '%s'" % node_id)
+		Global.debug_log("TechTreePanel: unlocked node '%s'" % node_id)
 
 func _on_node_unlocked(_node_id: String) -> void:
 	if _is_open:

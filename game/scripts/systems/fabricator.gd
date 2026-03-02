@@ -22,7 +22,7 @@ var _job_progress: float = 0.0
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
 	set_process(false)
-	Global.log("Fabricator: initialized")
+	Global.debug_log("Fabricator: initialized")
 
 func _process(delta: float) -> void:
 	if not _is_processing:
@@ -40,20 +40,20 @@ func _process(delta: float) -> void:
 ## Deducts inputs immediately on start. Returns true on success, false on failure.
 func queue_job(recipe_id: String) -> bool:
 	if not ModuleManager.is_installed(MODULE_ID):
-		Global.log("Fabricator: cannot start — module not installed")
+		Global.debug_log("Fabricator: cannot start — module not installed")
 		return false
 
 	if not TechTree.is_unlocked("fabricator_module"):
-		Global.log("Fabricator: cannot start — tech tree node 'fabricator_module' not unlocked")
+		Global.debug_log("Fabricator: cannot start — tech tree node 'fabricator_module' not unlocked")
 		return false
 
 	if _is_processing:
-		Global.log("Fabricator: cannot start — already processing recipe '%s'" % _current_recipe_id)
+		Global.debug_log("Fabricator: cannot start — already processing recipe '%s'" % _current_recipe_id)
 		return false
 
 	var entry: Dictionary = FabricatorDefs.get_recipe_entry(recipe_id)
 	if entry.is_empty():
-		Global.log("Fabricator: cannot start — unknown recipe '%s'" % recipe_id)
+		Global.debug_log("Fabricator: cannot start — unknown recipe '%s'" % recipe_id)
 		return false
 
 	# Validate and deduct all inputs.
@@ -67,7 +67,7 @@ func queue_job(recipe_id: String) -> bool:
 	_job_progress = 0.0
 	set_process(true)
 	job_started.emit(recipe_id)
-	Global.log("Fabricator: job started — recipe '%s'" % recipe_id)
+	Global.debug_log("Fabricator: job started — recipe '%s'" % recipe_id)
 	return true
 
 ## Cancels the current job. Input resources are NOT refunded.
@@ -78,7 +78,7 @@ func cancel_job() -> void:
 	_job_progress = 0.0
 	set_process(false)
 	job_cancelled.emit()
-	Global.log("Fabricator: job cancelled (inputs consumed, no refund)")
+	Global.debug_log("Fabricator: job cancelled (inputs consumed, no refund)")
 
 ## Returns true if a job is currently in progress.
 func is_job_active() -> bool:
@@ -106,7 +106,7 @@ func _validate_inputs(inputs: Array) -> bool:
 		var available: int = PlayerInventory.get_total_count(resource_type)
 		if available < quantity:
 			var resource_name: String = ResourceDefs.get_resource_name(resource_type)
-			Global.log("Fabricator: insufficient %s (have %d, need %d)" % [resource_name, available, quantity])
+			Global.debug_log("Fabricator: insufficient %s (have %d, need %d)" % [resource_name, available, quantity])
 			return false
 	return true
 
@@ -147,11 +147,11 @@ func _complete_job() -> void:
 		var quantity: int = output.get("quantity", 0) as int
 		var leftover: int = PlayerInventory.add_item(resource_type, ResourceDefs.Purity.THREE_STAR, quantity)
 		var delivered: int = quantity - leftover
-		Global.log("Fabricator: job complete — added %d %s to inventory" % [delivered, ResourceDefs.get_resource_name(resource_type)])
+		Global.debug_log("Fabricator: job complete — added %d %s to inventory" % [delivered, ResourceDefs.get_resource_name(resource_type)])
 	elif output_mode == FabricatorDefs.OUTPUT_MODE_EQUIP_HEAD_LAMP:
 		HeadLamp.equip()
-		Global.log("Fabricator: job complete — Head Lamp equipped")
+		Global.debug_log("Fabricator: job complete — Head Lamp equipped")
 	else:
-		Global.log("Fabricator: job complete — recipe '%s' (no output action)" % completed_recipe_id)
+		Global.debug_log("Fabricator: job complete — recipe '%s' (no output action)" % completed_recipe_id)
 
 	job_completed.emit(completed_recipe_id)

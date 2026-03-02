@@ -47,7 +47,7 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 	_build_collision_shape()
 	_build_visual_mesh()
-	Global.log("DroppedItem: spawned %s x%d" % [ResourceDefs.get_resource_name(_resource_type), _quantity])
+	Global.debug_log("DroppedItem: spawned %s x%d" % [ResourceDefs.get_resource_name(_resource_type), _quantity])
 
 
 func _process(delta: float) -> void:
@@ -106,10 +106,10 @@ func _try_pickup() -> void:
 	var remainder: int = PlayerInventory.add_item(_resource_type, _purity, _quantity)
 	if remainder == _quantity:
 		# Nothing was added — inventory is full
-		Global.log("DroppedItem: pickup failed — inventory full for %s" % ResourceDefs.get_resource_name(_resource_type))
+		Global.debug_log("DroppedItem: pickup failed — inventory full for %s" % ResourceDefs.get_resource_name(_resource_type))
 		return
 	var picked_up: int = _quantity - remainder
-	Global.log("DroppedItem: picked up %s x%d" % [ResourceDefs.get_resource_name(_resource_type), picked_up])
+	Global.debug_log("DroppedItem: picked up %s x%d" % [ResourceDefs.get_resource_name(_resource_type), picked_up])
 	item_picked_up.emit(_resource_type, _purity, picked_up)
 	if remainder > 0:
 		# Partial pickup — update quantity
@@ -161,7 +161,7 @@ func _get_interact_key_label() -> String:
 func _on_body_entered(body: Node3D) -> void:
 	if body.collision_layer & PhysicsLayers.PLAYER:
 		_player_inside = true
-		Global.log("DroppedItem: player entered pickup range")
+		Global.debug_log("DroppedItem: player entered pickup range")
 
 
 func _on_body_exited(body: Node3D) -> void:

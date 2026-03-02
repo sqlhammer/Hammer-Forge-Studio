@@ -67,7 +67,7 @@ var _play_button: Button = null
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_ui()
-	Global.log("MainMenu: ready")
+	Global.debug_log("MainMenu: ready")
 
 
 # ── Private Methods: UI Construction ─────────────────────
@@ -191,6 +191,6 @@ func _create_style_box(
 
 ## Handles the Play button press — logs and transitions to GameWorld.
 func _on_play_pressed() -> void:
-	Global.log("MainMenu: Play pressed — transitioning to GameWorld")
+	Global.debug_log("MainMenu: Play pressed — transitioning to GameWorld")
 	play_pressed.emit()
 	get_tree().change_scene_to_file(GAME_WORLD_SCENE)

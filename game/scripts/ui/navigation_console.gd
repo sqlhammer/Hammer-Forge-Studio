@@ -152,7 +152,7 @@ func open_panel() -> void:
 	InputManager.set_gameplay_inputs_enabled(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	_animate_open()
-	Global.log("NavigationConsole: opened")
+	Global.debug_log("NavigationConsole: opened")
 
 ## Closes the navigation console panel and restores input handling.
 func close_panel() -> void:
@@ -163,7 +163,7 @@ func close_panel() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_animate_close()
 	panel_closed.emit()
-	Global.log("NavigationConsole: closed")
+	Global.debug_log("NavigationConsole: closed")
 
 ## Closes the panel for travel without re-enabling gameplay inputs.
 ## The TravelSequenceManager owns the input state during the transition
@@ -176,7 +176,7 @@ func _close_for_travel() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_animate_close()
 	panel_closed.emit()
-	Global.log("NavigationConsole: closed for travel (inputs left disabled)")
+	Global.debug_log("NavigationConsole: closed for travel (inputs left disabled)")
 
 ## Returns true if the panel is currently open.
 func is_open() -> bool:
@@ -618,7 +618,7 @@ func _select_biome(biome_id: String) -> void:
 			break
 	_update_map_visuals()
 	_refresh_detail()
-	Global.log("NavigationConsole: selected destination '%s'" % biome_id)
+	Global.debug_log("NavigationConsole: selected destination '%s'" % biome_id)
 
 func _refresh_detail() -> void:
 	if _selected_biome_id.is_empty():
@@ -704,14 +704,14 @@ func _on_biome_node_clicked(biome_id: String) -> void:
 
 func _on_confirm_pressed() -> void:
 	if _selected_biome_id.is_empty():
-		Global.log("NavigationConsole: confirm pressed — no destination selected")
+		Global.debug_log("NavigationConsole: confirm pressed — no destination selected")
 		return
 	if not NavigationSystem.can_travel_to(_selected_biome_id):
-		Global.log("NavigationConsole: confirm pressed — cannot afford travel to '%s'" % _selected_biome_id)
+		Global.debug_log("NavigationConsole: confirm pressed — cannot afford travel to '%s'" % _selected_biome_id)
 		return
 
 	var destination: String = _selected_biome_id
-	Global.log("NavigationConsole: confirming travel to '%s'" % destination)
+	Global.debug_log("NavigationConsole: confirming travel to '%s'" % destination)
 	travel_confirmed.emit(destination)
 
 	# Close the panel first without re-enabling gameplay inputs — the
@@ -723,7 +723,7 @@ func _on_confirm_pressed() -> void:
 	# emitting travel_completed which triggers TravelSequenceManager's async
 	# biome transition (fade out -> swap -> fade in -> re-enable inputs).
 	NavigationSystem.initiate_travel(destination)
-	Global.log("NavigationConsole: travel initiated to '%s'" % destination)
+	Global.debug_log("NavigationConsole: travel initiated to '%s'" % destination)
 
 func _on_fuel_changed(_current: float, _maximum: float) -> void:
 	if _is_open:
@@ -751,7 +751,7 @@ func _on_load_fuel_pressed() -> void:
 		_fuel_status_label.text = "Loaded %d cell(s) (+%d units)" % [cells_consumed, int(units_added)]
 		_fuel_status_label.add_theme_color_override("font_color", COLOR_GREEN)
 		_fuel_status_label.visible = true
-		Global.log("NavigationConsole: loaded %d fuel cell(s) into ship tank" % cells_consumed)
+		Global.debug_log("NavigationConsole: loaded %d fuel cell(s) into ship tank" % cells_consumed)
 	else:
 		_fuel_status_label.text = "Tank is already full"
 		_fuel_status_label.add_theme_color_override("font_color", COLOR_AMBER)

@@ -47,7 +47,7 @@ var _previous_biome: String = ""
 func _ready() -> void:
 	_previous_biome = NavigationSystem.current_biome
 	NavigationSystem.biome_changed.connect(_on_biome_changed)
-	Global.log("ResourceRespawnSystem: initialized (starting biome='%s')" % _previous_biome)
+	Global.debug_log("ResourceRespawnSystem: initialized (starting biome='%s')" % _previous_biome)
 
 # ── Public Methods ────────────────────────────────────────
 
@@ -65,7 +65,7 @@ func report_depleted(deposit_id: String, biome_id: String, infinite: bool = fals
 	var biome_list: Array = _active_depletions[biome_id]
 	if deposit_id not in biome_list:
 		biome_list.append(deposit_id)
-		Global.log("ResourceRespawnSystem: tracked depletion '%s' in biome '%s'" % [
+		Global.debug_log("ResourceRespawnSystem: tracked depletion '%s' in biome '%s'" % [
 			deposit_id, biome_id])
 
 
@@ -88,7 +88,7 @@ func is_first_visit(biome_id: String) -> bool:
 func mark_respawns_applied(biome_id: String) -> void:
 	if _pending_respawns.has(biome_id):
 		_pending_respawns.erase(biome_id)
-		Global.log("ResourceRespawnSystem: respawns applied and cleared for biome '%s'" % biome_id)
+		Global.debug_log("ResourceRespawnSystem: respawns applied and cleared for biome '%s'" % biome_id)
 
 
 ## Resets all respawn state to initial conditions. Previous biome is set to
@@ -98,7 +98,7 @@ func reset() -> void:
 	_pending_respawns.clear()
 	_departed_biomes.clear()
 	_previous_biome = NavigationSystem.current_biome
-	Global.log("ResourceRespawnSystem: reset (starting biome='%s')" % _previous_biome)
+	Global.debug_log("ResourceRespawnSystem: reset (starting biome='%s')" % _previous_biome)
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -117,7 +117,7 @@ func _on_biome_changed(new_biome_id: String) -> void:
 			_pending_respawns[departed_biome] = depleted.duplicate()
 			_active_depletions.erase(departed_biome)
 			respawn_queued.emit(departed_biome)
-			Global.log("ResourceRespawnSystem: queued %d deposit(s) for respawn in '%s'" % [
+			Global.debug_log("ResourceRespawnSystem: queued %d deposit(s) for respawn in '%s'" % [
 				depleted.size(), departed_biome])
 		# Always mark biome departed, even if nothing was depleted.
 		_departed_biomes[departed_biome] = true
@@ -127,9 +127,9 @@ func _on_biome_changed(new_biome_id: String) -> void:
 	var pending: Array = _pending_respawns.get(new_biome_id, [])
 	if _departed_biomes.has(new_biome_id) and pending.size() > 0:
 		respawn_applied.emit(new_biome_id)
-		Global.log("ResourceRespawnSystem: respawn_applied emitted for '%s' (%d deposit(s))" % [
+		Global.debug_log("ResourceRespawnSystem: respawn_applied emitted for '%s' (%d deposit(s))" % [
 			new_biome_id, pending.size()])
 
 	_previous_biome = new_biome_id
-	Global.log("ResourceRespawnSystem: biome transition '%s' → '%s'" % [
+	Global.debug_log("ResourceRespawnSystem: biome transition '%s' → '%s'" % [
 		departed_biome, new_biome_id])

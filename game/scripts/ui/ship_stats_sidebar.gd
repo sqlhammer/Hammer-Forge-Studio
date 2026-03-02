@@ -274,10 +274,10 @@ func _update_alerts() -> void:
 	# Log alert changes
 	if new_alerts != _current_alert_keys:
 		if new_alerts.is_empty():
-			Global.log("ShipStatsSidebar: alerts cleared")
+			Global.debug_log("ShipStatsSidebar: alerts cleared")
 		else:
 			var joined: String = ", ".join(new_alerts)
-			Global.log("ShipStatsSidebar: active alerts — %s" % joined)
+			Global.debug_log("ShipStatsSidebar: active alerts — %s" % joined)
 		_current_alert_keys = new_alerts
 
 func _add_alert(text: String) -> void:

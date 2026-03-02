@@ -15,12 +15,12 @@ var _drones: Dictionary = {}  # drone_id (int) → DroneController
 ## Initializes the manager with the ship's home position for drone return.
 func setup(home_position: Vector3) -> void:
 	_home_position = home_position
-	Global.log("DroneManager: setup with home at %s" % str(home_position))
+	Global.debug_log("DroneManager: setup with home at %s" % str(home_position))
 
 ## Spawns a new physical drone with the given ID and program.
 func spawn_drone(drone_id: int, program: DroneProgram) -> void:
 	if _drones.has(drone_id):
-		Global.log("DroneManager: drone %d already exists, skipping spawn" % drone_id)
+		Global.debug_log("DroneManager: drone %d already exists, skipping spawn" % drone_id)
 		return
 	var drone_scene: PackedScene = load(MINING_DRONE_SCENE) as PackedScene
 	var controller: DroneController = drone_scene.instantiate() as DroneController
@@ -29,14 +29,14 @@ func spawn_drone(drone_id: int, program: DroneProgram) -> void:
 	_drones[drone_id] = controller
 	# Auto-assign first target
 	_assign_next_target(controller)
-	Global.log("DroneManager: spawned drone %d" % drone_id)
+	Global.debug_log("DroneManager: spawned drone %d" % drone_id)
 
 ## Recalls all active drones, forcing them to return home.
 func recall_all_drones() -> void:
 	for drone_id: int in _drones.keys():
 		var controller: DroneController = _drones[drone_id] as DroneController
 		controller.recall()
-	Global.log("DroneManager: recalled all drones")
+	Global.debug_log("DroneManager: recalled all drones")
 
 ## Returns a drone controller by ID, or null if not found.
 func get_drone_controller(drone_id: int) -> DroneController:

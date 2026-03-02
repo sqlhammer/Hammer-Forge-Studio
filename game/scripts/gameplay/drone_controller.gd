@@ -39,7 +39,7 @@ func setup(drone_id: int, home_position: Vector3, program: DroneProgram) -> void
 	_state = DroneAgent.DroneState.IDLE
 	name = "Drone_%d" % drone_id
 	global_position = Vector3(home_position.x, HOVER_HEIGHT, home_position.z)
-	Global.log("DroneController: drone %d initialized at home" % drone_id)
+	Global.debug_log("DroneController: drone %d initialized at home" % drone_id)
 
 ## Returns this drone's unique ID.
 func get_drone_id() -> int:
@@ -64,13 +64,13 @@ func assign_target(deposit: Deposit) -> void:
 	_state = DroneAgent.DroneState.TRAVELING
 	_extraction_accumulator = 0.0
 	_total_yield = 0
-	Global.log("DroneController: drone %d assigned to '%s'" % [_drone_id, deposit.name])
+	Global.debug_log("DroneController: drone %d assigned to '%s'" % [_drone_id, deposit.name])
 
 ## Forces the drone to return home immediately.
 func recall() -> void:
 	_target_deposit = null
 	_state = DroneAgent.DroneState.RETURNING
-	Global.log("DroneController: drone %d recalled" % _drone_id)
+	Global.debug_log("DroneController: drone %d recalled" % _drone_id)
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -80,7 +80,7 @@ func _process_traveling(delta: float) -> void:
 	if distance <= ARRIVAL_THRESHOLD:
 		_state = DroneAgent.DroneState.EXTRACTING
 		AutomationHub.notify_drone_arrived(_drone_id)
-		Global.log("DroneController: drone %d arrived at target, extracting" % _drone_id)
+		Global.debug_log("DroneController: drone %d arrived at target, extracting" % _drone_id)
 
 func _process_extracting(delta: float) -> void:
 	if not _target_deposit or _target_deposit.is_depleted():
@@ -109,7 +109,7 @@ func _finish_extraction() -> void:
 	AutomationHub.notify_extraction_complete(_drone_id, deposit_name, _total_yield)
 	_target_deposit = null
 	_state = DroneAgent.DroneState.RETURNING
-	Global.log("DroneController: drone %d finished extraction (yield=%d), returning" % [_drone_id, _total_yield])
+	Global.debug_log("DroneController: drone %d finished extraction (yield=%d), returning" % [_drone_id, _total_yield])
 
 func _process_returning(delta: float) -> void:
 	var home_hover: Vector3 = Vector3(_home_position.x, HOVER_HEIGHT, _home_position.z)
@@ -118,5 +118,5 @@ func _process_returning(delta: float) -> void:
 	if distance <= ARRIVAL_THRESHOLD:
 		AutomationHub.notify_drone_returned(_drone_id)
 		_state = DroneAgent.DroneState.IDLE
-		Global.log("DroneController: drone %d returned home" % _drone_id)
+		Global.debug_log("DroneController: drone %d returned home" % _drone_id)
 

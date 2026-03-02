@@ -1,7 +1,7 @@
 ## Structured logging system that writes JSONL files for consumption by AI agents.
 ## Each log entry contains trace context, module info, agent-actionable advice, and tags.
-## This system is separate from Global.log() — it produces machine-readable output
-## while Global.log() produces human-readable console output.
+## This system is separate from Global.debug_log() — it produces machine-readable output
+## while Global.debug_log() produces human-readable console output.
 extends Node
 
 # ── Constants ─────────────────────────────────────────────
@@ -32,9 +32,9 @@ func _ready() -> void:
 	_ensure_log_directory()
 	_current_log_path = _create_session_log_path()
 	_rotate_old_sessions()
-	Global.log("AgentLogger initialized — session: %s" % _session_id)
+	Global.debug_log("AgentLogger initialized — session: %s" % _session_id)
 	var resolved_path: String = ProjectSettings.globalize_path(_current_log_path)
-	Global.log("AgentLogger writing to: %s" % resolved_path)
+	Global.debug_log("AgentLogger writing to: %s" % resolved_path)
 
 
 func _process(delta: float) -> void:
@@ -223,7 +223,7 @@ func _rotate_old_sessions() -> void:
 	while log_files.size() >= MAX_SESSION_FILES:
 		var oldest_file: String = log_files[0]
 		directory.remove(oldest_file)
-		Global.log("AgentLogger: Rotated old log '%s'" % oldest_file)
+		Global.debug_log("AgentLogger: Rotated old log '%s'" % oldest_file)
 		log_files.remove_at(0)
 
 

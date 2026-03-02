@@ -822,6 +822,163 @@ async def test_merged_pr_auto_remediation_on_startup() -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
+# Gate detection unit tests (TICKET-0189)
+# ---------------------------------------------------------------------------
+
+async def test_gate_emitted_when_all_done_and_producer_fails() -> tuple[bool, str]:
+    """All phase tickets DONE on disk + Producer unavailable → conductor emits gate.
+
+    Scenario: a milestone has two tickets in the same phase, both DONE on disk.
+    The conductor's _do_evaluating call (with Producer already failed) should
+    detect completion and write pending_gate.json, transitioning to GATE_BLOCKED.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_gate_emit_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        milestone = "_gtest"
+        phase = "Alpha"
+
+        # Create ticket files — both DONE in the same phase
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        for tid in ("TICKET-8801", "TICKET-8802"):
+            (ticket_dir / f"{tid}.md").write_text(
+                f"---\nid: {tid}\nstatus: DONE\nphase: {phase}\n---\n",
+                encoding="utf-8",
+            )
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state(milestone, phase)
+        # Mark at least one completed wave so _do_evaluating doesn't short-circuit
+        conductor.state["completed_waves"] = [{"wave": 1, "tickets": ["TICKET-8801"]}]
+
+        # Patch out git operations — not relevant for this unit test
+        async def _noop_merge():
+            pass
+        conductor._merge_pending_branches = _noop_merge
+
+        await conductor._do_evaluating()
+
+        status = conductor.state.get("status")
+        gate_path = paths.pending_gate_path
+
+        if status != "GATE_BLOCKED":
+            return False, (
+                f"Gate fallback: expected status=GATE_BLOCKED, got {status!r}"
+            )
+        if not gate_path.exists():
+            return False, "Gate fallback: pending_gate.json was not written"
+
+        gate_data = json.loads(gate_path.read_text(encoding="utf-8"))
+        required = ["milestone", "phase", "next_phase", "summary", "requested_at"]
+        missing = [f for f in required if f not in gate_data]
+        if missing:
+            return False, f"Gate fallback: pending_gate.json missing fields: {missing}"
+        if "Conductor fallback" not in gate_data.get("summary", ""):
+            return False, (
+                f"Gate fallback: unexpected summary: {gate_data.get('summary')!r}"
+            )
+
+        return True, "Gate fallback: pending_gate.json written with correct schema"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_gate_not_double_emitted() -> tuple[bool, str]:
+    """When _gate_emitted_this_wave is True, conductor does not re-emit the gate.
+
+    Scenario: pending_gate.json already exists (Producer or a prior cycle already
+    emitted).  _gate_emitted_this_wave should be set True in _do_planning,
+    preventing _check_fallback_gate from firing again in _do_evaluating.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_gate_no_double_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        milestone = "_gtest2"
+        phase = "Beta"
+
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        for tid in ("TICKET-8803", "TICKET-8804"):
+            (ticket_dir / f"{tid}.md").write_text(
+                f"---\nid: {tid}\nstatus: DONE\nphase: {phase}\n---\n",
+                encoding="utf-8",
+            )
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state(milestone, phase)
+        conductor.state["completed_waves"] = [{"wave": 1, "tickets": ["TICKET-8803"]}]
+
+        # Pre-write pending_gate.json (simulating Producer already emitted)
+        write_json(paths.pending_gate_path, {
+            "milestone": milestone,
+            "phase": phase,
+            "next_phase": "",
+            "summary": "Producer emitted gate",
+            "requested_at": "2026-03-02T00:00:00",
+        })
+
+        # Simulate what _do_planning does: detect existing gate → set flag
+        conductor._gate_emitted_this_wave = paths.pending_gate_path.exists()
+
+        async def _noop_merge():
+            pass
+        conductor._merge_pending_branches = _noop_merge
+
+        # Capture the mtime of pending_gate.json before evaluating
+        mtime_before = paths.pending_gate_path.stat().st_mtime
+
+        await conductor._do_evaluating()
+
+        # File should not have been rewritten (mtime unchanged)
+        mtime_after = paths.pending_gate_path.stat().st_mtime
+        if mtime_before != mtime_after:
+            return False, (
+                "Gate no-double-emit: pending_gate.json was rewritten even though "
+                "_gate_emitted_this_wave was True"
+            )
+
+        # Status should be PLANNING (gate already handled — conductor skips fallback)
+        status = conductor.state.get("status")
+        if status not in ("PLANNING", "GATE_BLOCKED"):
+            return False, f"Gate no-double-emit: unexpected status {status!r}"
+
+        return True, "Gate no-double-emit: pending_gate.json not rewritten when flag set"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
 
@@ -1052,12 +1209,38 @@ def main():
         print(f"  Result: {r3_passed}/{r3_total} PASSED, {r3_total - r3_passed} FAILED")
     print("=" * 60)
 
+    # Run gate detection unit tests (TICKET-0189)
+    async def _run_gate_tests():
+        return [
+            await test_gate_emitted_when_all_done_and_producer_fails(),
+            await test_gate_not_double_emitted(),
+        ]
+
+    gate_checks = asyncio.run(_run_gate_tests())
+
+    print()
+    print("=" * 60)
+    print("  Gate Detection Unit Tests (TICKET-0189)")
+    print("=" * 60)
+    for ok, msg in gate_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    gate_passed = sum(1 for ok, _ in gate_checks if ok)
+    gate_total = len(gate_checks)
+    print()
+    if gate_passed == gate_total:
+        print(f"  Result: {gate_passed}/{gate_total} PASSED")
+    else:
+        print(f"  Result: {gate_passed}/{gate_total} PASSED, {gate_total - gate_passed} FAILED")
+    print("=" * 60)
+
     # Exit non-zero if any test suite failed
     all_passed = (
         harness_exit == 0
         and cp_passed == cp_total
         and uid_passed == uid_total
         and r3_passed == r3_total
+        and gate_passed == gate_total
     )
     sys.exit(0 if all_passed else 1)
 

@@ -1,7 +1,7 @@
 # Deferred Work Items
 
 **Owner:** producer
-**Last Updated:** 2026-02-28 (D-030–D-032 added from M8 playtest; D-026–D-029 added from TICKET-0177 code review)
+**Last Updated:** 2026-03-02 (D-034–D-035 added from M9 UAT; D-033 added from M8 review)
 
 > Tracks gameplay features and systems that were intentionally descoped from a milestone during planning. Each item references the design spec it originates from and the milestone where it was deferred. These items MUST be revisited and scheduled into a future milestone — they are not optional cuts, they are postponed work.
 
@@ -76,6 +76,13 @@
 | D-032 | Debug launcher toggle for 3× player movement speed to accelerate QA traversal of large biomes | N/A (tooling/QA) | Requested during M8 playtest; developer convenience feature, not gameplay | M9 | Scheduled | TICKET-0220 |
 
 | D-033 | Replace non-functional per-agent USD budget caps in orchestrator with per-agent `--max-turns` limits — the `budget_usd` values in `config.json` and `get_budget()` in `conductor.py` are passed through `run_claude()` but only used as a boolean (`if budget > 0`) to set a hardcoded `--max-turns 200`; the Claude CLI has no `--budget` flag so USD caps are never enforced; replace with configurable per-agent turn limits and remove dead budget plumbing | N/A (orchestrator tooling) | Non-blocking code smell; session ceiling is the only real cost gate and it works; per-agent USD tracking is aspirational until the CLI exposes a spend hook | Tooling sprint (T3 or standalone) | Open | — |
+
+### From M9 — Foundation & Hardening
+
+| ID | Description | Design Ref | Reason Deferred | Suggested Milestone | Status | Scheduled In |
+|----|-------------|------------|-----------------|---------------------|--------|--------------|
+| D-034 | Enter Ship interaction should require the player to be pointing at a physical surface of the ship's external mesh — currently the interact trigger zone fires regardless of aim direction, making it possible to "enter" the ship while facing away from it or through opaque geometry | `docs/design/systems/mobile-base.md` | Gameplay feel improvement discovered during M9 UAT; not a blocker for the core loop; requires raycasting against the ship exterior mesh collision shape | M10 | Open | — |
+| D-035 | Assign gamepad buttons to **Ping**, **Jump**, and **Headlamp** in the PersistentControls HUD — currently only Interact (A), Inventory (Select), and Item Actions (Y) are mapped; Ping (Q), Jump (Space), and Headlamp (F) have no gamepad bindings; a designer must propose a full input scheme (considering remaining available buttons: B, X, LB, RB, LT, RT, D-pad, L3, R3) and present options to the Studio Head for approval before implementation | N/A (M9 UAT finding) | Deferred from M9 to keep gamepad bug scope manageable; requires design sign-off before binding assignments are finalized | M10 | Open | — |
 
 ---
 

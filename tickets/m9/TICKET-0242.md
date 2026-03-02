@@ -2,7 +2,7 @@
 id: TICKET-0242
 title: "BUG — Gamepad right stick turn sensitivity too slow"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -65,3 +65,4 @@ These remain `@export` so they can be tuned from the editor inspector without co
 ## Activity Log
 
 - 2026-03-01 [producer] Created ticket — player-reported: right stick turning is far too slow
+- 2026-03-01 [gameplay-programmer] Starting work — dependency TICKET-0235 verified DONE

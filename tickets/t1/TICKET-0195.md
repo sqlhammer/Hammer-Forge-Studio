@@ -2,7 +2,7 @@
 id: TICKET-0195
 title: "Dependency graph diagrams — auto-generated Mermaid from ticket frontmatter"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: systems-programmer
 created_by: producer
@@ -57,3 +57,4 @@ Render auto-generated dependency graph diagrams on the dashboard, using Mermaid 
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — dependency graph diagram rendering
+- 2026-03-01 [systems-programmer] Starting work — implementing dependency graph diagrams on dashboard

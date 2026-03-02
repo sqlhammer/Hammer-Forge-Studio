@@ -11,6 +11,8 @@ Usage:
 Additional unit tests:
   - Checkpoint created on abnormal exit (empty stdout)
   - Checkpoint auto-remediated on startup when ticket is DONE on disk
+  - Checkpoint context injected into dispatch prompt when checkpoint exists (TICKET-0185)
+  - Resumed worker reports done → checkpoint deleted, [RESUME ] logged (TICKET-0185)
 """
 
 import argparse
@@ -396,6 +398,240 @@ async def test_checkpoint_auto_remediated_on_startup() -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
+# Resume dispatch unit tests (TICKET-0185)
+# ---------------------------------------------------------------------------
+
+async def test_checkpoint_context_injected_in_dispatch() -> tuple[bool, str]:
+    """Checkpoint exists for ticket → dispatch prompt includes checkpoint context.
+
+    Scenario: a checkpoint file exists for TICKET-9995 before _run_worker is called.
+    The conductor reads the checkpoint and builds a resume briefing, which is injected
+    into the prompt passed to _run_claude.  The [RESUME ] dispatch log is also emitted.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_resume_dispatch_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = REPO_ROOT
+    c.ORCH_DIR = orch_dir
+
+    try:
+        ticket_id = "TICKET-9995"
+
+        # Create checkpoint file for the ticket
+        checkpoints_dir = orch_dir / "checkpoints"
+        checkpoints_dir.mkdir()
+        checkpoint_path = checkpoints_dir / f"{ticket_id}.checkpoint.json"
+        checkpoint_path.write_text(json.dumps({
+            "ticket": ticket_id,
+            "agent": "gameplay-programmer",
+            "milestone": "_test",
+            "phase": "Alpha",
+            "wave": 2,
+            "suspended_at": "2026-03-02T10:00:00",
+            "reason": "timeout",
+            "progress": {
+                "steps_completed": ["read_ticket", "verified_deps", "marked_in_progress", "committed"],
+                "commit_hash": "deadbeef",
+                "branch": f"orch/gameplay-programmer/{ticket_id}",
+                "uncommitted_changes": False,
+                "pr_url": None,
+                "pr_merged": False,
+                "pr_state": None,
+                "ticket_status_on_disk": "IN_PROGRESS",
+                "files_changed": [],
+                "new_gd_scripts": False,
+            },
+            "notes": "exit_code=-1",
+        }), encoding="utf-8")
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state("_test", "Alpha")
+
+        # Capture the prompt passed to _run_claude
+        captured_prompts: list[str] = []
+        resume_logs: list[str] = []
+
+        async def mock_run_claude(prompt, **kwargs):
+            captured_prompts.append(prompt)
+            return (0, "", "", {})
+
+        conductor._run_claude = mock_run_claude
+
+        # Capture RESUME log events
+        original_log = conductor.logger.log
+        def capturing_log(level, msg):
+            if level == "RESUME":
+                resume_logs.append(msg)
+            original_log(level, msg)
+        conductor.logger.log = capturing_log
+
+        worker = {
+            "agent": "gameplay-programmer",
+            "ticket": ticket_id,
+            "budget_usd": 0.5,
+            "needs_worktree": False,
+            "needs_godot_mcp": False,
+            "worktree_path": None,
+            "branch": None,
+            "prompt_supplement": "",
+            "started_at": "2026-03-02T10:00:00",
+        }
+
+        await conductor._run_worker(worker)
+
+        # Verify the prompt contains resume briefing content
+        if not captured_prompts:
+            return False, "Resume dispatch: _run_claude was not called"
+
+        prompt = captured_prompts[0]
+        if "Resume Context" not in prompt:
+            return False, f"Resume dispatch: prompt missing 'Resume Context' section"
+        if ticket_id not in prompt:
+            return False, f"Resume dispatch: prompt missing ticket ID {ticket_id}"
+        if "deadbeef" not in prompt:
+            return False, f"Resume dispatch: prompt missing commit hash from checkpoint"
+
+        # Verify [RESUME ] dispatch log was emitted
+        dispatch_logs = [m for m in resume_logs if "Dispatching" in m and ticket_id in m]
+        if not dispatch_logs:
+            return False, "Resume dispatch: [RESUME ] dispatch log not emitted"
+
+        # Verify worker was flagged as resumed
+        if not worker.get("_was_resumed"):
+            return False, "Resume dispatch: worker['_was_resumed'] not set"
+
+        return True, "Resume dispatch: checkpoint context injected in prompt, [RESUME ] logged"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_resumed_worker_done_clears_checkpoint() -> tuple[bool, str]:
+    """Resumed worker reports done → checkpoint file deleted, [RESUME ] success logged.
+
+    Scenario: a checkpoint file exists for TICKET-9994 (worker was previously resumed).
+    The worker reports outcome=done and the ticket file is DONE on disk.
+    _do_working should delete the checkpoint and emit [RESUME ] {ticket} resumed successfully.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_resume_done_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        ticket_id = "TICKET-9994"
+        milestone = "_test"
+
+        # Create ticket file with status DONE
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        (ticket_dir / f"{ticket_id}.md").write_text(
+            f"---\nid: {ticket_id}\nstatus: DONE\n---\n", encoding="utf-8"
+        )
+
+        # Create checkpoint file (simulates an existing suspended checkpoint)
+        checkpoints_dir = orch_dir / "checkpoints"
+        checkpoints_dir.mkdir()
+        checkpoint_path = checkpoints_dir / f"{ticket_id}.checkpoint.json"
+        checkpoint_path.write_text(json.dumps({
+            "ticket": ticket_id,
+            "agent": "gameplay-programmer",
+            "milestone": milestone,
+            "phase": "Alpha",
+            "wave": 2,
+            "suspended_at": "2026-03-02T09:00:00",
+            "reason": "usage_limit",
+            "progress": {
+                "steps_completed": ["read_ticket", "verified_deps", "marked_in_progress"],
+                "commit_hash": None,
+                "branch": f"orch/gameplay-programmer/{ticket_id}",
+                "uncommitted_changes": False,
+                "pr_url": None,
+                "pr_merged": False,
+                "pr_state": None,
+                "ticket_status_on_disk": "IN_PROGRESS",
+                "files_changed": [],
+                "new_gd_scripts": False,
+            },
+            "notes": "exit_code=0",
+        }), encoding="utf-8")
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state(milestone, "Alpha")
+
+        # Build a worker pre-flagged as resumed (as _run_worker would set it)
+        worker = {
+            "agent": "gameplay-programmer",
+            "ticket": ticket_id,
+            "budget_usd": 0.5,
+            "needs_worktree": False,
+            "needs_godot_mcp": False,
+            "worktree_path": None,
+            "branch": None,
+            "prompt_supplement": "",
+            "started_at": "2026-03-02T09:30:00",
+            "_was_resumed": True,
+        }
+        conductor.state["active_workers"] = [worker]
+        conductor.state["active_ticket_ids"] = [ticket_id]
+
+        # Capture RESUME log events
+        resume_logs: list[str] = []
+        original_log = conductor.logger.log
+        def capturing_log(level, msg):
+            if level == "RESUME":
+                resume_logs.append(msg)
+            original_log(level, msg)
+        conductor.logger.log = capturing_log
+
+        # Mock _run_worker to return done outcome
+        done_json = json.dumps({
+            "ticket": ticket_id,
+            "outcome": "done",
+            "summary": "Resumed and completed successfully.",
+        })
+        async def mock_run_worker(_worker):
+            return (0, done_json, "", {})
+        conductor._run_worker = mock_run_worker
+
+        await conductor._do_working()
+
+        # Checkpoint file should be deleted
+        if checkpoint_path.exists():
+            return False, "Resume done: checkpoint file not deleted after successful resume"
+
+        # [RESUME ] success log should have been emitted
+        success_logs = [m for m in resume_logs if "resumed successfully" in m and ticket_id in m]
+        if not success_logs:
+            return False, "Resume done: [RESUME ] 'resumed successfully' log not emitted"
+
+        return True, "Resume done: checkpoint cleared, [RESUME ] resumed successfully logged"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
 
@@ -575,8 +811,38 @@ def main():
         print(f"  Result: {cp_passed}/{cp_total} PASSED, {cp_total - cp_passed} FAILED")
     print("=" * 60)
 
-    # Exit non-zero if either harness or checkpoint tests failed
-    sys.exit(0 if harness_exit == 0 and cp_passed == cp_total else 1)
+    # Run resume dispatch unit tests (TICKET-0185)
+    async def _run_resume_tests():
+        return [
+            await test_checkpoint_context_injected_in_dispatch(),
+            await test_resumed_worker_done_clears_checkpoint(),
+        ]
+
+    resume_checks = asyncio.run(_run_resume_tests())
+
+    print()
+    print("=" * 60)
+    print("  Resume Dispatch Unit Tests (TICKET-0185)")
+    print("=" * 60)
+    for ok, msg in resume_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    res_passed = sum(1 for ok, _ in resume_checks if ok)
+    res_total = len(resume_checks)
+    print()
+    if res_passed == res_total:
+        print(f"  Result: {res_passed}/{res_total} PASSED")
+    else:
+        print(f"  Result: {res_passed}/{res_total} PASSED, {res_total - res_passed} FAILED")
+    print("=" * 60)
+
+    # Exit non-zero if any test suite failed
+    all_passed = (
+        harness_exit == 0
+        and cp_passed == cp_total
+        and res_passed == res_total
+    )
+    sys.exit(0 if all_passed else 1)
 
 
 if __name__ == "__main__":

@@ -550,6 +550,64 @@ def render_template(template_path: Path, variables: dict) -> str:
     return text
 
 
+def _build_resume_briefing(ticket_id: str, checkpoint: dict) -> str:
+    """Format a checkpoint dict into a human-readable resume briefing for the dispatch prompt.
+
+    Called by _run_worker (TICKET-0185) when a checkpoint file exists for the ticket
+    being dispatched.  Returns a Markdown section that is injected into the
+    {checkpoint_context} placeholder in worker_dispatch.md.
+    """
+    progress = checkpoint.get("progress", {})
+    commit = progress.get("commit_hash") or "none"
+    branch = progress.get("branch") or "unknown"
+    push_status = "yes" if commit and commit != "none" else "unknown"
+    pr_url = progress.get("pr_url") or "none"
+    pr_merged = progress.get("pr_merged", False)
+    if pr_merged:
+        pr_status = "merged"
+    elif pr_url and pr_url != "none":
+        pr_status = f"open ({pr_url})"
+    else:
+        pr_status = "no"
+    ticket_status = progress.get("ticket_status_on_disk", "UNKNOWN")
+    steps = progress.get("steps_completed", [])
+    steps_str = ", ".join(steps) if steps else "none recorded"
+
+    # Determine remaining steps from observable state
+    remaining: list[str] = []
+    if "committed" not in steps:
+        remaining.append("Complete the implementation, commit your work, and push the branch")
+    elif "pushed" not in steps and pr_url == "none" and not pr_merged:
+        remaining.append("Push your branch to remote")
+    if not pr_merged and pr_url == "none" and "committed" in steps:
+        remaining.append(f"Create a PR from {branch} targeting main")
+    if not pr_merged and pr_url != "none":
+        remaining.append("Self-merge the PR")
+    if ticket_status != "DONE":
+        remaining.append(
+            "Update the ticket status to DONE with an Activity Log entry "
+            "(include the commit hash and PR URL)"
+        )
+    remaining.append("Output your JSON result")
+
+    remaining_str = "\n".join(f"{i + 1}. {step}" for i, step in enumerate(remaining))
+
+    return (
+        f"## Resume Context\n"
+        f"You are resuming {ticket_id} from an interrupted session.\n"
+        f"- Previous commit: {commit} on branch {branch}\n"
+        f"- Branch pushed to remote: {push_status}\n"
+        f"- PR created: {pr_status}\n"
+        f"- Ticket status on disk: {ticket_status}\n"
+        f"- Steps completed: {steps_str}\n"
+        f"\n"
+        f"YOUR REMAINING STEPS:\n"
+        f"{remaining_str}\n"
+        f"\n"
+        f"Do NOT redo work that was already completed."
+    )
+
+
 # ---------------------------------------------------------------------------
 # Claude CLI interface
 # ---------------------------------------------------------------------------
@@ -920,6 +978,7 @@ class Conductor:
             "max_parallel": str(self.config["concurrency"]["max_parallel_workers"]),
             "active_ticket_ids": json.dumps(active_ticket_ids),
             "completed_this_session": json.dumps(completed_this_session),
+            "pending_checkpoints": self._get_pending_checkpoints_summary(),
         }
         prompt = render_template(self.paths.prompts_dir / "plan_wave.md", template_vars)
 
@@ -1288,10 +1347,14 @@ class Conductor:
                             session_done.append(ticket)
                     elif is_limit:
                         self._write_checkpoint(worker, exit_code, stdout, stderr)
+                        if worker.get("_was_resumed"):
+                            self.logger.log("RESUME", f"{ticket} resume failed")
                         usage_limit_failures.append(ticket)
                         self._queue_retry(ticket, reason="usage_limit")
                     else:
                         self._write_checkpoint(worker, exit_code, stdout, stderr)
+                        if worker.get("_was_resumed"):
+                            self.logger.log("RESUME", f"{ticket} resume failed")
                         self._queue_retry(ticket)
                     continue
 
@@ -1324,6 +1387,8 @@ class Conductor:
                         else:
                             self.logger.log("DONE", f"{agent} <- {ticket}")
                             wave_tickets.append(ticket)
+                            if worker.get("_was_resumed"):
+                                self.logger.log("RESUME", f"{ticket} resumed successfully")
                             self._delete_checkpoint(ticket)
                             # Track session-completed tickets for dependency validation
                             session_done = self.state.setdefault("completed_this_session", [])
@@ -1335,6 +1400,8 @@ class Conductor:
                     else:
                         self.logger.log("PARTIAL", f"{agent} <- {ticket}: outcome={outcome}")
                         all_succeeded = False
+                        if worker.get("_was_resumed"):
+                            self.logger.log("RESUME", f"{ticket} resume failed")
                         self._queue_retry(ticket)
                 except ValueError:
                     self.logger.log("DONE", f"{agent} <- {ticket} (no structured output)")
@@ -1353,10 +1420,14 @@ class Conductor:
                         session_done.append(ticket)
                 elif is_limit:
                     self._write_checkpoint(worker, exit_code, stdout, stderr)
+                    if worker.get("_was_resumed"):
+                        self.logger.log("RESUME", f"{ticket} resume failed")
                     usage_limit_failures.append(ticket)
                     self._queue_retry(ticket, reason="usage_limit")
                 else:
                     self._write_checkpoint(worker, exit_code, stdout, stderr)
+                    if worker.get("_was_resumed"):
+                        self.logger.log("RESUME", f"{ticket} resume failed")
                     self._queue_retry(ticket)
             else:
                 empty = not stdout.strip() and not stderr.strip()
@@ -1376,10 +1447,14 @@ class Conductor:
                         session_done.append(ticket)
                 elif is_limit:
                     self._write_checkpoint(worker, exit_code, stdout, stderr)
+                    if worker.get("_was_resumed"):
+                        self.logger.log("RESUME", f"{ticket} resume failed")
                     usage_limit_failures.append(ticket)
                     self._queue_retry(ticket, reason="usage_limit")
                 else:
                     self._write_checkpoint(worker, exit_code, stdout, stderr)
+                    if worker.get("_was_resumed"):
+                        self.logger.log("RESUME", f"{ticket} resume failed")
                     self._queue_retry(ticket)
 
         # Record completed wave
@@ -1417,11 +1492,21 @@ class Conductor:
         supplement = worker.get("prompt_supplement", "")
 
         # Build worker prompt
-        # checkpoint_context will be fully populated by TICKET-0185; for now it is an
-        # empty string (fresh dispatch) or a fallback note (retry without checkpoint).
         retry_entry = self.state.get("retries", {}).get(ticket_id, 0)
         retry_count = retry_entry["count"] if isinstance(retry_entry, dict) else retry_entry
         checkpoint_context = worker.get("checkpoint_context", "")
+
+        # TICKET-0185: Load checkpoint file if present and inject structured resume briefing.
+        checkpoint_file = ORCH_DIR / "checkpoints" / f"{ticket_id}.checkpoint.json"
+        if not checkpoint_context and checkpoint_file.exists():
+            try:
+                cp_data = json.loads(checkpoint_file.read_text(encoding="utf-8"))
+                checkpoint_context = _build_resume_briefing(ticket_id, cp_data)
+                worker["_was_resumed"] = True
+                self.logger.log("RESUME", f"Dispatching {ticket_id} with checkpoint context")
+            except (json.JSONDecodeError, OSError):
+                pass
+
         if not checkpoint_context and retry_count > 0:
             # Fallback: no checkpoint file exists, but this is a retry dispatch.
             # Inform the agent so it can assess current state before proceeding.
@@ -1800,6 +1885,41 @@ class Conductor:
                 ]
                 self.logger.log("CLEANUP",
                     f"Cleared stale active_ticket_ids: {', '.join(cleared)}")
+
+    def _get_pending_checkpoints_summary(self) -> str:
+        """Scan checkpoints/ and return a human-readable summary for the Producer prompt.
+
+        Called by _do_planning (TICKET-0185) to populate {pending_checkpoints} in
+        plan_wave.md.  The Producer uses this information to prioritize resumed tickets
+        and avoid re-dispatching tickets with unresolved checkpoint states.
+        """
+        checkpoints_dir = ORCH_DIR / "checkpoints"
+        if not checkpoints_dir.exists():
+            return "none"
+
+        checkpoint_files = sorted(checkpoints_dir.glob("*.checkpoint.json"))
+        if not checkpoint_files:
+            return "none"
+
+        entries: list[str] = []
+        for cp_file in checkpoint_files:
+            try:
+                cp = json.loads(cp_file.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                continue
+            ticket = cp.get("ticket", "UNKNOWN")
+            agent = cp.get("agent", "unknown")
+            progress = cp.get("progress", {})
+            steps = progress.get("steps_completed", [])
+            status = progress.get("ticket_status_on_disk", "UNKNOWN")
+            reason = cp.get("reason", "unknown")
+            steps_str = ", ".join(steps) if steps else "none"
+            entries.append(
+                f"- {ticket} (agent: {agent}, status: {status}, "
+                f"reason: {reason}, steps: {steps_str})"
+            )
+
+        return "\n".join(entries) if entries else "none"
 
     # ------------------------------------------------------------------
     # EVALUATING

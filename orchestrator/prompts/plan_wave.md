@@ -9,6 +9,9 @@ You are the Producer agent in orchestration mode. Analyze the ticket queue and o
 - Active ticket locks (in-flight): {active_ticket_ids}
 - Completed this session: {completed_this_session}
   - Tickets in `completed_this_session` are definitively DONE in this session — treat them as DONE even if the ticket file hasn't been updated yet.
+- Pending checkpoints (suspended workers from previous sessions):
+{pending_checkpoints}
+  - Tickets listed here were interrupted and have checkpoint files. They are likely `IN_PROGRESS` on disk. Prioritize them in this wave if their dependencies are met — they will receive resume context automatically.
 
 ## Instructions
 

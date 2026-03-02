@@ -2,7 +2,7 @@
 id: TICKET-0220
 title: "Feature — Debug launcher toggle for 3× player movement speed"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P3
 owner: gameplay-programmer
 created_by: producer
@@ -21,12 +21,12 @@ Navigating large biomes (500m×500m) during playtesting is time-consuming at nor
 
 ## Acceptance Criteria
 
-- [ ] The debug launcher UI has a clearly labeled toggle (e.g., "Fast Move (3×)") that enables/disables the speed multiplier
-- [ ] When enabled, the player's walk and run speeds are multiplied by 3× from the moment the biome loads
-- [ ] The speed multiplier is applied via a clean multiplier on the existing movement speed constants — no copy-paste of movement logic
-- [ ] The toggle state persists across debug launches within the same session (saves to the same config mechanism as other debug toggles)
-- [ ] The multiplier is stripped out in production builds or is clearly gated behind `OS.is_debug_build()` — it must not affect normal gameplay
-- [ ] Full test suite passes with no new failures
+- [x] The debug launcher UI has a clearly labeled toggle (e.g., "Fast Move (3×)") that enables/disables the speed multiplier
+- [x] When enabled, the player's walk and run speeds are multiplied by 3× from the moment the biome loads
+- [x] The speed multiplier is applied via a clean multiplier on the existing movement speed constants — no copy-paste of movement logic
+- [x] The toggle state persists across debug launches within the same session (saves to the same config mechanism as other debug toggles)
+- [x] The multiplier is stripped out in production builds or is clearly gated behind `OS.is_debug_build()` — it must not affect normal gameplay
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -38,3 +38,4 @@ Navigating large biomes (500m×500m) during playtesting is time-consuming at nor
 
 - 2026-02-28 [producer] Created — deferred from M8; Studio Head requested during M8 playtest
 - 2026-03-01 [gameplay-programmer] Starting work — dependency TICKET-0233 is DONE
+- 2026-03-01 [gameplay-programmer] DONE — Added Fast Move (3×) toggle to DebugLauncher. Global.debug_speed_multiplier stores state, GameWorld applies to PlayerFirstPerson.debug_speed_multiplier gated behind OS.is_debug_build(). Commit: 984929d, PR: #260

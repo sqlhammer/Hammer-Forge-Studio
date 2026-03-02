@@ -2,7 +2,7 @@
 id: TICKET-0219
 title: "Feature — Destroy (discard) an item directly from inventory"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -21,12 +21,12 @@ Players cannot remove unwanted items from their inventory other than by using th
 
 ## Acceptance Criteria
 
-- [ ] Player can destroy a selected item from the inventory UI — item is removed from inventory and does not spawn in the world
-- [ ] A confirmation step is required before destruction (e.g., hold to destroy, or a confirm dialog) to prevent accidental loss
-- [ ] Destroyed items are gone permanently — no recovery
-- [ ] The action is clearly labeled "Destroy" or "Discard" in the UI to distinguish it from drop (TICKET-0218)
-- [ ] Unit tests cover: destroy removes item from inventory, item count decrements correctly, confirmation gate blocks accidental destruction
-- [ ] Full test suite passes with no new failures
+- [x] Player can destroy a selected item from the inventory UI — item is removed from inventory and does not spawn in the world
+- [x] A confirmation step is required before destruction (e.g., hold to destroy, or a confirm dialog) to prevent accidental loss
+- [x] Destroyed items are gone permanently — no recovery
+- [x] The action is clearly labeled "Destroy" or "Discard" in the UI to distinguish it from drop (TICKET-0218)
+- [x] Unit tests cover: destroy removes item from inventory, item count decrements correctly, confirmation gate blocks accidental destruction
+- [x] Full test suite passes with no new failures
 
 ## Implementation Notes
 
@@ -38,3 +38,4 @@ Players cannot remove unwanted items from their inventory other than by using th
 
 - 2026-02-28 [producer] Created — deferred from M8; Studio Head requested during M8 playtest
 - 2026-03-01 [gameplay-programmer] Starting work — implementing destroy/discard item feature with confirm dialog
+- 2026-03-01 [gameplay-programmer] DONE — commit 61f9218 (PR #236 https://github.com/sqlhammer/Hammer-Forge-Studio/pull/236). Implemented destroy action with confirm dialog (DESTROY/CANCEL buttons, CANCEL focused by default). Drop and destroy are distinct actions: [G]/right-click = drop, [Enter] = destroy with confirmation. Added 5 unit tests for destroy behavior.

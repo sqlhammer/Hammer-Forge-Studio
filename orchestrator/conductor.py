@@ -1252,7 +1252,17 @@ class Conductor:
                     self.logger.log("CRASH",
                         f"{agent} <- {ticket}: exit=0 but empty stdout — treating as failed")
                     all_succeeded = False
-                    self._queue_retry(ticket)
+                    # Silent-success check (R1, R10): ticket may be DONE even though the
+                    # agent exited before outputting JSON.  If so, skip the retry.
+                    if read_ticket_status(ticket, self.state["milestone"]) == "DONE":
+                        self.logger.log("DONE",
+                            f"{agent} <- {ticket} (silent success — ticket is DONE on disk)")
+                        wave_tickets.append(ticket)
+                        session_done = self.state.setdefault("completed_this_session", [])
+                        if ticket not in session_done:
+                            session_done.append(ticket)
+                    else:
+                        self._queue_retry(ticket)
                     continue
 
                 # Try to parse result
@@ -1301,7 +1311,16 @@ class Conductor:
             elif exit_code == -1:
                 self.logger.log("TIMEOUT", f"{agent} <- {ticket}: {stderr}")
                 all_succeeded = False
-                self._queue_retry(ticket)
+                # Silent-success check (R10): agent may have completed before timing out.
+                if read_ticket_status(ticket, self.state["milestone"]) == "DONE":
+                    self.logger.log("DONE",
+                        f"{agent} <- {ticket} (silent success — ticket is DONE on disk)")
+                    wave_tickets.append(ticket)
+                    session_done = self.state.setdefault("completed_this_session", [])
+                    if ticket not in session_done:
+                        session_done.append(ticket)
+                else:
+                    self._queue_retry(ticket)
             else:
                 empty = not stdout.strip() and not stderr.strip()
                 label = "CRASH" if empty else "FAILED"
@@ -1309,7 +1328,16 @@ class Conductor:
                     f"{agent} <- {ticket} (exit={exit_code}"
                     + (", empty output — possible crash/signal" if empty else "") + ")")
                 all_succeeded = False
-                self._queue_retry(ticket)
+                # Silent-success check (R1, R3, R10): agent may have completed before crashing.
+                if read_ticket_status(ticket, self.state["milestone"]) == "DONE":
+                    self.logger.log("DONE",
+                        f"{agent} <- {ticket} (silent success — ticket is DONE on disk)")
+                    wave_tickets.append(ticket)
+                    session_done = self.state.setdefault("completed_this_session", [])
+                    if ticket not in session_done:
+                        session_done.append(ticket)
+                else:
+                    self._queue_retry(ticket)
 
         # Record completed wave
         self.state["completed_waves"].append({
@@ -1334,6 +1362,20 @@ class Conductor:
         supplement = worker.get("prompt_supplement", "")
 
         # Build worker prompt
+        # checkpoint_context will be fully populated by TICKET-0185; for now it is an
+        # empty string (fresh dispatch) or a fallback note (retry without checkpoint).
+        retry_count = self.state.get("retries", {}).get(ticket_id, 0)
+        checkpoint_context = worker.get("checkpoint_context", "")
+        if not checkpoint_context and retry_count > 0:
+            # Fallback: no checkpoint file exists, but this is a retry dispatch.
+            # Inform the agent so it can assess current state before proceeding.
+            ticket_status_on_disk = read_ticket_status(ticket_id, self.state["milestone"])
+            checkpoint_context = (
+                f"This ticket is {ticket_status_on_disk} from a previous session that was "
+                "interrupted. Assess the current state of the branch and ticket before "
+                "proceeding."
+            )
+
         template_vars = {
             "agent_name": agent_slug.replace("-", " ").title(),
             "agent_slug": agent_slug,
@@ -1341,6 +1383,7 @@ class Conductor:
             "milestone": self.state["milestone"],
             "ticket_title": ticket_id,  # Will be refined by the agent after reading
             "prompt_supplement": supplement if supplement else "No additional notes.",
+            "checkpoint_context": checkpoint_context,
         }
         prompt = render_template(self.paths.prompts_dir / "worker_dispatch.md", template_vars)
 

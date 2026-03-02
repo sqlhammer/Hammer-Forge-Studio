@@ -2,7 +2,7 @@
 id: TICKET-0182
 title: "Fix dead-lock on IN_PROGRESS pre-claim and add silent-success detection"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P0
 owner: tools-devops-engineer
 created_by: producer
@@ -45,3 +45,4 @@ This ticket fixes both issues. See `docs/engineering/orchestrator-resilience-pla
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — P0 fix for dead-lock and silent-success detection gaps
+- 2026-03-01 [tools-devops-engineer] Starting work — dependency TICKET-0235 verified DONE

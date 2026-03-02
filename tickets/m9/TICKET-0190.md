@@ -2,12 +2,12 @@
 id: TICKET-0190
 title: "Auto-remediation for silently-merged PRs with IN_PROGRESS tickets"
 type: FEATURE
-status: OPEN
+status: DONE
 priority: P3
 owner: tools-devops-engineer
 created_by: producer
 created_at: 2026-02-27
-updated_at: 2026-02-27
+updated_at: 2026-03-02
 milestone: "M9"
 phase: "Orchestrator Resilience"
 depends_on: [TICKET-0183]
@@ -66,3 +66,5 @@ See `docs/engineering/orchestrator-resilience-plan.md` Risk R3 and Section 2.3 (
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — auto-remediation for silently-merged PRs (split from TICKET-0183)
+- 2026-03-02 [tools-devops-engineer] Starting work — implementing _check_merged_pr, auto-remediation in _do_working and _scan_checkpoints_on_startup
+- 2026-03-02 [tools-devops-engineer] DONE — commit f87b37a, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/282 merged. Implemented _check_merged_pr, _auto_remediate_merged_pr, _mark_ticket_done_on_disk; integrated R3 auto-remediation into all 6 abnormal-exit paths in _do_working and into _scan_checkpoints_on_startup; added 3 unit tests. All 13+2+2+3 harness/checkpoint/UID/R3 tests pass.

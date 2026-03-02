@@ -11,8 +11,6 @@ Usage:
 Additional unit tests:
   - Checkpoint created on abnormal exit (empty stdout)
   - Checkpoint auto-remediated on startup when ticket is DONE on disk
-  - Checkpoint context injected into dispatch prompt when checkpoint exists (TICKET-0185)
-  - Resumed worker reports done → checkpoint deleted, [RESUME ] logged (TICKET-0185)
 """
 
 import argparse
@@ -550,6 +548,437 @@ async def test_uid_commit_pending_already_pushed() -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
+# Merged-PR auto-remediation unit tests (TICKET-0190)
+# ---------------------------------------------------------------------------
+
+async def test_merged_pr_auto_remediation_in_do_working() -> tuple[bool, str]:
+    """Worker exits abnormally, gh pr list returns merged PR → ticket auto-remediated.
+
+    Scenario: agent exits non-zero (crash), the ticket is IN_PROGRESS on disk,
+    and _check_merged_pr returns a merged PR dict.  _do_working must auto-remediate
+    the ticket to DONE and NOT queue a retry.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_r3_merged_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        ticket_id = "TICKET-9994"
+        milestone = "_test"
+
+        # Create ticket file with status IN_PROGRESS
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        ticket_file = ticket_dir / f"{ticket_id}.md"
+        ticket_file.write_text(
+            f"---\nid: {ticket_id}\nstatus: IN_PROGRESS\nupdated_at: 2026-03-01\n---\n"
+            "## Activity Log\n- 2026-03-01 [agent] Starting work\n",
+            encoding="utf-8",
+        )
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = c.Conductor(paths=paths, config=config)
+        conductor.state = c.create_initial_state(milestone, "Alpha")
+
+        branch = f"orch/gameplay-programmer/{ticket_id}"
+        worker = {
+            "agent": "gameplay-programmer",
+            "ticket": ticket_id,
+            "budget_usd": 0.5,
+            "needs_worktree": False,
+            "needs_godot_mcp": False,
+            "worktree_path": None,
+            "branch": branch,
+            "prompt_supplement": "",
+            "started_at": "2026-03-01T00:00:00",
+        }
+        conductor.state["active_workers"] = [worker]
+        conductor.state["active_ticket_ids"] = [ticket_id]
+
+        # Patch _check_merged_pr to return a merged PR
+        conductor._check_merged_pr = lambda tid, br: (
+            {"number": 42, "url": "https://github.com/test/repo/pull/42",
+             "state": "merged", "merged": True}
+            if br == branch else None
+        )
+
+        # Mock _run_worker to return exit=1, empty output (crash)
+        async def mock_run_worker(_worker):
+            return (1, "", "", {})
+
+        conductor._run_worker = mock_run_worker
+
+        await conductor._do_working()
+
+        # Ticket file should now read DONE
+        ticket_text = ticket_file.read_text(encoding="utf-8")
+        if "status: DONE" not in ticket_text:
+            return False, "R3: ticket file was not updated to DONE after merged-PR auto-remediation"
+
+        # Ticket should be in completed_this_session
+        session_done = conductor.state.get("completed_this_session", [])
+        if ticket_id not in session_done:
+            return False, f"R3: {ticket_id} not added to completed_this_session"
+
+        # No retry should be queued
+        retries = conductor.state.get("retries", {})
+        if ticket_id in retries:
+            return False, f"R3: retry was queued for auto-remediated ticket {ticket_id}"
+
+        return True, "R3: ticket auto-remediated to DONE after merged PR, no retry queued"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_open_pr_no_auto_remediation() -> tuple[bool, str]:
+    """Worker exits abnormally, gh pr list returns open (not merged) PR → NOT auto-remediated.
+
+    Scenario: agent exits non-zero, the ticket is IN_PROGRESS on disk, but the PR
+    is open (not merged).  _do_working must NOT auto-remediate and must queue a retry.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_r3_open_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        ticket_id = "TICKET-9993"
+        milestone = "_test"
+
+        # Create ticket file with status IN_PROGRESS
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        ticket_file = ticket_dir / f"{ticket_id}.md"
+        ticket_file.write_text(
+            f"---\nid: {ticket_id}\nstatus: IN_PROGRESS\nupdated_at: 2026-03-01\n---\n",
+            encoding="utf-8",
+        )
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = c.Conductor(paths=paths, config=config)
+        conductor.state = c.create_initial_state(milestone, "Alpha")
+
+        branch = f"orch/gameplay-programmer/{ticket_id}"
+        worker = {
+            "agent": "gameplay-programmer",
+            "ticket": ticket_id,
+            "budget_usd": 0.5,
+            "needs_worktree": False,
+            "needs_godot_mcp": False,
+            "worktree_path": None,
+            "branch": branch,
+            "prompt_supplement": "",
+            "started_at": "2026-03-01T00:00:00",
+        }
+        conductor.state["active_workers"] = [worker]
+        conductor.state["active_ticket_ids"] = [ticket_id]
+
+        # Patch _check_merged_pr to return None (no merged PR found)
+        conductor._check_merged_pr = lambda tid, br: None
+
+        # Mock _run_worker to return exit=1, empty output (crash)
+        async def mock_run_worker(_worker):
+            return (1, "", "", {})
+
+        conductor._run_worker = mock_run_worker
+
+        await conductor._do_working()
+
+        # Ticket file should still read IN_PROGRESS
+        ticket_text = ticket_file.read_text(encoding="utf-8")
+        if "status: DONE" in ticket_text:
+            return False, "R3: ticket incorrectly updated to DONE when PR was not merged"
+
+        # Retry should be queued
+        retries = conductor.state.get("retries", {})
+        if ticket_id not in retries:
+            return False, f"R3: retry was not queued for non-merged PR crash case"
+
+        return True, "R3: open PR correctly skipped auto-remediation, retry queued"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_merged_pr_auto_remediation_on_startup() -> tuple[bool, str]:
+    """Checkpoint exists on startup with IN_PROGRESS ticket and merged PR → auto-remediated.
+
+    Scenario: previous session wrote a checkpoint for TICKET-9992 with status
+    IN_PROGRESS.  On restart, _scan_checkpoints_on_startup must call _check_merged_pr,
+    find the merged PR, and auto-remediate: update ticket to DONE, add to
+    completed_this_session, delete checkpoint.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_r3_startup_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        ticket_id = "TICKET-9992"
+        milestone = "_test"
+        branch = f"orch/gameplay-programmer/{ticket_id}"
+
+        # Create ticket file with status IN_PROGRESS
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        ticket_file = ticket_dir / f"{ticket_id}.md"
+        ticket_file.write_text(
+            f"---\nid: {ticket_id}\nstatus: IN_PROGRESS\nupdated_at: 2026-03-01\n---\n"
+            "## Activity Log\n- 2026-03-01 [agent] Starting work\n",
+            encoding="utf-8",
+        )
+
+        # Create checkpoint file with IN_PROGRESS branch info
+        checkpoints_dir = orch_dir / "checkpoints"
+        checkpoints_dir.mkdir()
+        checkpoint_path = checkpoints_dir / f"{ticket_id}.checkpoint.json"
+        checkpoint_path.write_text(json.dumps({
+            "ticket": ticket_id,
+            "agent": "gameplay-programmer",
+            "milestone": milestone,
+            "phase": "Alpha",
+            "wave": 5,
+            "suspended_at": "2026-03-01T10:00:00",
+            "reason": "usage_limit",
+            "progress": {
+                "steps_completed": ["read_ticket", "marked_in_progress", "committed", "merged_pr"],
+                "commit_hash": "def5678",
+                "branch": branch,
+                "uncommitted_changes": False,
+                "pr_url": "https://github.com/test/repo/pull/55",
+                "pr_merged": False,
+                "pr_state": "MERGED",
+                "ticket_status_on_disk": "IN_PROGRESS",
+                "files_changed": [],
+                "new_gd_scripts": False,
+            },
+            "notes": "exit_code=0",
+        }), encoding="utf-8")
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = c.Conductor(paths=paths, config=config)
+        conductor.state = c.create_initial_state(milestone, "Alpha")
+        conductor.state["active_ticket_ids"] = [ticket_id]
+
+        # Patch _check_merged_pr to return a merged PR for this branch
+        conductor._check_merged_pr = lambda tid, br: (
+            {"number": 55, "url": "https://github.com/test/repo/pull/55",
+             "state": "merged", "merged": True}
+            if br == branch else None
+        )
+
+        conductor._scan_checkpoints_on_startup()
+
+        # Checkpoint file should be deleted
+        if checkpoint_path.exists():
+            return False, "R3 startup: checkpoint not deleted after auto-remediation"
+
+        # Ticket should be in completed_this_session
+        session_done = conductor.state.get("completed_this_session", [])
+        if ticket_id not in session_done:
+            return False, f"R3 startup: {ticket_id} not added to completed_this_session"
+
+        # Ticket file should read DONE
+        ticket_text = ticket_file.read_text(encoding="utf-8")
+        if "status: DONE" not in ticket_text:
+            return False, "R3 startup: ticket file was not updated to DONE"
+
+        return True, "R3 startup: IN_PROGRESS checkpoint with merged PR auto-remediated on startup"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
+# Gate detection unit tests (TICKET-0189)
+# ---------------------------------------------------------------------------
+
+async def test_gate_emitted_when_all_done_and_producer_fails() -> tuple[bool, str]:
+    """All phase tickets DONE on disk + Producer unavailable → conductor emits gate.
+
+    Scenario: a milestone has two tickets in the same phase, both DONE on disk.
+    The conductor's _do_evaluating call (with Producer already failed) should
+    detect completion and write pending_gate.json, transitioning to GATE_BLOCKED.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_gate_emit_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        milestone = "_gtest"
+        phase = "Alpha"
+
+        # Create ticket files — both DONE in the same phase
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        for tid in ("TICKET-8801", "TICKET-8802"):
+            (ticket_dir / f"{tid}.md").write_text(
+                f"---\nid: {tid}\nstatus: DONE\nphase: {phase}\n---\n",
+                encoding="utf-8",
+            )
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state(milestone, phase)
+        # Mark at least one completed wave so _do_evaluating doesn't short-circuit
+        conductor.state["completed_waves"] = [{"wave": 1, "tickets": ["TICKET-8801"]}]
+
+        # Patch out git operations — not relevant for this unit test
+        async def _noop_merge():
+            pass
+        conductor._merge_pending_branches = _noop_merge
+
+        await conductor._do_evaluating()
+
+        status = conductor.state.get("status")
+        gate_path = paths.pending_gate_path
+
+        if status != "GATE_BLOCKED":
+            return False, (
+                f"Gate fallback: expected status=GATE_BLOCKED, got {status!r}"
+            )
+        if not gate_path.exists():
+            return False, "Gate fallback: pending_gate.json was not written"
+
+        gate_data = json.loads(gate_path.read_text(encoding="utf-8"))
+        required = ["milestone", "phase", "next_phase", "summary", "requested_at"]
+        missing = [f for f in required if f not in gate_data]
+        if missing:
+            return False, f"Gate fallback: pending_gate.json missing fields: {missing}"
+        if "Conductor fallback" not in gate_data.get("summary", ""):
+            return False, (
+                f"Gate fallback: unexpected summary: {gate_data.get('summary')!r}"
+            )
+
+        return True, "Gate fallback: pending_gate.json written with correct schema"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_gate_not_double_emitted() -> tuple[bool, str]:
+    """When _gate_emitted_this_wave is True, conductor does not re-emit the gate.
+
+    Scenario: pending_gate.json already exists (Producer or a prior cycle already
+    emitted).  _gate_emitted_this_wave should be set True in _do_planning,
+    preventing _check_fallback_gate from firing again in _do_evaluating.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_gate_no_double_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        milestone = "_gtest2"
+        phase = "Beta"
+
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        for tid in ("TICKET-8803", "TICKET-8804"):
+            (ticket_dir / f"{tid}.md").write_text(
+                f"---\nid: {tid}\nstatus: DONE\nphase: {phase}\n---\n",
+                encoding="utf-8",
+            )
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state(milestone, phase)
+        conductor.state["completed_waves"] = [{"wave": 1, "tickets": ["TICKET-8803"]}]
+
+        # Pre-write pending_gate.json (simulating Producer already emitted)
+        write_json(paths.pending_gate_path, {
+            "milestone": milestone,
+            "phase": phase,
+            "next_phase": "",
+            "summary": "Producer emitted gate",
+            "requested_at": "2026-03-02T00:00:00",
+        })
+
+        # Simulate what _do_planning does: detect existing gate → set flag
+        conductor._gate_emitted_this_wave = paths.pending_gate_path.exists()
+
+        async def _noop_merge():
+            pass
+        conductor._merge_pending_branches = _noop_merge
+
+        # Capture the mtime of pending_gate.json before evaluating
+        mtime_before = paths.pending_gate_path.stat().st_mtime
+
+        await conductor._do_evaluating()
+
+        # File should not have been rewritten (mtime unchanged)
+        mtime_after = paths.pending_gate_path.stat().st_mtime
+        if mtime_before != mtime_after:
+            return False, (
+                "Gate no-double-emit: pending_gate.json was rewritten even though "
+                "_gate_emitted_this_wave was True"
+            )
+
+        # Status should be PLANNING (gate already handled — conductor skips fallback)
+        status = conductor.state.get("status")
+        if status not in ("PLANNING", "GATE_BLOCKED"):
+            return False, f"Gate no-double-emit: unexpected status {status!r}"
+
+        return True, "Gate no-double-emit: pending_gate.json not rewritten when flag set"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
 # Resume dispatch unit tests (TICKET-0185)
 # ---------------------------------------------------------------------------
 
@@ -988,6 +1417,57 @@ def main():
         print(f"  Result: {uid_passed}/{uid_total} PASSED, {uid_total - uid_passed} FAILED")
     print("=" * 60)
 
+    # Run merged-PR auto-remediation unit tests (TICKET-0190)
+    async def _run_r3_tests():
+        return [
+            await test_merged_pr_auto_remediation_in_do_working(),
+            await test_open_pr_no_auto_remediation(),
+            await test_merged_pr_auto_remediation_on_startup(),
+        ]
+
+    r3_checks = asyncio.run(_run_r3_tests())
+
+    print()
+    print("=" * 60)
+    print("  Merged-PR Auto-Remediation Tests (TICKET-0190)")
+    print("=" * 60)
+    for ok, msg in r3_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    r3_passed = sum(1 for ok, _ in r3_checks if ok)
+    r3_total = len(r3_checks)
+    print()
+    if r3_passed == r3_total:
+        print(f"  Result: {r3_passed}/{r3_total} PASSED")
+    else:
+        print(f"  Result: {r3_passed}/{r3_total} PASSED, {r3_total - r3_passed} FAILED")
+    print("=" * 60)
+
+    # Run gate detection unit tests (TICKET-0189)
+    async def _run_gate_tests():
+        return [
+            await test_gate_emitted_when_all_done_and_producer_fails(),
+            await test_gate_not_double_emitted(),
+        ]
+
+    gate_checks = asyncio.run(_run_gate_tests())
+
+    print()
+    print("=" * 60)
+    print("  Gate Detection Unit Tests (TICKET-0189)")
+    print("=" * 60)
+    for ok, msg in gate_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    gate_passed = sum(1 for ok, _ in gate_checks if ok)
+    gate_total = len(gate_checks)
+    print()
+    if gate_passed == gate_total:
+        print(f"  Result: {gate_passed}/{gate_total} PASSED")
+    else:
+        print(f"  Result: {gate_passed}/{gate_total} PASSED, {gate_total - gate_passed} FAILED")
+    print("=" * 60)
+
     # Run resume dispatch unit tests (TICKET-0185)
     async def _run_resume_tests():
         return [
@@ -1018,6 +1498,8 @@ def main():
         harness_exit == 0
         and cp_passed == cp_total
         and uid_passed == uid_total
+        and r3_passed == r3_total
+        and gate_passed == gate_total
         and res_passed == res_total
     )
     sys.exit(0 if all_passed else 1)

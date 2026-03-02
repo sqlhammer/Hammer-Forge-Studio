@@ -2,6 +2,9 @@
 class_name InventoryScreen
 extends CanvasLayer
 
+# ── Signals ──────────────────────────────────────────────
+signal item_drop_requested(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Purity, quantity: int)
+
 # ── Constants ─────────────────────────────────────────────
 const SLOT_SIZE: float = 80.0
 const SLOT_GAP: float = 12.0
@@ -37,6 +40,7 @@ var _detail_icon: TextureRect = null
 var _detail_name_label: Label = null
 var _detail_stars_container: HBoxContainer = null
 var _detail_quantity_label: Label = null
+var _detail_drop_hint: Label = null
 var _dim_rect: ColorRect = null
 var _main_panel: PanelContainer = null
 var _combined_container: HBoxContainer = null
@@ -82,6 +86,10 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_cancel"):
 		close_inventory()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("use_item"):
+		# G key drops the focused slot's item onto the ground
+		_drop_focused_slot()
 		get_viewport().set_input_as_handled()
 
 # ── Public Methods ────────────────────────────────────────
@@ -268,6 +276,15 @@ func _build_ui() -> void:
 	_detail_quantity_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	detail_hbox.add_child(_detail_quantity_label)
 
+	# Drop hint below the detail area
+	_detail_drop_hint = Label.new()
+	_detail_drop_hint.add_theme_font_size_override("font_size", 14)
+	_detail_drop_hint.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
+	_detail_drop_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_detail_drop_hint.text = "[G] Drop  |  [Right-Click] Drop"
+	_detail_drop_hint.visible = false
+	vbox.add_child(_detail_drop_hint)
+
 func _create_slot(index: int) -> PanelContainer:
 	var slot := PanelContainer.new()
 	slot.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
@@ -355,6 +372,8 @@ func _update_detail_area() -> void:
 		_detail_name_label.text = "Empty Slot"
 		_detail_name_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 		_detail_quantity_label.text = ""
+		if _detail_drop_hint:
+			_detail_drop_hint.visible = false
 		for i: int in range(5):
 			(_detail_stars_container.get_child(i) as Label).visible = false
 		return
@@ -385,6 +404,10 @@ func _update_detail_area() -> void:
 		else:
 			star.add_theme_color_override("font_color", COLOR_NEUTRAL)
 
+	# Show drop hint for non-empty slots
+	if _detail_drop_hint:
+		_detail_drop_hint.visible = true
+
 func _move_focus(dx: int, dy: int) -> void:
 	var col: int = _focused_slot % GRID_COLUMNS
 	var row: int = _focused_slot / GRID_COLUMNS
@@ -413,6 +436,24 @@ func _on_slot_gui_input(event: InputEvent, index: int) -> void:
 		return
 	if mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_LEFT:
 		select_slot(index)
+	elif mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_RIGHT:
+		select_slot(index)
+		_drop_focused_slot()
+
+func _drop_focused_slot() -> void:
+	var slot_data: Dictionary = PlayerInventory.get_slot(_focused_slot)
+	if slot_data.is_empty():
+		return
+	var resource_type: ResourceDefs.ResourceType = slot_data.get("resource_type") as ResourceDefs.ResourceType
+	var purity: ResourceDefs.Purity = slot_data.get("purity") as ResourceDefs.Purity
+	var quantity: int = slot_data.get("quantity", 0) as int
+	PlayerInventory.remove_from_slot(_focused_slot, quantity)
+	var resource_name: String = ResourceDefs.get_resource_name(resource_type)
+	Global.log("InventoryScreen: drop requested — %s x%d" % [resource_name, quantity])
+	item_drop_requested.emit(resource_type, purity, quantity)
+	_refresh_slot(_focused_slot)
+	_update_detail_area()
+
 
 func _on_slot_changed(slot_index: int) -> void:
 	Global.log("InventoryScreen: slot %d changed" % slot_index)

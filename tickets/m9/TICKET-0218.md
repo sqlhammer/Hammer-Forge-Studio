@@ -2,7 +2,7 @@
 id: TICKET-0218
 title: "Feature — Drop items from inventory onto the ground and pick them back up"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -40,3 +40,4 @@ Players have no way to discard or reposition items carried in their inventory. T
 ## Activity Log
 
 - 2026-02-28 [producer] Created — deferred from M8; Studio Head requested during M8 playtest
+- 2026-03-01 [gameplay-programmer] Starting work — implementing drop/pickup system

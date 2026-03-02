@@ -2,7 +2,7 @@
 id: TICKET-0229
 title: "Root Game: Add starting_biome and starting_inventory params to Global"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -43,3 +43,4 @@ These properties are intentionally simple value holders with no logic. They are 
 
 - 2026-02-28 [producer] Created ticket — foundation for Root Game phase startup parameter flow
 - 2026-03-01 [systems-programmer] Starting work — adding starting_biome and starting_inventory properties to Global
+- 2026-03-01 [systems-programmer] DONE — commit b47c1cf, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/238 (merged)

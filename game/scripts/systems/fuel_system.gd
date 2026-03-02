@@ -38,7 +38,7 @@ var fuel_current: float:
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
 	_fuel_current = fuel_max
-	Global.log("FuelSystem: initialized (fuel=%.1f/%.1f)" % [_fuel_current, fuel_max])
+	Global.debug_log("FuelSystem: initialized (fuel=%.1f/%.1f)" % [_fuel_current, fuel_max])
 
 # ── Public Methods ────────────────────────────────────────
 
@@ -52,17 +52,17 @@ func consume_fuel(amount: float) -> void:
 	var threshold: float = fuel_max * FuelSystemDefs.LOW_FUEL_THRESHOLD_PERCENT
 	_fuel_current = maxf(_fuel_current - amount, 0.0)
 	fuel_changed.emit(_fuel_current, fuel_max)
-	Global.log("FuelSystem: consumed %.1f fuel (current=%.1f/%.1f)" % [
+	Global.debug_log("FuelSystem: consumed %.1f fuel (current=%.1f/%.1f)" % [
 		amount, _fuel_current, fuel_max])
 	if _fuel_current <= threshold and not _low_signal_emitted:
 		_low_signal_emitted = true
 		fuel_low.emit()
-		Global.log("FuelSystem: LOW FUEL — %.1f/%.1f (%.0f%%)" % [
+		Global.debug_log("FuelSystem: LOW FUEL — %.1f/%.1f (%.0f%%)" % [
 			_fuel_current, fuel_max, _fuel_current / fuel_max * 100.0])
 	if _fuel_current <= 0.0 and not _empty_signal_emitted:
 		_empty_signal_emitted = true
 		fuel_empty.emit()
-		Global.log("FuelSystem: FUEL EMPTY — tank depleted")
+		Global.debug_log("FuelSystem: FUEL EMPTY — tank depleted")
 
 ## Converts up to fuel_cells Fuel Cells from the player inventory into fuel units.
 ## Removes consumed Fuel Cells from PlayerInventory.
@@ -74,12 +74,12 @@ func refuel(fuel_cells: int) -> int:
 	var available: int = PlayerInventory.get_total_count(ResourceDefs.ResourceType.FUEL_CELL)
 	var to_consume: int = mini(fuel_cells, available)
 	if to_consume <= 0:
-		Global.log("FuelSystem: refuel requested but no Fuel Cells in inventory")
+		Global.debug_log("FuelSystem: refuel requested but no Fuel Cells in inventory")
 		return 0
 	# Calculate how many cells are actually needed to fill the tank
 	var space_remaining: float = fuel_max - _fuel_current
 	if space_remaining <= 0.0:
-		Global.log("FuelSystem: refuel skipped — tank already full")
+		Global.debug_log("FuelSystem: refuel skipped — tank already full")
 		return 0
 	var cells_needed_for_full: int = ceili(space_remaining / FuelSystemDefs.FUEL_CELL_UNITS)
 	to_consume = mini(to_consume, cells_needed_for_full)
@@ -98,7 +98,7 @@ func refuel(fuel_cells: int) -> int:
 		_empty_signal_emitted = false
 	if _fuel_current != previous_fuel:
 		fuel_changed.emit(_fuel_current, fuel_max)
-	Global.log("FuelSystem: refueled %d Fuel Cells (+%.1f fuel) (current=%.1f/%.1f)" % [
+	Global.debug_log("FuelSystem: refueled %d Fuel Cells (+%.1f fuel) (current=%.1f/%.1f)" % [
 		removed, fuel_gained, _fuel_current, fuel_max])
 	return removed
 
@@ -127,7 +127,7 @@ func reset_to_full() -> void:
 	_low_signal_emitted = false
 	_empty_signal_emitted = false
 	fuel_changed.emit(_fuel_current, fuel_max)
-	Global.log("FuelSystem: reset to full (%.1f/%.1f)" % [_fuel_current, fuel_max])
+	Global.debug_log("FuelSystem: reset to full (%.1f/%.1f)" % [_fuel_current, fuel_max])
 
 # ── Private Methods ───────────────────────────────────────
 

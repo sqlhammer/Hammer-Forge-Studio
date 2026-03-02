@@ -54,13 +54,13 @@ var _east_wall: StaticBody3D = null
 func initialize(archetype: BiomeArchetypeConfig) -> void:
 	_terrain_size = archetype.terrain_size
 	_create_boundary_walls()
-	Global.log("WorldBoundaryManager: initialized with terrain_size=%.0f" % _terrain_size)
+	Global.debug_log("WorldBoundaryManager: initialized with terrain_size=%.0f" % _terrain_size)
 
 
 ## Sets the body to track for proximity warnings. Typically the player character.
 func set_tracked_body(body: Node3D) -> void:
 	_tracked_body = body
-	Global.log("WorldBoundaryManager: tracking body '%s'" % body.name)
+	Global.debug_log("WorldBoundaryManager: tracking body '%s'" % body.name)
 
 
 ## Returns the terrain size this boundary enforces.
@@ -134,11 +134,11 @@ func _physics_process(_delta: float) -> void:
 		_is_in_warning_zone = true
 		var edge_direction: Vector3 = get_closest_edge_direction(body_position)
 		boundary_warning_entered.emit(edge_direction)
-		Global.log("WorldBoundaryManager: warning zone entered, edge=%s" % str(edge_direction))
+		Global.debug_log("WorldBoundaryManager: warning zone entered, edge=%s" % str(edge_direction))
 	elif not in_warning and _is_in_warning_zone:
 		_is_in_warning_zone = false
 		boundary_warning_exited.emit()
-		Global.log("WorldBoundaryManager: warning zone exited")
+		Global.debug_log("WorldBoundaryManager: warning zone exited")
 
 
 # ── Private Methods ───────────────────────────────────────

@@ -179,18 +179,18 @@ func _create_crosshair() -> Control:
 # ── Signal Handlers ───────────────────────────────────────
 
 func _on_ping_completed(deposits: Array[Deposit]) -> void:
-	Global.log("HUD: ping completed — %d deposits detected" % deposits.size())
+	Global.debug_log("HUD: ping completed — %d deposits detected" % deposits.size())
 	_compass_bar.add_ping_markers(deposits)
 
 func _on_analysis_started(_deposit: Deposit) -> void:
-	Global.log("HUD: analysis started — showing scan progress")
+	Global.debug_log("HUD: analysis started — showing scan progress")
 	_mining_progress.show_progress("SCANNING", Color("#00D4AA"))
 
 func _on_analysis_progress(progress: float) -> void:
 	_mining_progress.update_progress(progress)
 
 func _on_analysis_completed(deposit: Deposit) -> void:
-	Global.log("HUD: analysis completed — showing readout")
+	Global.debug_log("HUD: analysis completed — showing readout")
 	_mining_progress.show_complete()
 	_scanner_readout.show_readout(deposit)
 
@@ -198,14 +198,14 @@ func _on_analysis_cancelled() -> void:
 	_mining_progress.hide_progress()
 
 func _on_mining_started(_deposit: Deposit) -> void:
-	Global.log("HUD: mining started — showing extraction progress")
+	Global.debug_log("HUD: mining started — showing extraction progress")
 	_mining_progress.show_progress()
 
 func _on_mining_progress(progress: float) -> void:
 	_mining_progress.update_progress(progress)
 
 func _on_mining_completed(_deposit: Deposit, _resource_type: ResourceDefs.ResourceType, _purity: ResourceDefs.Purity, _quantity: int) -> void:
-	Global.log("HUD: mining completed")
+	Global.debug_log("HUD: mining completed")
 	_mining_progress.show_complete()
 
 func _on_mining_cancelled() -> void:
@@ -214,20 +214,20 @@ func _on_mining_cancelled() -> void:
 		_minigame_overlay.dismiss()
 
 func _on_mining_failed(reason: String) -> void:
-	Global.log("HUD: mining failed — %s" % reason)
+	Global.debug_log("HUD: mining failed — %s" % reason)
 	_mining_progress.show_failed(reason)
 
 func _on_minigame_started(line_count: int) -> void:
-	Global.log("HUD: minigame started — %d lines" % line_count)
+	Global.debug_log("HUD: minigame started — %d lines" % line_count)
 	if _minigame_overlay:
 		_minigame_overlay.show_minigame(line_count)
 
 func _on_line_traced(line_index: int) -> void:
-	Global.log("HUD: minigame line %d traced" % line_index)
+	Global.debug_log("HUD: minigame line %d traced" % line_index)
 	if _minigame_overlay:
 		_minigame_overlay.mark_line_traced(line_index)
 
 func _on_minigame_completed(all_traced: bool, bonus_quantity: int) -> void:
-	Global.log("HUD: minigame completed — success=%s, bonus=%d" % [str(all_traced), bonus_quantity])
+	Global.debug_log("HUD: minigame completed — success=%s, bonus=%d" % [str(all_traced), bonus_quantity])
 	if _minigame_overlay:
 		_minigame_overlay.show_result(all_traced, bonus_quantity)

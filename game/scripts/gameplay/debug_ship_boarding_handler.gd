@@ -83,7 +83,7 @@ func _begin_exit_ship() -> void:
 func _on_ship_enter_zone_entered(body: Node3D) -> void:
 	if body == _first_person:
 		_player_near_ship_entrance = true
-		Global.log("DebugShipBoardingHandler: player near ship entrance")
+		Global.debug_log("DebugShipBoardingHandler: player near ship entrance")
 
 
 func _on_ship_enter_zone_exited(body: Node3D) -> void:

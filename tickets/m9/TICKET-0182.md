@@ -2,7 +2,7 @@
 id: TICKET-0182
 title: "Fix dead-lock on IN_PROGRESS pre-claim and add silent-success detection"
 type: BUG
-status: OPEN
+status: DONE
 priority: P0
 owner: tools-devops-engineer
 created_by: producer
@@ -25,12 +25,12 @@ This ticket fixes both issues. See `docs/engineering/orchestrator-resilience-pla
 
 ## Acceptance Criteria
 
-- [ ] **Silent-success check in crash handler:** Before queuing a retry in the empty-stdout crash path (`conductor.py` ~line 1121), read the ticket status from disk. If the ticket is `DONE`, log `[DONE ] {ticket} (silent success)`, add to `wave_tickets` and `completed_this_session`, and skip the retry.
-- [ ] **Silent-success check in timeout handler:** Same check before retry in the timeout path (`conductor.py` ~line 1171).
-- [ ] **Silent-success check in non-zero exit handler:** Same check before retry in the non-zero exit path (`conductor.py` ~line 1175).
-- [ ] **Gate the IN_PROGRESS pre-claim check:** Modify `worker_dispatch.md` step 2 so that the pre-claim check is skipped when the dispatch includes a `{checkpoint_context}` section (indicating this is a resume). The check should still apply for fresh dispatches to prevent genuine duplicate dispatch.
-- [ ] **Fallback for no-checkpoint resume:** Even without a checkpoint file, if the conductor detects the ticket is IN_PROGRESS and is dispatching a retry (retry count > 0), the dispatch prompt must include a note: "This ticket is IN_PROGRESS from a previous session that was interrupted. Assess the current state of the branch and ticket before proceeding."
-- [ ] All existing conductor tests pass (`orchestrator/test_harness.py`).
+- [x] **Silent-success check in crash handler:** Before queuing a retry in the empty-stdout crash path (`conductor.py` ~line 1121), read the ticket status from disk. If the ticket is `DONE`, log `[DONE ] {ticket} (silent success)`, add to `wave_tickets` and `completed_this_session`, and skip the retry.
+- [x] **Silent-success check in timeout handler:** Same check before retry in the timeout path (`conductor.py` ~line 1171).
+- [x] **Silent-success check in non-zero exit handler:** Same check before retry in the non-zero exit path (`conductor.py` ~line 1175).
+- [x] **Gate the IN_PROGRESS pre-claim check:** Modify `worker_dispatch.md` step 2 so that the pre-claim check is skipped when the dispatch includes a `{checkpoint_context}` section (indicating this is a resume). The check should still apply for fresh dispatches to prevent genuine duplicate dispatch.
+- [x] **Fallback for no-checkpoint resume:** Even without a checkpoint file, if the conductor detects the ticket is IN_PROGRESS and is dispatching a retry (retry count > 0), the dispatch prompt must include a note: "This ticket is IN_PROGRESS from a previous session that was interrupted. Assess the current state of the branch and ticket before proceeding."
+- [x] All existing conductor tests pass (`orchestrator/test_harness.py`).
 
 ## Implementation Notes
 
@@ -45,3 +45,5 @@ This ticket fixes both issues. See `docs/engineering/orchestrator-resilience-pla
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — P0 fix for dead-lock and silent-success detection gaps
+- 2026-03-01 [tools-devops-engineer] Starting work — dependency TICKET-0235 verified DONE
+- 2026-03-01 [tools-devops-engineer] DONE — commit 637e8fb, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/273 (merged d62aaed). All 6 acceptance criteria met. 13/13 conductor tests pass.

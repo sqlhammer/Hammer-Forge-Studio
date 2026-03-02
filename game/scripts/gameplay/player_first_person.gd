@@ -41,8 +41,10 @@ func _ready() -> void:
 	$Head.position.y = head_height
 
 func _process(delta: float) -> void:
-	_update_movement(delta)
 	_update_camera(delta)
+
+func _physics_process(delta: float) -> void:
+	_update_movement(delta)
 	_apply_gravity(delta)
 	_update_jump()
 	_apply_movement()
@@ -87,7 +89,7 @@ func try_jump() -> bool:
 	_velocity.y = get_jump_velocity()
 	player_jumped.emit()
 	var log_message: String = "PlayerFirstPerson: jumped — velocity=%.2f" % get_jump_velocity()
-	Global.log(log_message)
+	Global.debug_log(log_message)
 	return true
 
 # ── Private Methods ───────────────────────────────────────
@@ -103,6 +105,8 @@ func _update_movement(delta: float) -> void:
 	# Get analog input from InputManager (works for both keyboard and gamepad)
 	if InputManager.get_current_input_device() == "gamepad":
 		input_vector = InputManager.get_analog_input("left")
+		# Negate Y: hardware stick-up = negative Y, but forward movement expects positive Y
+		input_vector.y = -input_vector.y
 	else:
 		# Keyboard input via actions
 		input_vector.x = InputManager.get_action_strength("move_right") - InputManager.get_action_strength("move_left")
@@ -154,8 +158,8 @@ func _update_camera(delta: float) -> void:
 
 	# Apply gamepad look
 	if look_input.length() > 0.01:
-		var yaw_delta: float = look_input.x * camera_sensitivity * 60.0  # Framerate-independent
-		var pitch_delta: float = look_input.y * camera_sensitivity * 60.0
+		var yaw_delta: float = look_input.x * camera_sensitivity * 60.0 * InputManager.gamepad_sensitivity_x
+		var pitch_delta: float = look_input.y * camera_sensitivity * 60.0 * InputManager.gamepad_sensitivity_y
 
 		# Rotate camera yaw (left/right)
 		global_transform.basis = global_transform.basis.rotated(Vector3.UP, -yaw_delta * delta)

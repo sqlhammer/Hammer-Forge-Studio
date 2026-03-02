@@ -70,7 +70,7 @@ func open() -> void:
 	InputManager.set_gameplay_inputs_enabled(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	_animate_open()
-	Global.log("RecyclerPanel: opened")
+	Global.debug_log("RecyclerPanel: opened")
 
 ## Closes the recycler panel without interrupting active jobs.
 func close() -> void:
@@ -81,7 +81,7 @@ func close() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_animate_close()
 	closed.emit()
-	Global.log("RecyclerPanel: closed")
+	Global.debug_log("RecyclerPanel: closed")
 
 ## Returns true if the panel is open.
 func is_open() -> bool:

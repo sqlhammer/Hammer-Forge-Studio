@@ -221,7 +221,7 @@ func _generate_terrain() -> void:
 	# Generate terrain
 	_terrain_result = generator.generate(BIOME_SEED, _archetype, _feature_requests)
 
-	Global.log("DebrisFieldBiome: terrain generated with seed %d, %d warnings" % [
+	Global.debug_log("DebrisFieldBiome: terrain generated with seed %d, %d warnings" % [
 		BIOME_SEED, _terrain_result.warnings.size()])
 
 
@@ -239,7 +239,7 @@ func _resolve_spawn_points() -> void:
 	# Player spawn is offset from ship spawn
 	_player_spawn_point = _ship_spawn_point + Vector3(0.0, 0.0, PLAYER_SPAWN_OFFSET)
 
-	Global.log("DebrisFieldBiome: ship spawn at %s, player spawn at %s" % [
+	Global.debug_log("DebrisFieldBiome: ship spawn at %s, player spawn at %s" % [
 		_ship_spawn_point, _player_spawn_point])
 
 
@@ -254,7 +254,7 @@ func _resolve_wreckage_positions() -> void:
 		for pos: Vector3 in positions:
 			_wreckage_cluster_positions.append(pos)
 
-	Global.log("DebrisFieldBiome: %d wreckage clusters resolved" % _wreckage_cluster_positions.size())
+	Global.debug_log("DebrisFieldBiome: %d wreckage clusters resolved" % _wreckage_cluster_positions.size())
 
 
 ## Resolves surface deposit metadata from resource spawn request results.
@@ -294,7 +294,7 @@ func _resolve_surface_deposits() -> void:
 				"drone_accessible": true,
 			})
 
-	Global.log("DebrisFieldBiome: %d surface deposits resolved" % _surface_deposits.size())
+	Global.debug_log("DebrisFieldBiome: %d surface deposits resolved" % _surface_deposits.size())
 
 
 ## Resolves deep deposit metadata beneath surface deposits.
@@ -351,7 +351,7 @@ func _resolve_deep_deposits() -> void:
 		})
 		deep_scrap_placed += 1
 
-	Global.log("DebrisFieldBiome: %d deep deposits resolved (%d Cryonite, %d Scrap Metal)" % [
+	Global.debug_log("DebrisFieldBiome: %d deep deposits resolved (%d Cryonite, %d Scrap Metal)" % [
 		_deep_deposits.size(), deep_cryo_placed, deep_scrap_placed])
 
 
@@ -385,7 +385,7 @@ func _build_terrain_mesh() -> void:
 	terrain_body.add_child(collision_shape)
 	add_child(terrain_body)
 
-	Global.log("DebrisFieldBiome: terrain mesh and collision built")
+	Global.debug_log("DebrisFieldBiome: terrain mesh and collision built")
 
 
 ## Builds greybox wreckage clusters at resolved positions.
@@ -404,7 +404,7 @@ func _build_wreckage_clusters() -> void:
 		cluster.position = cluster_pos
 		wreckage_container.add_child(cluster)
 
-	Global.log("DebrisFieldBiome: %d wreckage clusters built" % _wreckage_cluster_positions.size())
+	Global.debug_log("DebrisFieldBiome: %d wreckage clusters built" % _wreckage_cluster_positions.size())
 
 
 ## Creates a single wreckage cluster using CSG greybox primitives.
@@ -480,29 +480,35 @@ func _build_deposits() -> void:
 		deposit.add_to_group("interactable")
 		DepositRegistry.register(deposit)
 
-	Global.log("DebrisFieldBiome: %d surface + %d deep deposits placed" % [
+	Global.debug_log("DebrisFieldBiome: %d surface + %d deep deposits placed" % [
 		_surface_deposits.size(), _deep_deposits.size()])
 
 
 ## Creates a Deposit node from deposit info dictionary.
+## Uses DeepResourceNode for infinite (deep) deposits, plain Deposit for surface.
 func _create_deposit_from_info(deposit_info: Dictionary) -> Deposit:
-	var deposit: Deposit = Deposit.new()
+	var is_deep: bool = deposit_info.get("infinite", false)
+	var deposit: Deposit
+	if is_deep:
+		deposit = DeepResourceNode.new()
+	else:
+		deposit = Deposit.new()
 	var resource_type: ResourceDefs.ResourceType = deposit_info.get("resource_type", ResourceDefs.ResourceType.SCRAP_METAL)
 	var purity: ResourceDefs.Purity = deposit_info.get("purity", ResourceDefs.Purity.THREE_STAR)
 	var density_tier: ResourceDefs.DensityTier = deposit_info.get("density_tier", ResourceDefs.DensityTier.MEDIUM)
 	var quantity: int = deposit_info.get("quantity", SURFACE_DEPOSIT_QUANTITY)
 
 	deposit.setup(resource_type, purity, density_tier, quantity)
-	deposit.infinite = deposit_info.get("infinite", false)
-	deposit.yield_rate = deposit_info.get("yield_rate", 1.0)
-	deposit.drone_accessible = deposit_info.get("drone_accessible", true)
+	if not is_deep:
+		deposit.yield_rate = deposit_info.get("yield_rate", 1.0)
+		deposit.drone_accessible = deposit_info.get("drone_accessible", true)
 
 	var pos: Vector3 = deposit_info.get("position", Vector3.ZERO)
 	deposit.position = pos
 
 	# Name the deposit descriptively
 	var type_name: String = ResourceDefs.get_resource_name(resource_type)
-	var depth_label: String = "Deep" if deposit.infinite else "Surface"
+	var depth_label: String = "Deep" if is_deep else "Surface"
 	deposit.name = "%s_%s_%d" % [depth_label, type_name.replace(" ", ""), deposit.get_instance_id()]
 
 	return deposit
@@ -573,4 +579,4 @@ func _build_world_boundary() -> void:
 	_boundary_manager.initialize(_archetype)
 	_boundary_active = true
 
-	Global.log("DebrisFieldBiome: world boundary active")
+	Global.debug_log("DebrisFieldBiome: world boundary active")

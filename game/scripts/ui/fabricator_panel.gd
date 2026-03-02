@@ -129,7 +129,7 @@ func open() -> void:
 	InputManager.set_gameplay_inputs_enabled(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	_animate_open()
-	Global.log("FabricatorPanel: opened")
+	Global.debug_log("FabricatorPanel: opened")
 
 ## Closes the fabricator panel.
 func close() -> void:
@@ -140,7 +140,7 @@ func close() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	_animate_close()
 	closed.emit()
-	Global.log("FabricatorPanel: closed")
+	Global.debug_log("FabricatorPanel: closed")
 
 ## Returns true if the panel is open.
 func is_open() -> bool:

@@ -35,7 +35,7 @@ var _next_drone_id: int = 0
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
 	set_process(false)
-	Global.log("AutomationHub: initialized")
+	Global.debug_log("AutomationHub: initialized")
 
 func _process(delta: float) -> void:
 	if _drones.is_empty():
@@ -50,15 +50,15 @@ func _process(delta: float) -> void:
 ## Returns the drone_id on success, or -1 on failure.
 func deploy_drone(program: DroneProgram) -> int:
 	if not ModuleManager.is_installed(MODULE_ID):
-		Global.log("AutomationHub: deploy failed — module not installed")
+		Global.debug_log("AutomationHub: deploy failed — module not installed")
 		return -1
 
 	if not TechTree.is_unlocked("automation_hub"):
-		Global.log("AutomationHub: deploy failed — tech tree node 'automation_hub' not unlocked")
+		Global.debug_log("AutomationHub: deploy failed — tech tree node 'automation_hub' not unlocked")
 		return -1
 
 	if get_active_drone_count() >= MAX_ACTIVE_DRONES_TIER_1:
-		Global.log("AutomationHub: deploy failed — maximum drones active (%d/%d)" % [get_active_drone_count(), MAX_ACTIVE_DRONES_TIER_1])
+		Global.debug_log("AutomationHub: deploy failed — maximum drones active (%d/%d)" % [get_active_drone_count(), MAX_ACTIVE_DRONES_TIER_1])
 		return -1
 
 	var drone: DroneAgent = DroneAgent.new()
@@ -68,35 +68,35 @@ func deploy_drone(program: DroneProgram) -> int:
 	_next_drone_id += 1
 
 	set_process(true)
-	Global.log("AutomationHub: deployed drone %d" % assigned_id)
+	Global.debug_log("AutomationHub: deployed drone %d" % assigned_id)
 	return assigned_id
 
 ## Assigns a deposit target to an idle drone. The deposit must be Phase 2 analyzed.
 ## Returns true on success, false on failure.
 func assign_target(drone_id: int, deposit: Deposit) -> bool:
 	if not _drones.has(drone_id):
-		Global.log("AutomationHub: assign failed — drone %d not found" % drone_id)
+		Global.debug_log("AutomationHub: assign failed — drone %d not found" % drone_id)
 		return false
 
 	var drone: DroneAgent = _drones[drone_id] as DroneAgent
 	if not drone.is_idle():
-		Global.log("AutomationHub: assign failed — drone %d is not idle (state: %s)" % [drone_id, DroneAgent.DroneState.keys()[drone.get_state()]])
+		Global.debug_log("AutomationHub: assign failed — drone %d is not idle (state: %s)" % [drone_id, DroneAgent.DroneState.keys()[drone.get_state()]])
 		return false
 
 	# Enforce scanner-first constraint.
 	if deposit.get_scan_state() != Deposit.ScanState.ANALYZED:
-		Global.log("AutomationHub: assign failed — deposit '%s' has not completed Phase 2 Analysis" % deposit.name)
+		Global.debug_log("AutomationHub: assign failed — deposit '%s' has not completed Phase 2 Analysis" % deposit.name)
 		return false
 
 	# Validate drone program accepts this deposit.
 	var program: DroneProgram = drone.get_program()
 	if program != null and not program.accepts_deposit(deposit):
-		Global.log("AutomationHub: assign failed — drone %d program rejects deposit '%s'" % [drone_id, deposit.name])
+		Global.debug_log("AutomationHub: assign failed — drone %d program rejects deposit '%s'" % [drone_id, deposit.name])
 		return false
 
 	drone.start_travel(deposit.name)
 	drone_started.emit(deposit.name)
-	Global.log("AutomationHub: drone %d assigned to deposit '%s'" % [drone_id, deposit.name])
+	Global.debug_log("AutomationHub: drone %d assigned to deposit '%s'" % [drone_id, deposit.name])
 	return true
 
 ## Recalls a drone, transitioning it to RETURNING and then IDLE.
@@ -105,7 +105,7 @@ func recall_drone(drone_id: int) -> void:
 		return
 	var drone: DroneAgent = _drones[drone_id] as DroneAgent
 	drone.start_returning()
-	Global.log("AutomationHub: drone %d recalled" % drone_id)
+	Global.debug_log("AutomationHub: drone %d recalled" % drone_id)
 
 ## Removes a drone from the active pool. Call after it has returned.
 func remove_drone(drone_id: int) -> void:
@@ -113,7 +113,7 @@ func remove_drone(drone_id: int) -> void:
 		_drones.erase(drone_id)
 		if _drones.is_empty():
 			set_process(false)
-		Global.log("AutomationHub: drone %d removed" % drone_id)
+		Global.debug_log("AutomationHub: drone %d removed" % drone_id)
 
 ## Returns the number of currently active drones.
 func get_active_drone_count() -> int:
@@ -167,7 +167,7 @@ func notify_drone_arrived(drone_id: int) -> void:
 		return
 	var drone: DroneAgent = _drones[drone_id] as DroneAgent
 	drone.start_extracting()
-	Global.log("AutomationHub: drone %d arrived at target, now extracting" % drone_id)
+	Global.debug_log("AutomationHub: drone %d arrived at target, now extracting" % drone_id)
 
 ## Called by gameplay scripts (TICKET-0072) when a drone finishes extraction at a deposit.
 ## deposit_id: the deposit node name. yield_quantity: units extracted.
@@ -177,7 +177,7 @@ func notify_extraction_complete(drone_id: int, deposit_id: String, yield_quantit
 	var drone: DroneAgent = _drones[drone_id] as DroneAgent
 	drone.start_returning()
 	drone_completed.emit(deposit_id, yield_quantity)
-	Global.log("AutomationHub: drone %d completed extraction at '%s' (yield=%d)" % [drone_id, deposit_id, yield_quantity])
+	Global.debug_log("AutomationHub: drone %d completed extraction at '%s' (yield=%d)" % [drone_id, deposit_id, yield_quantity])
 
 ## Called by gameplay scripts (TICKET-0072) when a drone physically returns to the hub.
 func notify_drone_returned(drone_id: int) -> void:
@@ -186,4 +186,4 @@ func notify_drone_returned(drone_id: int) -> void:
 	var drone: DroneAgent = _drones[drone_id] as DroneAgent
 	drone.return_to_idle()
 	drone_returned.emit()
-	Global.log("AutomationHub: drone %d returned to idle" % drone_id)
+	Global.debug_log("AutomationHub: drone %d returned to idle" % drone_id)

@@ -42,7 +42,8 @@ func after_each() -> void:
 	FuelSystem.reset_to_full()
 	PlayerInventory.clear_all()
 	ShipState.reset()
-	_spy.clear()
+	if _spy:
+		_spy.clear()
 	_spy = null
 
 

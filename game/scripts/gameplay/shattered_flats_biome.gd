@@ -43,9 +43,6 @@ const RESOURCE_SLOPE_MAX: float = 20.0
 ## Deep node vertical offset below the corresponding surface node.
 const DEEP_NODE_Y_OFFSET: float = -3.0
 
-## Deep node yield rate (10% of surface speed).
-const DEEP_NODE_YIELD_RATE: float = 0.1
-
 ## Ruin cluster world-space XZ positions (spread across the biome).
 const RUIN_POSITIONS: Array[Vector2] = [
 	Vector2(150.0, 150.0),
@@ -526,7 +523,11 @@ func _create_deposit(
 	world_position: Vector3,
 	is_deep: bool
 ) -> Deposit:
-	var deposit: Deposit = Deposit.new()
+	var deposit: Deposit
+	if is_deep:
+		deposit = DeepResourceNode.new()
+	else:
+		deposit = Deposit.new()
 	deposit.name = deposit_name
 
 	# Determine purity and density using deterministic RNG
@@ -539,10 +540,6 @@ func _create_deposit(
 
 	deposit.setup(resource_type, purity, density, quantity)
 	deposit.position = world_position
-
-	if is_deep:
-		deposit.infinite = true
-		deposit.yield_rate = DEEP_NODE_YIELD_RATE
 
 	# Add visual mesh
 	var mesh_instance: MeshInstance3D = MeshInstance3D.new()

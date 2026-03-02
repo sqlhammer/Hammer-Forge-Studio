@@ -29,7 +29,7 @@ func _ready() -> void:
 	_generate_hull_collision()
 	_recharge_zone.body_entered.connect(_on_body_entered_recharge)
 	_recharge_zone.body_exited.connect(_on_body_exited_recharge)
-	Global.log("ShipExterior: ready")
+	Global.debug_log("ShipExterior: ready")
 
 func _process(delta: float) -> void:
 	if _player_in_recharge_zone:
@@ -68,14 +68,14 @@ func _generate_hull_collision() -> void:
 				if body_child is StaticBody3D:
 					(body_child as StaticBody3D).collision_layer = PhysicsLayers.ENVIRONMENT
 					(body_child as StaticBody3D).collision_mask = 0
-			Global.log("ShipExterior: VHACD hull collision generated")
+			Global.debug_log("ShipExterior: VHACD hull collision generated")
 			break
 
 func _on_body_entered_recharge(body: Node3D) -> void:
 	recharge_zone_entered.emit(body)
 	if body.collision_layer & PhysicsLayers.PLAYER != 0:
 		_player_in_recharge_zone = true
-		Global.log("ShipExterior: player entered recharge zone")
+		Global.debug_log("ShipExterior: player entered recharge zone")
 
 func _on_body_exited_recharge(body: Node3D) -> void:
 	recharge_zone_exited.emit(body)
@@ -83,4 +83,4 @@ func _on_body_exited_recharge(body: Node3D) -> void:
 		_player_in_recharge_zone = false
 		if SuitBattery.is_recharging():
 			SuitBattery.stop_recharge()
-		Global.log("ShipExterior: player exited recharge zone")
+		Global.debug_log("ShipExterior: player exited recharge zone")

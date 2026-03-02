@@ -2,7 +2,7 @@
 id: TICKET-0241
 title: "BUG — Gamepad left stick Y-axis inverted (push down goes forward)"
 type: BUG
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -25,11 +25,11 @@ In `game/scripts/gameplay/player_first_person.gd`, `_update_movement()`, the gam
 
 ## Acceptance Criteria
 
-- [ ] Pushing the left stick up (toward the top of the controller) moves the player forward.
-- [ ] Pulling the left stick down moves the player backward.
-- [ ] Keyboard movement (W/S) is unaffected.
-- [ ] The fix is consistent: if `invert_gamepad_look_y` exists as a separate option, movement Y is not entangled with it.
-- [ ] Existing unit tests pass.
+- [x] Pushing the left stick up (toward the top of the controller) moves the player forward.
+- [x] Pulling the left stick down moves the player backward.
+- [x] Keyboard movement (W/S) is unaffected.
+- [x] The fix is consistent: if `invert_gamepad_look_y` exists as a separate option, movement Y is not entangled with it.
+- [x] Existing unit tests pass.
 
 ## Implementation Notes
 
@@ -51,3 +51,5 @@ Do not negate inside `InputManager.get_analog_input()` — the raw axis value sh
 ## Activity Log
 
 - 2026-03-01 [producer] Created ticket — player-reported: pushing left stick down goes forward
+- 2026-03-01 [gameplay-programmer] Starting work — dependency TICKET-0235 verified DONE
+- 2026-03-01 [gameplay-programmer] DONE — negated input_vector.y in gamepad branch of _update_movement(). Commit ad980f3, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/263 (merged)

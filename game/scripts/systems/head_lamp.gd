@@ -29,7 +29,7 @@ var _active: bool = false
 func _ready() -> void:
 	set_process(false)
 	_load_save()
-	Global.log("HeadLamp: initialized (equipped=%s, active=%s)" % [str(_is_equipped), str(_active)])
+	Global.debug_log("HeadLamp: initialized (equipped=%s, active=%s)" % [str(_is_equipped), str(_active)])
 	# Resume drain processing if lamp was active when the game was last saved.
 	if _is_equipped and _active:
 		set_process(true)
@@ -54,24 +54,24 @@ func is_active() -> bool:
 ## Has no effect if the lamp is already equipped.
 func equip() -> void:
 	if _is_equipped:
-		Global.log("HeadLamp: equip called but already equipped — ignored")
+		Global.debug_log("HeadLamp: equip called but already equipped — ignored")
 		return
 	_is_equipped = true
 	_save()
 	head_lamp_equipped.emit()
-	Global.log("HeadLamp: equipped to suit")
+	Global.debug_log("HeadLamp: equipped to suit")
 
 ## Toggles the head lamp on or off. Requires the lamp to be equipped.
 ## Emits head_lamp_toggled with the new active state.
 func toggle() -> void:
 	if not _is_equipped:
-		Global.log("HeadLamp: toggle ignored — lamp not equipped")
+		Global.debug_log("HeadLamp: toggle ignored — lamp not equipped")
 		return
 	_active = not _active
 	set_process(_active)
 	_save()
 	head_lamp_toggled.emit(_active)
-	Global.log("HeadLamp: toggled — now %s" % ("ON" if _active else "OFF"))
+	Global.debug_log("HeadLamp: toggled — now %s" % ("ON" if _active else "OFF"))
 
 ## Forces the head lamp off without toggling. Used when suit battery is depleted.
 func force_off() -> void:
@@ -81,7 +81,7 @@ func force_off() -> void:
 	set_process(false)
 	_save()
 	head_lamp_toggled.emit(false)
-	Global.log("HeadLamp: forced off (battery depleted)")
+	Global.debug_log("HeadLamp: forced off (battery depleted)")
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -99,7 +99,7 @@ func _load_save() -> void:
 	var config: ConfigFile = ConfigFile.new()
 	var err: Error = config.load(SAVE_PATH)
 	if err == ERR_FILE_NOT_FOUND:
-		Global.log("HeadLamp: no save file — starting unequipped")
+		Global.debug_log("HeadLamp: no save file — starting unequipped")
 		return
 	if err != OK:
 		push_error("HeadLamp: failed to load save (error %d)" % err)
@@ -107,4 +107,4 @@ func _load_save() -> void:
 	_is_equipped = config.get_value("state", "is_equipped", false) as bool
 	# Always start inactive regardless of last saved state — player must re-toggle after loading.
 	_active = false
-	Global.log("HeadLamp: loaded save (equipped=%s)" % str(_is_equipped))
+	Global.debug_log("HeadLamp: loaded save (equipped=%s)" % str(_is_equipped))

@@ -104,7 +104,7 @@ func add_ping_markers(deposits: Array[Deposit]) -> void:
 				already_tracked = true
 				break
 		if not already_tracked and _ping_markers.size() < MAX_MARKERS:
-			Global.log("CompassBar: added ping marker — total markers: %d" % (_ping_markers.size() + 1))
+			Global.debug_log("CompassBar: added ping marker — total markers: %d" % (_ping_markers.size() + 1))
 			_ping_markers.append({
 				"deposit": deposit,
 				"time_added": current_time,
@@ -122,7 +122,7 @@ func set_ship_target(ship: Node3D) -> void:
 	if _ship_target == ship:
 		return
 	_ship_target = ship
-	Global.log("CompassBar: ship target set")
+	Global.debug_log("CompassBar: ship target set")
 
 # ── Private Methods ───────────────────────────────────────
 

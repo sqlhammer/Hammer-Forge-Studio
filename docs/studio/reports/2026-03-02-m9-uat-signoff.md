@@ -59,7 +59,7 @@
 
 **Automated coverage:** `test_game_startup_unit.gd` — 20 tests covering DebugLauncher behavior.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -79,7 +79,7 @@
 
 **Automated coverage:** `test_game_startup_unit.gd` — MainMenu scene instantiation test, button presence test.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -109,7 +109,7 @@
 
 **Automated coverage:** `test_game_world_unit.gd` — 14 tests covering biome instantiation, inventory grant, empty inventory, state reset.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -130,7 +130,7 @@
 
 **Automated coverage:** `test_game_startup_unit.gd` — DebugLauncher biome entries, beginning_inventory population/reset tests.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -146,7 +146,7 @@
 
 **Automated coverage:** Full test suite — all 5 previously-identified test files confirmed to use direct instantiation; zero references to TestWorld remain.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -162,7 +162,7 @@
 
 **Automated coverage:** Headless test suite now compiles cleanly post-rename. 280 call sites updated mechanically via PR #271.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -189,7 +189,7 @@
 
 **Automated coverage:** Existing unit tests pass (movement code not unit-tested for hardware axis direction — manual verification required).
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -211,7 +211,7 @@
 
 **Automated coverage:** None — sensitivity tuning is a manual feel test.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_ Studio Head manually increased; `InputManager.gamepad_sensitivity_x` to `15.0` and `gamepad_sensitivity_y` to `7.0`.
 
 ---
 
@@ -233,7 +233,7 @@
 
 **Automated coverage:** Existing unit tests pass. Manual controller test required to confirm hardware binding.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -256,7 +256,7 @@
 
 **Automated coverage:** `test_game_startup_unit.gd` and related — device-aware label lookup tested in code review. Manual device-switch verification required.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -284,7 +284,10 @@
 
 **Automated coverage:** `test_dropped_item_unit.gd` (or equivalent) — 19 unit tests covering drop/pickup/rejection/despawn logic.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [❌] ✅ Approved / ❌ Rejected — _Notes:_
+
+- There is no way for the gamepad to open the inventory
+- Dropping the item does not result in the item being on the ground, it appears to be deleted, not dropped
 
 ---
 
@@ -308,7 +311,7 @@
 
 **Automated coverage:** 5 unit tests covering destroy/cancel/inventory-decrement behavior.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -329,7 +332,7 @@
 
 **Automated coverage:** `Global.debug_speed_multiplier` is set/applied; gated behind `OS.is_debug_build()`. Manual feel test required.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -347,7 +350,7 @@
 
 **Expected result:** Confirmed working — M9 ran 19 waves with multiple retries (0230, 0231, 0232, 0235, 0244, 0259, 0260, 0186, 0227) and all resolved to DONE without dead-locks.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -359,7 +362,7 @@
 
 **Expected result:** Confirmed working — TICKET-0188 activity log and conductor output show no lost partial work during the 19-wave M9 run.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -371,7 +374,7 @@
 
 **Expected result:** Infrastructure improvement — validates through operational behavior. No LIMIT_WAIT events occurred during M9's run, confirming the detection path is present without false positives.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -383,7 +386,7 @@
 
 **Expected result:** Confirmed working through M9 retry behavior — retried tickets (e.g., 0259, 0260) completed successfully on second attempt.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -395,7 +398,7 @@
 
 **Expected result:** Confirmed working — all UID sidecars from M9 new `.gd` files committed cleanly without duplicates.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -407,7 +410,7 @@
 
 **Expected result:** Infrastructure improvement — the M9 run completed all 31 tickets with no gate passing prematurely.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -419,7 +422,7 @@
 
 **Expected result:** Infrastructure improvement — M9's gate progression proceeded cleanly through 5 phases.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -431,7 +434,7 @@
 
 **Expected result:** Infrastructure improvement — no orphaned IN_PROGRESS tickets were observed during M9's 19-wave run.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -443,7 +446,7 @@
 
 **Expected result:** Infrastructure improvement — log rotation behavior is a post-milestone-close operation; no anomalies observed.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -455,7 +458,7 @@
 
 **Expected result:** Confirmed — runbook exists at `docs/engineering/orchestrator-resilience-runbook.md`. CLAUDE.md includes the new Suspension & Resume section and updated "On Milestone Close" checklist (Step 7: verify checkpoints empty).
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -475,7 +478,7 @@
 
 **Automated coverage:** Full test suite — comment-only change, no functional impact.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -489,7 +492,7 @@
 
 **Automated coverage:** Existing biome unit tests — behavioral equivalence confirmed.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -503,7 +506,7 @@
 
 **Automated coverage:** Existing player movement tests pass.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -517,7 +520,7 @@
 
 **Automated coverage:** All NavigationConsole unit tests.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [✅] ✅ Approved / ❌ Rejected — _Notes:_
 
 ---
 
@@ -527,7 +530,7 @@
 
 | Feature | Ticket | Issue Description |
 |---------|--------|-------------------|
-| — | — | — |
+| Drop Items from Inventory | 0218 | There is no way for the gamepad to open the inventory. Dropping the item does not result in the item being on the ground, it appears to be deleted, not dropped. |
 
 ---
 
@@ -536,8 +539,8 @@
 > Complete this section after all checkboxes above are marked.
 
 **Total Features:** 22
-**Approved:** 0
-**Rejected:** 0
+**Approved:** 21
+**Rejected:** 1
 
 **Gate Condition:** All 22 features must be `✅ Approved` for sign-off to be granted.
 

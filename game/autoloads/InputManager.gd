@@ -14,8 +14,8 @@ signal input_device_changed(device: String)  # "keyboard" or "gamepad"
 # ── Exported Variables ────────────────────────────────────
 @export var mouse_sensitivity_x: float = 1.0
 @export var mouse_sensitivity_y: float = 1.0
-@export var gamepad_sensitivity_x: float = 3.0
-@export var gamepad_sensitivity_y: float = 2.0
+@export var gamepad_sensitivity_x: float = 15.0
+@export var gamepad_sensitivity_y: float = 7.0
 @export var invert_gamepad_look_y: bool = false
 
 # ── Constants (gameplay actions suppressed when UI is open) ─

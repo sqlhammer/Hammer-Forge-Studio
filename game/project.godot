@@ -11,9 +11,9 @@ config_version=5
 [application]
 
 config/name="core"
+run/main_scene="res://scenes/gameplay/game.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="uid://c1oa7t8hyfnps"
-run/main_scene="res://scenes/gameplay/game.tscn"
 
 [autoload]
 

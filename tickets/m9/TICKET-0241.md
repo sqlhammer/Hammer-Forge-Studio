@@ -2,7 +2,7 @@
 id: TICKET-0241
 title: "BUG — Gamepad left stick Y-axis inverted (push down goes forward)"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -51,3 +51,4 @@ Do not negate inside `InputManager.get_analog_input()` — the raw axis value sh
 ## Activity Log
 
 - 2026-03-01 [producer] Created ticket — player-reported: pushing left stick down goes forward
+- 2026-03-01 [gameplay-programmer] Starting work — dependency TICKET-0235 verified DONE

@@ -162,6 +162,11 @@ func _setup_input_actions() -> void:
 	# UI Context Actions
 	_add_action_if_missing("ui_action_menu", [], [], [JOY_BUTTON_Y])
 
+	# Ensure Godot built-in UI actions include gamepad buttons (Godot 4 defaults
+	# only map keyboard keys — Enter/Space for ui_accept, Escape for ui_cancel)
+	_add_joy_button_to_existing_action("ui_accept", JOY_BUTTON_A)
+	_add_joy_button_to_existing_action("ui_cancel", JOY_BUTTON_B)
+
 	# Third-Person Context Actions
 	_add_action_if_missing("ship_forward", [KEY_W, KEY_UP])
 	_add_action_if_missing("ship_backward", [KEY_S, KEY_DOWN])
@@ -188,6 +193,20 @@ func _add_action_if_missing(action_name: String, keys: Array = [], mouse_buttons
 		var event := InputEventJoypadButton.new()
 		event.button_index = joy_button
 		InputMap.action_add_event(action_name, event)
+
+## Adds a joypad button to an existing input action if not already mapped.
+## Unlike _add_action_if_missing, this works on actions that already exist (e.g., Godot built-ins).
+func _add_joy_button_to_existing_action(action_name: String, joy_button: int) -> void:
+	if not InputMap.has_action(action_name):
+		return
+	for existing_event: InputEvent in InputMap.action_get_events(action_name):
+		if existing_event is InputEventJoypadButton:
+			var existing_joy: InputEventJoypadButton = existing_event as InputEventJoypadButton
+			if existing_joy.button_index == joy_button:
+				return
+	var event := InputEventJoypadButton.new()
+	event.button_index = joy_button
+	InputMap.action_add_event(action_name, event)
 
 ## Applies dead zone to a 2D axis input (typically from analog stick).
 func _apply_dead_zone(input: Vector2, dead_zone: float) -> Vector2:

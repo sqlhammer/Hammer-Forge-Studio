@@ -2,7 +2,7 @@
 id: TICKET-0271
 title: "BUG: Gamepad B button does not cancel the Item Actions popup"
 type: BUG
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -46,12 +46,12 @@ The popup remains open. B produces no response.
 
 ## Acceptance Criteria
 
-- [ ] Pressing **B** while the Item Actions popup is open closes the popup without performing any action.
-- [ ] Focus returns to the previously focused inventory slot after dismissal.
-- [ ] The **Y** button also closes the popup (as specified in TICKET-0268 design — "B or Y" should cancel).
-- [ ] Keyboard **Escape** still cancels the popup (existing fallback from TICKET-0268).
-- [ ] If `JOY_BUTTON_B` is added to `ui_cancel`, confirm it does not interfere with B's existing role as "close inventory" when the popup is not open.
-- [ ] Existing unit tests pass.
+- [x] Pressing **B** while the Item Actions popup is open closes the popup without performing any action.
+- [x] Focus returns to the previously focused inventory slot after dismissal.
+- [x] The **Y** button also closes the popup (as specified in TICKET-0268 design — "B or Y" should cancel).
+- [x] Keyboard **Escape** still cancels the popup (existing fallback from TICKET-0268).
+- [x] If `JOY_BUTTON_B` is added to `ui_cancel`, confirm it does not interfere with B's existing role as "close inventory" when the popup is not open.
+- [x] Existing unit tests pass.
 
 ## Implementation Notes
 
@@ -66,3 +66,4 @@ The popup should already check `ui_cancel` — verify the input event reaches `_
 ## Activity Log
 
 - 2026-03-02 [producer] Filed — UAT rejection. Studio Head confirmed B button does not close the Item Actions popup. May share root cause with TICKET-0270 (missing signal connections); investigate together.
+- 2026-03-02 [gameplay-programmer] Starting work — shared root cause with TICKET-0270 confirmed: Godot 4 built-in ui_cancel does not include JOY_BUTTON_B by default. Same fix in InputManager resolves both tickets.

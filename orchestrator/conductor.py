@@ -245,6 +245,65 @@ class ActivityLogger:
         print(line.rstrip())
 
 
+class SuspensionLogger:
+    """Writes machine-readable JSON-lines to suspension.log for all suspension events.
+
+    Each entry is one JSON object per line (JSONL format). Used alongside
+    ActivityLogger to provide structured data for gate evaluation and analysis.
+    """
+
+    def __init__(self, path: Path):
+        self.path = path
+
+    def log(
+        self,
+        event: str,
+        agent: str = "",
+        ticket: str = "",
+        milestone: str = "",
+        phase: str = "",
+        wave: int = 0,
+        checkpoint_path: str = "",
+        retry_count: int = 0,
+        retry_reason: str = "",
+        notes: str = "",
+    ):
+        """Write a structured suspension event entry to suspension.log.
+
+        Args:
+            event: One of limit_hit, suspended, resume_dispatched, resume_success,
+                   resume_failure, auto_remediated, zombie_detected.
+            agent: Agent slug (e.g. "gameplay-programmer").
+            ticket: Ticket ID (e.g. "TICKET-0187").
+            milestone: Milestone ID (e.g. "M9").
+            phase: Phase name (e.g. "Orchestrator Resilience").
+            wave: Wave number at time of event.
+            checkpoint_path: Path to checkpoint file (relative string).
+            retry_count: Number of retries attempted so far.
+            retry_reason: "usage_limit" or "implementation_failure".
+            notes: Free-text details about the event.
+        """
+        entry = {
+            "timestamp": now_iso(),
+            "event": event,
+            "agent": agent,
+            "ticket": ticket,
+            "milestone": milestone,
+            "phase": phase,
+            "wave": wave,
+            "checkpoint_path": checkpoint_path,
+            "retry_count": retry_count,
+            "retry_reason": retry_reason,
+            "notes": notes,
+        }
+        try:
+            with open(self.path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry) + "\n")
+                f.flush()
+        except Exception:
+            pass  # Never crash the conductor over a log write failure
+
+
 # ---------------------------------------------------------------------------
 # Config helpers
 # ---------------------------------------------------------------------------
@@ -783,6 +842,10 @@ class Conductor:
         self.paths = paths
         self.config = config
         self.logger = ActivityLogger(paths.activity_log)
+        # Suspension log lives alongside activity.log in the instance dir
+        self.suspension_logger = SuspensionLogger(
+            paths.activity_log.parent / "suspension.log"
+        )
         self.shutdown_requested = False
         self._active_procs: set[asyncio.subprocess.Process] = set()
         self._run_claude = run_claude_fn or run_claude
@@ -1029,8 +1092,21 @@ class Conductor:
             self.state["status"] = "DISPATCHING"
 
         elif action == "no_work":
-            self.logger.log("PLAN", "No workable tickets. Idling.")
-            self.state["status"] = "IDLE"
+            # Gate deferral (R7): before going idle, check for unresolved checkpoints
+            # in the current phase.  If any exist, those tickets were suspended and
+            # not yet re-dispatched — defer the gate and stay in PLANNING so the
+            # conductor can re-dispatch them on the next wave.
+            current_phase = self.state.get("phase", "")
+            should_defer, deferred_tickets = self._check_gate_deferral(current_phase)
+            if should_defer:
+                n = len(deferred_tickets)
+                self.logger.log("WARNING",
+                    f"Gate deferred — {n} unresolved checkpoint(s) exist for phase "
+                    f'"{current_phase}": {", ".join(deferred_tickets)}')
+                # Stay in PLANNING — do not set status to IDLE
+            else:
+                self.logger.log("PLAN", "No workable tickets. Idling.")
+                self.state["status"] = "IDLE"
 
         elif action == "milestone_complete":
             self.logger.log("SYSTEM",
@@ -1287,6 +1363,15 @@ class Conductor:
                         if ticket not in session_done:
                             session_done.append(ticket)
                     elif is_limit:
+                        self.suspension_logger.log(
+                            event="limit_hit",
+                            agent=agent,
+                            ticket=ticket,
+                            milestone=self.state.get("milestone", ""),
+                            phase=self.state.get("phase", ""),
+                            wave=self.state.get("wave_number", 0),
+                            notes=f"exit_code={exit_code} empty stdout",
+                        )
                         self._write_checkpoint(worker, exit_code, stdout, stderr)
                         usage_limit_failures.append(ticket)
                         self._queue_retry(ticket, reason="usage_limit")
@@ -1324,6 +1409,20 @@ class Conductor:
                         else:
                             self.logger.log("DONE", f"{agent} <- {ticket}")
                             wave_tickets.append(ticket)
+                            # Log resume_success if this ticket had prior retries (was suspended)
+                            retry_entry = self.state.get("retries", {}).get(ticket, 0)
+                            retry_count = retry_entry["count"] if isinstance(retry_entry, dict) else retry_entry
+                            if retry_count > 0:
+                                self.suspension_logger.log(
+                                    event="resume_success",
+                                    agent=agent,
+                                    ticket=ticket,
+                                    milestone=self.state.get("milestone", ""),
+                                    phase=self.state.get("phase", ""),
+                                    wave=self.state.get("wave_number", 0),
+                                    retry_count=retry_count,
+                                    notes="ticket completed successfully after resume",
+                                )
                             self._delete_checkpoint(ticket)
                             # Track session-completed tickets for dependency validation
                             session_done = self.state.setdefault("completed_this_session", [])
@@ -1332,9 +1431,35 @@ class Conductor:
                     elif outcome == "blocked":
                         self.logger.log("BLOCKED", f"{agent} <- {ticket}: {result_data.get('summary', '')}")
                         all_succeeded = False
+                        retry_entry = self.state.get("retries", {}).get(ticket, 0)
+                        retry_count = retry_entry["count"] if isinstance(retry_entry, dict) else retry_entry
+                        if retry_count > 0:
+                            self.suspension_logger.log(
+                                event="resume_failure",
+                                agent=agent,
+                                ticket=ticket,
+                                milestone=self.state.get("milestone", ""),
+                                phase=self.state.get("phase", ""),
+                                wave=self.state.get("wave_number", 0),
+                                retry_count=retry_count,
+                                notes=f"outcome=blocked after resume",
+                            )
                     else:
                         self.logger.log("PARTIAL", f"{agent} <- {ticket}: outcome={outcome}")
                         all_succeeded = False
+                        retry_entry = self.state.get("retries", {}).get(ticket, 0)
+                        retry_count = retry_entry["count"] if isinstance(retry_entry, dict) else retry_entry
+                        if retry_count > 0:
+                            self.suspension_logger.log(
+                                event="resume_failure",
+                                agent=agent,
+                                ticket=ticket,
+                                milestone=self.state.get("milestone", ""),
+                                phase=self.state.get("phase", ""),
+                                wave=self.state.get("wave_number", 0),
+                                retry_count=retry_count,
+                                notes=f"outcome={outcome} after resume",
+                            )
                         self._queue_retry(ticket)
                 except ValueError:
                     self.logger.log("DONE", f"{agent} <- {ticket} (no structured output)")
@@ -1352,6 +1477,15 @@ class Conductor:
                     if ticket not in session_done:
                         session_done.append(ticket)
                 elif is_limit:
+                    self.suspension_logger.log(
+                        event="limit_hit",
+                        agent=agent,
+                        ticket=ticket,
+                        milestone=self.state.get("milestone", ""),
+                        phase=self.state.get("phase", ""),
+                        wave=self.state.get("wave_number", 0),
+                        notes=f"exit_code={exit_code} timeout",
+                    )
                     self._write_checkpoint(worker, exit_code, stdout, stderr)
                     usage_limit_failures.append(ticket)
                     self._queue_retry(ticket, reason="usage_limit")
@@ -1375,6 +1509,15 @@ class Conductor:
                     if ticket not in session_done:
                         session_done.append(ticket)
                 elif is_limit:
+                    self.suspension_logger.log(
+                        event="limit_hit",
+                        agent=agent,
+                        ticket=ticket,
+                        milestone=self.state.get("milestone", ""),
+                        phase=self.state.get("phase", ""),
+                        wave=self.state.get("wave_number", 0),
+                        notes=f"exit_code={exit_code} crash/nonzero",
+                    )
                     self._write_checkpoint(worker, exit_code, stdout, stderr)
                     usage_limit_failures.append(ticket)
                     self._queue_retry(ticket, reason="usage_limit")
@@ -1478,6 +1621,23 @@ class Conductor:
 
         self.logger.log("DISPATCH",
             f"{agent_slug} -> {ticket_id} (model={model}, budget={format_cost(budget)})")
+
+        # Log resume_dispatched if this is a retry with checkpoint context
+        if checkpoint_context and retry_count > 0:
+            checkpoint_file = (
+                ORCH_DIR / "checkpoints" / f"{ticket_id}.checkpoint.json"
+            )
+            self.suspension_logger.log(
+                event="resume_dispatched",
+                agent=agent_slug,
+                ticket=ticket_id,
+                milestone=self.state.get("milestone", ""),
+                phase=self.state.get("phase", ""),
+                wave=self.state.get("wave_number", 0),
+                checkpoint_path=str(checkpoint_file) if checkpoint_file.exists() else "",
+                retry_count=retry_count,
+                notes="dispatching with checkpoint context",
+            )
 
         start = time.time()
         exit_code, stdout, stderr, usage_meta = await self._run_claude(
@@ -1727,6 +1887,20 @@ class Conductor:
             write_json(tmp_path, checkpoint)
             tmp_path.replace(checkpoint_path)
             self.logger.log("CHECKPOINT", f"{ticket_id} suspended — wrote checkpoint")
+            retry_entry = self.state.get("retries", {}).get(ticket_id, 0)
+            retry_count = retry_entry["count"] if isinstance(retry_entry, dict) else retry_entry
+            self.suspension_logger.log(
+                event="suspended",
+                agent=agent,
+                ticket=ticket_id,
+                milestone=self.state.get("milestone", ""),
+                phase=self.state.get("phase", ""),
+                wave=self.state.get("wave_number", 0),
+                checkpoint_path=str(checkpoint_path),
+                retry_count=retry_count,
+                retry_reason=reason,
+                notes=f"exit_code={exit_code}",
+            )
         except OSError as e:
             self.logger.log("WARNING", f"Failed to write checkpoint for {ticket_id}: {e}")
 
@@ -1741,6 +1915,30 @@ class Conductor:
                 self.logger.log("CHECKPOINT", f"{ticket_id} checkpoint cleared")
             except OSError:
                 pass
+
+    def _check_gate_deferral(self, phase: str) -> tuple[bool, list[str]]:
+        """Check if any unresolved checkpoints exist for tickets in the given phase.
+
+        Scans ORCH_DIR/checkpoints/ for checkpoint files whose phase matches `phase`.
+        Returns (True, [ticket_ids]) if the gate should be deferred because suspended
+        tickets exist for the phase, or (False, []) if the gate may fire normally.
+        """
+        checkpoints_dir = ORCH_DIR / "checkpoints"
+        if not checkpoints_dir.exists():
+            return False, []
+
+        deferred: list[str] = []
+        for cp_file in checkpoints_dir.glob("*.checkpoint.json"):
+            try:
+                cp_data = json.loads(cp_file.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                continue
+            if cp_data.get("phase", "") == phase:
+                ticket_id = cp_data.get("ticket", "")
+                if ticket_id:
+                    deferred.append(ticket_id)
+
+        return (len(deferred) > 0, deferred)
 
     def _scan_checkpoints_on_startup(self):
         """Scan checkpoints/ for zombie tickets from previous sessions.
@@ -1778,6 +1976,16 @@ class Conductor:
                 self.logger.log("CLEANUP",
                     f"{ticket_id} auto-remediated on startup — "
                     "ticket is DONE on disk, deleting checkpoint")
+                self.suspension_logger.log(
+                    event="auto_remediated",
+                    ticket=ticket_id,
+                    agent=cp_data.get("agent", ""),
+                    milestone=cp_data.get("milestone", milestone),
+                    phase=cp_data.get("phase", ""),
+                    wave=cp_data.get("wave", 0),
+                    checkpoint_path=str(cp_file),
+                    notes="ticket DONE on disk at startup — checkpoint auto-deleted",
+                )
                 session_done = self.state.setdefault("completed_this_session", [])
                 if ticket_id not in session_done:
                     session_done.append(ticket_id)
@@ -1789,6 +1997,16 @@ class Conductor:
                 self.logger.log("CLEANUP",
                     f"{ticket_id} was zombie — checkpoint exists from previous session "
                     f"(status={ticket_status})")
+                self.suspension_logger.log(
+                    event="zombie_detected",
+                    ticket=ticket_id,
+                    agent=cp_data.get("agent", ""),
+                    milestone=cp_data.get("milestone", milestone),
+                    phase=cp_data.get("phase", ""),
+                    wave=cp_data.get("wave", 0),
+                    checkpoint_path=str(cp_file),
+                    notes=f"ticket status={ticket_status} at startup",
+                )
 
         # Clear stale active_ticket_ids (no live process after restart)
         if stale_ids:

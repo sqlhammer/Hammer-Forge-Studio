@@ -7,6 +7,7 @@ orchestrator/instances/
 orchestrator/checkpoints/
 orchestrator/config.local.json
 orchestrator/usage.jsonl
+orchestrator/suspension.log
 
 # Test harness ephemeral tickets
 tickets/_test/

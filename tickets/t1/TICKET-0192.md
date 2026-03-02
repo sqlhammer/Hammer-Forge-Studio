@@ -2,12 +2,12 @@
 id: TICKET-0192
 title: "Dashboard site scaffold — HTML/CSS/JS structure with Mermaid.js"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
 created_at: 2026-02-27
-updated_at: 2026-02-27
+updated_at: 2026-03-01
 milestone: "T1"
 phase: "Foundation"
 depends_on: [TICKET-0190]
@@ -22,36 +22,36 @@ Create the static site scaffold for the project reporting dashboard. This establ
 ## Acceptance Criteria
 
 ### File Structure
-- [ ] Source files at `dashboard/src/`
-- [ ] `dashboard/src/index.html` — main entry point with navigation structure
-- [ ] `dashboard/src/css/style.css` — dashboard stylesheet
-- [ ] `dashboard/src/js/app.js` — JavaScript module for loading and rendering data
-- [ ] `dashboard/src/js/mermaid.min.js` or CDN link for Mermaid.js library
-- [ ] `dashboard/dist/` added to `.gitignore` (build output, not committed)
+- [x] Source files at `dashboard/src/`
+- [x] `dashboard/src/index.html` — main entry point with navigation structure
+- [x] `dashboard/src/css/style.css` — dashboard stylesheet
+- [x] `dashboard/src/js/app.js` — JavaScript module for loading and rendering data
+- [x] `dashboard/src/js/mermaid.min.js` or CDN link for Mermaid.js library
+- [x] `dashboard/dist/` added to `.gitignore` (build output, not committed)
 
 ### HTML Structure
-- [ ] Responsive layout with sidebar navigation and main content area
-- [ ] Navigation links for: Dashboard (overview), each milestone, Diagrams (architecture)
-- [ ] Header with project name "Hammer Forge Studio" and last-build timestamp
-- [ ] Footer with "Auto-generated from project data" note
+- [x] Responsive layout with sidebar navigation and main content area
+- [x] Navigation links for: Dashboard (overview), each milestone, Diagrams (architecture)
+- [x] Header with project name "Hammer Forge Studio" and last-build timestamp
+- [x] Footer with "Auto-generated from project data" note
 
 ### Styling
-- [ ] Dark theme (dark background, light text) to match developer tool aesthetics
-- [ ] Clean, readable typography (system font stack or monospace)
-- [ ] Status badges with color coding: green (DONE/Complete), yellow (IN_PROGRESS/Active), grey (OPEN/Planning)
-- [ ] Progress bars styled for milestone completion
-- [ ] Responsive: usable on screens from 768px to 1920px wide
+- [x] Dark theme (dark background, light text) to match developer tool aesthetics
+- [x] Clean, readable typography (system font stack or monospace)
+- [x] Status badges with color coding: green (DONE/Complete), yellow (IN_PROGRESS/Active), grey (OPEN/Planning)
+- [x] Progress bars styled for milestone completion
+- [x] Responsive: usable on screens from 768px to 1920px wide
 
 ### JavaScript Data Loading
-- [ ] `app.js` fetches pre-baked JSON files from `data/` directory (relative path)
-- [ ] Renders data into DOM elements using vanilla JS (no framework dependency)
-- [ ] Mermaid.js initialized and rendering a test diagram on page load
-- [ ] Error handling: displays "No data available" message if JSON files are missing or malformed
+- [x] `app.js` fetches pre-baked JSON files from `data/` directory (relative path)
+- [x] Renders data into DOM elements using vanilla JS (no framework dependency)
+- [x] Mermaid.js initialized and rendering a test diagram on page load
+- [x] Error handling: displays "No data available" message if JSON files are missing or malformed
 
 ### Mermaid.js Integration
-- [ ] Mermaid.js loaded (CDN or bundled — CDN preferred for simplicity)
-- [ ] Test diagram renders correctly on the page
-- [ ] Mermaid theme set to `dark` to match site styling
+- [x] Mermaid.js loaded (CDN or bundled — CDN preferred for simplicity)
+- [x] Test diagram renders correctly on the page
+- [x] Mermaid theme set to `dark` to match site styling
 
 ## Implementation Notes
 
@@ -68,3 +68,4 @@ Create the static site scaffold for the project reporting dashboard. This establ
 
 - 2026-02-27 [producer] Created ticket — static site scaffold for dashboard
 - 2026-03-01 [systems-programmer] Starting work — building HTML/CSS/JS scaffold with Mermaid.js
+- 2026-03-01 [systems-programmer] Completed — commit fc59eb3, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/239 (merged)

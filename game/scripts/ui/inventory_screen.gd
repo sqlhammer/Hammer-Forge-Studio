@@ -55,6 +55,9 @@ var _font: Font = null
 var _stick_latched_x: bool = false
 var _stick_latched_y: bool = false
 
+## Gamepad action popup state
+var _action_popup: InventoryActionPopup = null
+
 ## Destroy confirmation dialog state
 var _confirm_visible: bool = false
 var _confirm_overlay: Control = null
@@ -72,6 +75,7 @@ func _ready() -> void:
 	_font = ThemeDB.fallback_font
 	_build_ui()
 	PlayerInventory.slot_changed.connect(_on_slot_changed)
+	InputManager.input_device_changed.connect(_on_input_device_changed)
 	Global.debug_log("InventoryScreen: ready")
 
 func _process(_delta: float) -> void:
@@ -85,6 +89,11 @@ func _process(_delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if not _is_open:
+		return
+
+	# When the action popup is open, it traps all input via set_input_as_handled
+	# so this method won't be reached — but guard defensively
+	if _action_popup and _action_popup.is_open():
 		return
 
 	# Analog stick uses edge-triggered latch to prevent continuous scrolling
@@ -109,6 +118,13 @@ func _input(event: InputEvent) -> void:
 		elif event.is_action_pressed("ui_right"):
 			_cancel_confirm_button.grab_focus()
 			get_viewport().set_input_as_handled()
+		return
+
+	# Y button (ui_action_menu) opens the action popup for the focused slot
+	if event.is_action_pressed("ui_action_menu"):
+		if not PlayerInventory.is_slot_empty(_focused_slot):
+			_open_action_popup()
+		get_viewport().set_input_as_handled()
 		return
 
 	# Navigation (only when inventory is open and confirm dialog is closed)
@@ -155,6 +171,7 @@ func open_inventory() -> void:
 	_refresh_all_slots()
 	_update_focus_visual()
 	_update_detail_area()
+	_refresh_controls_descriptor()
 	InputManager.set_gameplay_inputs_enabled(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	# Refresh sidebar values
@@ -172,6 +189,8 @@ func open_inventory() -> void:
 
 ## Closes the inventory.
 func close_inventory() -> void:
+	if _action_popup and _action_popup.is_open():
+		_action_popup._close()
 	if _confirm_visible:
 		_close_destroy_confirm()
 	Global.debug_log("InventoryScreen: closed")
@@ -203,6 +222,20 @@ func select_slot(index: int) -> void:
 ## Returns true if the destroy confirmation dialog is currently visible.
 func is_destroy_confirm_visible() -> bool:
 	return _confirm_visible
+
+## Returns true if the gamepad action popup is currently open.
+func is_action_popup_open() -> bool:
+	return _action_popup != null and _action_popup.is_open()
+
+## Returns the InventoryActionPopup instance for signal connections and testing.
+func get_action_popup() -> InventoryActionPopup:
+	return _action_popup
+
+## Returns the current controls descriptor text (for testing device-aware switching).
+func get_controls_descriptor_text() -> String:
+	if _detail_drop_hint:
+		return _detail_drop_hint.text
+	return ""
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -338,6 +371,14 @@ func _build_ui() -> void:
 
 	# Build destroy confirmation dialog on top of everything
 	_build_destroy_confirm_dialog(dim_layer)
+
+	# Build gamepad action popup on top of everything (rendered above confirm dialog)
+	_action_popup = InventoryActionPopup.new()
+	_action_popup.name = "InventoryActionPopup"
+	_action_popup.set_anchors_preset(Control.PRESET_CENTER)
+	_action_popup.action_requested.connect(_on_action_popup_action_requested)
+	_action_popup.cancelled.connect(_on_action_popup_cancelled)
+	dim_layer.add_child(_action_popup)
 
 func _build_destroy_confirm_dialog(parent: Control) -> void:
 	_confirm_overlay = Control.new()
@@ -519,8 +560,7 @@ func _update_detail_area() -> void:
 	_detail_quantity_label.text = "x %d" % quantity
 
 	# Show drop/destroy hints for non-empty slots
-	if _detail_drop_hint:
-		_detail_drop_hint.visible = true
+	_refresh_controls_descriptor()
 
 	# Update stars
 	var purity_val: int = purity as int
@@ -607,6 +647,10 @@ func _style_button(button: Button, accent_color: Color) -> void:
 	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
 
 func _handle_stick_input(event: InputEventJoypadMotion) -> void:
+	# Block grid stick navigation while the action popup is open
+	if _action_popup and _action_popup.is_open():
+		return
+
 	var axis: int = event.axis
 	var value: float = event.axis_value
 
@@ -657,12 +701,12 @@ func _move_focus(dx: int, dy: int) -> void:
 	_update_detail_area()
 
 func _on_slot_mouse_entered(index: int) -> void:
-	if not _is_open or _confirm_visible:
+	if not _is_open or _confirm_visible or is_action_popup_open():
 		return
 	select_slot(index)
 
 func _on_slot_gui_input(event: InputEvent, index: int) -> void:
-	if not _is_open or _confirm_visible:
+	if not _is_open or _confirm_visible or is_action_popup_open():
 		return
 	var mouse_event: InputEventMouseButton = event as InputEventMouseButton
 	if mouse_event == null:
@@ -679,3 +723,68 @@ func _on_slot_changed(slot_index: int) -> void:
 		_refresh_slot(slot_index)
 		if slot_index == _focused_slot:
 			_update_detail_area()
+
+func _open_action_popup() -> void:
+	if _action_popup == null:
+		return
+	_action_popup.show_for_slot(_focused_slot)
+	_refresh_controls_descriptor()
+	Global.debug_log("InventoryScreen: action popup opened for slot %d" % _focused_slot)
+
+func _on_action_popup_action_requested(action: String, slot_index: int) -> void:
+	_refresh_controls_descriptor()
+	match action:
+		"drop":
+			# Route to existing drop logic — same path as G / right-click
+			_focused_slot = slot_index
+			_drop_focused_slot()
+		"destroy":
+			# Route to existing destroy logic directly — popup hold-to-confirm
+			# replaces the keyboard confirm dialog, so no re-prompt
+			_focused_slot = slot_index
+			_destroy_from_popup()
+	Global.debug_log("InventoryScreen: action popup routed '%s' for slot %d" % [action, slot_index])
+
+func _on_action_popup_cancelled() -> void:
+	_refresh_controls_descriptor()
+	Global.debug_log("InventoryScreen: action popup cancelled, grid navigation resumed")
+
+func _destroy_from_popup() -> void:
+	var slot_data: Dictionary = PlayerInventory.get_slot(_focused_slot)
+	if slot_data.is_empty():
+		return
+	var resource_type: ResourceDefs.ResourceType = slot_data.get("resource_type") as ResourceDefs.ResourceType
+	var purity: ResourceDefs.Purity = slot_data.get("purity") as ResourceDefs.Purity
+	var quantity: int = slot_data.get("quantity", 0) as int
+	PlayerInventory.remove_from_slot(_focused_slot, quantity)
+	item_destroyed.emit(resource_type, purity, quantity)
+	Global.debug_log("InventoryScreen: destroyed %d %s from slot %d (via popup)" % [quantity, ResourceDefs.get_resource_name(resource_type), _focused_slot])
+	_update_detail_area()
+
+func _refresh_controls_descriptor() -> void:
+	if _detail_drop_hint == null:
+		return
+
+	# While popup is open, show popup navigation hints
+	if _action_popup and _action_popup.is_open():
+		_detail_drop_hint.text = "[A] Confirm / Hold to Destroy   [B] Cancel   D-pad ↑↓ Navigate"
+		_detail_drop_hint.visible = true
+		return
+
+	# Hide descriptor when focused slot is empty
+	var slot_data: Dictionary = PlayerInventory.get_slot(_focused_slot)
+	if slot_data.is_empty():
+		_detail_drop_hint.visible = false
+		return
+
+	# Show device-appropriate controls descriptor
+	var current_device: String = InputManager.get_current_input_device()
+	if current_device == "gamepad":
+		_detail_drop_hint.text = "[Y] Actions"
+	else:
+		_detail_drop_hint.text = "[G] Drop  |  [Enter/A] Destroy  |  [Right-Click] Drop"
+	_detail_drop_hint.visible = true
+
+func _on_input_device_changed(_device: String) -> void:
+	if _is_open:
+		_refresh_controls_descriptor()

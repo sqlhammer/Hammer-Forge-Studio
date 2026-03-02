@@ -159,6 +159,9 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("use_item", [KEY_G])
 	_add_action_if_missing("toggle_head_lamp", [KEY_F])
 
+	# UI Context Actions
+	_add_action_if_missing("ui_action_menu", [], [], [JOY_BUTTON_Y])
+
 	# Third-Person Context Actions
 	_add_action_if_missing("ship_forward", [KEY_W, KEY_UP])
 	_add_action_if_missing("ship_backward", [KEY_S, KEY_DOWN])

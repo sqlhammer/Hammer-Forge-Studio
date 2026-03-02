@@ -2,7 +2,7 @@
 id: TICKET-0269
 title: "FEATURE: Wire InventoryActionPopup into inventory screen — Y button, grid pause, hint bar, gamepad controls descriptor"
 type: FEATURE
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -91,3 +91,4 @@ func _on_action_popup_cancelled() -> void:
 ## Activity Log
 
 - 2026-03-02 [producer] Filed — depends on TICKET-0268 (popup component). Completes the Option B gamepad inventory action implementation.
+- 2026-03-02 [gameplay-programmer] Starting work — TICKET-0268 is DONE, all dependencies satisfied.

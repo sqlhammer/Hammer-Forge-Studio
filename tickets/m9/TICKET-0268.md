@@ -2,7 +2,7 @@
 id: TICKET-0268
 title: "FEATURE: Implement InventoryActionPopup scene for gamepad item actions"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -47,17 +47,17 @@ Hint bar while popup is open:
 
 ## Acceptance Criteria
 
-- [ ] Scene exists at `game/scenes/ui/inventory_action_popup.tscn` with script `game/scripts/ui/inventory_action_popup.gd`.
-- [ ] Popup displays three rows: **Drop Item**, **Destroy**, **Cancel**. Default focus is on **Drop Item**.
-- [ ] D-pad up/down and left stick (edge-triggered, per TICKET-0265 pattern) navigate between rows.
-- [ ] Pressing **A** on "Drop Item" emits `action_requested("drop", slot_index)` and closes the popup.
-- [ ] Pressing **A** on "Cancel" (or pressing **B** or **Y** at any time) emits `cancelled` and closes the popup.
-- [ ] "Destroy" row uses **hold-to-confirm**: holding **A** while "Destroy" is focused fills a visible progress bar on the row over **0.8 seconds**. Releasing before full cancels the hold without action. Completing the hold emits `action_requested("destroy", slot_index)` and closes the popup.
-- [ ] The popup traps all navigation and action input while open — no input leaks to the inventory grid underneath.
-- [ ] `slot_index: int` is passed in at open time via a `show_for_slot(index: int)` method.
-- [ ] The popup is hidden (`hide()`) by default; calling `show_for_slot(index)` makes it visible and gives it focus.
-- [ ] Keyboard fallback: the popup also responds to arrow keys (up/down) for navigation and Enter/Escape for confirm/cancel, so it is testable without a gamepad.
-- [ ] Unit tests cover: correct signal emitted for each row, hold-to-destroy cancels on early release, B/Y closes without action.
+- [x] Scene exists at `game/scenes/ui/inventory_action_popup.tscn` with script `game/scripts/ui/inventory_action_popup.gd`.
+- [x] Popup displays three rows: **Drop Item**, **Destroy**, **Cancel**. Default focus is on **Drop Item**.
+- [x] D-pad up/down and left stick (edge-triggered, per TICKET-0265 pattern) navigate between rows.
+- [x] Pressing **A** on "Drop Item" emits `action_requested("drop", slot_index)` and closes the popup.
+- [x] Pressing **A** on "Cancel" (or pressing **B** or **Y** at any time) emits `cancelled` and closes the popup.
+- [x] "Destroy" row uses **hold-to-confirm**: holding **A** while "Destroy" is focused fills a visible progress bar on the row over **0.8 seconds**. Releasing before full cancels the hold without action. Completing the hold emits `action_requested("destroy", slot_index)` and closes the popup.
+- [x] The popup traps all navigation and action input while open — no input leaks to the inventory grid underneath.
+- [x] `slot_index: int` is passed in at open time via a `show_for_slot(index: int)` method.
+- [x] The popup is hidden (`hide()`) by default; calling `show_for_slot(index)` makes it visible and gives it focus.
+- [x] Keyboard fallback: the popup also responds to arrow keys (up/down) for navigation and Enter/Escape for confirm/cancel, so it is testable without a gamepad.
+- [x] Unit tests cover: correct signal emitted for each row, hold-to-destroy cancels on early release, B/Y closes without action.
 
 ## Signals
 
@@ -77,3 +77,4 @@ signal cancelled()
 
 - 2026-03-02 [producer] Filed — Studio Head approved Option B (Modified) from design proposal TICKET-0266. This ticket implements the popup component; TICKET-0269 handles integration.
 - 2026-03-02 [gameplay-programmer] Starting work — all dependencies satisfied (none), implementing InventoryActionPopup scene and script.
+- 2026-03-02 [gameplay-programmer] DONE — Implementation complete. Commit 97319c1, PR #296 (merged). Created inventory_action_popup.gd/.tscn and unit tests. All acceptance criteria met.

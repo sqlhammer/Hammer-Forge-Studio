@@ -1676,8 +1676,8 @@ def main():
         description="Hammer Forge Studio — Agent Orchestrator"
     )
     parser.add_argument("milestone", nargs="?",
-        help="Milestone ID (e.g., M7). Required for a fresh start; "
-             "omit only with --status.")
+        help="Milestone ID (e.g., M9 for game milestones, T1 for tooling milestones). "
+             "Required for a fresh start; omit only with --status.")
     parser.add_argument("--instance", type=str, default=None,
         help="Instance name for scoped state/logs (defaults to <milestone>)")
     parser.add_argument("--status", action="store_true",
@@ -1701,7 +1701,7 @@ def main():
         return
 
     if not instance_name:
-        parser.error("Provide <milestone> for a fresh start (e.g., M7)")
+        parser.error("Provide <milestone> for a fresh start (e.g., M9 or T1)")
         return
 
     paths = resolve_instance(instance_name, ORCH_DIR)
@@ -1715,7 +1715,7 @@ def main():
     else:
         # Fresh start — milestone required; phase auto-detected from tickets
         if not args.milestone:
-            parser.error("Provide <milestone> for a fresh start (e.g., M7)")
+            parser.error("Provide <milestone> for a fresh start (e.g., M9 or T1)")
             return
         milestone = args.milestone
         phase = detect_starting_phase(milestone)

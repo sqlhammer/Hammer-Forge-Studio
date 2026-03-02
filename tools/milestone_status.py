@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """milestone_status.py — Fast replacement for milestone_status.sh.
 
-Usage: python tools/milestone_status.py [--brief] [M#]
+Usage: python tools/milestone_status.py [--brief] [M#|T#]
   --brief  Only show OPEN/IN_PROGRESS tickets; collapse DONE into a count.
            Use this for the milestone-summary skill to minimise output tokens.
-Accepts "M5", "5", "m5". Defaults to auto-detecting the active milestone.
+Accepts "M5", "5", "m5" for game milestones; "T1", "t1" for tooling milestones.
+Defaults to auto-detecting the active milestone (first non-Complete row in
+milestones.md; M-series rows are listed before T-series rows, so M-series
+Active milestones are returned first when both series have active milestones).
 Scans only active ticket dirs (skips _archive/ entirely).
 """
 

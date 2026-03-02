@@ -477,6 +477,7 @@ def create_initial_state(milestone: str, phase: str) -> dict:
         "completed_this_session": [],
         "total_cost_usd": 0.0,
         "retries": {},
+        "_uid_commit_pending": False,
     }
 
 
@@ -836,6 +837,14 @@ class Conductor:
 
         # Startup zombie detection: clear stale state from previous sessions
         self._scan_checkpoints_on_startup()
+
+        # Resume interrupted UID commit sequence before any git pull attempt.
+        # A pending UID commit can leave the repo in dirty state (staged but not
+        # committed), which blocks git pull in _do_planning. Run it here first.
+        if self.state.get("_uid_commit_pending", False):
+            self.logger.log("SYSTEM",
+                "UID commit: _uid_commit_pending=True on startup — resuming UID commit sequence")
+            await self._handle_uid_commits()
 
         while not self.shutdown_requested:
             status = self.state["status"]
@@ -1821,6 +1830,8 @@ class Conductor:
 
         # Handle UID commits if any new .gd scripts were created
         if self.state.pop("_any_new_gd", False):
+            self.state["_uid_commit_pending"] = True
+            save_state(self.state, self.paths.state_path)
             await self._handle_uid_commits()
 
         # Check budget ceiling
@@ -1917,39 +1928,89 @@ class Conductor:
                     + del_result.stderr.strip())
 
     async def _handle_uid_commits(self):
-        """GDScript UID commit procedure from CLAUDE.md."""
-        self.logger.log("SYSTEM", "Checking for new .gd.uid files...")
+        """GDScript UID commit procedure from CLAUDE.md.
+
+        Idempotent — safe to call multiple times. Each step checks its own
+        precondition before executing, so interrupted runs resume cleanly.
+        Clears the _uid_commit_pending flag in state.json after all steps complete.
+        """
+        self.logger.log("SYSTEM", "UID commit: starting idempotent UID commit sequence...")
 
         # Trigger Godot filesystem scan (best-effort — Godot may not be running)
         try:
-            # We can't use Godot MCP from Python directly, so we just wait
-            # and check for files that Godot may have generated
             await asyncio.sleep(5)
         except asyncio.CancelledError:
             return
 
-        # Check for new uid files
-        result = subprocess.run(
+        # --- Step 1: git add ---
+        # Check which .uid files are already staged.
+        already_staged = subprocess.run(
+            ["git", "diff", "--cached", "--name-only", "--", "*.gd.uid"],
+            cwd=str(REPO_ROOT), capture_output=True, text=True
+        )
+        staged_uid_files = {f.strip() for f in already_staged.stdout.splitlines() if f.strip()}
+        self.logger.log("SYSTEM",
+            f"UID commit: {len(staged_uid_files)} .gd.uid file(s) already staged")
+
+        # Find untracked .uid files that still need staging.
+        untracked = subprocess.run(
             ["git", "ls-files", "--others", "--exclude-standard", "--", "*.gd.uid"],
             cwd=str(REPO_ROOT), capture_output=True, text=True
         )
-        uid_files = [f for f in result.stdout.splitlines() if f.strip()]
+        untracked_uid_files = [f.strip() for f in untracked.stdout.splitlines() if f.strip()]
+        self.logger.log("SYSTEM",
+            f"UID commit: {len(untracked_uid_files)} untracked .gd.uid file(s) to stage")
 
-        if uid_files:
-            self.logger.log("SYSTEM", f"Found {len(uid_files)} new .gd.uid files")
+        if untracked_uid_files:
             subprocess.run(
-                ["git", "add", "--"] + uid_files,
+                ["git", "add", "--"] + untracked_uid_files,
                 cwd=str(REPO_ROOT), capture_output=True
             )
+            self.logger.log("SYSTEM",
+                f"UID commit: staged {len(untracked_uid_files)} file(s)")
+        else:
+            self.logger.log("SYSTEM", "UID commit: git add skipped — no untracked .gd.uid files")
+
+        # --- Step 2: git commit ---
+        # Only commit if there are staged changes.
+        has_staged = subprocess.run(
+            ["git", "diff", "--cached", "--quiet"],
+            cwd=str(REPO_ROOT), capture_output=True
+        )
+        if has_staged.returncode != 0:
+            # returncode != 0 means there are staged changes
+            self.logger.log("SYSTEM", "UID commit: staged changes detected — committing")
             subprocess.run(
                 ["git", "commit", "-m", "chore: commit Godot-generated UIDs"],
                 cwd=str(REPO_ROOT), capture_output=True
             )
+            self.logger.log("SYSTEM", "UID commit: committed")
+        else:
+            self.logger.log("SYSTEM", "UID commit: git commit skipped — no staged changes")
+
+        # --- Step 3: git push ---
+        # Only push if local HEAD is ahead of origin/main.
+        ahead_count = subprocess.run(
+            ["git", "rev-list", "--count", "origin/main..HEAD"],
+            cwd=str(REPO_ROOT), capture_output=True, text=True
+        )
+        commits_ahead = int(ahead_count.stdout.strip() or "0")
+        self.logger.log("SYSTEM",
+            f"UID commit: local is {commits_ahead} commit(s) ahead of origin/main")
+
+        if commits_ahead > 0:
             subprocess.run(
                 ["git", "push", "origin", "main"],
                 cwd=str(REPO_ROOT), capture_output=True
             )
-            self.logger.log("SYSTEM", "UID files committed and pushed.")
+            self.logger.log("SYSTEM", "UID commit: pushed to origin/main")
+        else:
+            self.logger.log("SYSTEM", "UID commit: git push skipped — already up to date with origin/main")
+
+        # --- Done: clear the pending flag ---
+        self.state["_uid_commit_pending"] = False
+        save_state(self.state, self.paths.state_path)
+        self.logger.log("SYSTEM", "UID commit: _uid_commit_pending cleared")
 
 def _safe_delete(path: Path):
     try:

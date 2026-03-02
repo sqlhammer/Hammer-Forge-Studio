@@ -39,6 +39,8 @@ var _is_prompt_visible: bool = false
 var _fade_tween: Tween = null
 var _headlamp_row: HBoxContainer = null
 var _headlamp_key_label: Label = null
+## Maps action names to their KeyLabel nodes for device-aware refresh
+var _persistent_controls: Dictionary = {}  # { String -> Label }
 
 # ── Onready Variables ─────────────────────────────────────
 @onready var _contextual_prompt: Control = $ContextualPrompt
@@ -58,11 +60,16 @@ func _ready() -> void:
 	HeadLamp.head_lamp_equipped.connect(_on_head_lamp_equipped)
 	if HeadLamp.is_equipped():
 		_add_headlamp_control()
+	# Register scene-defined persistent controls for device-aware label updates
+	_persistent_controls["scan"] = $PersistentControls/ControlsList/PingRow/KeyLabel as Label
+	_persistent_controls["inventory_toggle"] = $PersistentControls/ControlsList/InventoryRow/KeyLabel as Label
 	# Refresh prompt labels when input device changes (keyboard ↔ gamepad)
 	InputManager.input_device_changed.connect(_on_input_device_changed)
+	# Set initial labels based on the current device at startup
+	_refresh_all_persistent_labels()
 
 func _process(_delta: float) -> void:
-	_refresh_headlamp_key_label()
+	_refresh_all_persistent_labels()
 	if not _camera or not _player:
 		return
 	var prompt: Dictionary = _detect_interaction_prompt()
@@ -199,9 +206,13 @@ func _hide_prompt() -> void:
 	)
 
 func _add_jump_control_row() -> void:
-	var row: HBoxContainer = _create_control_row("Space", "Jump", 50.0)
+	var key_text: String = get_action_input_label("jump")
+	if key_text == "?":
+		key_text = "\u2014"
+	var row: HBoxContainer = _create_control_row(key_text, "Jump", 50.0)
 	row.name = "JumpRow"
 	_controls_list.add_child(row)
+	_persistent_controls["jump"] = row.get_node("KeyLabel") as Label
 
 func _on_head_lamp_equipped() -> void:
 	_add_headlamp_control()
@@ -210,23 +221,30 @@ func _add_headlamp_control() -> void:
 	if _headlamp_row:
 		return
 	var key_text: String = get_action_input_label(HEADLAMP_ACTION)
+	if key_text == "?":
+		key_text = "\u2014"
 	_headlamp_row = _create_control_row(key_text, HEADLAMP_LABEL)
 	# Store key label reference for dynamic refresh
 	_headlamp_key_label = _headlamp_row.get_node("KeyLabel") as Label
+	_persistent_controls[HEADLAMP_ACTION] = _headlamp_key_label
 	_controls_list.add_child(_headlamp_row)
 	Global.debug_log("InteractionPromptHUD: headlamp control added [%s]" % key_text)
-
-func _refresh_headlamp_key_label() -> void:
-	if not _headlamp_key_label:
-		return
-	var current_key: String = get_action_input_label(HEADLAMP_ACTION)
-	if _headlamp_key_label.text != current_key:
-		_headlamp_key_label.text = current_key
 
 func _on_input_device_changed(_device: String) -> void:
 	# Force the contextual prompt to re-evaluate its key label on next frame
 	_current_prompt = {}
-	_refresh_headlamp_key_label()
+	_refresh_all_persistent_labels()
+
+## Updates all persistent control key labels based on the active input device.
+func _refresh_all_persistent_labels() -> void:
+	for action: String in _persistent_controls:
+		var label: Label = _persistent_controls[action] as Label
+		if not label:
+			continue
+		var new_text: String = get_action_input_label(action)
+		if new_text == "?":
+			new_text = "\u2014"
+		label.text = new_text
 
 func _get_action_joypad_label(action: String) -> String:
 	var events: Array[InputEvent] = InputMap.action_get_events(action)

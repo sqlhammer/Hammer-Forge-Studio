@@ -2,7 +2,7 @@
 id: TICKET-0235
 title: "Root Game: QA Gate and Phase Sign-Off"
 type: QA
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: qa-engineer
 created_by: producer
@@ -56,3 +56,4 @@ Write unit tests for all new systems introduced in the Root Game phase, then val
 ## Activity Log
 
 - 2026-02-28 [producer] Created ticket — QA gate for Root Game phase
+- 2026-03-01 [qa-engineer] Starting work — all dependencies verified DONE

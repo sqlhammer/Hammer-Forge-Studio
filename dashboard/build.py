@@ -19,6 +19,8 @@ TICKETS_DIR = REPO_ROOT / "tickets"
 MILESTONES_FILE = REPO_ROOT / "docs" / "studio" / "milestones.md"
 OUTPUT_DIR = REPO_ROOT / "dashboard" / "dist" / "data"
 DIAGRAMS_DIR = OUTPUT_DIR / "diagrams"
+HAND_CURATED_SRC = REPO_ROOT / "dashboard" / "diagrams"
+HAND_CURATED_DST = OUTPUT_DIR / "architecture"
 
 
 # ── Frontmatter Parsing ─────────────────────────────────────────────────────
@@ -371,6 +373,19 @@ def main() -> int:
             diagram_count += 1
 
     print(f"  generated {diagram_count} Mermaid diagrams")
+
+    # Copy hand-curated architecture diagrams from dashboard/diagrams/ to dist
+    # (TICKET-0196: game-core-loop, system-architecture, agent-orchestration-flow)
+    curated_count = 0
+    if HAND_CURATED_SRC.is_dir():
+        HAND_CURATED_DST.mkdir(parents=True, exist_ok=True)
+        for mmd_file in sorted(HAND_CURATED_SRC.glob("*.mmd")):
+            dst = HAND_CURATED_DST / mmd_file.name
+            dst.write_bytes(mmd_file.read_bytes())
+            print(f"  copied {mmd_file.name} -> {dst.relative_to(REPO_ROOT)}")
+            curated_count += 1
+    print(f"  copied {curated_count} hand-curated architecture diagrams")
+
     print("done.")
     return 0
 

@@ -1,0 +1,46 @@
+graph TD
+    subgraph AUTOLOADS[Autoload Singletons]
+        Global[Global - Utility and Debug Logging]
+        InputMgr[InputManager - Keyboard and Gamepad]
+        AgentLog[AgentLogger - Structured JSONL Logging]
+        Inventory[PlayerInventory - Item Storage and Query]
+        DepReg[DepositRegistry - World Deposit Tracking]
+        ShipState[ShipState - Ship Mode and Module Slots]
+        FuelSys[FuelSystem - Fuel Tank and Travel Cost]
+        NavSys[NavigationSystem - Biome Travel FSM]
+        RespawnSys[ResourceRespawnSystem - Deposit Respawn]
+    end
+
+    subgraph SCENES[Scene Hierarchy]
+        MainScene[Main Scene]
+        ShipExt[Ship Exterior - Orbit View]
+        ShipInt[Ship Interior - Modules]
+        Player[Player - First Person]
+        BiomeScene[Biome Scene - Surface]
+    end
+
+    subgraph MODULES[Ship Modules]
+        Recycle[Recycler Module]
+        Fab[Fabricator Module]
+        TechTree[Tech Tree Console]
+        NavConsole[Navigation Console]
+    end
+
+    MainScene --> ShipExt
+    MainScene --> ShipInt
+    MainScene --> BiomeScene
+    ShipInt --> Player
+    ShipInt --> MODULES
+
+    Inventory <-->|add and remove items| Recycle
+    Inventory <-->|consume components| Fab
+    ShipState <-->|fuel query| FuelSys
+    NavSys -->|biome_changed signal| RespawnSys
+    NavSys -->|travel state| ShipState
+    DepReg <-->|deposit state| BiomeScene
+    Global -.->|debug logging| InputMgr
+    Global -.->|debug logging| AgentLog
+
+    style AUTOLOADS fill:#1a2a3a,stroke:#4a8abf,color:#cce
+    style SCENES fill:#1a2a1a,stroke:#4abf4a,color:#cec
+    style MODULES fill:#2a1a2a,stroke:#bf4abf,color:#ecc

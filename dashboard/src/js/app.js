@@ -375,6 +375,71 @@ async function renderDiagrams() {
   }
 }
 
+/* ── Architecture Diagrams — TICKET-0196 ─────────────────────────────────── */
+/*
+ * Hand-curated architecture diagrams sourced from dashboard/diagrams/*.mmd.
+ * build.py copies them to dashboard/dist/data/architecture/ for the static
+ * site to fetch. Each entry maps to a file in that directory.
+ */
+
+var ARCHITECTURE_DIAGRAMS = [
+  {
+    id: "game-core-loop",
+    title: "Game Core Loop",
+    description: "The main gameplay loop: Land on a planet, scan the area, mine surface or deep nodes, return to the ship to recycle or fabricate, upgrade systems via the Tech Tree, then travel to the next destination.",
+  },
+  {
+    id: "system-architecture",
+    title: "System Architecture",
+    description: "Autoload singletons, scene hierarchy (Main → Ship/Biome → Player), and key data flows between game systems (Inventory, FuelSystem, NavigationSystem, DepositRegistry, and more).",
+  },
+  {
+    id: "agent-orchestration-flow",
+    title: "Agent Orchestration Flow",
+    description: "Producer → Conductor → parallel worker agents dispatch via worktrees. Shows ticket lifecycle (OPEN → IN_PROGRESS → DONE) and phase gate checkpoints requiring Studio Head approval.",
+  },
+];
+
+async function loadArchitectureDiagrams() {
+  var container = document.getElementById("architecture-diagrams-container");
+  if (!container) return;
+
+  var html = "";
+  var loaded = 0;
+
+  for (var i = 0; i < ARCHITECTURE_DIAGRAMS.length; i++) {
+    var diagram = ARCHITECTURE_DIAGRAMS[i];
+    var url = DATA_BASE + "architecture/" + diagram.id + ".mmd";
+    try {
+      var resp = await fetch(url);
+      if (resp.ok) {
+        var mmdContent = await resp.text();
+        html +=
+          '<div class="diagram-block">' +
+          "<h4>" + escapeHtml(diagram.title) + "</h4>" +
+          "<p>" + escapeHtml(diagram.description) + "</p>" +
+          '<div class="mermaid">' + escapeHtml(mmdContent) + "</div>" +
+          "</div>";
+        loaded++;
+      }
+    } catch (err) {
+      // Diagram not available — skip silently
+    }
+  }
+
+  if (loaded === 0) {
+    container.innerHTML =
+      '<p class="no-data">No architecture diagrams found — run <code>python dashboard/build.py</code> to copy them to dist.</p>';
+    return;
+  }
+
+  container.innerHTML = html;
+
+  if (typeof mermaid !== "undefined") {
+    mermaid.contentLoaded();
+  }
+}
+
 /* ── Render: Build Timestamp ──────────────────────────────────────────────── */
 
 function renderBuildTimestamp() {
@@ -424,6 +489,7 @@ async function init() {
   renderOverview();
   renderSidebarMilestones();
   await renderDiagrams();
+  await loadArchitectureDiagrams(); // TICKET-0196
   runRegisteredRenderers();
 }
 

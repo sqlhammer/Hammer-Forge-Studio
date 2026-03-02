@@ -2,7 +2,7 @@
 id: TICKET-0196
 title: "Architecture and game loop diagrams — curated Mermaid source files"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: producer
 created_by: producer
@@ -60,3 +60,4 @@ Create hand-curated Mermaid diagram source files that visualize the game's archi
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — hand-curated architecture and game loop diagrams
+- 2026-03-01 [producer] Starting work — creating Mermaid diagram source files and dashboard integration

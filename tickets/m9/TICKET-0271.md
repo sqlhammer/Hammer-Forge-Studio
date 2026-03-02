@@ -2,7 +2,7 @@
 id: TICKET-0271
 title: "BUG: Gamepad B button does not cancel the Item Actions popup"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -67,3 +67,4 @@ The popup should already check `ui_cancel` — verify the input event reaches `_
 
 - 2026-03-02 [producer] Filed — UAT rejection. Studio Head confirmed B button does not close the Item Actions popup. May share root cause with TICKET-0270 (missing signal connections); investigate together.
 - 2026-03-02 [gameplay-programmer] Starting work — shared root cause with TICKET-0270 confirmed: Godot 4 built-in ui_cancel does not include JOY_BUTTON_B by default. Same fix in InputManager resolves both tickets.
+- 2026-03-02 [gameplay-programmer] DONE — Fixed together with TICKET-0270. JOY_BUTTON_B now mapped to ui_cancel via _add_joy_button_to_existing_action() in InputManager. B closes popup when open; does not interfere with inventory close (B triggers ui_cancel which also closes inventory — standard gamepad convention). Commit db4d0eb (branch), merge commit e95592e (main), PR #300 (merged).

@@ -464,6 +464,61 @@ def detect_starting_phase(milestone: str) -> str:
     return "Foundation"
 
 
+def get_phase_tickets(milestone: str, phase: str) -> list[str]:
+    """Return all ticket IDs in the milestone that belong to the given phase.
+
+    Reads ticket files under tickets/{milestone}/ and returns IDs where the
+    `phase:` frontmatter field matches the given phase name exactly.
+    Sorted by ticket filename (i.e., ticket ID order).
+    """
+    tickets_dir = REPO_ROOT / "tickets" / milestone.lower()
+    if not tickets_dir.exists():
+        return []
+
+    phase_re = re.compile(r'^phase:\s*["\']?([^"\'\\n]+?)["\']?\s*$', re.MULTILINE)
+    result = []
+    for ticket_file in sorted(tickets_dir.glob("TICKET-*.md")):
+        try:
+            text = ticket_file.read_text(encoding="utf-8")
+            m = phase_re.search(text)
+            if m and m.group(1).strip() == phase:
+                result.append(ticket_file.stem)
+        except Exception:
+            pass
+    return result
+
+
+def get_next_phase(milestone: str, current_phase: str) -> str | None:
+    """Return the phase that follows current_phase in ticket ID order.
+
+    Scans all ticket files in the milestone sorted by ID and collects distinct
+    phase values in order of first appearance.  Returns the phase immediately
+    after current_phase, or None if current_phase is the last (or not found).
+    """
+    tickets_dir = REPO_ROOT / "tickets" / milestone.lower()
+    if not tickets_dir.exists():
+        return None
+
+    phase_re = re.compile(r'^phase:\s*["\']?([^"\'\\n]+?)["\']?\s*$', re.MULTILINE)
+    seen: list[str] = []
+    for ticket_file in sorted(tickets_dir.glob("TICKET-*.md")):
+        try:
+            text = ticket_file.read_text(encoding="utf-8")
+            m = phase_re.search(text)
+            if m:
+                p = m.group(1).strip()
+                if p not in seen:
+                    seen.append(p)
+        except Exception:
+            pass
+
+    if current_phase in seen:
+        idx = seen.index(current_phase)
+        if idx + 1 < len(seen):
+            return seen[idx + 1]
+    return None
+
+
 def create_initial_state(milestone: str, phase: str) -> dict:
     return {
         "status": "PLANNING",
@@ -787,6 +842,12 @@ class Conductor:
         self._active_procs: set[asyncio.subprocess.Process] = set()
         self._run_claude = run_claude_fn or run_claude
 
+        # Gate detection state (TICKET-0189)
+        self._gate_emitted_this_wave: bool = False
+        self._gate_check_logged_this_wave: bool = False
+        # Phase-ticket cache: stores (milestone, phase, wave_number, tickets)
+        self._phase_ticket_cache: tuple[str, str, int, list[str]] | None = None
+
         # Auto-resume from saved state if it exists
         self.state = load_state(paths.state_path)
         if self.state is not None:
@@ -855,6 +916,9 @@ class Conductor:
             elif status == "LIMIT_WAIT":
                 await self._do_limit_wait()
 
+            elif status == "GATE_BLOCKED":
+                await self._do_gate_blocked()
+
             elif status == "HALTED":
                 self.logger.log("HALTED",
                     "System halted. Run with --resume after resolving the issue.")
@@ -901,6 +965,13 @@ class Conductor:
 
         self.state["wave_number"] += 1
         wave_num = self.state["wave_number"]
+
+        # Reset per-wave gate flags (TICKET-0189)
+        self._gate_emitted_this_wave = False
+        self._gate_check_logged_this_wave = False
+        # If pending_gate.json already exists (e.g. Producer emitted it), mark gate as emitted
+        if self.paths.pending_gate_path.exists():
+            self._gate_emitted_this_wave = True
 
         self.logger.log("PLAN", f"Requesting wave {wave_num} plan from Producer...")
 
@@ -1545,6 +1616,56 @@ class Conductor:
         self.logger.log("LIMIT_WAIT", "Cooldown expired — resuming")
         self.state["status"] = "PLANNING"
 
+    async def _do_gate_blocked(self):
+        """Wait for gate approval after a phase-completion gate is emitted.
+
+        Polls for gate_response.json (written by Producer or Studio Head).
+        When found: advances conductor to the next phase and returns to PLANNING.
+        If gate_response.json is absent, sleeps 30 seconds and polls again.
+        """
+        if self.paths.gate_response_path.exists():
+            try:
+                resp = load_json(self.paths.gate_response_path)
+                next_phase = resp.get("next_phase", "").strip()
+
+                # Fall back to reading next_phase from the pending gate itself
+                if not next_phase and self.paths.pending_gate_path.exists():
+                    try:
+                        gate_data = load_json(self.paths.pending_gate_path)
+                        next_phase = gate_data.get("next_phase", "").strip()
+                    except Exception:
+                        pass
+
+                if next_phase:
+                    self.state["phase"] = next_phase
+                    # Invalidate phase-ticket cache for the new phase
+                    self._phase_ticket_cache = None
+                    self.logger.log(
+                        "GATE",
+                        f"Gate approved — advancing to phase: {next_phase}",
+                    )
+                else:
+                    self.logger.log(
+                        "GATE",
+                        "Gate response received but next_phase is missing — "
+                        "staying in current phase",
+                    )
+
+                # Clean up gate files
+                _safe_delete(self.paths.pending_gate_path)
+                _safe_delete(self.paths.gate_response_path)
+                self._gate_emitted_this_wave = False
+                self.state["status"] = "PLANNING"
+            except Exception as exc:
+                self.logger.log("WARNING",
+                    f"Failed to read gate_response.json: {exc}")
+                await asyncio.sleep(30)
+        else:
+            self.logger.log("GATE",
+                "Waiting for gate response (pending_gate.json written — "
+                "awaiting gate_response.json)...")
+            await asyncio.sleep(30)
+
     # Usage-limit keywords (case-insensitive scan of stderr/stdout)
     _USAGE_LIMIT_KEYWORDS = (
         "rate limit", "rate_limit", "usage limit", "usage_limit",
@@ -1830,8 +1951,97 @@ class Conductor:
             self.state["status"] = "HALTED"
             return
 
+        # Conductor-level gate detection fallback (TICKET-0189 / R7)
+        # If all phase tickets are DONE on disk and no gate was already emitted
+        # this wave, the conductor emits the gate without waiting for Producer.
+        if not self._gate_emitted_this_wave:
+            self._check_fallback_gate()
+            if self.state["status"] == "GATE_BLOCKED":
+                return
+
         # Continue to next planning cycle
         self.state["status"] = "PLANNING"
+
+    def _get_phase_tickets_cached(self) -> list[str]:
+        """Return phase tickets, using the per-wave cache."""
+        milestone = self.state["milestone"]
+        phase = self.state["phase"]
+        wave = self.state["wave_number"]
+
+        if (self._phase_ticket_cache is not None
+                and self._phase_ticket_cache[0] == milestone
+                and self._phase_ticket_cache[1] == phase
+                and self._phase_ticket_cache[2] == wave):
+            return self._phase_ticket_cache[3]
+
+        tickets = get_phase_tickets(milestone, phase)
+        self._phase_ticket_cache = (milestone, phase, wave, tickets)
+        return tickets
+
+    def _check_fallback_gate(self):
+        """Check if all phase tickets are DONE and emit a conductor fallback gate.
+
+        Emits pending_gate.json and transitions to GATE_BLOCKED if:
+        - All tickets in the current phase read DONE on disk.
+        - No unresolved checkpoints exist for phase tickets.
+        - No gate was already emitted this wave.
+
+        Logs once per wave if the phase is not yet complete (DEBUG level).
+        """
+        milestone = self.state["milestone"]
+        phase = self.state["phase"]
+        phase_tickets = self._get_phase_tickets_cached()
+
+        if not phase_tickets:
+            return
+
+        total = len(phase_tickets)
+        done_count = 0
+        for tid in phase_tickets:
+            status = read_ticket_status(tid, milestone)
+            if status == "DONE":
+                done_count += 1
+
+        if done_count < total:
+            if not self._gate_check_logged_this_wave:
+                self._gate_check_logged_this_wave = True
+                self.logger.log(
+                    "GATE",
+                    f"Phase {phase} has {done_count}/{total} tickets DONE — not ready",
+                )
+            return
+
+        # All tickets DONE — check for unresolved checkpoints before emitting
+        checkpoints_dir = self.paths.orch_dir / "checkpoints"
+        if checkpoints_dir.exists():
+            for tid in phase_tickets:
+                cp_path = checkpoints_dir / f"{tid}.checkpoint.json"
+                if cp_path.exists():
+                    self.logger.log(
+                        "GATE",
+                        f"Gate deferred — unresolved checkpoint exists for {tid} "
+                        "(all tickets DONE but checkpoint not cleared)",
+                    )
+                    return
+
+        # All clear — emit the fallback gate
+        next_phase = get_next_phase(milestone, phase)
+        gate_data = {
+            "milestone": milestone,
+            "phase": phase,
+            "next_phase": next_phase or "",
+            "summary": "Conductor fallback — Producer unavailable",
+            "requested_at": now_iso(),
+        }
+        write_json(self.paths.pending_gate_path, gate_data)
+        self._gate_emitted_this_wave = True
+
+        self.logger.log(
+            "GATE",
+            f"Conductor detected phase completion — emitting gate (Producer fallback) "
+            f"[phase={phase}, next_phase={next_phase!r}]",
+        )
+        self.state["status"] = "GATE_BLOCKED"
 
     async def _merge_pending_branches(self):
         """Clean up orch worktrees and branches after workers self-merged via GitHub PR.

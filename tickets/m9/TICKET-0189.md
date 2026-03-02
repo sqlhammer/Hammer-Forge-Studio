@@ -2,7 +2,7 @@
 id: TICKET-0189
 title: "Conductor-level gate detection fallback when Producer is unavailable"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: tools-devops-engineer
 created_by: producer
@@ -61,3 +61,4 @@ See `docs/engineering/orchestrator-resilience-plan.md` Risk R7 and Section 2.3 (
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — split from TICKET-0186 for independent scope
+- 2026-03-02 [tools-devops-engineer] Starting work — implementing conductor-level gate detection fallback

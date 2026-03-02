@@ -51,7 +51,7 @@
 |---|-----------|-------------|--------|-------|------|------|-------------|
 | T1 | Project Reporting Dashboard — GitHub Pages status site, auto-built on push | — | Complete | 10 | 0 | 10 | 2026-03-01 |
 | T2 | Usage & Cost Attribution — Orchestrator usage tracking, JSONL ledger, reporting | — | Complete | 8 | 0 | 8 | 2026-03-01 |
-| T3 | Parallel Godot MCP — Per-agent headless Godot instances, remove file-based lock | — | Planning | — | — | — | — |
+| T3 | Parallel Godot MCP — Per-agent headless Godot instances, remove file-based lock | — | Active | 5 | 4 | 1 | — |
 | T4 | Multi-Milestone Orchestrator — Instance directories, parallel conductor support | — | Complete | 9 | 0 | 9 | 2026-03-01 |
 
 ---
@@ -726,6 +726,49 @@ TICKET-0212 (code review) — depends on ALL implementation tickets (0207–0211
 - T2 is informational/reporting only — it does not enforce rate limits or throttle the orchestrator. Capacity gauges are advisory.
 - The JSONL ledger is gitignored (local data). The reporting and backfill scripts are committed.
 - Opus 1.7x token weighting reflects Anthropic's rate limit accounting where Opus output tokens consume 1.7x the capacity of Sonnet/Haiku tokens.
+
+---
+
+### T3 — Parallel Godot MCP
+
+**Goal:** Replace the file-based `godot_mcp.lock` with per-agent headless Godot instances.
+Each agent with `needs_godot_mcp: true` gets its own Godot editor process on a unique port
+pair — no manual Godot setup, up to 4 agents running concurrently.
+
+**Scope:**
+- `orchestrator/config.json` — add `godot` section (executable, ports, max_instances);
+  remove `godot_mcp_exclusive` flag
+- `orchestrator/godot_instance_manager.py` — new `GodotInstanceManager` class
+  (slot allocation, launch, health check, `.mcp.json` writing, terminate, orphan recovery)
+- `orchestrator/conductor.py` — remove 4 lock functions + all lock logic; integrate
+  `GodotInstanceManager` into `_do_dispatching` and `_do_working`
+- `.gitignore` — add `orchestrator/godot_instances.json`
+
+**Phases:**
+- **Foundation** (TICKET-0272–TICKET-0273): Config + `.gitignore` prep, `GodotInstanceManager` class
+- **Integration** (TICKET-0274): Wire into conductor, remove lock system
+- **QA** (TICKET-0275): End-to-end verification with real Godot instances
+
+**Tickets:** TICKET-0236 (kickoff, DONE), TICKET-0272 through TICKET-0275
+
+| Phase | Ticket | Title | Type | Owner |
+|-------|--------|-------|------|-------|
+| Kickoff | TICKET-0236 | T3 kickoff — plan parallel Godot MCP instances milestone | TASK | producer |
+| Foundation | TICKET-0272 | Add godot config section to config.json and .gitignore entry | TASK | tools-devops-engineer |
+| Foundation | TICKET-0273 | Implement GodotInstanceManager class | TASK | tools-devops-engineer |
+| Integration | TICKET-0274 | Wire GodotInstanceManager into conductor; remove lock system | TASK | tools-devops-engineer |
+| QA | TICKET-0275 | End-to-end verification of parallel Godot MCP instances | QA | qa-engineer |
+
+**Dependency Graph:**
+```
+TICKET-0272 (config + .gitignore)  ─┐
+                                     ├─► TICKET-0274 (conductor wiring) ──► TICKET-0275 (QA)
+TICKET-0273 (GodotInstanceManager) ─┘
+```
+
+**Parallel-eligible:** T3 does not block and is not blocked by any game milestone.
+
+**Dependencies:** None
 
 ---
 

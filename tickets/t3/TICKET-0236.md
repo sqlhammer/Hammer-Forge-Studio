@@ -2,12 +2,12 @@
 id: TICKET-0236
 title: "T3 kickoff — plan parallel Godot MCP instances milestone"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: producer
 created_by: studio-head
 created_at: 2026-02-28
-updated_at: 2026-02-28
+updated_at: 2026-03-02
 milestone: "T3"
 phase: "Kickoff"
 depends_on: []
@@ -97,3 +97,4 @@ Agents available for implementation:
 ## Activity Log
 
 - 2026-02-28 [studio-head] Created ticket — T3 kickoff: plan parallel Godot MCP instances milestone
+- 2026-03-02 [producer] DONE — Created TICKET-0272–0275 (Foundation × 2, Integration × 1, QA × 1); updated milestones.md T3 row to Active

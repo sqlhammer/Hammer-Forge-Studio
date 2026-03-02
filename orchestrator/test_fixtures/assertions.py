@@ -42,24 +42,32 @@ def check_9903_dispatched(waves: list[dict]) -> tuple[bool, str]:
     return False, "TICKET-9903 never dispatched"
 
 
-def check_gate_fired(events: list[dict]) -> tuple[bool, str]:
-    """5. Phase gate fires after all Alpha tickets DONE."""
-    for e in events:
-        if e.get("type") == "gate_blocked":
-            return True, f"Phase gate: GATE_BLOCKED after Alpha"
-    return False, "No gate_blocked event found"
+def check_no_premature_beta(waves: list[dict]) -> tuple[bool, str]:
+    """5. TICKET-9904 and TICKET-9905 not dispatched before TICKET-9903 completed."""
+    # Find the wave number where 9903 was dispatched
+    wave_9903 = None
+    for w in waves:
+        if "TICKET-9903" in w.get("tickets_dispatched", []):
+            wave_9903 = w["wave"]
+            break
 
+    if wave_9903 is None:
+        return False, "TICKET-9903 never dispatched"
 
-def check_gate_approved(events: list[dict]) -> tuple[bool, str]:
-    """6. Gate auto-approved, state transitions to Beta phase."""
-    for e in events:
-        if e.get("type") == "gate_approved":
-            return True, f"Gate auto-approved -> Beta"
-    return False, "No gate_approved event found"
+    # 9904/9905 must appear in a strictly later wave than 9903
+    for w in waves:
+        for tid in ("TICKET-9904", "TICKET-9905"):
+            if tid in w.get("tickets_dispatched", []) and w["wave"] <= wave_9903:
+                return False, (
+                    f"{tid} dispatched in wave {w['wave']} but 9903 was in wave {wave_9903} "
+                    "(dependency sequencing violation)"
+                )
+
+    return True, "TICKET-9904/9905 dispatched only after TICKET-9903 completed (dep sequencing OK)"
 
 
 def check_beta_parallel(waves: list[dict]) -> tuple[bool, str]:
-    """7. Some wave dispatches TICKET-9904 + TICKET-9905 in parallel."""
+    """6. Some wave dispatches TICKET-9904 + TICKET-9905 in parallel."""
     for w in waves:
         tids = set(w.get("tickets_dispatched", []))
         if {"TICKET-9904", "TICKET-9905"}.issubset(tids):
@@ -68,7 +76,7 @@ def check_beta_parallel(waves: list[dict]) -> tuple[bool, str]:
 
 
 def check_9906_dispatched(waves: list[dict]) -> tuple[bool, str]:
-    """8. Some wave dispatches TICKET-9906 (final fan-in)."""
+    """7. Some wave dispatches TICKET-9906 (final fan-in)."""
     for w in waves:
         if "TICKET-9906" in w.get("tickets_dispatched", []):
             return True, f"Wave {w['wave']}: 9906 dispatched"
@@ -76,7 +84,7 @@ def check_9906_dispatched(waves: list[dict]) -> tuple[bool, str]:
 
 
 def check_milestone_complete(events: list[dict]) -> tuple[bool, str]:
-    """9. Final wave returns milestone_complete."""
+    """8. Final wave returns milestone_complete."""
     for e in events:
         if e.get("type") == "milestone_complete":
             return True, "Final wave: milestone_complete"
@@ -84,7 +92,7 @@ def check_milestone_complete(events: list[dict]) -> tuple[bool, str]:
 
 
 def check_producer_schema(waves: list[dict], schema: dict) -> tuple[bool, str]:
-    """10. All producer outputs validate against wave_plan.json schema."""
+    """9. All producer outputs validate against wave_plan.json schema."""
     # Lightweight validation: check required fields exist and action is valid
     valid_actions = set(schema["properties"]["action"]["enum"])
     for w in waves:
@@ -100,16 +108,11 @@ def check_producer_schema(waves: list[dict], schema: dict) -> tuple[bool, str]:
                 for key in ("agent", "ticket", "budget_usd", "needs_worktree", "needs_godot_mcp"):
                     if key not in item:
                         return False, f"Wave item missing '{key}'"
-        if action == "gate_blocked":
-            gate = raw.get("gate", {})
-            for key in ("milestone", "phase", "next_phase", "summary"):
-                if key not in gate:
-                    return False, f"Gate missing '{key}'"
     return True, "Schema: producer outputs valid"
 
 
 def check_worker_schema(results: list[dict], schema: dict) -> tuple[bool, str]:
-    """11. All worker results validate against worker_result.json schema."""
+    """10. All worker results validate against worker_result.json schema."""
     valid_outcomes = set(schema["properties"]["outcome"]["enum"])
     for r in results:
         if "ticket" not in r:
@@ -124,7 +127,7 @@ def check_worker_schema(results: list[dict], schema: dict) -> tuple[bool, str]:
 
 
 def check_retry(events: list[dict], ticket_id: str = "TICKET-9902") -> tuple[bool, str]:
-    """12. Retry logic: ticket fails then succeeds (mock mode)."""
+    """11. Retry logic: ticket fails then succeeds (mock mode)."""
     failed = False
     succeeded = False
     for e in events:
@@ -141,14 +144,14 @@ def check_retry(events: list[dict], ticket_id: str = "TICKET-9902") -> tuple[boo
 
 
 def check_budget(state: dict, ceiling: float) -> tuple[bool, str]:
-    """13. Budget tracking: total_cost_usd within ceiling."""
+    """12. Budget tracking: total_cost_usd within ceiling."""
     cost = state.get("total_cost_usd", 0.0)
     ok = cost <= ceiling
     return ok, f"Budget within ceiling (${cost:.2f} <= ${ceiling:.2f})"
 
 
 def check_cleanup(repo_root: Path) -> tuple[bool, str]:
-    """14. Cleanup: no orphan state files after teardown."""
+    """13. Cleanup: no orphan state files after teardown."""
     test_dir = repo_root / "tickets" / "_test"
     if test_dir.exists():
         return False, f"Cleanup: tickets/_test/ still exists"

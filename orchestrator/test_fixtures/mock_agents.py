@@ -91,12 +91,6 @@ def create_mock_run_claude(repo_root: Path, injector: FailureInjector | None = N
     if injector is None:
         injector = FailureInjector()
 
-    # Track wave state for the mock Producer
-    _producer_state = {
-        "phase": None,
-        "last_action": None,
-    }
-
     async def mock_run_claude(
         prompt: str,
         model: str,
@@ -109,95 +103,59 @@ def create_mock_run_claude(repo_root: Path, injector: FailureInjector | None = N
         timeout_minutes: int = 30,
         log_path=None,
         on_proc_start=None,
-    ) -> tuple[int, str, str]:
+    ) -> tuple[int, str, str, dict]:
         # Determine if this is a Producer or Worker call based on prompt content
         is_producer = "wave" in prompt.lower() and "plan" in prompt.lower()
 
         if is_producer:
-            return _mock_producer(prompt, repo_root, _producer_state, verbose)
+            return _mock_producer(prompt, repo_root, verbose)
         else:
             return _mock_worker(prompt, repo_root, injector, verbose)
 
     return mock_run_claude
 
 
-def _mock_producer(prompt: str, repo_root: Path, state: dict,
-                   verbose: bool) -> tuple[int, str, str]:
+def _mock_producer(prompt: str, repo_root: Path,
+                   verbose: bool) -> tuple[int, str, str, dict]:
     """Simulate the Producer: read ticket statuses, return a wave plan."""
     tickets = _get_test_tickets(repo_root)
 
-    # Extract milestone and phase from prompt
+    # Extract milestone from prompt
     milestone_match = re.search(r"milestone[=:]\s*(\S+)", prompt, re.IGNORECASE)
-    phase_match = re.search(r"phase[=:]\s*[\"']?([^\"'\n,]+)", prompt, re.IGNORECASE)
-    milestone = milestone_match.group(1) if milestone_match else "TEST"
-    phase = phase_match.group(1).strip() if phase_match else None
-
-    if phase:
-        state["phase"] = phase
-
-    current_phase = state.get("phase", "Alpha")
+    milestone = milestone_match.group(1) if milestone_match else "_test"
 
     # Build status map
     done_ids = {tid for tid, fm in tickets.items() if fm.get("status") == "DONE"}
     open_ids = {tid for tid, fm in tickets.items() if fm.get("status") != "DONE"}
 
-    # Check if all tickets for current phase are done
-    phase_tickets = {tid for tid, fm in tickets.items()
-                     if fm.get("phase", "").strip('"') == current_phase}
-    phase_done = phase_tickets.issubset(done_ids)
-
-    # If current phase is done, check if we need a gate
-    if phase_done and current_phase == "Alpha" and state.get("last_action") != "gate_sent":
-        state["last_action"] = "gate_sent"
-        plan = {
-            "action": "gate_blocked",
-            "summary": f"All Alpha tickets complete. Gate required before Beta.",
-            "gate": {
-                "milestone": milestone,
-                "phase": "Alpha",
-                "next_phase": "Beta",
-                "summary": "Alpha phase complete — 3/3 tickets DONE.",
-            },
-        }
-        if verbose:
-            print(f"  [MOCK-PRODUCER] gate_blocked: Alpha -> Beta")
-        return (0, json.dumps(plan), "")
-
-    # After gate approval, phase becomes Beta — reset gate tracking
-    if current_phase == "Beta":
-        state["last_action"] = None
-
     # Check for milestone_complete
     if not open_ids:
         plan = {
             "action": "milestone_complete",
-            "summary": "All 6 TEST tickets are DONE.",
+            "summary": "All TEST tickets are DONE.",
         }
         if verbose:
             print(f"  [MOCK-PRODUCER] milestone_complete")
-        return (0, json.dumps(plan), "")
+        return (0, json.dumps(plan), "", {})
 
-    # Find dispatchable tickets in current phase
+    # Find dispatchable tickets — any phase, deps met
     dispatchable = []
     for tid, fm in tickets.items():
         if fm.get("status") == "DONE":
-            continue
-        ticket_phase = fm.get("phase", "").strip('"')
-        if ticket_phase != current_phase:
             continue
         deps = _parse_depends(fm.get("depends_on", "[]"))
         if all(d in done_ids for d in deps):
             dispatchable.append((tid, fm))
 
     if not dispatchable:
-        # No work available in current phase — could be waiting on deps
+        # No work available — waiting on deps
         plan = {
             "action": "no_work",
-            "summary": f"No dispatchable tickets in {current_phase} phase.",
+            "summary": "No dispatchable tickets.",
         }
         if verbose:
             print(f"  [MOCK-PRODUCER] no_work")
-        return (0, json.dumps(plan), "")
+        return (0, json.dumps(plan), "", {})
 
     # Build wave
     wave = []
@@ -213,22 +171,22 @@ def _mock_producer(prompt: str, repo_root: Path, state: dict,
 
     plan = {
         "action": "spawn_agents",
-        "summary": f"Dispatching {len(wave)} tickets in {current_phase} phase.",
+        "summary": f"Dispatching {len(wave)} tickets.",
         "wave": wave,
     }
     if verbose:
         tids = ", ".join(w["ticket"] for w in wave)
         print(f"  [MOCK-PRODUCER] spawn_agents: [{tids}]")
-    return (0, json.dumps(plan), "")
+    return (0, json.dumps(plan), "", {})
 
 
 def _mock_worker(prompt: str, repo_root: Path, injector: FailureInjector,
-                 verbose: bool) -> tuple[int, str, str]:
+                 verbose: bool) -> tuple[int, str, str, dict]:
     """Simulate a Worker: mark ticket DONE, return worker_result JSON."""
     # Extract ticket ID from the prompt
     ticket_match = re.search(r"(TICKET-\d+)", prompt)
     if not ticket_match:
-        return (1, "", "No ticket ID found in prompt")
+        return (1, "", "No ticket ID found in prompt", {})
     ticket_id = ticket_match.group(1)
 
     # Check failure injection
@@ -241,7 +199,7 @@ def _mock_worker(prompt: str, repo_root: Path, injector: FailureInjector,
         }
         if verbose:
             print(f"  [MOCK-WORKER] {ticket_id}: FAILED (injected)")
-        return (0, json.dumps(result), "")
+        return (0, json.dumps(result), "", {})
 
     # Mark ticket DONE in the file
     mark_ticket_done(repo_root, ticket_id)
@@ -257,4 +215,4 @@ def _mock_worker(prompt: str, repo_root: Path, injector: FailureInjector,
     }
     if verbose:
         print(f"  [MOCK-WORKER] {ticket_id}: DONE")
-    return (0, json.dumps(result), "")
+    return (0, json.dumps(result), "", {})

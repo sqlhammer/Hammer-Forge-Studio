@@ -32,6 +32,7 @@ from orchestrator.conductor import (
     save_state,
     write_json,
 )
+from orchestrator.instance_paths import InstancePaths, load_config
 from orchestrator.test_fixtures.generate_tickets import (
     create_test_tickets,
     cleanup_test_tickets,
@@ -44,16 +45,16 @@ from orchestrator.test_fixtures import assertions
 
 
 # ---------------------------------------------------------------------------
-# TestConductor — thin wrapper that records events and auto-approves gates
+# TestConductor — thin wrapper that records events
 # ---------------------------------------------------------------------------
 
 class TestConductor(Conductor):
     """Conductor subclass for testing.
 
     Overrides:
-    - Gate handling: auto-approves immediately (no file polling).
-    - Event recording: tracks waves, gate events, worker results for assertions.
-    - I/O redirection: uses a temp ORCH_DIR so production files are untouched.
+    - Event recording: tracks waves, worker results for assertions.
+    - I/O redirection: uses a temp orch_dir so production files are untouched.
+    - Evaluating: skips git merge/pull/UID steps (tests don't produce real branches).
     """
 
     def __init__(self, orch_dir: Path, repo_root: Path, **kwargs):
@@ -63,35 +64,41 @@ class TestConductor(Conductor):
         self._waves: list[dict] = []
         self._worker_results: list[dict] = []
         self._verbose = kwargs.pop("verbose", False)
+        run_claude_fn = kwargs.pop("run_claude_fn", None)
+        config_path = kwargs.pop("config_path", None)
 
-        # Monkey-patch module-level paths used by conductor internals
+        # Patch module-level path constants used by conductor internals
         import orchestrator.conductor as c
-        self._orig_paths = {
-            "REPO_ROOT": c.REPO_ROOT,
-            "ORCH_DIR": c.ORCH_DIR,
-            "STATE_PATH": c.STATE_PATH,
-            "ACTIVITY_LOG": c.ACTIVITY_LOG,
-            "PENDING_GATE_PATH": c.PENDING_GATE_PATH,
-            "GATE_RESPONSE_PATH": c.GATE_RESPONSE_PATH,
-            "RESULTS_DIR": c.RESULTS_DIR,
-            "LOGS_DIR": c.LOGS_DIR,
-        }
+        self._orig_repo_root = c.REPO_ROOT
+        self._orig_orch_dir = c.ORCH_DIR
         c.REPO_ROOT = repo_root
         c.ORCH_DIR = orch_dir
-        c.STATE_PATH = orch_dir / "state.json"
-        c.ACTIVITY_LOG = orch_dir / "activity.log"
-        c.PENDING_GATE_PATH = orch_dir / "pending_gate.json"
-        c.GATE_RESPONSE_PATH = orch_dir / "gate_response.json"
-        c.RESULTS_DIR = orch_dir / "results"
-        c.LOGS_DIR = orch_dir / "logs"
 
-        super().__init__(**kwargs)
+        # Build InstancePaths pointing to the temp orch_dir
+        paths = InstancePaths(
+            orch_dir=orch_dir,
+            instance_dir=orch_dir,
+            config_path=config_path or (orch_dir / "config.json"),
+            config_local_path=orch_dir / "config.local.json",
+            state_path=orch_dir / "state.json",
+            activity_log=orch_dir / "activity.log",
+            pending_gate_path=orch_dir / "pending_gate.json",
+            gate_response_path=orch_dir / "gate_response.json",
+            godot_mcp_lock_path=orch_dir / "godot_mcp.lock",
+            results_dir=orch_dir / "results",
+            logs_dir=orch_dir / "logs",
+            prompts_dir=orch_dir / "prompts",
+            schemas_dir=orch_dir / "schemas",
+        )
+        config = load_config(paths)
+
+        super().__init__(paths=paths, config=config, run_claude_fn=run_claude_fn)
 
     def restore_paths(self):
         """Restore original module-level paths after test."""
         import orchestrator.conductor as c
-        for attr, val in self._orig_paths.items():
-            setattr(c, attr, val)
+        c.REPO_ROOT = self._orig_repo_root
+        c.ORCH_DIR = self._orig_orch_dir
 
     # -- Event recording hooks -----------------------------------------------
 
@@ -119,29 +126,9 @@ class TestConductor(Conductor):
                 "tickets": tids,
             })
 
-        # Record gate events
-        if self.state.get("status") == "GATE_BLOCKED":
-            gate = self.state.get("_pending_gate", {})
-            raw_plan = {
-                "action": "gate_blocked",
-                "summary": gate.get("summary", ""),
-                "gate": gate,
-            }
-            self._waves.append({
-                "wave": self.state["wave_number"],
-                "tickets_dispatched": [],
-                "raw_plan": raw_plan,
-            })
-            self._events.append({
-                "type": "gate_blocked",
-                "phase": gate.get("phase"),
-                "next_phase": gate.get("next_phase"),
-            })
-
-        # Record milestone_complete / no_work
+        # Record milestone_complete
         if self.state.get("status") == "IDLE":
             completed = self.state.get("completed_waves", [])
-            # Determine if this is milestone_complete or no_work
             all_tids = set()
             for w in completed:
                 all_tids.update(w.get("tickets", []))
@@ -189,30 +176,7 @@ class TestConductor(Conductor):
                     })
                     self._events.append({"type": "worker_failed", "ticket": tid})
 
-    # -- Gate auto-approval --------------------------------------------------
-
-    async def _do_gate_blocked(self):
-        """Auto-approve the gate immediately instead of polling for a file."""
-        gate = self.state.pop("_pending_gate", {})
-        if not gate:
-            self.state["status"] = "PLANNING"
-            return
-
-        next_phase = gate.get("next_phase", "Beta")
-        if self._verbose:
-            print(f"  [TEST] Auto-approving gate: {gate.get('phase')} -> {next_phase}")
-
-        self.logger.log("APPROVED", f"Auto-approved gate -> {next_phase}")
-        self.state["phase"] = next_phase
-        self.state["status"] = "PLANNING"
-
-        self._events.append({
-            "type": "gate_approved",
-            "phase": gate.get("phase"),
-            "next_phase": next_phase,
-        })
-
-    # -- Disable git operations in EVALUATING --------------------------------
+    # -- Skip git operations in EVALUATING -----------------------------------
 
     async def _do_evaluating(self):
         """Skip git merge/pull/UID steps — tests don't produce real branches."""
@@ -279,8 +243,9 @@ async def run_test(mode: str, verbose: bool, keep_artifacts: bool) -> int:
                 verbose=verbose,
             )
 
-        # Run the conductor
-        await conductor.run("TEST", "Alpha")
+        # Run the conductor — use "_test" milestone so read_ticket_status
+        # can find tickets in tickets/_test/ by lowercasing the milestone name.
+        await conductor.run("_test", "Alpha")
 
         # Collect data for assertions
         state = conductor.state
@@ -289,14 +254,13 @@ async def run_test(mode: str, verbose: bool, keep_artifacts: bool) -> int:
         worker_results = conductor._worker_results
         duration = time.time() - start_time
 
-        # Run all 14 assertions
+        # Run all 13 assertions
         checks = [
             assertions.check_terminal_state(state),
             assertions.check_wave1_parallel(waves),
             assertions.check_wave1_no_9903(waves),
             assertions.check_9903_dispatched(waves),
-            assertions.check_gate_fired(events),
-            assertions.check_gate_approved(events),
+            assertions.check_no_premature_beta(waves),
             assertions.check_beta_parallel(waves),
             assertions.check_9906_dispatched(waves),
             assertions.check_milestone_complete(events),

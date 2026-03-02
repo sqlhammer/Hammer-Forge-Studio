@@ -7,7 +7,7 @@
   "properties": {
     "action": {
       "type": "string",
-      "enum": ["spawn_agents", "gate_blocked", "no_work", "milestone_complete", "error"],
+      "enum": ["spawn_agents", "no_work", "milestone_complete", "error"],
       "description": "What the conductor should do next."
     },
     "wave": {
@@ -45,18 +45,6 @@
         },
         "additionalProperties": false
       }
-    },
-    "gate": {
-      "type": "object",
-      "description": "Gate details (required when action=gate_blocked).",
-      "required": ["milestone", "phase", "next_phase", "summary"],
-      "properties": {
-        "milestone": { "type": "string" },
-        "phase": { "type": "string" },
-        "next_phase": { "type": "string" },
-        "summary": { "type": "string" }
-      },
-      "additionalProperties": false
     },
     "summary": {
       "type": "string",

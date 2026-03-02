@@ -1,6 +1,6 @@
 ---
 id: TICKET-0235
-title: "Root Game: QA — write unit tests and validate full phase"
+title: "Root Game: QA Gate and Phase Sign-Off"
 type: QA
 status: OPEN
 priority: P1
@@ -51,6 +51,7 @@ Write unit tests for all new systems introduced in the Root Game phase, then val
 - [ ] All new tests pass.
 - [ ] Full test suite passes with zero failures (`res://addons/hammer_forge_tests/test_runner.tscn`).
 - [ ] Test count is greater than the count at the start of the Root Game phase (new tests are additive).
+- [ ] Phase Gate Summary report posted to `docs/studio/reports/`.
 
 ## Activity Log
 

@@ -121,17 +121,6 @@ def _print_full_status(instance_name: str, paths, state: dict, args) -> None:
             print(f"    {tid}: {count} attempt(s)")
         print()
 
-    # Pending gate
-    if paths.pending_gate_path.exists():
-        with open(paths.pending_gate_path, encoding="utf-8") as f:
-            gate = json.load(f)
-        print("  ** PENDING GATE **")
-        print(f"    Phase:      {gate.get('phase', '?')}")
-        print(f"    Next phase: {gate.get('next_phase', '?')}")
-        print(f"    Summary:    {gate.get('summary', '')}")
-        print(f"    Run: python orchestrator/approve_gate.py")
-        print()
-
     # Activity log tail
     if args.log > 0 and paths.activity_log.exists():
         print(f"  Last {args.log} log entries:")

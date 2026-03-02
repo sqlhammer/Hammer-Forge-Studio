@@ -42,7 +42,7 @@ tags: []
 
 ### `phase` Field
 
-**Optional.** The name of the milestone phase this ticket belongs to (e.g., `"Foundation"`, `"Gameplay"`, `"QA"`). Set by the Producer when creating tickets within a phased milestone. Agents use this to understand where their work fits within the milestone structure.
+**Informational/reporting only.** Records which milestone phase this ticket belongs to (e.g., `"Foundation"`, `"Gameplay"`, `"QA"`). The orchestrator does not use this field for gating — phase transitions are managed entirely via `depends_on` dependencies on phase sign-off tickets. Set by the Producer when creating tickets within a phased milestone. Agents use this to understand where their work fits within the milestone structure.
 
 ### `milestone_gate` Semantics
 
@@ -104,6 +104,17 @@ What the next owner needs to know when this ticket is transferred to them.
 | `SPIKE` | Time-boxed research or exploration to answer a specific question; produces a finding doc, not shipped code |
 | `BLOCKER` | Created when an agent cannot proceed; owned by Producer; references the blocked ticket in `blocks:` |
 | `REVIEW` | A completed artifact (code, asset, doc) that requires review or approval before the work is considered done |
+
+### Phase Sign-Off Tickets
+
+Phase sign-off tickets are a specific use of `TASK` or `QA` type tickets that gate phase transitions. One is created per phase boundary that must block the next phase from starting:
+
+- `depends_on` lists all implementation tickets in the preceding phase
+- Next-phase entry tickets include this sign-off ticket ID in their own `depends_on`
+- Owner: `qa-engineer` for phases requiring test validation; `studio-head` for phases requiring human approval
+- Acceptance criteria must include: all phase tickets `DONE`, test suite passes with zero failures, Phase Gate Summary posted to `docs/studio/reports/`
+
+The orchestrator has no special phase-gate logic — it simply dispatches any ticket whose `depends_on` are all `DONE`. Sign-off tickets encode the sequencing constraint in the dependency graph.
 
 ---
 

@@ -10,7 +10,7 @@ created_at: 2026-02-27
 updated_at: 2026-02-27
 milestone: "M9"
 phase: "Orchestrator Resilience"
-depends_on: []
+depends_on: [TICKET-0235]
 blocks: [TICKET-0183, TICKET-0185]
 tags: [orchestrator, conductor, resilience, dead-lock, P0]
 ---

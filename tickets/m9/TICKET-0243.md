@@ -10,7 +10,7 @@ created_at: 2026-03-01
 updated_at: 2026-03-01
 milestone: "M9"
 phase: "Gamepad Bugs"
-depends_on: [TICKET-0244]
+depends_on: [TICKET-0235, TICKET-0244]
 blocks: []
 tags: [gamepad, input, hud, interaction-prompt, bug]
 ---

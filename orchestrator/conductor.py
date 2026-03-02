@@ -849,9 +849,6 @@ class Conductor:
             elif status == "EVALUATING":
                 await self._do_evaluating()
 
-            elif status == "GATE_BLOCKED":
-                await self._do_gate_blocked()
-
             elif status == "HALTED":
                 self.logger.log("HALTED",
                     "System halted. Run with --resume after resolving the issue.")
@@ -1010,13 +1007,6 @@ class Conductor:
             self.logger.log("PLAN",
                 f"Wave {wave_num}: {len(wave)} assignments [{assignments}]")
             self.state["status"] = "DISPATCHING"
-
-        elif action == "gate_blocked":
-            gate = plan.get("gate", {})
-            self.state["status"] = "GATE_BLOCKED"
-            self.state["_pending_gate"] = gate
-            self.logger.log("GATE",
-                f"Phase \"{gate.get('phase', '?')}\" complete — awaiting approval")
 
         elif action == "no_work":
             self.logger.log("PLAN", "No workable tickets. Idling.")
@@ -1574,91 +1564,6 @@ class Conductor:
                 cwd=str(REPO_ROOT), capture_output=True
             )
             self.logger.log("SYSTEM", "UID files committed and pushed.")
-
-    # ------------------------------------------------------------------
-    # GATE_BLOCKED
-    # ------------------------------------------------------------------
-
-    async def _do_gate_blocked(self):
-        """Handle phase gate — notify human and wait for approval."""
-        pending_gate_path = self.paths.pending_gate_path
-        gate_response_path = self.paths.gate_response_path
-
-        gate = self.state.pop("_pending_gate", {})
-        if not gate:
-            # Check if pending_gate.json already exists (resume scenario)
-            if pending_gate_path.exists():
-                gate = load_json(pending_gate_path)
-            else:
-                self.state["status"] = "PLANNING"
-                return
-
-        # Write gate file
-        gate["requested_at"] = now_iso()
-        write_json(pending_gate_path, gate)
-
-        # Print notification
-        phase = gate.get("phase", "?")
-        milestone = gate.get("milestone", self.state["milestone"])
-        next_phase = gate.get("next_phase", "?")
-        summary = gate.get("summary", "")
-
-        banner = "\n" + "=" * 60
-        banner += f"\n  GATE — ACTION REQUIRED"
-        banner += f"\n  Phase \"{phase}\" ({milestone}) is complete."
-        banner += f"\n  {summary}"
-        banner += f"\n  Next phase: \"{next_phase}\""
-        banner += f"\n  Run: python orchestrator/approve_gate.py"
-        banner += "\n" + "=" * 60 + "\n"
-        print(banner)
-
-        # Fire Windows toast
-        fire_toast(
-            f"Gate: {phase} ({milestone})",
-            f"Phase complete. Run approve_gate.py to continue."
-        )
-
-        self.logger.log("GATE",
-            f"Awaiting Studio Head approval for {phase} ({milestone})")
-
-        # Poll for response
-        while not self.shutdown_requested:
-            if gate_response_path.exists():
-                try:
-                    response = load_json(gate_response_path)
-                except (json.JSONDecodeError, OSError):
-                    await asyncio.sleep(5)
-                    continue
-
-                action = response.get("action", "")
-                comment = response.get("comment", "")
-
-                if action == "approve":
-                    self.logger.log("APPROVED",
-                        f"Studio Head approved phase gate"
-                        + (f" — {comment}" if comment else ""))
-                    self.state["phase"] = next_phase
-                    self.state["status"] = "PLANNING"
-                elif action == "reject":
-                    self.logger.log("REJECTED",
-                        f"Studio Head rejected phase gate"
-                        + (f" — {comment}" if comment else ""))
-                    self.state["status"] = "HALTED"
-                else:
-                    self.logger.log("ERROR",
-                        f"Unknown gate response action: {action}")
-                    self.state["status"] = "HALTED"
-
-                # Clean up gate files
-                _safe_delete(pending_gate_path)
-                _safe_delete(gate_response_path)
-                return
-
-            await asyncio.sleep(5)
-
-        # Shutdown requested while waiting for gate
-        self.logger.log("SYSTEM", "Shutdown during gate wait. Gate still pending.")
-
 
 def _safe_delete(path: Path):
     try:

@@ -10,7 +10,7 @@ created_at: 2026-03-01
 updated_at: 2026-03-01
 milestone: "M9"
 phase: "Code Quality"
-depends_on: []
+depends_on: [TICKET-0235]
 blocks: []
 tags: [code-quality, m8-cleanup, tests, navigation-console, null-reference, qa]
 ---

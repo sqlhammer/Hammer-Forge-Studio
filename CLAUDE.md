@@ -96,7 +96,7 @@ This step must complete before marking the ticket `DONE`.
 - Code review does NOT block commits—commits happen immediately upon implementation completion
 - If code review requests changes, create a new `BUGFIX` or `TASK` ticket; do not revert the original commit
 
-## Phase Gate Protocol
+## Phase Sequencing via Sign-Off Tickets
 
 ### What Is a Phase?
 
@@ -104,27 +104,31 @@ Every milestone is divided into 2–4 named phases (e.g., "Foundation," "Gamepla
 
 - **Scope-bounded, not time-bounded.** A phase is complete when its tickets are done, not when a clock expires.
 - **Named and purposeful.** Names reflect the work being done, not a number.
+- **Informational only in the orchestrator.** The `phase` field in tickets is for planning and status display only. The orchestrator does not check phases — it dispatches any ticket whose `depends_on` are all `DONE`, regardless of phase.
 - **Defined at milestone kickoff** by the Studio Head (with Producer drafting assistance). Phase definitions are part of the milestone document and require Studio Head approval before agents begin work.
-- **Sequential by default.** Agents do not begin Phase N+1 until the Phase N gate passes. Exception: the Studio Head may explicitly mark phases as parallel-eligible in the milestone definition.
 
-### When Does a Gate Fire?
+### Phase Sign-Off Tickets
 
-A Phase Gate fires automatically when all tickets in a phase reach `DONE`. The Producer agent is responsible for enforcing it.
+Phase transitions between sequential phases are encoded in the ticket dependency tree via dedicated **sign-off tickets**:
 
-### Gate Pass Conditions
+- One sign-off ticket is created per phase boundary that must gate the next phase
+- Its `depends_on` lists all implementation tickets in that phase
+- Next-phase entry tickets include the sign-off ticket ID in their own `depends_on`
+- Owner: `qa-engineer` for phases requiring test validation; `studio-head` for phases requiring human review/approval
 
-A gate **passes** only when ALL of the following are true:
+**QA Engineer sign-off responsibilities:**
+- Run the full test suite and confirm zero failures
+- Confirm all phase tickets are `DONE`
+- Post a Phase Gate Summary report to `docs/studio/reports/`
+- Mark the sign-off ticket `DONE`
 
-- ✅ Every ticket in the phase has status `DONE`
-- ✅ The full test suite passes with zero failures
-- ✅ No cross-milestone parse errors or test-runner blockers exist
-- ✅ The dependency graph is clean — no ticket was started while a `depends_on` was non-DONE
+**Studio Head sign-off:** Edit the ticket file directly (set `status: DONE`, add Activity Log entry), then re-run the conductor. No CLI tool required.
 
-### On Gate PASS
+### Orchestrator Behavior
 
-Producer posts a Phase Gate Summary (see `docs/studio/templates/phase-gate-summary.md`) and opens the next phase automatically. The Studio Head is **not** paged on a gate pass.
+The orchestrator has no `GATE_BLOCKED` state. It dispatches any ticket with all `depends_on` satisfied. When no unblocked work remains, the conductor goes `IDLE`. When a sign-off ticket is marked `DONE`, re-invoking the conductor picks up newly unblocked downstream tickets automatically.
 
-### On Milestone Close (QA Gate PASS)
+### On Milestone Close (QA Sign-Off Complete)
 
 When the QA phase gate passes **and** the Studio Head has completed the UAT sign-off document (all checkboxes `✅ Approved`), the Producer must complete the following before the milestone is considered closed:
 
@@ -136,19 +140,15 @@ When the QA phase gate passes **and** the Studio Head has completed the UAT sign
 6. ✅ Commit and push all doc updates to `main`
 7. ✅ Clean up milestone branches — delete all feature branches used during the milestone (e.g., branches matching `orch/*/TICKET-*`, `feature/m<N>/`, or `feature/t<N>/`) from remote. These are safe to delete once all changes are merged to `main`
 
-### On Gate FAIL
-
-Producer pages the Studio Head immediately with the specific failure condition. No work on the next phase begins until the Studio Head resolves or explicitly overrides the failure.
-
 ## Studio Head Touchpoints
 
 The Studio Head is engaged at exactly three points per milestone:
 
 1. **Milestone Kickoff** — approves milestone scope and phase definitions before agents begin work
-2. **Phase Gate Failure** — paged for triage; must resolve or override before the next phase opens
+2. **P0 Blocker Escalation** — Producer pages Studio Head when a P0 ticket cannot be resolved by the assigned agent
 3. **Milestone QA Close** — QA sign-off is a hard gate; Studio Head reviews the UAT sign-off document (`docs/studio/reports/YYYY-MM-DD-[milestone]-uat-signoff.md`), marks each feature checkbox, and grants final approval once all features are `✅ Approved`
 
-The Studio Head is **not** paged at phase gate passes, individual ticket completions, or code review openings.
+The Studio Head is **not** paged at phase transitions, individual ticket completions, or code review openings.
 
 ## Process Violation Enforcement Rules
 

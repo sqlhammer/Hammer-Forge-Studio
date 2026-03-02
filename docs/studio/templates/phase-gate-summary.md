@@ -1,6 +1,6 @@
 # Phase Gate Summary — [MILESTONE] / [PHASE NAME]
 
-> **Template:** Copy this file and fill in all fields when a phase gate fires.
+> **Template:** Copy this file and fill in all fields when completing a phase sign-off ticket.
 > Save to `docs/studio/reports/` as `YYYY-MM-DD-[milestone]-[phase]-gate.md`.
 
 ---
@@ -13,7 +13,6 @@
 | **Phase Name** | e.g., Foundation |
 | **Gate Timestamp** | YYYY-MM-DD HH:MM UTC |
 | **Gate Status** | ✅ PASS / ❌ FAIL |
-| **Studio Head Action Required** | No (PASS) / **Yes — see Failure section (FAIL)** |
 
 ---
 

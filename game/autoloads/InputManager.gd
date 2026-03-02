@@ -155,7 +155,7 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("switch_view", [KEY_TAB])
 	_add_action_if_missing("pause", [KEY_ESCAPE])
 	_add_action_if_missing("jump", [KEY_SPACE])
-	_add_action_if_missing("inventory_toggle", [KEY_I])
+	_add_action_if_missing("inventory_toggle", [KEY_I], [], [JOY_BUTTON_BACK])
 	_add_action_if_missing("use_item", [KEY_G])
 	_add_action_if_missing("toggle_head_lamp", [KEY_F])
 

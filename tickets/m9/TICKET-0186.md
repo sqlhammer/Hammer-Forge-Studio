@@ -2,7 +2,7 @@
 id: TICKET-0186
 title: "UID commit idempotency — make _handle_uid_commits restartable"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: tools-devops-engineer
 created_by: producer
@@ -55,3 +55,4 @@ See `docs/engineering/orchestrator-resilience-plan.md` Risk R5.
 
 - 2026-02-27 [producer] Created ticket — UID idempotency and conductor gate fallback
 - 2026-02-27 [producer] Split conductor-level gate detection into TICKET-0189 — this ticket now covers UID idempotency only
+- 2026-03-02 [tools-devops-engineer] Starting work — implementing _uid_commit_pending flag, precondition checks, startup resume, and unit tests

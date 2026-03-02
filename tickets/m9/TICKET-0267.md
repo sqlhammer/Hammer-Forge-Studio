@@ -2,7 +2,7 @@
 id: TICKET-0267
 title: "BUG: HUD controls indicator shows keyboard keys when gamepad is the active controller"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -55,11 +55,11 @@ HUD hint labels are static keyboard strings; they never update when a gamepad is
 
 ## Acceptance Criteria
 
-- [ ] When gamepad is active, each HUD hint label displays the gamepad button bound to that action instead of the keyboard key.
-- [ ] When keyboard/mouse is active, keyboard labels are shown as before.
-- [ ] Switching between keyboard and gamepad mid-session updates the labels without requiring a scene reload.
-- [ ] If an action has no binding for the active device, the hint label is hidden or shows `—` rather than showing the wrong device's binding.
-- [ ] Existing unit tests pass.
+- [x] When gamepad is active, each HUD hint label displays the gamepad button bound to that action instead of the keyboard key.
+- [x] When keyboard/mouse is active, keyboard labels are shown as before.
+- [x] Switching between keyboard and gamepad mid-session updates the labels without requiring a scene reload.
+- [x] If an action has no binding for the active device, the hint label is hidden or shows `—` rather than showing the wrong device's binding.
+- [x] Existing unit tests pass.
 
 ## Implementation Notes
 
@@ -76,3 +76,4 @@ A helper function `get_action_label(action_name: String, device: String) -> Stri
 
 - 2026-03-02 [producer] Filed — UAT rejection. Studio Head reported HUD bottom-right controls indicator always shows keyboard keys (I, Q, Space, F) even when gamepad is the active controller. Labels must be device-aware.
 - 2026-03-02 [gameplay-programmer] Starting work — implementing device-aware persistent control labels in InteractionPromptHUD.
+- 2026-03-02 [gameplay-programmer] DONE — commit 42ed344, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/294 (merged). All persistent control labels now refresh dynamically on device switch via _persistent_controls dictionary and _refresh_all_persistent_labels().

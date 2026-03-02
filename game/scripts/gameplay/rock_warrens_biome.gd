@@ -49,9 +49,6 @@ const DEEP_NODE_QUANTITY: int = 100
 const SURFACE_NODE_MIN_QUANTITY: int = 15
 const SURFACE_NODE_MAX_QUANTITY: int = 40
 
-## Deep node yield rate multiplier (10% of surface speed).
-const DEEP_NODE_YIELD_RATE: float = 0.1
-
 ## Rock formation grid spacing — metres between formation placement checks.
 const FORMATION_GRID_SPACING: float = 12.0
 
@@ -539,7 +536,11 @@ func _create_deposit(
 	is_deep: bool,
 	deposit_name: String
 ) -> Deposit:
-	var deposit: Deposit = Deposit.new()
+	var deposit: Deposit
+	if is_deep:
+		deposit = DeepResourceNode.new()
+	else:
+		deposit = Deposit.new()
 	deposit.name = deposit_name
 	deposit.setup(
 		resource_type,
@@ -550,8 +551,6 @@ func _create_deposit(
 	deposit.position = world_position
 
 	if is_deep:
-		deposit.infinite = true
-		deposit.yield_rate = DEEP_NODE_YIELD_RATE
 		deposit.add_to_group("deep_deposit")
 	else:
 		deposit.add_to_group("surface_deposit")

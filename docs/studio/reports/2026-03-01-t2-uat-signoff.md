@@ -17,7 +17,7 @@
 | **Prepared By** | qa-engineer |
 | **Date Prepared** | 2026-03-01 |
 | **Test Build** | be1b68c (main) |
-| **Sign-Off Status** | ⏳ Pending |
+| **Sign-Off Status** | ✅ Approved — 2026-03-01 |
 
 ---
 
@@ -56,7 +56,7 @@
 
 **Automated coverage:** QA validation: 22 records extracted from 22 log files with no parse errors. All required fields present.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved
 
 ---
 
@@ -75,7 +75,7 @@
 
 **Automated coverage:** QA validation: all 22 records validated, all required fields present, no parse errors. State.json `total_cost_usd` tracks session costs (per-session accumulation, resets each conductor run by design).
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved
 
 ---
 
@@ -99,7 +99,7 @@
 
 **Automated coverage:** QA validation: defaults-fallback tested — warning printed to stderr, report continued with correct defaults.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved
 
 ---
 
@@ -134,7 +134,7 @@
 
 **Automated coverage:** QA validation: output matches expected values.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved
 
 ---
 
@@ -151,7 +151,7 @@
 
 **Automated coverage:** QA validation: breakdown verified correct.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved
 
 ---
 
@@ -168,7 +168,7 @@
 
 **Automated coverage:** QA validation: breakdown verified correct, planning waves correctly included.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved
 
 ---
 
@@ -188,7 +188,7 @@
 
 **Automated coverage:** QA validation: phase breakdown verified, historical milestones appear correctly.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved
 
 ---
 
@@ -209,7 +209,7 @@
 
 **Automated coverage:** QA validation: 5h and weekly windows manually verified against raw records. Opus 1.7× weighting confirmed. Threshold logic verified: <50% green, 50–80% yellow, >80% red.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved
 
 ---
 
@@ -226,7 +226,7 @@
 
 **Automated coverage:** QA validation: JSON output validated with all flag combinations. All keys and values present and structurally match human-readable output.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved
 
 ---
 
@@ -254,7 +254,7 @@
 
 **Automated coverage:** QA validation: dry-run and live run both verified. Idempotency confirmed (ledger unchanged after second run). Historical milestone data appears in reports.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved
 
 ---
 
@@ -286,8 +286,8 @@ All tests were executed by qa-engineer against commit `be1b68c` on `main`.
 
 ## Final Sign-Off
 
-**Total Features:** 8
-**Approved:** 0 (pending Studio Head review)
+**Total Features:** 10
+**Approved:** 10
 **Rejected:** 0
 
 **Gate Condition:** All features must be `✅ Approved` for sign-off to be granted.
@@ -296,7 +296,7 @@ All tests were executed by qa-engineer against commit `be1b68c` on `main`.
 
 **Studio Head Sign-Off:**
 
-- [ ] All features approved — milestone is cleared for close
+- [x] All features approved — milestone is cleared for close
 
-**Signed off by:** _(Studio Head)_
-**Date:** ___________
+**Signed off by:** Studio Head (Derik)
+**Date:** 2026-03-01

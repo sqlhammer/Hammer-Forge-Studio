@@ -150,7 +150,7 @@ The following are explicitly **not** being built and should not be scoped into a
 
 ## Release Goals
 
-*Last updated: 2026-02-26. See `docs/studio/milestones.md` for the authoritative milestone roadmap; this table is a product-level summary kept in sync at each milestone close.*
+*Last updated: 2026-03-01. See `docs/studio/milestones.md` for the authoritative milestone roadmap; this table is a product-level summary kept in sync at each milestone close.*
 
 | Milestone | Status | QA Sign-off | Description |
 |---|---|---|---|
@@ -180,6 +180,9 @@ The following are explicitly **not** being built and should not be scoped into a
 | Milestone | Status | QA Sign-off | Description |
 |---|---|---|---|
 | T1 | Planning | — | Project Reporting Dashboard: GitHub Pages status site, auto-built on push |
+| T2 | **Complete** | 2026-03-01 | Usage & Cost Attribution: orchestrator usage tracking, JSONL ledger, capacity reporting |
+| T3 | Planning | — | Parallel Godot MCP: per-agent headless Godot instances, remove file-based lock |
+| T4 | **Complete** | 2026-03-01 | Multi-Milestone Orchestrator: instance directories, parallel conductor support |
 
 ---
 

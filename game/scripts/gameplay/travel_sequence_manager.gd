@@ -61,7 +61,7 @@ func setup(player: Node3D, ship_exterior: ShipExterior, biome_container: Node3D,
 	_ship_interior = ship_interior
 	NavigationSystem.travel_completed.connect(_on_travel_completed)
 	_build_fade_overlay()
-	Global.log("TravelSequenceManager: setup complete")
+	Global.debug_log("TravelSequenceManager: setup complete")
 
 
 ## Disconnects from NavigationSystem. Call before freeing this node.
@@ -108,7 +108,7 @@ func execute_biome_swap(destination_id: String) -> bool:
 	# Reposition player and ship at the new biome spawn points
 	_reposition_at_spawn(new_biome)
 
-	Global.log("TravelSequenceManager: biome swap to '%s' complete" % destination_id)
+	Global.debug_log("TravelSequenceManager: biome swap to '%s' complete" % destination_id)
 	return true
 
 
@@ -157,10 +157,10 @@ static func get_biome_ship_spawn(biome_node: Node3D) -> Vector3:
 ## ensures the await chain runs in a clean call context.
 func _on_travel_completed(destination_id: String) -> void:
 	if _is_transitioning:
-		Global.log("TravelSequenceManager: ignoring travel_completed — already transitioning")
+		Global.debug_log("TravelSequenceManager: ignoring travel_completed — already transitioning")
 		return
 	_is_transitioning = true
-	Global.log("TravelSequenceManager: travel_completed received for '%s' — starting transition" % destination_id)
+	Global.debug_log("TravelSequenceManager: travel_completed received for '%s' — starting transition" % destination_id)
 	_execute_travel_transition(destination_id)
 
 
@@ -170,11 +170,11 @@ func _on_travel_completed(destination_id: String) -> void:
 func _execute_travel_transition(destination_id: String) -> void:
 	travel_sequence_started.emit(destination_id)
 	InputManager.set_gameplay_inputs_enabled(false)
-	Global.log("TravelSequenceManager: travel sequence started → '%s'" % destination_id)
+	Global.debug_log("TravelSequenceManager: travel sequence started → '%s'" % destination_id)
 
 	# Fade to black
 	await _fade_out()
-	Global.log("TravelSequenceManager: fade-out complete for '%s'" % destination_id)
+	Global.debug_log("TravelSequenceManager: fade-out complete for '%s'" % destination_id)
 
 	# Swap biome content
 	var success: bool = execute_biome_swap(destination_id)
@@ -187,17 +187,17 @@ func _execute_travel_transition(destination_id: String) -> void:
 		_is_transitioning = false
 		return
 
-	Global.log("TravelSequenceManager: biome swap succeeded for '%s'" % destination_id)
+	Global.debug_log("TravelSequenceManager: biome swap succeeded for '%s'" % destination_id)
 
 	# Fade back in
 	await _fade_in()
-	Global.log("TravelSequenceManager: fade-in complete for '%s'" % destination_id)
+	Global.debug_log("TravelSequenceManager: fade-in complete for '%s'" % destination_id)
 
 	# Restore input and mark transition complete
 	InputManager.set_gameplay_inputs_enabled(true)
 	_is_transitioning = false
 	travel_sequence_completed.emit(destination_id)
-	Global.log("TravelSequenceManager: travel sequence completed → '%s'" % destination_id)
+	Global.debug_log("TravelSequenceManager: travel sequence completed → '%s'" % destination_id)
 
 
 ## Builds the full-screen fade overlay (CanvasLayer + ColorRect).
@@ -252,7 +252,7 @@ func _clear_biome_container() -> void:
 		if is_instance_valid(deposit):
 			DepositRegistry.unregister(deposit)
 	_current_biome_node = null
-	Global.log("TravelSequenceManager: biome container cleared")
+	Global.debug_log("TravelSequenceManager: biome container cleared")
 
 
 ## Repositions the ship exterior at the biome ship spawn point. If the player
@@ -277,10 +277,10 @@ func _reposition_at_spawn(biome_node: Node3D) -> void:
 		var first_person: CharacterBody3D = _player.get_node_or_null("FirstPersonController") as CharacterBody3D
 		if first_person:
 			first_person.velocity = Vector3.ZERO
-		Global.log("TravelSequenceManager: player repositioned to %s" % str(player_spawn))
+		Global.debug_log("TravelSequenceManager: player repositioned to %s" % str(player_spawn))
 	elif player_in_ship:
-		Global.log("TravelSequenceManager: player is inside ship — skipping reposition")
+		Global.debug_log("TravelSequenceManager: player is inside ship — skipping reposition")
 
 	if _ship_exterior:
 		_ship_exterior.position = ship_spawn
-		Global.log("TravelSequenceManager: ship repositioned to %s" % str(ship_spawn))
+		Global.debug_log("TravelSequenceManager: ship repositioned to %s" % str(ship_spawn))

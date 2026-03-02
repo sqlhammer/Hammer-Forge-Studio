@@ -89,7 +89,7 @@ func _draw() -> void:
 
 ## Shows the mining progress bar with optional custom label.
 func show_progress(label: String = "EXTRACTING", color: Color = COLOR_TEAL) -> void:
-	Global.log("MiningProgress: showing progress — %s" % label)
+	Global.debug_log("MiningProgress: showing progress — %s" % label)
 	_is_active = true
 	_is_completing = false
 	_status_text = label
@@ -105,7 +105,7 @@ func update_progress(value: float) -> void:
 
 ## Shows completion state then fades.
 func show_complete() -> void:
-	Global.log("MiningProgress: complete")
+	Global.debug_log("MiningProgress: complete")
 	_status_text = "COMPLETE"
 	_status_color = COLOR_GREEN
 	_bar_color = COLOR_GREEN
@@ -115,7 +115,7 @@ func show_complete() -> void:
 
 ## Shows failure state then fades.
 func show_failed(reason: String) -> void:
-	Global.log("MiningProgress: failed — %s" % reason)
+	Global.debug_log("MiningProgress: failed — %s" % reason)
 	_status_text = reason
 	_status_color = COLOR_CORAL
 	_bar_color = COLOR_CORAL

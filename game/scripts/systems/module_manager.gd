@@ -15,7 +15,7 @@ var _installed_modules: Dictionary = {}
 
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
-	Global.log("ModuleManager: initialized")
+	Global.debug_log("ModuleManager: initialized")
 
 # ── Public Methods ────────────────────────────────────────
 
@@ -25,26 +25,26 @@ func install_module(module_id: String) -> bool:
 	var entry: Dictionary = ModuleDefs.get_module_entry(module_id)
 	if entry.is_empty():
 		install_failed.emit(module_id, "UNKNOWN_MODULE")
-		Global.log("ModuleManager: install failed — unknown module '%s'" % module_id)
+		Global.debug_log("ModuleManager: install failed — unknown module '%s'" % module_id)
 		return false
 
 	if is_installed(module_id):
 		install_failed.emit(module_id, "ALREADY_INSTALLED")
-		Global.log("ModuleManager: install failed — '%s' already installed" % module_id)
+		Global.debug_log("ModuleManager: install failed — '%s' already installed" % module_id)
 		return false
 
 	# Validate tech tree gate — module cannot be installed until the required node is unlocked.
 	var tech_tree_gate: String = ModuleDefs.get_tech_tree_gate(module_id)
 	if not tech_tree_gate.is_empty() and not TechTree.is_unlocked(tech_tree_gate):
 		install_failed.emit(module_id, "TECH_TREE_LOCKED")
-		Global.log("ModuleManager: install failed — '%s' requires tech tree node '%s' to be unlocked" % [module_id, tech_tree_gate])
+		Global.debug_log("ModuleManager: install failed — '%s' requires tech tree node '%s' to be unlocked" % [module_id, tech_tree_gate])
 		return false
 
 	# Validate power capacity
 	var power_draw: float = entry.get("power_draw", 0.0) as float
 	if ShipState.would_exceed_capacity(power_draw):
 		install_failed.emit(module_id, "POWER_OVERLOAD")
-		Global.log("ModuleManager: install failed — '%s' would overload power (draw=%.1f)" % [module_id, power_draw])
+		Global.debug_log("ModuleManager: install failed — '%s' would overload power (draw=%.1f)" % [module_id, power_draw])
 		return false
 
 	# Validate and deduct resource cost (any purity accepted, lowest consumed first)
@@ -56,7 +56,7 @@ func install_module(module_id: String) -> bool:
 		if total_available < quantity:
 			var resource_name: String = ResourceDefs.get_resource_name(resource_type)
 			install_failed.emit(module_id, "INSUFFICIENT_RESOURCES")
-			Global.log("ModuleManager: install failed — need %d %s for '%s' (have %d)" % [quantity, resource_name, module_id, total_available])
+			Global.debug_log("ModuleManager: install failed — need %d %s for '%s' (have %d)" % [quantity, resource_name, module_id, total_available])
 			return false
 		_remove_any_purity(resource_type, quantity)
 
@@ -71,14 +71,14 @@ func install_module(module_id: String) -> bool:
 	}
 
 	module_installed.emit(module_id)
-	Global.log("ModuleManager: installed '%s' (power_draw=%.1f)" % [module_id, power_draw])
+	Global.debug_log("ModuleManager: installed '%s' (power_draw=%.1f)" % [module_id, power_draw])
 	return true
 
 ## Removes an installed module by ID. No resource refund in M4.
 ## Returns true on success, false if module is not installed.
 func remove_module(module_id: String) -> bool:
 	if not is_installed(module_id):
-		Global.log("ModuleManager: remove failed — '%s' not installed" % module_id)
+		Global.debug_log("ModuleManager: remove failed — '%s' not installed" % module_id)
 		return false
 
 	var module_data: Dictionary = _installed_modules[module_id]
@@ -89,7 +89,7 @@ func remove_module(module_id: String) -> bool:
 
 	_installed_modules.erase(module_id)
 	module_removed.emit(module_id)
-	Global.log("ModuleManager: removed '%s'" % module_id)
+	Global.debug_log("ModuleManager: removed '%s'" % module_id)
 	return true
 
 ## Returns true if a module is currently installed.

@@ -64,7 +64,7 @@ func setup(player: CharacterBody3D) -> void:
 
 ## Shows the readout for a specific deposit.
 func show_readout(deposit: Deposit) -> void:
-	Global.log("ScannerReadout: showing readout for deposit at %s" % str(deposit.global_position))
+	Global.debug_log("ScannerReadout: showing readout for deposit at %s" % str(deposit.global_position))
 	_current_deposit = deposit
 	_update_readout_data()
 	_is_visible = true
@@ -72,7 +72,7 @@ func show_readout(deposit: Deposit) -> void:
 
 ## Hides the readout.
 func hide_readout() -> void:
-	Global.log("ScannerReadout: hiding readout")
+	Global.debug_log("ScannerReadout: hiding readout")
 	_is_visible = false
 	_current_deposit = null
 	_animate_hide()

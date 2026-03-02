@@ -72,7 +72,7 @@ func _process(_delta: float) -> void:
 func setup(camera: Camera3D, player: CharacterBody3D) -> void:
 	_camera = camera
 	_player = player
-	Global.log("InteractionPromptHUD: setup complete")
+	Global.debug_log("InteractionPromptHUD: setup complete")
 
 ## Updates the active camera reference (used on view mode switch).
 func set_camera(camera: Camera3D) -> void:
@@ -202,7 +202,7 @@ func _add_headlamp_control() -> void:
 	# Store key label reference for dynamic refresh
 	_headlamp_key_label = _headlamp_row.get_node("KeyLabel") as Label
 	_controls_list.add_child(_headlamp_row)
-	Global.log("InteractionPromptHUD: headlamp control added [%s]" % key_text)
+	Global.debug_log("InteractionPromptHUD: headlamp control added [%s]" % key_text)
 
 func _refresh_headlamp_key_label() -> void:
 	if not _headlamp_key_label:

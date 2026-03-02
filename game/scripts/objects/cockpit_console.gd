@@ -11,4 +11,4 @@ extends StaticBody3D
 func _ready() -> void:
 	collision_layer = PhysicsLayers.INTERACTABLE
 	collision_mask = 0
-	Global.log("CockpitConsole: ready")
+	Global.debug_log("CockpitConsole: ready")

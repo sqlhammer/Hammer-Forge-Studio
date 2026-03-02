@@ -198,7 +198,7 @@ func generate() -> void:
 	_create_spawn_points()
 	_setup_world_boundary()
 
-	Global.log("RockWarrensBiome: generation complete — %d formations, %d scrap deposits, %d cryonite deposits" % [
+	Global.debug_log("RockWarrensBiome: generation complete — %d formations, %d scrap deposits, %d cryonite deposits" % [
 		_rock_formation_count,
 		get_scrap_metal_surface_count() + get_deep_scrap_metal_count(),
 		get_cryonite_surface_count() + get_deep_cryonite_count(),

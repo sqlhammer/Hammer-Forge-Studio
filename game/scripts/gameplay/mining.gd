@@ -107,14 +107,14 @@ func _update_mining(delta: float) -> void:
 		if not SuitBattery.can_mine(aimed_deposit.deposit_tier):
 			if _is_mining:
 				_cancel_mining()
-			Global.log("Mining: failed — insufficient battery charge")
+			Global.debug_log("Mining: failed — insufficient battery charge")
 			mining_failed.emit("NO CHARGE")
 			return
 
 		if PlayerInventory.is_full():
 			if _is_mining:
 				_cancel_mining()
-			Global.log("Mining: failed — inventory full")
+			Global.debug_log("Mining: failed — inventory full")
 			mining_failed.emit("INVENTORY FULL")
 			return
 
@@ -152,7 +152,7 @@ func _start_mining(deposit: Deposit) -> void:
 	_mining_target = deposit
 	_mining_progress = 0.0
 	_is_mining = true
-	Global.log("Mining: extraction started on deposit at %s" % str(deposit.global_position))
+	Global.debug_log("Mining: extraction started on deposit at %s" % str(deposit.global_position))
 	mining_started.emit(deposit)
 	_start_minigame(deposit)
 
@@ -161,7 +161,7 @@ func _complete_mining() -> void:
 		return
 	var result: Dictionary = _mining_target.extract(EXTRACTION_AMOUNT)
 	if result.is_empty():
-		Global.log("Mining: extraction returned empty result")
+		Global.debug_log("Mining: extraction returned empty result")
 		_cleanup_minigame()
 		return
 
@@ -176,7 +176,7 @@ func _complete_mining() -> void:
 	if is_pressurized and not minigame_succeeded:
 		# Pressurized resource with failed or skipped minigame: partial yield (resource vented)
 		effective_extracted = ceili(extracted * PARTIAL_YIELD_MULTIPLIER)
-		Global.log("Mining: pressurized resource vented — partial yield %d/%d" % [effective_extracted, extracted])
+		Global.debug_log("Mining: pressurized resource vented — partial yield %d/%d" % [effective_extracted, extracted])
 	elif minigame_succeeded:
 		bonus = ceili(extracted * BONUS_MULTIPLIER)
 
@@ -188,7 +188,7 @@ func _complete_mining() -> void:
 			total_to_add,
 		)
 		var added: int = total_to_add - leftover
-		Global.log("Mining: extraction completed — extracted %d, bonus %d, added %d to inventory" % [extracted, bonus, added])
+		Global.debug_log("Mining: extraction completed — extracted %d, bonus %d, added %d to inventory" % [extracted, bonus, added])
 		if added > 0:
 			mining_completed.emit(_mining_target, _mining_target.resource_type, _mining_target.purity, added)
 
@@ -201,7 +201,7 @@ func _complete_mining() -> void:
 	_mining_target = null
 
 func _cancel_mining() -> void:
-	Global.log("Mining: extraction cancelled")
+	Global.debug_log("Mining: extraction cancelled")
 	_cleanup_minigame()
 	_is_mining = false
 	_mining_progress = 0.0
@@ -226,7 +226,7 @@ func _start_minigame(deposit: Deposit) -> void:
 
 	_setup_minigame_node(deposit)
 	_minigame_node.create_lines(_pattern_line_count, _player.global_position)
-	Global.log("Mining: minigame started — %d lines to trace" % _pattern_line_count)
+	Global.debug_log("Mining: minigame started — %d lines to trace" % _pattern_line_count)
 	minigame_started.emit(_pattern_line_count)
 
 ## Finds or creates a MiningMinigame child node on the deposit, positioned and
@@ -275,7 +275,7 @@ func _update_minigame_trace(delta: float) -> void:
 				_lines_traced[i] = true
 				if _minigame_node:
 					_minigame_node.mark_line_traced(i)
-				Global.log("Mining: minigame line %d traced" % i)
+				Global.debug_log("Mining: minigame line %d traced" % i)
 				line_traced.emit(i)
 		else:
 			# Dwell resets when crosshair leaves the line

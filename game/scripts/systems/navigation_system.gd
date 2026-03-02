@@ -44,7 +44,7 @@ var _state: TravelState = TravelState.IDLE
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	Global.log("NavigationSystem: initialized (current_biome=%s)" % current_biome)
+	Global.debug_log("NavigationSystem: initialized (current_biome=%s)" % current_biome)
 
 # ── Public Methods ────────────────────────────────────────
 
@@ -82,18 +82,18 @@ func can_travel_to(destination_id: String) -> bool:
 ## No-ops silently if already in-transit or destination is invalid/current.
 func initiate_travel(destination_id: String) -> void:
 	if _state != TravelState.IDLE:
-		Global.log("NavigationSystem: initiate_travel ignored — state is %s" % \
+		Global.debug_log("NavigationSystem: initiate_travel ignored — state is %s" % \
 			TravelState.keys()[_state])
 		return
 	if not BiomeRegistry.is_valid_biome(destination_id):
-		Global.log("NavigationSystem: unknown destination '%s'" % destination_id)
+		Global.debug_log("NavigationSystem: unknown destination '%s'" % destination_id)
 		return
 	if destination_id == current_biome:
-		Global.log("NavigationSystem: already at '%s' — no travel needed" % destination_id)
+		Global.debug_log("NavigationSystem: already at '%s' — no travel needed" % destination_id)
 		return
 	if not can_travel_to(destination_id):
 		travel_blocked.emit(destination_id)
-		Global.log("NavigationSystem: travel to '%s' blocked — insufficient fuel" % \
+		Global.debug_log("NavigationSystem: travel to '%s' blocked — insufficient fuel" % \
 			destination_id)
 		return
 
@@ -111,10 +111,10 @@ func initiate_travel(destination_id: String) -> void:
 	current_biome = destination_id
 	_set_state(TravelState.IDLE)
 
-	Global.log("NavigationSystem: emitting travel_completed for '%s'" % destination_id)
+	Global.debug_log("NavigationSystem: emitting travel_completed for '%s'" % destination_id)
 	travel_completed.emit(destination_id)
 	biome_changed.emit(destination_id)
-	Global.log("NavigationSystem: arrived at '%s' (from '%s', fuel_cost=%.1f)" % [
+	Global.debug_log("NavigationSystem: arrived at '%s' (from '%s', fuel_cost=%.1f)" % [
 		destination_id, previous_biome, cost])
 
 
@@ -123,11 +123,11 @@ func initiate_travel(destination_id: String) -> void:
 func reset() -> void:
 	current_biome = "shattered_flats"
 	_state = TravelState.IDLE
-	Global.log("NavigationSystem: reset to shattered_flats (IDLE)")
+	Global.debug_log("NavigationSystem: reset to shattered_flats (IDLE)")
 
 # ── Private Methods ───────────────────────────────────────
 
 ## Transitions to new_state and logs the change.
 func _set_state(new_state: TravelState) -> void:
 	_state = new_state
-	Global.log("NavigationSystem: state → %s" % TravelState.keys()[new_state])
+	Global.debug_log("NavigationSystem: state → %s" % TravelState.keys()[new_state])

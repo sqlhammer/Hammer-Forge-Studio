@@ -138,15 +138,15 @@ func _on_fuel_changed(current: float, maximum: float) -> void:
 		_flash_visible = true
 	if _fuel_percent > LOW_THRESHOLD:
 		_is_low = false
-	Global.log("FuelGauge: updated to %.0f%%" % (_fuel_percent * 100.0))
+	Global.debug_log("FuelGauge: updated to %.0f%%" % (_fuel_percent * 100.0))
 
 func _on_fuel_low() -> void:
 	_is_low = true
-	Global.log("FuelGauge: LOW FUEL warning active")
+	Global.debug_log("FuelGauge: LOW FUEL warning active")
 
 func _on_fuel_empty() -> void:
 	_is_empty = true
 	_flash_timer = 0.0
 	_flash_elapsed = 0.0
 	_flash_visible = true
-	Global.log("FuelGauge: FUEL EMPTY — flash animation started")
+	Global.debug_log("FuelGauge: FUEL EMPTY — flash animation started")

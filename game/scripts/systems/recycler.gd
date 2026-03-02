@@ -33,7 +33,7 @@ var _has_uncollected_output: bool = false
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
 	set_process(false)
-	Global.log("Recycler: initialized (recipe: %d Scrap Metal → %d Metal, %.1fs)" % [RECIPE_INPUT_QUANTITY, RECIPE_OUTPUT_QUANTITY, PROCESSING_TIME])
+	Global.debug_log("Recycler: initialized (recipe: %d Scrap Metal → %d Metal, %.1fs)" % [RECIPE_INPUT_QUANTITY, RECIPE_OUTPUT_QUANTITY, PROCESSING_TIME])
 
 func _process(delta: float) -> void:
 	if not _is_processing:
@@ -49,34 +49,34 @@ func _process(delta: float) -> void:
 ## Returns true if job started, false on failure.
 func start_job() -> bool:
 	if not ModuleManager.is_installed(MODULE_ID):
-		Global.log("Recycler: cannot start — module not installed")
+		Global.debug_log("Recycler: cannot start — module not installed")
 		return false
 
 	if _is_processing:
-		Global.log("Recycler: cannot start — already processing")
+		Global.debug_log("Recycler: cannot start — already processing")
 		return false
 
 	if _has_uncollected_output:
-		Global.log("Recycler: cannot start — uncollected output pending")
+		Global.debug_log("Recycler: cannot start — uncollected output pending")
 		return false
 
 	# Validate input resources (total across all purities)
 	var total_available: int = PlayerInventory.get_total_count(RECIPE_INPUT_TYPE)
 	if total_available < RECIPE_INPUT_QUANTITY:
-		Global.log("Recycler: cannot start — insufficient Scrap Metal (have %d, need %d)" % [total_available, RECIPE_INPUT_QUANTITY])
+		Global.debug_log("Recycler: cannot start — insufficient Scrap Metal (have %d, need %d)" % [total_available, RECIPE_INPUT_QUANTITY])
 		return false
 
 	# Deduct input resources (consume lowest purity first)
 	var removed: int = _remove_input_any_purity(RECIPE_INPUT_TYPE, RECIPE_INPUT_QUANTITY)
 	if removed < RECIPE_INPUT_QUANTITY:
-		Global.log("Recycler: resource deduction failed unexpectedly")
+		Global.debug_log("Recycler: resource deduction failed unexpectedly")
 		return false
 
 	_is_processing = true
 	_job_progress = 0.0
 	set_process(true)
 	job_started.emit(RECIPE_INPUT_TYPE, RECIPE_OUTPUT_TYPE)
-	Global.log("Recycler: job started (%d Scrap Metal → %d Metal)" % [RECIPE_INPUT_QUANTITY, RECIPE_OUTPUT_QUANTITY])
+	Global.debug_log("Recycler: job started (%d Scrap Metal → %d Metal)" % [RECIPE_INPUT_QUANTITY, RECIPE_OUTPUT_QUANTITY])
 	return true
 
 ## Cancels the current job. Input resources are NOT refunded.
@@ -87,7 +87,7 @@ func cancel_job() -> void:
 	_job_progress = 0.0
 	set_process(false)
 	job_cancelled.emit()
-	Global.log("Recycler: job cancelled (input consumed)")
+	Global.debug_log("Recycler: job cancelled (input consumed)")
 
 ## Collects the output of a completed job into the player inventory.
 ## Returns the quantity actually added (may be less if inventory is full).
@@ -106,10 +106,10 @@ func collect_output() -> int:
 		_has_uncollected_output = false
 		_pending_output_type = ResourceDefs.ResourceType.NONE
 		_pending_output_quantity = 0
-		Global.log("Recycler: output collected (%d Metal)" % collected)
+		Global.debug_log("Recycler: output collected (%d Metal)" % collected)
 	else:
 		_pending_output_quantity = leftover
-		Global.log("Recycler: partial collect (%d Metal, %d remaining)" % [collected, leftover])
+		Global.debug_log("Recycler: partial collect (%d Metal, %d remaining)" % [collected, leftover])
 
 	return collected
 
@@ -153,7 +153,7 @@ func _complete_job() -> void:
 	_pending_output_quantity = RECIPE_OUTPUT_QUANTITY
 	_has_uncollected_output = true
 	job_completed.emit(RECIPE_OUTPUT_TYPE, RECIPE_OUTPUT_QUANTITY)
-	Global.log("Recycler: job completed — %d Metal ready for collection" % RECIPE_OUTPUT_QUANTITY)
+	Global.debug_log("Recycler: job completed — %d Metal ready for collection" % RECIPE_OUTPUT_QUANTITY)
 
 ## Removes input resources across any purity levels. Returns total removed.
 func _remove_input_any_purity(resource_type: ResourceDefs.ResourceType, quantity: int) -> int:

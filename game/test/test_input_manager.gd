@@ -15,7 +15,7 @@ func _ready() -> void:
 	_title_label.text = "InputManager Test Scene"
 	_setup_ui()
 	InputManager.input_device_changed.connect(_on_input_device_changed)
-	Global.log("TestInputManager scene loaded")
+	Global.debug_log("TestInputManager scene loaded")
 
 func _process(_delta: float) -> void:
 	_update_display()
@@ -55,4 +55,4 @@ func _update_display() -> void:
 
 ## Called when InputManager detects device change.
 func _on_input_device_changed(device: String) -> void:
-	Global.log("Test scene detected device change: %s" % device)
+	Global.debug_log("Test scene detected device change: %s" % device)

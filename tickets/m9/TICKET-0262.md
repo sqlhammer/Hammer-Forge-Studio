@@ -2,7 +2,7 @@
 id: TICKET-0262
 title: "BUG: Global.log() naming conflict causes Godot 4.5 headless GDScript parse error — entire test suite unrunnable headlessly"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: qa-engineer
@@ -77,3 +77,4 @@ Exit code: 0 (test runner exited cleanly but ran 0 tests)
 ## Activity Log
 
 - 2026-03-01 [qa-engineer] Filed — discovered while attempting headless test execution for TICKET-0235 Root Game QA gate. Headless command: `Godot_v4.5.1-stable_win64_console.exe --headless --path game res://addons/hammer_forge_tests/test_runner.tscn`. Full output reviewed — parse error on Global.gd:11 blocks all compilation. BUG filed; TICKET-0235 gate documented with this blocker noted.
+- 2026-03-01 [systems-programmer] Starting work — renaming Global.log() to Global.debug_log() across 49 files (280 call sites) plus method definition.

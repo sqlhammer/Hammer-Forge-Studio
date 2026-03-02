@@ -16,7 +16,7 @@ var _unlocked_nodes: Dictionary = {}
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
 	_load_save()
-	Global.log("TechTree: initialized (%d node(s) unlocked)" % _unlocked_nodes.size())
+	Global.debug_log("TechTree: initialized (%d node(s) unlocked)" % _unlocked_nodes.size())
 
 # ── Public Methods ────────────────────────────────────────
 
@@ -26,18 +26,18 @@ func _ready() -> void:
 func unlock_node(node_id: String) -> bool:
 	var entry: Dictionary = TechTreeDefs.get_node_entry(node_id)
 	if entry.is_empty():
-		Global.log("TechTree: unlock failed — unknown node '%s'" % node_id)
+		Global.debug_log("TechTree: unlock failed — unknown node '%s'" % node_id)
 		return false
 
 	if is_unlocked(node_id):
-		Global.log("TechTree: unlock skipped — node '%s' already unlocked" % node_id)
+		Global.debug_log("TechTree: unlock skipped — node '%s' already unlocked" % node_id)
 		return false
 
 	# Validate all prerequisites are met before spending resources.
 	var prerequisites: Array[String] = TechTreeDefs.get_prerequisites(node_id)
 	for prereq_id: String in prerequisites:
 		if not is_unlocked(prereq_id):
-			Global.log("TechTree: unlock failed — '%s' requires '%s' to be unlocked first" % [node_id, prereq_id])
+			Global.debug_log("TechTree: unlock failed — '%s' requires '%s' to be unlocked first" % [node_id, prereq_id])
 			return false
 
 	# Validate and deduct resource cost.
@@ -48,14 +48,14 @@ func unlock_node(node_id: String) -> bool:
 		var total_available: int = PlayerInventory.get_total_count(resource_type)
 		if total_available < quantity:
 			var resource_name: String = ResourceDefs.get_resource_name(resource_type)
-			Global.log("TechTree: unlock failed — '%s' needs %d %s (have %d)" % [node_id, quantity, resource_name, total_available])
+			Global.debug_log("TechTree: unlock failed — '%s' needs %d %s (have %d)" % [node_id, quantity, resource_name, total_available])
 			return false
 		_remove_any_purity(resource_type, quantity)
 
 	_unlocked_nodes[node_id] = true
 	node_unlocked.emit(node_id)
 	_save()
-	Global.log("TechTree: unlocked node '%s'" % node_id)
+	Global.debug_log("TechTree: unlocked node '%s'" % node_id)
 	return true
 
 ## Returns true if the given node has been unlocked.
@@ -98,7 +98,7 @@ func get_available_nodes() -> Array[String]:
 func reset() -> void:
 	_unlocked_nodes.clear()
 	_save()
-	Global.log("TechTree: reset — all nodes locked")
+	Global.debug_log("TechTree: reset — all nodes locked")
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -131,7 +131,7 @@ func _load_save() -> void:
 	var config: ConfigFile = ConfigFile.new()
 	var err: Error = config.load(SAVE_PATH)
 	if err == ERR_FILE_NOT_FOUND:
-		Global.log("TechTree: no save file found — starting fresh")
+		Global.debug_log("TechTree: no save file found — starting fresh")
 		return
 	if err != OK:
 		push_error("TechTree: failed to load save from '%s' (error %d)" % [SAVE_PATH, err])
@@ -139,4 +139,4 @@ func _load_save() -> void:
 	var keys: Array = config.get_section_keys("unlocked") if config.has_section("unlocked") else []
 	for key: Variant in keys:
 		_unlocked_nodes[key as String] = true
-	Global.log("TechTree: loaded %d unlocked node(s) from save" % _unlocked_nodes.size())
+	Global.debug_log("TechTree: loaded %d unlocked node(s) from save" % _unlocked_nodes.size())

@@ -49,7 +49,7 @@ func _ready() -> void:
 	_build_display()
 	_connect_ship_state()
 	_refresh_value()
-	Global.log("ShipStatusDisplay: initialized for %s" % variable_name)
+	Global.debug_log("ShipStatusDisplay: initialized for %s" % variable_name)
 
 func _process(delta: float) -> void:
 	if _is_critical:

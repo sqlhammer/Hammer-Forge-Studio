@@ -2,7 +2,7 @@
 id: TICKET-0270
 title: "BUG: Item Actions popup action buttons do nothing when confirmed with gamepad"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -62,3 +62,4 @@ The `action_requested` signal from `InventoryActionPopup` is likely not connecte
 
 - 2026-03-02 [producer] Filed — UAT rejection. Studio Head confirmed popup opens and navigates correctly but A button produces no action on either Drop or Destroy rows.
 - 2026-03-02 [gameplay-programmer] Starting work — TICKET-0269 is DONE, dependency satisfied. Root cause identified: Godot 4 built-in ui_accept does not include JOY_BUTTON_A by default, and InputManager._add_action_if_missing() skips existing actions. Fix: add helper to InputManager that adds joypad events to existing built-in actions.
+- 2026-03-02 [gameplay-programmer] DONE — Fixed shared root cause with TICKET-0271. Added _add_joy_button_to_existing_action() to InputManager, mapping JOY_BUTTON_A → ui_accept and JOY_BUTTON_B → ui_cancel. Added 2 regression tests. Commit db4d0eb (branch), merge commit e95592e (main), PR #300 (merged).

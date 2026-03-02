@@ -2,7 +2,7 @@
 id: TICKET-0231
 title: "Root Game: Create Main Menu scene with Play button"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -21,15 +21,15 @@ Create the game's main menu — a minimal `Control`-based scene with a single "P
 
 ## Acceptance Criteria
 
-- [ ] New script `game/scripts/ui/main_menu.gd` with `class_name MainMenu extends Control`.
-- [ ] New scene `game/scenes/ui/main_menu.tscn` using `MainMenu` as its script.
-- [ ] Scene displays a single "Play" `Button` centered on screen.
-- [ ] Button label is exactly `"Play"`.
-- [ ] Pressing Play transitions to `res://scenes/gameplay/game_world.tscn` via `get_tree().change_scene_to_file()`.
-- [ ] The main menu UI is built programmatically in `_ready()` (no editor-placed nodes required beyond the root Control) — consistent with `DebugLauncher` style.
-- [ ] Background uses dark color matching the game's aesthetic (consistent with `DebugLauncher`'s `#1a1a2e` background).
-- [ ] `Global.log()` call when Play is pressed.
-- [ ] No dependency on `DebugLauncher` — the main menu is unaware of how parameters were set.
+- [x] New script `game/scripts/ui/main_menu.gd` with `class_name MainMenu extends Control`.
+- [x] New scene `game/scenes/ui/main_menu.tscn` using `MainMenu` as its script.
+- [x] Scene displays a single "Play" `Button` centered on screen.
+- [x] Button label is exactly `"Play"`.
+- [x] Pressing Play transitions to `res://scenes/gameplay/game_world.tscn` via `get_tree().change_scene_to_file()`.
+- [x] The main menu UI is built programmatically in `_ready()` (no editor-placed nodes required beyond the root Control) — consistent with `DebugLauncher` style.
+- [x] Background uses dark color matching the game's aesthetic (consistent with `DebugLauncher`'s `#1a1a2e` background).
+- [x] `Global.log()` call when Play is pressed.
+- [x] No dependency on `DebugLauncher` — the main menu is unaware of how parameters were set.
 
 ## Implementation Notes
 
@@ -41,3 +41,4 @@ Create the game's main menu — a minimal `Control`-based scene with a single "P
 ## Activity Log
 
 - 2026-02-28 [producer] Created ticket — main menu scene for Root Game phase
+- 2026-03-01 [gameplay-programmer] Starting work — creating MainMenu scene and script per wireframe spec

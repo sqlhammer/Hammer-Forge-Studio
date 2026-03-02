@@ -7,6 +7,10 @@ Usage:
     python orchestrator/test_harness.py --mode live            # real agents (~$2-3)
     python orchestrator/test_harness.py --mode mock --verbose  # print wave plans
     python orchestrator/test_harness.py --keep-artifacts       # don't clean up temp dir
+
+Additional unit tests:
+  - Checkpoint created on abnormal exit (empty stdout)
+  - Checkpoint auto-remediated on startup when ticket is DONE on disk
 """
 
 import argparse
@@ -198,6 +202,200 @@ class TestConductor(Conductor):
 
 
 # ---------------------------------------------------------------------------
+# Checkpoint unit tests (TICKET-0183)
+# ---------------------------------------------------------------------------
+
+def _make_checkpoint_paths(orch_dir: Path) -> InstancePaths:
+    """Build InstancePaths pointing at a temp orch_dir for checkpoint tests."""
+    return InstancePaths(
+        orch_dir=orch_dir,
+        instance_dir=orch_dir,
+        config_path=REPO_ROOT / "orchestrator" / "test_config.json",
+        config_local_path=orch_dir / "config.local.json",
+        state_path=orch_dir / "state.json",
+        activity_log=orch_dir / "activity.log",
+        pending_gate_path=orch_dir / "pending_gate.json",
+        gate_response_path=orch_dir / "gate_response.json",
+        godot_mcp_lock_path=orch_dir / "godot_mcp.lock",
+        results_dir=orch_dir / "results",
+        logs_dir=orch_dir / "logs",
+        prompts_dir=REPO_ROOT / "orchestrator" / "prompts",
+        schemas_dir=REPO_ROOT / "orchestrator" / "schemas",
+    )
+
+
+async def test_checkpoint_created_on_abnormal_exit() -> tuple[bool, str]:
+    """Worker exits with empty stdout → checkpoint file created with correct schema.
+
+    Scenario: agent exits 0 with empty stdout (usage-limit pattern) and the ticket
+    is not DONE on disk.  _write_checkpoint must be called before _queue_retry,
+    producing a checkpoint JSON with all required schema fields.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_checkpoint_write_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = REPO_ROOT
+    c.ORCH_DIR = orch_dir
+
+    try:
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state("_test", "Alpha")
+
+        # Build a fake worker (no worktree — skips git probing)
+        ticket_id = "TICKET-9997"
+        worker = {
+            "agent": "gameplay-programmer",
+            "ticket": ticket_id,
+            "budget_usd": 0.5,
+            "needs_worktree": False,
+            "needs_godot_mcp": False,
+            "worktree_path": None,
+            "branch": None,
+            "prompt_supplement": "",
+            "started_at": "2026-03-01T00:00:00",
+        }
+        conductor.state["active_workers"] = [worker]
+        conductor.state["active_ticket_ids"] = [ticket_id]
+
+        # Mock _run_worker to return exit=0, empty stdout (usage-limit pattern)
+        async def mock_run_worker(_worker):
+            return (0, "", "", {})
+
+        conductor._run_worker = mock_run_worker
+
+        await conductor._do_working()
+
+        # Verify checkpoint file was created
+        checkpoint_path = orch_dir / "checkpoints" / f"{ticket_id}.checkpoint.json"
+        if not checkpoint_path.exists():
+            return False, "Checkpoint: file not created after empty-stdout exit"
+
+        cp = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+
+        # Validate required schema fields
+        required_top = ["ticket", "agent", "milestone", "phase", "wave",
+                        "suspended_at", "reason", "progress", "notes"]
+        missing_top = [f for f in required_top if f not in cp]
+        if missing_top:
+            return False, f"Checkpoint: missing top-level fields: {missing_top}"
+
+        required_progress = ["commit_hash", "branch", "pr_url", "pr_merged",
+                             "ticket_status_on_disk", "steps_completed"]
+        missing_prog = [f for f in required_progress if f not in cp.get("progress", {})]
+        if missing_prog:
+            return False, f"Checkpoint: missing progress fields: {missing_prog}"
+
+        if cp["ticket"] != ticket_id:
+            return False, f"Checkpoint: ticket field mismatch: {cp['ticket']!r}"
+
+        if cp["reason"] != "usage_limit":
+            return False, f"Checkpoint: expected reason='usage_limit', got {cp['reason']!r}"
+
+        return True, "Checkpoint: created with correct schema after empty-stdout exit"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_checkpoint_auto_remediated_on_startup() -> tuple[bool, str]:
+    """Checkpoint exists on startup with ticket DONE on disk → auto-remediated and deleted.
+
+    Scenario: previous session wrote a checkpoint for TICKET-9996; on restart the
+    conductor scans checkpoints/, finds the file, reads the ticket (DONE on disk),
+    and auto-remediates: adds to completed_this_session and deletes the checkpoint.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_checkpoint_startup_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        ticket_id = "TICKET-9996"
+        milestone = "_test"
+
+        # Create ticket file with status DONE
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        (ticket_dir / f"{ticket_id}.md").write_text(
+            f"---\nid: {ticket_id}\nstatus: DONE\n---\n", encoding="utf-8"
+        )
+
+        # Create checkpoint file
+        checkpoints_dir = orch_dir / "checkpoints"
+        checkpoints_dir.mkdir()
+        checkpoint_path = checkpoints_dir / f"{ticket_id}.checkpoint.json"
+        checkpoint_path.write_text(json.dumps({
+            "ticket": ticket_id,
+            "agent": "gameplay-programmer",
+            "milestone": milestone,
+            "phase": "Alpha",
+            "wave": 3,
+            "suspended_at": "2026-03-01T10:00:00",
+            "reason": "usage_limit",
+            "progress": {
+                "steps_completed": ["read_ticket", "marked_in_progress", "committed"],
+                "commit_hash": "abc1234",
+                "branch": f"orch/gameplay-programmer/{ticket_id}",
+                "uncommitted_changes": False,
+                "pr_url": None,
+                "pr_merged": False,
+                "pr_state": None,
+                "ticket_status_on_disk": "IN_PROGRESS",
+                "files_changed": [],
+                "new_gd_scripts": False,
+            },
+            "notes": "exit_code=0",
+        }), encoding="utf-8")
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state(milestone, "Alpha")
+
+        # Simulate a stale active_ticket_id entry from the previous session
+        conductor.state["active_ticket_ids"] = [ticket_id]
+
+        conductor._scan_checkpoints_on_startup()
+
+        # Checkpoint file should be deleted
+        if checkpoint_path.exists():
+            return False, "Checkpoint: file not deleted after auto-remediation on startup"
+
+        # Ticket should be in completed_this_session
+        session_done = conductor.state.get("completed_this_session", [])
+        if ticket_id not in session_done:
+            return False, f"Checkpoint: {ticket_id} not added to completed_this_session"
+
+        # Stale active_ticket_id should be cleared
+        active = conductor.state.get("active_ticket_ids", [])
+        if ticket_id in active:
+            return False, f"Checkpoint: {ticket_id} not cleared from active_ticket_ids"
+
+        return True, "Checkpoint: auto-remediated on startup — file deleted, ticket added to session"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
 
@@ -348,8 +546,37 @@ def main():
                         help="Don't clean up temp directory after run")
 
     args = parser.parse_args()
-    exit_code = asyncio.run(run_test(args.mode, args.verbose, args.keep_artifacts))
-    sys.exit(exit_code)
+
+    # Run the end-to-end harness
+    harness_exit = asyncio.run(run_test(args.mode, args.verbose, args.keep_artifacts))
+
+    # Run checkpoint unit tests (TICKET-0183)
+    async def _run_checkpoint_tests():
+        return [
+            await test_checkpoint_created_on_abnormal_exit(),
+            await test_checkpoint_auto_remediated_on_startup(),
+        ]
+
+    checkpoint_checks = asyncio.run(_run_checkpoint_tests())
+
+    print()
+    print("=" * 60)
+    print("  Checkpoint Unit Tests (TICKET-0183)")
+    print("=" * 60)
+    for ok, msg in checkpoint_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    cp_passed = sum(1 for ok, _ in checkpoint_checks if ok)
+    cp_total = len(checkpoint_checks)
+    print()
+    if cp_passed == cp_total:
+        print(f"  Result: {cp_passed}/{cp_total} PASSED")
+    else:
+        print(f"  Result: {cp_passed}/{cp_total} PASSED, {cp_total - cp_passed} FAILED")
+    print("=" * 60)
+
+    # Exit non-zero if either harness or checkpoint tests failed
+    sys.exit(0 if harness_exit == 0 and cp_passed == cp_total else 1)
 
 
 if __name__ == "__main__":

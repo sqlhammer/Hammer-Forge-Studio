@@ -2,7 +2,7 @@
 id: TICKET-0183
 title: "Checkpoint system — write, read, and clear suspension checkpoints"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: tools-devops-engineer
 created_by: producer
@@ -68,3 +68,4 @@ See `docs/engineering/orchestrator-resilience-plan.md` Section 2.1–2.2 for the
 
 - 2026-02-27 [producer] Created ticket — checkpoint infrastructure for graceful failure and resume
 - 2026-02-27 [producer] Moved R3 auto-remediation (merged-PR detection) to dedicated TICKET-0190
+- 2026-03-02 [tools-devops-engineer] Starting work — implementing checkpoint system per resilience plan sections 2.1–2.2

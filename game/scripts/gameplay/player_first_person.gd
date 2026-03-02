@@ -41,8 +41,10 @@ func _ready() -> void:
 	$Head.position.y = head_height
 
 func _process(delta: float) -> void:
-	_update_movement(delta)
 	_update_camera(delta)
+
+func _physics_process(delta: float) -> void:
+	_update_movement(delta)
 	_apply_gravity(delta)
 	_update_jump()
 	_apply_movement()

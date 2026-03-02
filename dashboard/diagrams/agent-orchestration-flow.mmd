@@ -1,0 +1,42 @@
+flowchart TD
+    SH[Studio Head - Human]
+    CONDUCTOR[Conductor - conductor.py]
+    PRODUCER[Producer - claude -p JSON mode]
+    TICKETS[Ticket Queue - tickets/milestone/]
+
+    subgraph WORKERS[Worker Agents - Parallel Worktrees]
+        SP[systems-programmer]
+        GP[gameplay-programmer]
+        OTHER[other specialist agents]
+    end
+
+    GATE[Phase Gate - All phase tickets DONE]
+    APPROVE[approve_gate.py]
+
+    subgraph LIFECYCLE[Ticket Lifecycle]
+        OPEN[OPEN] --> IN_PROG[IN_PROGRESS]
+        IN_PROG --> DONE[DONE]
+    end
+
+    SH -->|python conductor.py M8 Phase| CONDUCTOR
+    CONDUCTOR -->|plan_wave.md prompt| PRODUCER
+    PRODUCER -->|reads ticket status| TICKETS
+    PRODUCER -->|JSON wave plan| CONDUCTOR
+    CONDUCTOR -->|spawn in worktrees| WORKERS
+    SP -->|commit + PR + self-merge| CONDUCTOR
+    GP -->|commit + PR + self-merge| CONDUCTOR
+    OTHER -->|commit + PR + self-merge| CONDUCTOR
+    CONDUCTOR -->|phase complete| GATE
+    GATE -->|notify Studio Head| SH
+    SH -->|python approve_gate.py| APPROVE
+    APPROVE -->|gate_response.json| CONDUCTOR
+    CONDUCTOR -->|next phase planning| PRODUCER
+
+    style SH fill:#6a1a80,color:#fff
+    style CONDUCTOR fill:#1a5c6f,color:#fff
+    style PRODUCER fill:#1a6f5c,color:#fff
+    style GATE fill:#7a4000,color:#fff
+    style APPROVE fill:#5a3000,color:#fff
+    style TICKETS fill:#3a3a3a,color:#fff
+    style WORKERS fill:#1a2a3a,stroke:#4a8abf,color:#cce
+    style LIFECYCLE fill:#1a2a1a,stroke:#4abf4a,color:#cec

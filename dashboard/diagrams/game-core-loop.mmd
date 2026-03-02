@@ -1,0 +1,32 @@
+flowchart TD
+    TRAVEL[Travel - Navigation Console]
+    LAND[Land - Orbital to Ground]
+    SCAN[Scan Area - Scanner]
+    SURFACE[Mine Surface Node - Hand Drill]
+    DEEP[Mine Deep Node - Hand Drill]
+    RETURN[Return to Ship]
+    RECYCLE[Recycle - Recycler]
+    FABRICATE[Fabricate - Fabricator]
+    UPGRADE[Upgrade - Tech Tree]
+
+    TRAVEL --> LAND
+    LAND --> SCAN
+    SCAN -->|surface deposit| SURFACE
+    SCAN -->|deep node| DEEP
+    SURFACE --> RETURN
+    DEEP --> RETURN
+    RETURN -->|raw ore| RECYCLE
+    RETURN -->|components| FABRICATE
+    RECYCLE --> UPGRADE
+    FABRICATE --> UPGRADE
+    UPGRADE --> TRAVEL
+
+    style TRAVEL fill:#1a6f5c,color:#fff
+    style LAND fill:#1a5c6f,color:#fff
+    style SCAN fill:#4a3080,color:#fff
+    style SURFACE fill:#7a4000,color:#fff
+    style DEEP fill:#5a2000,color:#fff
+    style RETURN fill:#1a3060,color:#fff
+    style RECYCLE fill:#0a5020,color:#fff
+    style FABRICATE fill:#0a3050,color:#fff
+    style UPGRADE fill:#6a2080,color:#fff

@@ -1,5 +1,6 @@
 ## Unit tests for the Inventory system. Verifies slot management, stacking, add/remove
-## operations, capacity limits, signal emissions, and query methods.
+## operations, capacity limits, signal emissions, query methods, and destroy (full-stack
+## removal from a specific slot).
 class_name TestInventoryUnit
 extends TestSuite
 
@@ -65,6 +66,12 @@ func register_tests() -> void:
 	add_test("get_slot_returns_duplicate", _test_get_slot_returns_duplicate)
 	add_test("get_slot_out_of_bounds_returns_empty", _test_get_slot_out_of_bounds_returns_empty)
 	add_test("is_slot_empty_out_of_bounds_returns_false", _test_is_slot_empty_out_of_bounds_returns_false)
+	# Destroy (full-stack removal) tests
+	add_test("destroy_full_stack_removes_all_items", _test_destroy_full_stack_removes_all_items)
+	add_test("destroy_full_stack_clears_slot", _test_destroy_full_stack_clears_slot)
+	add_test("destroy_full_stack_decrements_used_slot_count", _test_destroy_full_stack_decrements_used_slot_count)
+	add_test("destroy_full_stack_emits_item_removed_with_full_quantity", _test_destroy_full_stack_emits_item_removed_with_full_quantity)
+	add_test("destroy_from_empty_slot_returns_zero_no_signals", _test_destroy_from_empty_slot_returns_zero_no_signals)
 
 
 # ── Test Methods ──────────────────────────────────────────
@@ -363,3 +370,69 @@ func _test_is_slot_empty_out_of_bounds_returns_false() -> void:
 		"is_slot_empty with negative index should return false")
 	assert_false(_inventory.is_slot_empty(99),
 		"is_slot_empty with out-of-bounds index should return false")
+
+
+# ── Destroy (Full-Stack Removal) Tests ───────────────────
+
+func _test_destroy_full_stack_removes_all_items() -> void:
+	_inventory.add_item(
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR, 50)
+	var slot_data: Dictionary = _inventory.get_slot(0)
+	var quantity: int = slot_data.get("quantity", 0) as int
+	var destroyed: int = _inventory.remove_from_slot(0, quantity)
+	assert_equal(destroyed, 50, "Should destroy all 50 items from slot")
+	assert_equal(_inventory.get_total_count(ResourceDefs.ResourceType.SCRAP_METAL), 0,
+		"Total count should be 0 after destroying all items")
+
+
+func _test_destroy_full_stack_clears_slot() -> void:
+	_inventory.add_item(
+		ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.TWO_STAR, 30)
+	_inventory.remove_from_slot(0, 30)
+	assert_true(_inventory.is_slot_empty(0),
+		"Slot should be empty after destroying full stack")
+	var slot_data: Dictionary = _inventory.get_slot(0)
+	assert_true(slot_data.is_empty(),
+		"get_slot should return empty dict after full-stack destroy")
+
+
+func _test_destroy_full_stack_decrements_used_slot_count() -> void:
+	_inventory.add_item(
+		ResourceDefs.ResourceType.SCRAP_METAL, ResourceDefs.Purity.THREE_STAR, 40)
+	_inventory.add_item(
+		ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.ONE_STAR, 20)
+	assert_equal(_inventory.get_used_slot_count(), 2, "Should have 2 used slots")
+	_inventory.remove_from_slot(0, 40)
+	assert_equal(_inventory.get_used_slot_count(), 1,
+		"Used slot count should decrement after destroy")
+	assert_equal(_inventory.get_free_slot_count(), 14,
+		"Free slot count should increment after destroy")
+
+
+func _test_destroy_full_stack_emits_item_removed_with_full_quantity() -> void:
+	_inventory.add_item(
+		ResourceDefs.ResourceType.METAL, ResourceDefs.Purity.TWO_STAR, 25)
+	_spy.clear()
+	_inventory.remove_from_slot(0, 25)
+	assert_signal_emitted(_spy, "item_removed",
+		"item_removed should fire on full-stack destroy")
+	var args: Array = _spy.get_emission_args("item_removed", 0)
+	assert_equal(args[0], ResourceDefs.ResourceType.METAL,
+		"item_removed should report METAL type")
+	assert_equal(args[1], ResourceDefs.Purity.TWO_STAR,
+		"item_removed should report TWO_STAR purity")
+	assert_equal(args[2], 25,
+		"item_removed should report full quantity destroyed")
+	assert_signal_emitted(_spy, "slot_changed",
+		"slot_changed should fire on destroy")
+
+
+func _test_destroy_from_empty_slot_returns_zero_no_signals() -> void:
+	_spy.clear()
+	var destroyed: int = _inventory.remove_from_slot(0, 10)
+	assert_equal(destroyed, 0,
+		"Destroying from empty slot should return 0")
+	assert_equal(_spy.get_emission_count("item_removed"), 0,
+		"item_removed should not fire when destroying from empty slot")
+	assert_equal(_spy.get_emission_count("slot_changed"), 0,
+		"slot_changed should not fire when destroying from empty slot")

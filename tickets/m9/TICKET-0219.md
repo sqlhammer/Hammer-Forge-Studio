@@ -2,7 +2,7 @@
 id: TICKET-0219
 title: "Feature — Destroy (discard) an item directly from inventory"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -37,3 +37,4 @@ Players cannot remove unwanted items from their inventory other than by using th
 ## Activity Log
 
 - 2026-02-28 [producer] Created — deferred from M8; Studio Head requested during M8 playtest
+- 2026-03-01 [gameplay-programmer] Starting work — implementing destroy/discard item feature with confirm dialog

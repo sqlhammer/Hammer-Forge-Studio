@@ -849,6 +849,9 @@ class Conductor:
             elif status == "EVALUATING":
                 await self._do_evaluating()
 
+            elif status == "LIMIT_WAIT":
+                await self._do_limit_wait()
+
             elif status == "HALTED":
                 self.logger.log("HALTED",
                     "System halted. Run with --resume after resolving the issue.")
@@ -900,8 +903,8 @@ class Conductor:
 
         # Build prompt
         retry_tickets = [
-            tid for tid, count in self.state.get("retries", {}).items()
-            if count > 0
+            tid for tid, entry in self.state.get("retries", {}).items()
+            if (entry["count"] if isinstance(entry, dict) else entry) > 0
         ]
         active_ticket_ids = self.state.get("active_ticket_ids", [])
         completed_this_session = self.state.get("completed_this_session", [])
@@ -936,7 +939,13 @@ class Conductor:
 
         if exit_code != 0:
             self.logger.log("ERROR", f"Producer exited with code {exit_code}: {stderr[:200]}")
-            # Retry up to 3 times
+            if self._detect_usage_limit(exit_code, stdout, stderr):
+                self.logger.log("BUDGET",
+                    "Producer hit usage limit — entering cooldown")
+                self.state["wave_number"] -= 1
+                self._enter_limit_wait()
+                return
+            # Retry up to 3 times for non-usage-limit failures
             if self.state.get("_producer_retries", 0) < 3:
                 self.state["_producer_retries"] = self.state.get("_producer_retries", 0) + 1
                 self.logger.log("RETRY", f"Retrying Producer (attempt {self.state['_producer_retries']}/3)")
@@ -971,6 +980,14 @@ class Conductor:
                 self.state.get("total_cost_usd", 0.0) + cost
             )
             save_state(self.state, self.paths.state_path)
+
+        # Detect usage limit on exit_code==0 with empty stdout (silent session exit)
+        if not stdout.strip():
+            self.logger.log("BUDGET",
+                "Producer exited cleanly but produced no output — suspected usage limit")
+            self.state["wave_number"] -= 1
+            self._enter_limit_wait()
+            return
 
         # Parse plan
         try:
@@ -1208,6 +1225,8 @@ class Conductor:
         wave_tickets = []
         all_succeeded = True
         any_new_gd = False
+        # Track usage-limit failures for mass-threshold detection (per-worker tuple)
+        usage_limit_failures: list[str] = []  # ticket IDs that hit usage limit
 
         for worker, (exit_code, stdout, stderr, usage_meta) in results:
             agent = worker["agent"]
@@ -1249,10 +1268,17 @@ class Conductor:
 
             if exit_code == 0:
                 if not stdout.strip():
+                    # exit=0 + empty stdout is a strong usage-limit signal
+                    is_limit = self._detect_usage_limit(exit_code, stdout, stderr)
                     self.logger.log("CRASH",
-                        f"{agent} <- {ticket}: exit=0 but empty stdout — treating as failed")
+                        f"{agent} <- {ticket}: exit=0 but empty stdout — "
+                        + ("suspected usage limit" if is_limit else "treating as failed"))
                     all_succeeded = False
-                    self._queue_retry(ticket)
+                    if is_limit:
+                        usage_limit_failures.append(ticket)
+                        self._queue_retry(ticket, reason="usage_limit")
+                    else:
+                        self._queue_retry(ticket)
                     continue
 
                 # Try to parse result
@@ -1301,7 +1327,12 @@ class Conductor:
             elif exit_code == -1:
                 self.logger.log("TIMEOUT", f"{agent} <- {ticket}: {stderr}")
                 all_succeeded = False
-                self._queue_retry(ticket)
+                is_limit = self._detect_usage_limit(exit_code, stdout, stderr)
+                if is_limit:
+                    usage_limit_failures.append(ticket)
+                    self._queue_retry(ticket, reason="usage_limit")
+                else:
+                    self._queue_retry(ticket)
             else:
                 empty = not stdout.strip() and not stderr.strip()
                 label = "CRASH" if empty else "FAILED"
@@ -1309,7 +1340,12 @@ class Conductor:
                     f"{agent} <- {ticket} (exit={exit_code}"
                     + (", empty output — possible crash/signal" if empty else "") + ")")
                 all_succeeded = False
-                self._queue_retry(ticket)
+                is_limit = self._detect_usage_limit(exit_code, stdout, stderr)
+                if is_limit:
+                    usage_limit_failures.append(ticket)
+                    self._queue_retry(ticket, reason="usage_limit")
+                else:
+                    self._queue_retry(ticket)
 
         # Record completed wave
         self.state["completed_waves"].append({
@@ -1323,6 +1359,18 @@ class Conductor:
         status_msg = f"Wave {self.state['wave_number']} complete: "
         status_msg += f"{len(wave_tickets)}/{len(results)} succeeded"
         self.logger.log("WAVE", status_msg)
+
+        # Mass usage-limit detection: if >= threshold% of workers failed with usage limit,
+        # enter LIMIT_WAIT instead of queuing individual retries normally.
+        if usage_limit_failures and results:
+            threshold_pct = self.config.get("limit_wait", {}).get("mass_threshold_pct", 50)
+            failure_ratio = len(usage_limit_failures) / len(results)
+            if failure_ratio >= threshold_pct / 100:
+                self.logger.log("BUDGET",
+                    f"{len(usage_limit_failures)}/{len(results)} workers hit usage limit "
+                    f"(>={threshold_pct}% threshold) — entering cooldown")
+                self._enter_limit_wait()
+                return
 
         self.state["status"] = "EVALUATING"
 
@@ -1402,18 +1450,105 @@ class Conductor:
 
         return (exit_code, stdout, stderr, usage_meta)
 
-    def _queue_retry(self, ticket_id: str):
-        """Queue a ticket for retry if under the max retry count."""
-        max_retries = self.config["retries"]["max_per_ticket"]
-        current = self.state.get("retries", {}).get(ticket_id, 0)
-        if current < max_retries:
-            self.state.setdefault("retries", {})[ticket_id] = current + 1
-            self.logger.log("RETRY",
-                f"{ticket_id} queued for retry (attempt {current + 1}/{max_retries})")
-        else:
-            self.logger.log("ERROR",
-                f"{ticket_id} exceeded max retries ({max_retries}). Halting.")
+    # ------------------------------------------------------------------
+    # LIMIT_WAIT
+    # ------------------------------------------------------------------
+
+    def _enter_limit_wait(self):
+        """Transition to LIMIT_WAIT, or HALT if max cooldown cycles exhausted."""
+        cfg = self.config.get("limit_wait", {})
+        max_cycles = cfg.get("max_cooldown_cycles", 3)
+        current_cycles = self.state.get("_cooldown_cycle_count", 0)
+        if current_cycles >= max_cycles:
+            self.logger.log("BUDGET",
+                f"Persistent usage limit after {max_cycles} cooldowns — halting")
             self.state["status"] = "HALTED"
+        else:
+            self.state["_cooldown_cycle_count"] = current_cycles + 1
+            self.state["status"] = "LIMIT_WAIT"
+
+    async def _do_limit_wait(self):
+        """Sleep in intervals during a usage-limit cooldown period."""
+        cfg = self.config.get("limit_wait", {})
+        cooldown_minutes = cfg.get("cooldown_minutes", 15)
+        total_seconds = cooldown_minutes * 60
+        log_interval_seconds = 5 * 60  # log every 5 minutes
+
+        cycle = self.state.get("_cooldown_cycle_count", 1)
+        self.logger.log("LIMIT_WAIT",
+            f"Cooldown cycle {cycle} — sleeping {cooldown_minutes}m before resuming")
+
+        elapsed = 0
+        while elapsed < total_seconds:
+            if self.shutdown_requested:
+                return
+            remaining = total_seconds - elapsed
+            sleep_time = min(log_interval_seconds, remaining)
+            await asyncio.sleep(sleep_time)
+            elapsed += sleep_time
+            if elapsed < total_seconds:
+                remaining_minutes = (total_seconds - elapsed) / 60
+                self.logger.log("LIMIT_WAIT",
+                    f"Cooling down — {remaining_minutes:.0f}m remaining")
+
+        self.logger.log("LIMIT_WAIT", "Cooldown expired — resuming")
+        self.state["status"] = "PLANNING"
+
+    # Usage-limit keywords (case-insensitive scan of stderr/stdout)
+    _USAGE_LIMIT_KEYWORDS = (
+        "rate limit", "rate_limit", "usage limit", "usage_limit",
+        "capacity", "exceeded", "too many requests", "429", "quota",
+    )
+
+    @staticmethod
+    def _detect_usage_limit(exit_code: int, stdout: str, stderr: str) -> bool:
+        """Return True if the failure appears to be a Claude Max usage limit.
+
+        Heuristics:
+        - stderr or stdout contains a known usage-limit keyword (case-insensitive)
+        - exit_code == 0 with completely empty stdout (Claude session starts and
+          immediately ends — common Claude Max capacity behaviour)
+        """
+        combined = (stdout + "\n" + stderr).lower()
+        for keyword in Conductor._USAGE_LIMIT_KEYWORDS:
+            if keyword in combined:
+                return True
+        if exit_code == 0 and not stdout.strip():
+            return True
+        return False
+
+    def _queue_retry(self, ticket_id: str, reason: str = "implementation_failure"):
+        """Queue a ticket for retry.
+
+        Args:
+            ticket_id: The ticket to retry.
+            reason: "usage_limit" or "implementation_failure" (default).
+                    Only implementation_failure retries count toward the
+                    max_per_ticket HALT threshold.
+        """
+        max_retries = self.config["retries"]["max_per_ticket"]
+        retries = self.state.setdefault("retries", {})
+        entry = retries.get(ticket_id)
+        # Migrate legacy int format (produced before this feature was added)
+        if isinstance(entry, int):
+            entry = {"count": entry, "reasons": ["implementation_failure"] * entry}
+        elif entry is None:
+            entry = {"count": 0, "reasons": []}
+
+        if reason == "implementation_failure":
+            if entry["count"] >= max_retries:
+                self.logger.log("ERROR",
+                    f"{ticket_id} exceeded max retries ({max_retries}). Halting.")
+                self.state["status"] = "HALTED"
+                return
+            entry["count"] += 1
+
+        entry["reasons"].append(reason)
+        retries[ticket_id] = entry
+
+        total_attempts = len(entry["reasons"])
+        self.logger.log("RETRY",
+            f"{ticket_id} queued for retry (reason={reason}, attempt {total_attempts})")
 
     # ------------------------------------------------------------------
     # EVALUATING

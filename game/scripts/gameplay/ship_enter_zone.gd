@@ -16,6 +16,7 @@ func get_interaction_prompt() -> Dictionary:
 		return {}
 	return {
 		"key": "E",
+		"action": "interact",
 		"label": "Enter Ship",
 		"hold": false,
 	}

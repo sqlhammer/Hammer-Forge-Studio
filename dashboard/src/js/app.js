@@ -141,6 +141,94 @@ function navigateTo(sectionId, title) {
   }
 }
 
+/* ── Phase Gate Helpers ───────────────────────────────────────────────────── */
+
+/**
+ * Compute phase status from phase ticket data.
+ * Returns "passed" | "in-progress" | "pending".
+ */
+function computePhaseStatus(phase) {
+  if (phase.total === 0) return "pending";
+  if (phase.done === phase.total) return "passed";
+  if (phase.done > 0 || phase.in_progress > 0) return "in-progress";
+  return "pending";
+}
+
+/**
+ * Render phase gate indicator dots for a milestone's phases.
+ */
+function renderPhaseIndicators(msId) {
+  var phases = DashboardData.phases;
+  if (!phases) return "";
+
+  var msPhases = phases.filter(function (p) { return p.milestone === msId; });
+  if (msPhases.length === 0) return "";
+
+  var html = '<div class="phase-indicators">';
+  msPhases.forEach(function (phase) {
+    var status = computePhaseStatus(phase);
+    var title = escapeHtml(phase.phase) + " — " + phase.done + "/" + phase.total;
+    html +=
+      '<span class="phase-dot phase-dot-' + status + '" title="' + title + '">' +
+      "</span>" +
+      '<span class="phase-dot-label">' + escapeHtml(phase.phase) + "</span>";
+  });
+  html += "</div>";
+  return html;
+}
+
+/* ── Milestone Card Builder ──────────────────────────────────────────────── */
+
+function buildMilestoneCard(ms) {
+  var isActive = ms.status === "Active";
+  var cardClass = "card milestone-card" + (isActive ? " milestone-active" : "");
+  var pct = Math.round(ms.completion_pct);
+
+  return (
+    '<div class="' + cardClass + '" data-milestone-id="' + escapeHtml(ms.id) + '">' +
+    "<h3>" + escapeHtml(ms.id + " — " + ms.name) + " " + statusBadge(ms.status) + "</h3>" +
+    '<div class="card-stat">' +
+    '<span class="card-stat-label">Tickets</span>' +
+    '<span class="card-stat-value">' + ms.done + " / " + ms.total + "</span>" +
+    "</div>" +
+    progressBar(pct) +
+    '<div class="card-stat">' +
+    '<span class="card-stat-label">Open</span>' +
+    '<span class="card-stat-value">' + ms.open + "</span>" +
+    "</div>" +
+    '<div class="card-stat">' +
+    '<span class="card-stat-label">In Progress</span>' +
+    '<span class="card-stat-value">' + ms.in_progress + "</span>" +
+    "</div>" +
+    renderPhaseIndicators(ms.id) +
+    "</div>"
+  );
+}
+
+/* ── Status Group Builder ────────────────────────────────────────────────── */
+
+function buildStatusGroup(label, milestones, collapsed) {
+  if (milestones.length === 0) return "";
+
+  var collapsedClass = collapsed ? " collapsed" : "";
+  var html =
+    '<div class="status-group' + collapsedClass + '">' +
+    '<div class="status-group-header">' +
+    '<span class="status-group-toggle">' + (collapsed ? "+" : "-") + "</span>" +
+    '<span class="status-group-label">' + escapeHtml(label) + "</span>" +
+    '<span class="status-group-count">' + milestones.length + "</span>" +
+    "</div>" +
+    '<div class="status-group-body">' +
+    '<div class="card-grid">';
+
+  milestones.forEach(function (ms) {
+    html += buildMilestoneCard(ms);
+  });
+
+  html += "</div></div></div>";
+  return html;
+}
+
 /* ── Render: Overview ─────────────────────────────────────────────────────── */
 
 function renderOverview() {
@@ -153,33 +241,36 @@ function renderOverview() {
     return;
   }
 
-  // Milestone cards
+  // Group milestones by status: Active, Planning, Complete
+  var active = milestones.filter(function (ms) { return ms.status === "Active"; });
+  var planning = milestones.filter(function (ms) { return ms.status === "Planning"; });
+  var complete = milestones.filter(function (ms) { return ms.status === "Complete"; });
+
   var grid = document.getElementById("milestones-grid");
   var html = "";
-  milestones.forEach(function (ms) {
-    html +=
-      '<div class="card">' +
-      "<h3>" + escapeHtml(ms.id + " — " + ms.name) + "</h3>" +
-      '<div class="card-stat">' +
-      '<span class="card-stat-label">Status</span>' +
-      statusBadge(ms.status) +
-      "</div>" +
-      '<div class="card-stat">' +
-      '<span class="card-stat-label">Tickets</span>' +
-      '<span class="card-stat-value">' + ms.done + " / " + ms.total + "</span>" +
-      "</div>" +
-      progressBar(ms.completion_pct) +
-      '<div class="card-stat">' +
-      '<span class="card-stat-label">Open</span>' +
-      '<span class="card-stat-value">' + ms.open + "</span>" +
-      "</div>" +
-      '<div class="card-stat">' +
-      '<span class="card-stat-label">In Progress</span>' +
-      '<span class="card-stat-value">' + ms.in_progress + "</span>" +
-      "</div>" +
-      "</div>";
-  });
+  html += buildStatusGroup("Active", active, false);
+  html += buildStatusGroup("Planning", planning, false);
+  html += buildStatusGroup("Complete", complete, true);
   grid.innerHTML = html;
+
+  // Bind collapse/expand toggle on status group headers
+  grid.querySelectorAll(".status-group-header").forEach(function (header) {
+    header.addEventListener("click", function () {
+      var group = this.parentElement;
+      var toggle = this.querySelector(".status-group-toggle");
+      group.classList.toggle("collapsed");
+      toggle.textContent = group.classList.contains("collapsed") ? "+" : "-";
+    });
+  });
+
+  // Bind click handlers on milestone cards — placeholder for TICKET-0194
+  grid.querySelectorAll(".milestone-card").forEach(function (card) {
+    card.addEventListener("click", function () {
+      var msId = this.getAttribute("data-milestone-id");
+      navigateTo("milestones", msId);
+      renderMilestoneDetail(msId);
+    });
+  });
 
   // Tickets summary
   if (tickets) {

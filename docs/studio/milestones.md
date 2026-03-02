@@ -34,7 +34,7 @@
 | M6 | Icon Generation Pipeline — Icon PoC evaluation, style guides, full icon set | — | Complete | 23 | 0 | 23 | 2026-02-26 |
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Complete | 56 | 0 | 56 | 2026-03-01 |
-| M9 | Foundation & Hardening — Canonical game launch architecture, orchestrator hardening, gamepad fixes, and M8 playtest polish | — | Active | 29 | 29 | 0 | — |
+| M9 | Foundation & Hardening — Canonical game launch architecture, orchestrator hardening, gamepad fixes, and M8 playtest polish | — | Complete | 39 | 0 | 39 | 2026-03-02 |
 | M10 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
 | M11 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
 | M12 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
@@ -454,7 +454,9 @@
 
 **Goal:** Establish the canonical game launch architecture, harden the orchestrator against usage-limit edge cases, resolve player-reported gamepad bugs, and incorporate M8 playtest polish. This milestone closes all deferred and backlogged work from M8 before the project enters visual and content expansion phases.
 
-**Scope:** Fully scoped. 29 tickets across 5 phases.
+**Scope:** Fully scoped. 39 tickets across 5 phases (29 planned at kickoff + 10 UAT bug fix tickets added mid-milestone: TICKET-0262–0271).
+
+**Closed:** 2026-03-02 — QA sign-off by Studio Head
 
 **Phases:**
 - **Root Game** (TICKET-0229–TICKET-0235, TICKET-0237): Game entry point architecture — root `game` scene, main menu, GameWorld, DebugLauncher refactor, TestWorld deprecation. **Must complete before Gameplay Polish and Orchestrator Resilience phases begin.** Introduces the canonical game launch flow: `game.tscn` routes to debug_launcher (debug builds) or main_menu (release); Play loads GameWorld using `Global.starting_biome` and `Global.starting_inventory`.

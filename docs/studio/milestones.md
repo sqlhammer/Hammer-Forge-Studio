@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-03-01 (M9 kicked off — Active)
+**Last Updated:** 2026-03-01 (T1 kicked off — Active)
 
 > Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
@@ -49,7 +49,7 @@
 
 | # | Milestone | Target Date | Status | Total | Open | Done | QA Sign-off |
 |---|-----------|-------------|--------|-------|------|------|-------------|
-| T1 | Project Reporting Dashboard — GitHub Pages status site, auto-built on push | — | Planning | 10 | 10 | 0 | — |
+| T1 | Project Reporting Dashboard — GitHub Pages status site, auto-built on push | — | Active | 10 | 10 | 0 | — |
 | T2 | Usage & Cost Attribution — Orchestrator usage tracking, JSONL ledger, reporting | — | Complete | 8 | 0 | 8 | 2026-03-01 |
 | T3 | Parallel Godot MCP — Per-agent headless Godot instances, remove file-based lock | — | Planning | — | — | — | — |
 | T4 | Multi-Milestone Orchestrator — Instance directories, parallel conductor support | — | Complete | 9 | 0 | 9 | 2026-03-01 |

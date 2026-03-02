@@ -2,7 +2,7 @@
 id: TICKET-0237
 title: "Root Game: Design — Main Menu wireframe and layout spec"
 type: DESIGN
-status: OPEN
+status: DONE
 priority: P1
 owner: ui-ux-designer
 created_by: producer
@@ -21,17 +21,17 @@ Design the Main Menu screen for the Root Game phase. This is a minimal first-pas
 
 ## Deliverables
 
-- [ ] Wireframe or annotated mockup of the Main Menu layout (ASCII, Figma export, or equivalent) committed to `docs/design/ui/main_menu_wireframe.md` (or `.png` if a raster mockup is preferred).
-- [ ] Layout spec: background treatment, button size/position, font sizes, colors (aligned with the game's existing palette — dark background `#1a1a2e`, slate text `#F1F5F9`, consistent with DebugLauncher's style).
-- [ ] Button state spec: default, hover, pressed states for the Play button.
-- [ ] Any notes on future extensibility (e.g., where a title logo or settings button would slot in) — brief, no implementation work required.
+- [x] Wireframe or annotated mockup of the Main Menu layout (ASCII, Figma export, or equivalent) committed to `docs/design/ui/main_menu_wireframe.md` (or `.png` if a raster mockup is preferred).
+- [x] Layout spec: background treatment, button size/position, font sizes, colors (aligned with the game's existing palette — dark background `#1a1a2e`, slate text `#F1F5F9`, consistent with DebugLauncher's style).
+- [x] Button state spec: default, hover, pressed states for the Play button.
+- [x] Any notes on future extensibility (e.g., where a title logo or settings button would slot in) — brief, no implementation work required.
 
 ## Acceptance Criteria
 
-- [ ] Deliverable committed to `docs/design/ui/`.
-- [ ] Layout is implementable with Godot's built-in `Control` nodes (no custom shaders or assets required for this phase).
-- [ ] Design reviewed and approved (self-approve is acceptable for this phase — no separate review ticket needed).
-- [ ] TICKET-0231 implementer has enough information to build the scene without further design questions.
+- [x] Deliverable committed to `docs/design/ui/`.
+- [x] Layout is implementable with Godot's built-in `Control` nodes (no custom shaders or assets required for this phase).
+- [x] Design reviewed and approved (self-approve is acceptable for this phase — no separate review ticket needed).
+- [x] TICKET-0231 implementer has enough information to build the scene without further design questions.
 
 ## Implementation Notes
 
@@ -42,3 +42,5 @@ Design the Main Menu screen for the Root Game phase. This is a minimal first-pas
 ## Activity Log
 
 - 2026-02-28 [producer] Created ticket — Main Menu design gate before TICKET-0231 implementation
+- 2026-03-01 [ui-ux-designer] Starting work — creating wireframe and layout spec for Main Menu
+- 2026-03-01 [ui-ux-designer] DONE — wireframe and layout spec committed to docs/design/ui/main_menu_wireframe.md; self-approved per producer note; TICKET-0231 implementer checklist included

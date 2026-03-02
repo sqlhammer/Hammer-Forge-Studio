@@ -14,6 +14,7 @@ const GRID_COLUMNS: int = 5
 const GRID_ROWS: int = 3
 const PANEL_WIDTH: float = 580.0
 const PANEL_HEIGHT: float = 480.0
+const STICK_DEAD_ZONE: float = 0.5
 
 ## Sidebar width for combined centering
 const SIDEBAR_WIDTH: float = 180.0
@@ -50,6 +51,10 @@ var _combined_container: HBoxContainer = null
 var _ship_sidebar: ShipStatsSidebar = null
 var _font: Font = null
 
+## Edge-triggered latch for analog stick navigation (per-axis)
+var _stick_latched_x: bool = false
+var _stick_latched_y: bool = false
+
 ## Destroy confirmation dialog state
 var _confirm_visible: bool = false
 var _confirm_overlay: Control = null
@@ -80,6 +85,11 @@ func _process(_delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if not _is_open:
+		return
+
+	# Analog stick uses edge-triggered latch to prevent continuous scrolling
+	if event is InputEventJoypadMotion:
+		_handle_stick_input(event as InputEventJoypadMotion)
 		return
 
 	# When the destroy confirm dialog is open, handle its input exclusively
@@ -140,6 +150,8 @@ func open_inventory() -> void:
 	_is_open = true
 	visible = true
 	_focused_slot = 0
+	_stick_latched_x = false
+	_stick_latched_y = false
 	_refresh_all_slots()
 	_update_focus_visual()
 	_update_detail_area()
@@ -593,6 +605,41 @@ func _style_button(button: Button, accent_color: Color) -> void:
 
 	button.add_theme_color_override("font_color", accent_color)
 	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
+
+func _handle_stick_input(event: InputEventJoypadMotion) -> void:
+	var axis: int = event.axis
+	var value: float = event.axis_value
+
+	if axis == JOY_AXIS_LEFT_X:
+		if absf(value) < STICK_DEAD_ZONE:
+			_stick_latched_x = false
+			return
+		if _stick_latched_x:
+			get_viewport().set_input_as_handled()
+			return
+		_stick_latched_x = true
+		var direction: int = 1 if value > 0 else -1
+		if _confirm_visible:
+			# Left/right switches between Destroy and Cancel buttons
+			if direction < 0:
+				_destroy_confirm_button.grab_focus()
+			else:
+				_cancel_confirm_button.grab_focus()
+		else:
+			_move_focus(direction, 0)
+		get_viewport().set_input_as_handled()
+	elif axis == JOY_AXIS_LEFT_Y:
+		if absf(value) < STICK_DEAD_ZONE:
+			_stick_latched_y = false
+			return
+		if _stick_latched_y:
+			get_viewport().set_input_as_handled()
+			return
+		_stick_latched_y = true
+		if not _confirm_visible:
+			var direction: int = 1 if value > 0 else -1
+			_move_focus(0, direction)
+		get_viewport().set_input_as_handled()
 
 func _move_focus(dx: int, dy: int) -> void:
 	var col: int = _focused_slot % GRID_COLUMNS

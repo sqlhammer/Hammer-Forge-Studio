@@ -2,7 +2,7 @@
 id: TICKET-0265
 title: "BUG: Gamepad stick menu navigation fires continuously while held — should require return-to-center between moves"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -44,12 +44,12 @@ Navigation fires continuously at the polling rate while the stick is held, causi
 
 ## Acceptance Criteria
 
-- [ ] Deflecting the stick in any direction advances selection by exactly **one slot**, then stops.
-- [ ] Holding the stick in that direction does **not** fire additional navigation events.
-- [ ] Returning the stick to center resets the latch; the next deflection fires one move again.
-- [ ] The behavior applies to the inventory grid and any other menu that uses stick navigation.
-- [ ] Mouse / keyboard navigation in menus is unaffected.
-- [ ] Existing unit tests pass.
+- [x] Deflecting the stick in any direction advances selection by exactly **one slot**, then stops.
+- [x] Holding the stick in that direction does **not** fire additional navigation events.
+- [x] Returning the stick to center resets the latch; the next deflection fires one move again.
+- [x] The behavior applies to the inventory grid and any other menu that uses stick navigation.
+- [x] Mouse / keyboard navigation in menus is unaffected.
+- [x] Existing unit tests pass.
 
 ## Implementation Notes
 
@@ -78,3 +78,4 @@ The latch resets only when the stick magnitude drops below the dead zone. Separa
 
 - 2026-03-02 [producer] Filed — UAT rejection. Studio Head reported inventory navigation races when stick is held; discrete step behavior required.
 - 2026-03-02 [gameplay-programmer] Starting work — implementing edge-triggered stick latch in inventory_screen.gd and navigation_console.gd.
+- 2026-03-02 [gameplay-programmer] DONE — commit 3fbfcce, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/292. Edge-triggered latch implemented per-axis in both inventory_screen.gd and navigation_console.gd. Keyboard/mouse unaffected.

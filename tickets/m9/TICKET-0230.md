@@ -2,7 +2,7 @@
 id: TICKET-0230
 title: "Root Game: Create GameWorld scene — world-building extracted from DebugLauncher"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -47,3 +47,4 @@ Extract the world-building logic currently embedded in `DebugLauncher._launch()`
 ## Activity Log
 
 - 2026-02-28 [producer] Created ticket — extract world-building from DebugLauncher into proper GameWorld scene
+- 2026-03-01 [gameplay-programmer] Starting work — extracting world-building logic from DebugLauncher into GameWorld scene

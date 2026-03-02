@@ -18,10 +18,12 @@ import asyncio
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 # Ensure the repo root is importable
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -577,6 +579,430 @@ async def test_suspension_event_logged_to_both_logs() -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
+# UID commit idempotency unit tests (TICKET-0186)
+# ---------------------------------------------------------------------------
+
+async def test_uid_commit_pending_with_staged_files() -> tuple[bool, str]:
+    """Conductor restarted with _uid_commit_pending=True and staged .uid files.
+
+    Scenario: previous session staged .gd.uid files but was interrupted before
+    commit.  On startup the conductor detects _uid_commit_pending=True and runs
+    _handle_uid_commits.  The method should commit and push, then clear the flag.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_uid_staged_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = REPO_ROOT
+    c.ORCH_DIR = orch_dir
+
+    try:
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state("_test", "Alpha")
+        conductor.state["_uid_commit_pending"] = True
+
+        git_calls: list[list[str]] = []
+
+        def mock_subprocess_run(args, **kwargs):
+            git_calls.append(list(args))
+            result = MagicMock()
+            result.returncode = 0
+            result.stdout = ""
+            result.stderr = ""
+            cmd = args[1] if len(args) > 1 else ""
+
+            if args[1:4] == ["diff", "--cached", "--name-only"]:
+                # Some files already staged
+                result.stdout = "game/scripts/foo.gd.uid\n"
+            elif args[1:4] == ["ls-files", "--others", "--exclude-standard"]:
+                # One more untracked .uid file
+                result.stdout = "game/scripts/bar.gd.uid\n"
+            elif args[1:3] == ["diff", "--cached"]:
+                # Staged changes exist → returncode=1
+                result.returncode = 1
+            elif args[1:3] == ["rev-list", "--count"]:
+                # 1 commit ahead of origin/main
+                result.stdout = "1\n"
+            return result
+
+        with patch("orchestrator.conductor.subprocess.run", side_effect=mock_subprocess_run):
+            await conductor._handle_uid_commits()
+
+        # Flag must be cleared
+        if conductor.state.get("_uid_commit_pending") is not False:
+            return False, "UID-idempotency: _uid_commit_pending not cleared after staged-file run"
+
+        # Verify git commit and git push were called
+        commit_called = any(c[1:3] == ["commit", "-m"] for c in git_calls)
+        push_called = any(c[1:3] == ["push", "origin"] for c in git_calls)
+
+        if not commit_called:
+            return False, "UID-idempotency: git commit not called when staged changes present"
+        if not push_called:
+            return False, "UID-idempotency: git push not called when 1 commit ahead"
+
+        return True, "UID-idempotency: staged .uid files — committed, pushed, flag cleared"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_uid_commit_pending_already_pushed() -> tuple[bool, str]:
+    """Conductor restarted with _uid_commit_pending=True and already-pushed commit.
+
+    Scenario: previous session committed and pushed but crashed before clearing
+    the flag.  On startup the conductor detects _uid_commit_pending=True and runs
+    _handle_uid_commits.  The method must detect that origin/main is up-to-date
+    and skip commit + push without creating an empty commit.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_uid_pushed_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = REPO_ROOT
+    c.ORCH_DIR = orch_dir
+
+    try:
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state("_test", "Alpha")
+        conductor.state["_uid_commit_pending"] = True
+
+        git_calls: list[list[str]] = []
+
+        def mock_subprocess_run(args, **kwargs):
+            git_calls.append(list(args))
+            result = MagicMock()
+            result.returncode = 0
+            result.stdout = ""
+            result.stderr = ""
+
+            if args[1:4] == ["diff", "--cached", "--name-only"]:
+                # Nothing staged
+                result.stdout = ""
+            elif args[1:4] == ["ls-files", "--others", "--exclude-standard"]:
+                # No untracked .uid files
+                result.stdout = ""
+            elif args[1:3] == ["diff", "--cached"]:
+                # No staged changes → returncode=0 (nothing to commit)
+                result.returncode = 0
+            elif args[1:3] == ["rev-list", "--count"]:
+                # 0 commits ahead — already pushed
+                result.stdout = "0\n"
+            return result
+
+        with patch("orchestrator.conductor.subprocess.run", side_effect=mock_subprocess_run):
+            await conductor._handle_uid_commits()
+
+        # Flag must be cleared
+        if conductor.state.get("_uid_commit_pending") is not False:
+            return False, "UID-idempotency: _uid_commit_pending not cleared after already-pushed run"
+
+        # Verify git commit and git push were NOT called
+        commit_called = any(c[1:3] == ["commit", "-m"] for c in git_calls)
+        push_called = any(c[1:3] == ["push", "origin"] for c in git_calls)
+
+        if commit_called:
+            return False, "UID-idempotency: git commit called when no staged changes (empty commit risk)"
+        if push_called:
+            return False, "UID-idempotency: git push called when already up-to-date with origin/main"
+
+        return True, "UID-idempotency: already-pushed — commit and push skipped, flag cleared"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
+# Merged-PR auto-remediation unit tests (TICKET-0190)
+# ---------------------------------------------------------------------------
+
+async def test_merged_pr_auto_remediation_in_do_working() -> tuple[bool, str]:
+    """Worker exits abnormally, gh pr list returns merged PR → ticket auto-remediated.
+
+    Scenario: agent exits non-zero (crash), the ticket is IN_PROGRESS on disk,
+    and _check_merged_pr returns a merged PR dict.  _do_working must auto-remediate
+    the ticket to DONE and NOT queue a retry.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_r3_merged_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        ticket_id = "TICKET-9994"
+        milestone = "_test"
+
+        # Create ticket file with status IN_PROGRESS
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        ticket_file = ticket_dir / f"{ticket_id}.md"
+        ticket_file.write_text(
+            f"---\nid: {ticket_id}\nstatus: IN_PROGRESS\nupdated_at: 2026-03-01\n---\n"
+            "## Activity Log\n- 2026-03-01 [agent] Starting work\n",
+            encoding="utf-8",
+        )
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = c.Conductor(paths=paths, config=config)
+        conductor.state = c.create_initial_state(milestone, "Alpha")
+
+        branch = f"orch/gameplay-programmer/{ticket_id}"
+        worker = {
+            "agent": "gameplay-programmer",
+            "ticket": ticket_id,
+            "budget_usd": 0.5,
+            "needs_worktree": False,
+            "needs_godot_mcp": False,
+            "worktree_path": None,
+            "branch": branch,
+            "prompt_supplement": "",
+            "started_at": "2026-03-01T00:00:00",
+        }
+        conductor.state["active_workers"] = [worker]
+        conductor.state["active_ticket_ids"] = [ticket_id]
+
+        # Patch _check_merged_pr to return a merged PR
+        conductor._check_merged_pr = lambda tid, br: (
+            {"number": 42, "url": "https://github.com/test/repo/pull/42",
+             "state": "merged", "merged": True}
+            if br == branch else None
+        )
+
+        # Mock _run_worker to return exit=1, empty output (crash)
+        async def mock_run_worker(_worker):
+            return (1, "", "", {})
+
+        conductor._run_worker = mock_run_worker
+
+        await conductor._do_working()
+
+        # Ticket file should now read DONE
+        ticket_text = ticket_file.read_text(encoding="utf-8")
+        if "status: DONE" not in ticket_text:
+            return False, "R3: ticket file was not updated to DONE after merged-PR auto-remediation"
+
+        # Ticket should be in completed_this_session
+        session_done = conductor.state.get("completed_this_session", [])
+        if ticket_id not in session_done:
+            return False, f"R3: {ticket_id} not added to completed_this_session"
+
+        # No retry should be queued
+        retries = conductor.state.get("retries", {})
+        if ticket_id in retries:
+            return False, f"R3: retry was queued for auto-remediated ticket {ticket_id}"
+
+        return True, "R3: ticket auto-remediated to DONE after merged PR, no retry queued"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_open_pr_no_auto_remediation() -> tuple[bool, str]:
+    """Worker exits abnormally, gh pr list returns open (not merged) PR → NOT auto-remediated.
+
+    Scenario: agent exits non-zero, the ticket is IN_PROGRESS on disk, but the PR
+    is open (not merged).  _do_working must NOT auto-remediate and must queue a retry.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_r3_open_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        ticket_id = "TICKET-9993"
+        milestone = "_test"
+
+        # Create ticket file with status IN_PROGRESS
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        ticket_file = ticket_dir / f"{ticket_id}.md"
+        ticket_file.write_text(
+            f"---\nid: {ticket_id}\nstatus: IN_PROGRESS\nupdated_at: 2026-03-01\n---\n",
+            encoding="utf-8",
+        )
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = c.Conductor(paths=paths, config=config)
+        conductor.state = c.create_initial_state(milestone, "Alpha")
+
+        branch = f"orch/gameplay-programmer/{ticket_id}"
+        worker = {
+            "agent": "gameplay-programmer",
+            "ticket": ticket_id,
+            "budget_usd": 0.5,
+            "needs_worktree": False,
+            "needs_godot_mcp": False,
+            "worktree_path": None,
+            "branch": branch,
+            "prompt_supplement": "",
+            "started_at": "2026-03-01T00:00:00",
+        }
+        conductor.state["active_workers"] = [worker]
+        conductor.state["active_ticket_ids"] = [ticket_id]
+
+        # Patch _check_merged_pr to return None (no merged PR found)
+        conductor._check_merged_pr = lambda tid, br: None
+
+        # Mock _run_worker to return exit=1, empty output (crash)
+        async def mock_run_worker(_worker):
+            return (1, "", "", {})
+
+        conductor._run_worker = mock_run_worker
+
+        await conductor._do_working()
+
+        # Ticket file should still read IN_PROGRESS
+        ticket_text = ticket_file.read_text(encoding="utf-8")
+        if "status: DONE" in ticket_text:
+            return False, "R3: ticket incorrectly updated to DONE when PR was not merged"
+
+        # Retry should be queued
+        retries = conductor.state.get("retries", {})
+        if ticket_id not in retries:
+            return False, f"R3: retry was not queued for non-merged PR crash case"
+
+        return True, "R3: open PR correctly skipped auto-remediation, retry queued"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_merged_pr_auto_remediation_on_startup() -> tuple[bool, str]:
+    """Checkpoint exists on startup with IN_PROGRESS ticket and merged PR → auto-remediated.
+
+    Scenario: previous session wrote a checkpoint for TICKET-9992 with status
+    IN_PROGRESS.  On restart, _scan_checkpoints_on_startup must call _check_merged_pr,
+    find the merged PR, and auto-remediate: update ticket to DONE, add to
+    completed_this_session, delete checkpoint.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_r3_startup_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+    repo_root = tmp_dir / "repo"
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = repo_root
+    c.ORCH_DIR = orch_dir
+
+    try:
+        ticket_id = "TICKET-9992"
+        milestone = "_test"
+        branch = f"orch/gameplay-programmer/{ticket_id}"
+
+        # Create ticket file with status IN_PROGRESS
+        ticket_dir = repo_root / "tickets" / milestone
+        ticket_dir.mkdir(parents=True)
+        ticket_file = ticket_dir / f"{ticket_id}.md"
+        ticket_file.write_text(
+            f"---\nid: {ticket_id}\nstatus: IN_PROGRESS\nupdated_at: 2026-03-01\n---\n"
+            "## Activity Log\n- 2026-03-01 [agent] Starting work\n",
+            encoding="utf-8",
+        )
+
+        # Create checkpoint file with IN_PROGRESS branch info
+        checkpoints_dir = orch_dir / "checkpoints"
+        checkpoints_dir.mkdir()
+        checkpoint_path = checkpoints_dir / f"{ticket_id}.checkpoint.json"
+        checkpoint_path.write_text(json.dumps({
+            "ticket": ticket_id,
+            "agent": "gameplay-programmer",
+            "milestone": milestone,
+            "phase": "Alpha",
+            "wave": 5,
+            "suspended_at": "2026-03-01T10:00:00",
+            "reason": "usage_limit",
+            "progress": {
+                "steps_completed": ["read_ticket", "marked_in_progress", "committed", "merged_pr"],
+                "commit_hash": "def5678",
+                "branch": branch,
+                "uncommitted_changes": False,
+                "pr_url": "https://github.com/test/repo/pull/55",
+                "pr_merged": False,
+                "pr_state": "MERGED",
+                "ticket_status_on_disk": "IN_PROGRESS",
+                "files_changed": [],
+                "new_gd_scripts": False,
+            },
+            "notes": "exit_code=0",
+        }), encoding="utf-8")
+
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = c.Conductor(paths=paths, config=config)
+        conductor.state = c.create_initial_state(milestone, "Alpha")
+        conductor.state["active_ticket_ids"] = [ticket_id]
+
+        # Patch _check_merged_pr to return a merged PR for this branch
+        conductor._check_merged_pr = lambda tid, br: (
+            {"number": 55, "url": "https://github.com/test/repo/pull/55",
+             "state": "merged", "merged": True}
+            if br == branch else None
+        )
+
+        conductor._scan_checkpoints_on_startup()
+
+        # Checkpoint file should be deleted
+        if checkpoint_path.exists():
+            return False, "R3 startup: checkpoint not deleted after auto-remediation"
+
+        # Ticket should be in completed_this_session
+        session_done = conductor.state.get("completed_this_session", [])
+        if ticket_id not in session_done:
+            return False, f"R3 startup: {ticket_id} not added to completed_this_session"
+
+        # Ticket file should read DONE
+        ticket_text = ticket_file.read_text(encoding="utf-8")
+        if "status: DONE" not in ticket_text:
+            return False, "R3 startup: ticket file was not updated to DONE"
+
+        return True, "R3 startup: IN_PROGRESS checkpoint with merged PR auto-remediated on startup"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
 
@@ -781,11 +1207,64 @@ def main():
         print(f"  Result: {susp_passed}/{susp_total} PASSED, {susp_total - susp_passed} FAILED")
     print("=" * 60)
 
+    # Run UID commit idempotency unit tests (TICKET-0186)
+    async def _run_uid_tests():
+        return [
+            await test_uid_commit_pending_with_staged_files(),
+            await test_uid_commit_pending_already_pushed(),
+        ]
+
+    uid_checks = asyncio.run(_run_uid_tests())
+
+    print()
+    print("=" * 60)
+    print("  UID Commit Idempotency Unit Tests (TICKET-0186)")
+    print("=" * 60)
+    for ok, msg in uid_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    uid_passed = sum(1 for ok, _ in uid_checks if ok)
+    uid_total = len(uid_checks)
+    print()
+    if uid_passed == uid_total:
+        print(f"  Result: {uid_passed}/{uid_total} PASSED")
+    else:
+        print(f"  Result: {uid_passed}/{uid_total} PASSED, {uid_total - uid_passed} FAILED")
+    print("=" * 60)
+
+    # Run merged-PR auto-remediation unit tests (TICKET-0190)
+    async def _run_r3_tests():
+        return [
+            await test_merged_pr_auto_remediation_in_do_working(),
+            await test_open_pr_no_auto_remediation(),
+            await test_merged_pr_auto_remediation_on_startup(),
+        ]
+
+    r3_checks = asyncio.run(_run_r3_tests())
+
+    print()
+    print("=" * 60)
+    print("  Merged-PR Auto-Remediation Tests (TICKET-0190)")
+    print("=" * 60)
+    for ok, msg in r3_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    r3_passed = sum(1 for ok, _ in r3_checks if ok)
+    r3_total = len(r3_checks)
+    print()
+    if r3_passed == r3_total:
+        print(f"  Result: {r3_passed}/{r3_total} PASSED")
+    else:
+        print(f"  Result: {r3_passed}/{r3_total} PASSED, {r3_total - r3_passed} FAILED")
+    print("=" * 60)
+
     # Exit non-zero if any test suite failed
     all_passed = (
         harness_exit == 0
         and cp_passed == cp_total
         and susp_passed == susp_total
+        and uid_passed == uid_total
+        and r3_passed == r3_total
     )
     sys.exit(0 if all_passed else 1)
 

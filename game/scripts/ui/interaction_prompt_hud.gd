@@ -58,6 +58,8 @@ func _ready() -> void:
 	HeadLamp.head_lamp_equipped.connect(_on_head_lamp_equipped)
 	if HeadLamp.is_equipped():
 		_add_headlamp_control()
+	# Refresh prompt labels when input device changes (keyboard ↔ gamepad)
+	InputManager.input_device_changed.connect(_on_input_device_changed)
 
 func _process(_delta: float) -> void:
 	_refresh_headlamp_key_label()
@@ -96,6 +98,12 @@ func get_action_key_label(action: String) -> String:
 			var key_event: InputEventKey = event as InputEventKey
 			return OS.get_keycode_string(key_event.keycode)
 	return "?"
+
+## Returns the human-readable label for the given action based on the current input device.
+func get_action_input_label(action: String) -> String:
+	if InputManager.get_current_input_device() == "gamepad":
+		return _get_action_joypad_label(action)
+	return get_action_key_label(action)
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -155,6 +163,10 @@ func _update_prompt_display(prompt: Dictionary) -> void:
 
 func _apply_prompt_content(prompt: Dictionary) -> void:
 	var key_text: String = prompt.get("key", "E") as String
+	# When the prompt includes an action name, resolve the label for the current device
+	var action: String = prompt.get("action", "") as String
+	if action != "":
+		key_text = get_action_input_label(action)
 	var label_text: String = prompt.get("label", "Interact") as String
 	var is_hold: bool = prompt.get("hold", false) as bool
 	_key_label.text = key_text
@@ -197,7 +209,7 @@ func _on_head_lamp_equipped() -> void:
 func _add_headlamp_control() -> void:
 	if _headlamp_row:
 		return
-	var key_text: String = get_action_key_label(HEADLAMP_ACTION)
+	var key_text: String = get_action_input_label(HEADLAMP_ACTION)
 	_headlamp_row = _create_control_row(key_text, HEADLAMP_LABEL)
 	# Store key label reference for dynamic refresh
 	_headlamp_key_label = _headlamp_row.get_node("KeyLabel") as Label
@@ -207,9 +219,42 @@ func _add_headlamp_control() -> void:
 func _refresh_headlamp_key_label() -> void:
 	if not _headlamp_key_label:
 		return
-	var current_key: String = get_action_key_label(HEADLAMP_ACTION)
+	var current_key: String = get_action_input_label(HEADLAMP_ACTION)
 	if _headlamp_key_label.text != current_key:
 		_headlamp_key_label.text = current_key
+
+func _on_input_device_changed(_device: String) -> void:
+	# Force the contextual prompt to re-evaluate its key label on next frame
+	_current_prompt = {}
+	_refresh_headlamp_key_label()
+
+func _get_action_joypad_label(action: String) -> String:
+	var events: Array[InputEvent] = InputMap.action_get_events(action)
+	for event: InputEvent in events:
+		if event is InputEventJoypadButton:
+			return _joy_button_name(event.button_index)
+	return "?"
+
+func _joy_button_name(button: int) -> String:
+	match button:
+		JOY_BUTTON_A:
+			return "A"
+		JOY_BUTTON_B:
+			return "B"
+		JOY_BUTTON_X:
+			return "X"
+		JOY_BUTTON_Y:
+			return "Y"
+		JOY_BUTTON_LEFT_SHOULDER:
+			return "LB"
+		JOY_BUTTON_RIGHT_SHOULDER:
+			return "RB"
+		JOY_BUTTON_START:
+			return "Start"
+		JOY_BUTTON_BACK:
+			return "Back"
+		_:
+			return "?"
 
 func _create_control_row(key_text: String, label_text: String, key_min_width: float = 28.0) -> HBoxContainer:
 	var row: HBoxContainer = HBoxContainer.new()

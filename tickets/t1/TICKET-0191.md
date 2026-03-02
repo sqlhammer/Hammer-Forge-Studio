@@ -2,7 +2,7 @@
 id: TICKET-0191
 title: "GitHub Actions workflow — build pipeline and GitHub Pages deployment"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: tools-devops-engineer
 created_by: producer
@@ -59,3 +59,4 @@ Create a GitHub Actions workflow that triggers on every push to `main`, runs the
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — GitHub Actions CI/CD for dashboard
+- 2026-03-01 [tools-devops-engineer] Starting work — implementing GitHub Actions workflow for dashboard build and GitHub Pages deployment

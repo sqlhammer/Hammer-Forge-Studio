@@ -2,7 +2,7 @@
 id: TICKET-0261
 title: "Code Quality: Fix NavigationConsole null spy reference in test after_each()"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P3
 owner: qa-engineer
 created_by: producer
@@ -21,10 +21,10 @@ tags: [code-quality, m8-cleanup, tests, navigation-console, null-reference, qa]
 
 ## Acceptance Criteria
 
-- [x] `after_each()` in `test_navigation_console_unit` guards `_spy.clear()` with a null check (or initializes `_spy` to a non-null default) so no `SCRIPT ERROR` is emitted during teardown
-- [x] All existing NavigationConsole unit tests still pass
-- [x] The test log contains zero `SCRIPT ERROR` lines attributable to this file
-- [x] Full test suite passes with no new failures
+- [ ] `after_each()` in `test_navigation_console_unit` guards `_spy.clear()` with a null check (or initializes `_spy` to a non-null default) so no `SCRIPT ERROR` is emitted during teardown
+- [ ] All existing NavigationConsole unit tests still pass
+- [ ] The test log contains zero `SCRIPT ERROR` lines attributable to this file
+- [ ] Full test suite passes with no new failures
 
 ## Implementation Notes
 

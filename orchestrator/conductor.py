@@ -834,6 +834,9 @@ class Conductor:
         self.logger.log("SYSTEM",
             f"Started (milestone={self.state['milestone']}, phase={self.state['phase']})")
 
+        # Startup zombie detection: clear stale state from previous sessions
+        self._scan_checkpoints_on_startup()
+
         while not self.shutdown_requested:
             status = self.state["status"]
 
@@ -1284,9 +1287,11 @@ class Conductor:
                         if ticket not in session_done:
                             session_done.append(ticket)
                     elif is_limit:
+                        self._write_checkpoint(worker, exit_code, stdout, stderr)
                         usage_limit_failures.append(ticket)
                         self._queue_retry(ticket, reason="usage_limit")
                     else:
+                        self._write_checkpoint(worker, exit_code, stdout, stderr)
                         self._queue_retry(ticket)
                     continue
 
@@ -1319,6 +1324,7 @@ class Conductor:
                         else:
                             self.logger.log("DONE", f"{agent} <- {ticket}")
                             wave_tickets.append(ticket)
+                            self._delete_checkpoint(ticket)
                             # Track session-completed tickets for dependency validation
                             session_done = self.state.setdefault("completed_this_session", [])
                             if ticket not in session_done:
@@ -1346,9 +1352,11 @@ class Conductor:
                     if ticket not in session_done:
                         session_done.append(ticket)
                 elif is_limit:
+                    self._write_checkpoint(worker, exit_code, stdout, stderr)
                     usage_limit_failures.append(ticket)
                     self._queue_retry(ticket, reason="usage_limit")
                 else:
+                    self._write_checkpoint(worker, exit_code, stdout, stderr)
                     self._queue_retry(ticket)
             else:
                 empty = not stdout.strip() and not stderr.strip()
@@ -1367,9 +1375,11 @@ class Conductor:
                     if ticket not in session_done:
                         session_done.append(ticket)
                 elif is_limit:
+                    self._write_checkpoint(worker, exit_code, stdout, stderr)
                     usage_limit_failures.append(ticket)
                     self._queue_retry(ticket, reason="usage_limit")
                 else:
+                    self._write_checkpoint(worker, exit_code, stdout, stderr)
                     self._queue_retry(ticket)
 
         # Record completed wave
@@ -1590,6 +1600,206 @@ class Conductor:
         total_attempts = len(entry["reasons"])
         self.logger.log("RETRY",
             f"{ticket_id} queued for retry (reason={reason}, attempt {total_attempts})")
+
+    # ------------------------------------------------------------------
+    # CHECKPOINT SYSTEM
+    # ------------------------------------------------------------------
+
+    def _write_checkpoint(
+        self,
+        worker: dict,
+        exit_code: int,
+        stdout: str,
+        stderr: str,
+    ) -> dict:
+        """Write a suspension checkpoint for an abnormally-exiting worker.
+
+        Probes worktree git state and remote PR state, then writes an atomic
+        checkpoint JSON to orchestrator/checkpoints/{TICKET-NNNN}.checkpoint.json.
+        Returns the checkpoint dict for downstream use (context injection, auto-remediation).
+        """
+        ticket_id = worker["ticket"]
+        agent = worker["agent"]
+        worktree_path_str = worker.get("worktree_path")
+        branch = worker.get("branch") or ""
+
+        # Determine suspension reason
+        is_limit = self._detect_usage_limit(exit_code, stdout, stderr)
+        if is_limit:
+            reason = "usage_limit"
+        elif exit_code == -1:
+            reason = "timeout"
+        elif not stdout.strip() and not stderr.strip() and exit_code != 0:
+            reason = "crash"
+        else:
+            reason = "unknown"
+
+        # Probe worktree git state (best-effort)
+        commit_hash = None
+        uncommitted_changes = False
+        actual_branch = branch
+        if worktree_path_str:
+            wt = Path(worktree_path_str)
+            if wt.exists():
+                log_result = subprocess.run(
+                    ["git", "-C", str(wt), "log", "--oneline", "-1"],
+                    capture_output=True, text=True,
+                )
+                if log_result.returncode == 0 and log_result.stdout.strip():
+                    commit_hash = log_result.stdout.strip().split()[0]
+
+                status_result = subprocess.run(
+                    ["git", "-C", str(wt), "status", "--porcelain"],
+                    capture_output=True, text=True,
+                )
+                if status_result.returncode == 0:
+                    uncommitted_changes = bool(status_result.stdout.strip())
+
+                branch_result = subprocess.run(
+                    ["git", "-C", str(wt), "branch", "--show-current"],
+                    capture_output=True, text=True,
+                )
+                if branch_result.returncode == 0 and branch_result.stdout.strip():
+                    actual_branch = branch_result.stdout.strip()
+
+        # Probe remote PR state via gh CLI (best-effort)
+        pr_url = None
+        pr_merged = False
+        pr_state = None
+        if actual_branch:
+            try:
+                pr_result = subprocess.run(
+                    ["gh", "pr", "list", "--head", actual_branch,
+                     "--json", "number,url,state,merged"],
+                    capture_output=True, text=True, timeout=15,
+                )
+                if pr_result.returncode == 0 and pr_result.stdout.strip():
+                    pr_data = json.loads(pr_result.stdout)
+                    if pr_data:
+                        pr_entry = pr_data[0]
+                        pr_url = pr_entry.get("url")
+                        pr_merged = pr_entry.get("merged", False)
+                        pr_state = pr_entry.get("state")
+            except (json.JSONDecodeError, subprocess.TimeoutExpired, OSError):
+                pass
+
+        # Read ticket status from disk
+        ticket_status = read_ticket_status(ticket_id, self.state.get("milestone", ""))
+
+        # Infer completed steps from observable state
+        steps_completed = ["read_ticket", "verified_deps"]
+        if ticket_status == "IN_PROGRESS":
+            steps_completed.append("marked_in_progress")
+        if commit_hash:
+            steps_completed.append("committed")
+        if pr_url and pr_merged:
+            steps_completed.append("merged_pr")
+
+        checkpoint = {
+            "ticket": ticket_id,
+            "agent": agent,
+            "milestone": self.state.get("milestone", ""),
+            "phase": self.state.get("phase", ""),
+            "wave": self.state.get("wave_number", 0),
+            "suspended_at": now_iso(),
+            "reason": reason,
+            "progress": {
+                "steps_completed": steps_completed,
+                "commit_hash": commit_hash,
+                "branch": actual_branch or None,
+                "uncommitted_changes": uncommitted_changes,
+                "pr_url": pr_url,
+                "pr_merged": pr_merged,
+                "pr_state": pr_state,
+                "ticket_status_on_disk": ticket_status,
+                "files_changed": [],
+                "new_gd_scripts": False,
+            },
+            "notes": f"exit_code={exit_code}",
+        }
+
+        # Write atomically: tmp file then rename
+        checkpoints_dir = ORCH_DIR / "checkpoints"
+        checkpoints_dir.mkdir(parents=True, exist_ok=True)
+        checkpoint_path = checkpoints_dir / f"{ticket_id}.checkpoint.json"
+        tmp_path = checkpoint_path.with_suffix(".tmp")
+        try:
+            write_json(tmp_path, checkpoint)
+            tmp_path.replace(checkpoint_path)
+            self.logger.log("CHECKPOINT", f"{ticket_id} suspended — wrote checkpoint")
+        except OSError as e:
+            self.logger.log("WARNING", f"Failed to write checkpoint for {ticket_id}: {e}")
+
+        return checkpoint
+
+    def _delete_checkpoint(self, ticket_id: str):
+        """Delete the checkpoint file for a successfully completed ticket."""
+        checkpoint_path = ORCH_DIR / "checkpoints" / f"{ticket_id}.checkpoint.json"
+        if checkpoint_path.exists():
+            try:
+                checkpoint_path.unlink()
+                self.logger.log("CHECKPOINT", f"{ticket_id} checkpoint cleared")
+            except OSError:
+                pass
+
+    def _scan_checkpoints_on_startup(self):
+        """Scan checkpoints/ for zombie tickets from previous sessions.
+
+        Called once at the start of run() before the main loop.
+        - DONE on disk  → auto-remediate: add to completed_this_session, delete checkpoint.
+        - IN_PROGRESS   → log zombie warning (will be re-dispatched with checkpoint context).
+        Clears any stale active_ticket_ids entries that correspond to checkpoints.
+        """
+        checkpoints_dir = ORCH_DIR / "checkpoints"
+        if not checkpoints_dir.exists():
+            return
+
+        checkpoint_files = list(checkpoints_dir.glob("*.checkpoint.json"))
+        if not checkpoint_files:
+            return
+
+        milestone = self.state.get("milestone", "")
+        stale_ids: set[str] = set()
+
+        for cp_file in checkpoint_files:
+            try:
+                cp_data = json.loads(cp_file.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                continue
+
+            ticket_id = cp_data.get("ticket", "")
+            if not ticket_id:
+                continue
+
+            stale_ids.add(ticket_id)
+            ticket_status = read_ticket_status(ticket_id, milestone)
+
+            if ticket_status == "DONE":
+                self.logger.log("CLEANUP",
+                    f"{ticket_id} auto-remediated on startup — "
+                    "ticket is DONE on disk, deleting checkpoint")
+                session_done = self.state.setdefault("completed_this_session", [])
+                if ticket_id not in session_done:
+                    session_done.append(ticket_id)
+                try:
+                    cp_file.unlink()
+                except OSError:
+                    pass
+            else:
+                self.logger.log("CLEANUP",
+                    f"{ticket_id} was zombie — checkpoint exists from previous session "
+                    f"(status={ticket_status})")
+
+        # Clear stale active_ticket_ids (no live process after restart)
+        if stale_ids:
+            active = self.state.get("active_ticket_ids", [])
+            cleared = [tid for tid in active if tid in stale_ids]
+            if cleared:
+                self.state["active_ticket_ids"] = [
+                    tid for tid in active if tid not in stale_ids
+                ]
+                self.logger.log("CLEANUP",
+                    f"Cleared stale active_ticket_ids: {', '.join(cleared)}")
 
     # ------------------------------------------------------------------
     # EVALUATING

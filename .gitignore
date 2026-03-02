@@ -4,6 +4,7 @@ __pycache__/
 
 # Orchestrator runtime artifacts
 orchestrator/instances/
+orchestrator/checkpoints/
 orchestrator/config.local.json
 orchestrator/usage.jsonl
 

@@ -1,6 +1,10 @@
-## Inventory overlay: 15-slot grid with item display, gamepad navigation, and item details.
+## Inventory overlay: 15-slot grid with item display, gamepad navigation, item details,
+## and destroy action with confirmation dialog. Owner: gameplay-programmer
 class_name InventoryScreen
 extends CanvasLayer
+
+# ── Signals ──────────────────────────────────────────────
+signal item_destroyed(resource_type: ResourceDefs.ResourceType, purity: ResourceDefs.Purity, quantity: int)
 
 # ── Constants ─────────────────────────────────────────────
 const SLOT_SIZE: float = 80.0
@@ -22,6 +26,7 @@ const COLOR_SLOT_BG_OCCUPIED := Color("#1A2736", 0.8)
 const COLOR_SLOT_BORDER := Color("#1A2736")
 const COLOR_TEAL := Color("#00D4AA")
 const COLOR_AMBER := Color("#FFB830")
+const COLOR_CORAL := Color("#FF6B5A")
 const COLOR_TEXT_PRIMARY := Color("#F1F5F9")
 const COLOR_TEXT_SECONDARY := Color("#94A3B8")
 const COLOR_NEUTRAL := Color("#94A3B8")
@@ -37,11 +42,20 @@ var _detail_icon: TextureRect = null
 var _detail_name_label: Label = null
 var _detail_stars_container: HBoxContainer = null
 var _detail_quantity_label: Label = null
+var _destroy_hint_label: Label = null
 var _dim_rect: ColorRect = null
 var _main_panel: PanelContainer = null
 var _combined_container: HBoxContainer = null
 var _ship_sidebar: ShipStatsSidebar = null
 var _font: Font = null
+
+## Destroy confirmation dialog state
+var _confirm_visible: bool = false
+var _confirm_overlay: Control = null
+var _confirm_title_label: Label = null
+var _confirm_message_label: Label = null
+var _destroy_confirm_button: Button = null
+var _cancel_confirm_button: Button = null
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -67,7 +81,26 @@ func _input(event: InputEvent) -> void:
 	if not _is_open:
 		return
 
-	# Navigation (only when inventory is open)
+	# When the destroy confirm dialog is open, handle its input exclusively
+	if _confirm_visible:
+		if event.is_action_pressed("ui_cancel"):
+			_close_destroy_confirm()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_accept"):
+			if _destroy_confirm_button.has_focus():
+				_on_destroy_confirmed()
+			elif _cancel_confirm_button.has_focus():
+				_close_destroy_confirm()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_left"):
+			_destroy_confirm_button.grab_focus()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_right"):
+			_cancel_confirm_button.grab_focus()
+			get_viewport().set_input_as_handled()
+		return
+
+	# Navigation (only when inventory is open and confirm dialog is closed)
 	if event.is_action_pressed("ui_right"):
 		_move_focus(1, 0)
 		get_viewport().set_input_as_handled()
@@ -82,6 +115,9 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("ui_cancel"):
 		close_inventory()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_accept"):
+		_request_destroy()
 		get_viewport().set_input_as_handled()
 
 # ── Public Methods ────────────────────────────────────────
@@ -119,6 +155,8 @@ func open_inventory() -> void:
 
 ## Closes the inventory.
 func close_inventory() -> void:
+	if _confirm_visible:
+		_close_destroy_confirm()
 	Global.log("InventoryScreen: closed")
 	_is_open = false
 	InputManager.set_gameplay_inputs_enabled(true)
@@ -144,6 +182,10 @@ func select_slot(index: int) -> void:
 	_focused_slot = index
 	_update_focus_visual()
 	_update_detail_area()
+
+## Returns true if the destroy confirmation dialog is currently visible.
+func is_destroy_confirm_visible() -> bool:
+	return _confirm_visible
 
 # ── Private Methods ───────────────────────────────────────
 
@@ -268,6 +310,87 @@ func _build_ui() -> void:
 	_detail_quantity_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	detail_hbox.add_child(_detail_quantity_label)
 
+	# Destroy action hint in the detail area
+	_destroy_hint_label = Label.new()
+	_destroy_hint_label.text = "[Enter] Destroy"
+	_destroy_hint_label.add_theme_font_size_override("font_size", 14)
+	_destroy_hint_label.add_theme_color_override("font_color", COLOR_CORAL)
+	_destroy_hint_label.visible = false
+	detail_hbox.add_child(_destroy_hint_label)
+
+	# Build destroy confirmation dialog on top of everything
+	_build_destroy_confirm_dialog(dim_layer)
+
+func _build_destroy_confirm_dialog(parent: Control) -> void:
+	_confirm_overlay = Control.new()
+	_confirm_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_confirm_overlay.visible = false
+	parent.add_child(_confirm_overlay)
+
+	var dim := ColorRect.new()
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color("#000000", 0.3)
+	_confirm_overlay.add_child(dim)
+
+	var confirm_center := CenterContainer.new()
+	confirm_center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_confirm_overlay.add_child(confirm_center)
+
+	var dialog := PanelContainer.new()
+	dialog.custom_minimum_size = Vector2(400, 200)
+	var style := StyleBoxFlat.new()
+	style.bg_color = COLOR_SURFACE
+	style.border_color = COLOR_CORAL
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(8)
+	style.set_content_margin_all(24)
+	dialog.add_theme_stylebox_override("panel", style)
+	confirm_center.add_child(dialog)
+
+	var dialog_vbox := VBoxContainer.new()
+	dialog_vbox.add_theme_constant_override("separation", 12)
+	dialog.add_child(dialog_vbox)
+
+	_confirm_title_label = Label.new()
+	_confirm_title_label.add_theme_font_size_override("font_size", 22)
+	_confirm_title_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
+	dialog_vbox.add_child(_confirm_title_label)
+
+	# Dialog divider
+	var dialog_divider := HSeparator.new()
+	var dialog_div_style := StyleBoxFlat.new()
+	dialog_div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
+	dialog_div_style.set_content_margin_all(0)
+	dialog_divider.add_theme_stylebox_override("separator", dialog_div_style)
+	dialog_vbox.add_child(dialog_divider)
+
+	_confirm_message_label = Label.new()
+	_confirm_message_label.add_theme_font_size_override("font_size", 16)
+	_confirm_message_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
+	_confirm_message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	dialog_vbox.add_child(_confirm_message_label)
+
+	var button_row := HBoxContainer.new()
+	button_row.add_theme_constant_override("separation", 16)
+	button_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	dialog_vbox.add_child(button_row)
+
+	_destroy_confirm_button = Button.new()
+	_destroy_confirm_button.text = "DESTROY"
+	_destroy_confirm_button.custom_minimum_size = Vector2(120, 40)
+	_destroy_confirm_button.add_theme_font_size_override("font_size", 16)
+	_style_button(_destroy_confirm_button, COLOR_CORAL)
+	_destroy_confirm_button.pressed.connect(_on_destroy_confirmed)
+	button_row.add_child(_destroy_confirm_button)
+
+	_cancel_confirm_button = Button.new()
+	_cancel_confirm_button.text = "CANCEL"
+	_cancel_confirm_button.custom_minimum_size = Vector2(120, 40)
+	_cancel_confirm_button.add_theme_font_size_override("font_size", 16)
+	_style_button(_cancel_confirm_button, COLOR_NEUTRAL)
+	_cancel_confirm_button.pressed.connect(_close_destroy_confirm)
+	button_row.add_child(_cancel_confirm_button)
+
 func _create_slot(index: int) -> PanelContainer:
 	var slot := PanelContainer.new()
 	slot.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
@@ -355,6 +478,7 @@ func _update_detail_area() -> void:
 		_detail_name_label.text = "Empty Slot"
 		_detail_name_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 		_detail_quantity_label.text = ""
+		_destroy_hint_label.visible = false
 		for i: int in range(5):
 			(_detail_stars_container.get_child(i) as Label).visible = false
 		return
@@ -375,6 +499,9 @@ func _update_detail_area() -> void:
 	_detail_name_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
 	_detail_quantity_label.text = "x %d" % quantity
 
+	# Show the destroy hint when a slot has items
+	_destroy_hint_label.visible = true
+
 	# Update stars
 	var purity_val: int = purity as int
 	for i: int in range(5):
@@ -384,6 +511,66 @@ func _update_detail_area() -> void:
 			star.add_theme_color_override("font_color", COLOR_AMBER)
 		else:
 			star.add_theme_color_override("font_color", COLOR_NEUTRAL)
+
+func _request_destroy() -> void:
+	if PlayerInventory.is_slot_empty(_focused_slot):
+		return
+	_open_destroy_confirm()
+
+func _open_destroy_confirm() -> void:
+	var slot_data: Dictionary = PlayerInventory.get_slot(_focused_slot)
+	var resource_type: ResourceDefs.ResourceType = slot_data.get("resource_type") as ResourceDefs.ResourceType
+	var quantity: int = slot_data.get("quantity", 0) as int
+	var item_name: String = ResourceDefs.get_resource_name(resource_type)
+
+	_confirm_title_label.text = "Destroy %s?" % item_name
+	_confirm_message_label.text = "x%d %s will be permanently destroyed. This cannot be undone." % [quantity, item_name]
+	_confirm_overlay.visible = true
+	_confirm_visible = true
+	# CANCEL focused by default to prevent accidental destruction
+	_cancel_confirm_button.grab_focus()
+	Global.log("InventoryScreen: destroy confirm opened for slot %d" % _focused_slot)
+
+func _close_destroy_confirm() -> void:
+	_confirm_overlay.visible = false
+	_confirm_visible = false
+	Global.log("InventoryScreen: destroy confirm cancelled")
+
+func _on_destroy_confirmed() -> void:
+	var slot_data: Dictionary = PlayerInventory.get_slot(_focused_slot)
+	if slot_data.is_empty():
+		_close_destroy_confirm()
+		return
+	var resource_type: ResourceDefs.ResourceType = slot_data.get("resource_type") as ResourceDefs.ResourceType
+	var purity: ResourceDefs.Purity = slot_data.get("purity") as ResourceDefs.Purity
+	var quantity: int = slot_data.get("quantity", 0) as int
+	PlayerInventory.remove_from_slot(_focused_slot, quantity)
+	item_destroyed.emit(resource_type, purity, quantity)
+	Global.log("InventoryScreen: destroyed %d %s from slot %d" % [quantity, ResourceDefs.get_resource_name(resource_type), _focused_slot])
+	_close_destroy_confirm()
+	_update_detail_area()
+
+func _style_button(button: Button, accent_color: Color) -> void:
+	var normal_style := StyleBoxFlat.new()
+	normal_style.bg_color = Color(accent_color, 0.2)
+	normal_style.border_color = accent_color
+	normal_style.set_border_width_all(1)
+	normal_style.set_corner_radius_all(4)
+	normal_style.set_content_margin_all(8)
+	button.add_theme_stylebox_override("normal", normal_style)
+	button.add_theme_stylebox_override("hover", normal_style)
+
+	var pressed_style: StyleBoxFlat = normal_style.duplicate() as StyleBoxFlat
+	pressed_style.bg_color = Color(accent_color, 0.4)
+	button.add_theme_stylebox_override("pressed", pressed_style)
+
+	var focus_style: StyleBoxFlat = normal_style.duplicate() as StyleBoxFlat
+	focus_style.border_color = COLOR_TEAL
+	focus_style.set_border_width_all(2)
+	button.add_theme_stylebox_override("focus", focus_style)
+
+	button.add_theme_color_override("font_color", accent_color)
+	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
 
 func _move_focus(dx: int, dy: int) -> void:
 	var col: int = _focused_slot % GRID_COLUMNS
@@ -401,12 +588,12 @@ func _move_focus(dx: int, dy: int) -> void:
 	_update_detail_area()
 
 func _on_slot_mouse_entered(index: int) -> void:
-	if not _is_open:
+	if not _is_open or _confirm_visible:
 		return
 	select_slot(index)
 
 func _on_slot_gui_input(event: InputEvent, index: int) -> void:
-	if not _is_open:
+	if not _is_open or _confirm_visible:
 		return
 	var mouse_event: InputEventMouseButton = event as InputEventMouseButton
 	if mouse_event == null:

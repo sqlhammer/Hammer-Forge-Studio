@@ -164,8 +164,9 @@ func _position_entities_and_setup(biome: Node3D) -> void:
 		player.position = player_pos
 		_setup_gameplay(player)
 
-	# Debug overlay for sessions with non-empty starting inventory
-	if not Global.starting_inventory.is_empty():
+	# Debug overlay for sessions with debug features active
+	var has_debug_features: bool = not Global.starting_inventory.is_empty() or Global.debug_speed_multiplier != 1.0
+	if has_debug_features:
 		_add_debug_overlay()
 
 	# Capture mouse for first-person gameplay
@@ -210,6 +211,11 @@ func _setup_gameplay(player: Node3D) -> void:
 	if camera == null:
 		push_error("GameWorld: player has no camera")
 		return
+
+	# Apply debug speed multiplier if set in DebugLauncher (debug builds only)
+	if OS.is_debug_build() and Global.debug_speed_multiplier != 1.0:
+		first_person.debug_speed_multiplier = Global.debug_speed_multiplier
+		Global.log("GameWorld: debug_speed_multiplier set to %.1f" % Global.debug_speed_multiplier)
 
 	# Set player collision layers
 	first_person.collision_layer = PhysicsLayers.PLAYER

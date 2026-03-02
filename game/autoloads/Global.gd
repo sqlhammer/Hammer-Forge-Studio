@@ -4,6 +4,7 @@ extends Node
 # ── Public Variables ─────────────────────────────────────
 var starting_biome: String = "shattered_flats"
 var starting_inventory: Dictionary = {}
+var debug_speed_multiplier: float = 1.0
 
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:

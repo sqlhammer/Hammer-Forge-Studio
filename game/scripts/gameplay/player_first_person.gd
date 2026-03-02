@@ -22,6 +22,9 @@ const JUMP_HEIGHT_RATIO: float = 0.5
 @export var head_bob_speed: float = 4.0
 @export var invert_gamepad_look_y: bool = false
 
+# ── Public Variables ──────────────────────────────────────
+var debug_speed_multiplier: float = 1.0
+
 # ── Private Variables ─────────────────────────────────────
 var _velocity: Vector3 = Vector3.ZERO
 var _camera_pitch: float = 0.0
@@ -119,6 +122,9 @@ func _update_movement(delta: float) -> void:
 
 	# Apply battery movement penalty
 	speed *= SuitBattery.get_movement_multiplier()
+
+	# Apply debug speed multiplier (set by DebugLauncher; default 1.0 is a no-op)
+	speed *= debug_speed_multiplier
 
 	# Calculate movement velocity (horizontal only)
 	var move_direction: Vector3 = (forward * input_vector.y + right * input_vector.x) * speed

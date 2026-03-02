@@ -11,6 +11,7 @@ extends Control
 
 var _biome_selector: OptionButton = null
 var _begin_wealthy_check: CheckBox = null
+var _fast_move_check: CheckBox = null
 var _launch_button: Button = null
 
 
@@ -98,6 +99,15 @@ func _build_ui() -> void:
 	_begin_wealthy_check.toggled.connect(_on_begin_wealthy_toggled)
 	vbox.add_child(_begin_wealthy_check)
 
+	# Fast Move checkbox
+	_fast_move_check = CheckBox.new()
+	_fast_move_check.name = "FastMoveCheck"
+	_fast_move_check.text = "Fast Move (3×)"
+	_fast_move_check.add_theme_font_size_override("font_size", 16)
+	_fast_move_check.add_theme_color_override("font_color", Color("#F1F5F9"))
+	_fast_move_check.toggled.connect(_on_fast_move_toggled)
+	vbox.add_child(_fast_move_check)
+
 	# Launch button
 	_launch_button = Button.new()
 	_launch_button.name = "LaunchButton"
@@ -150,6 +160,16 @@ func _on_begin_wealthy_toggled(toggled_on: bool) -> void:
 	else:
 		Global.starting_inventory = {}
 		Global.log("DebugLauncher: begin-wealthy OFF — starting_inventory cleared")
+
+
+## Updates Global.debug_speed_multiplier when the fast-move checkbox is toggled.
+func _on_fast_move_toggled(toggled_on: bool) -> void:
+	if toggled_on:
+		Global.debug_speed_multiplier = 3.0
+		Global.log("DebugLauncher: fast-move ON — debug_speed_multiplier set to 3.0")
+	else:
+		Global.debug_speed_multiplier = 1.0
+		Global.log("DebugLauncher: fast-move OFF — debug_speed_multiplier reset to 1.0")
 
 
 ## Transitions to the main menu scene. Game root handles scene lifecycle.

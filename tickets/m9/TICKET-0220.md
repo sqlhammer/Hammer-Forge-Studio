@@ -2,7 +2,7 @@
 id: TICKET-0220
 title: "Feature — Debug launcher toggle for 3× player movement speed"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P3
 owner: gameplay-programmer
 created_by: producer
@@ -37,3 +37,4 @@ Navigating large biomes (500m×500m) during playtesting is time-consuming at nor
 ## Activity Log
 
 - 2026-02-28 [producer] Created — deferred from M8; Studio Head requested during M8 playtest
+- 2026-03-01 [gameplay-programmer] Starting work — dependency TICKET-0233 is DONE

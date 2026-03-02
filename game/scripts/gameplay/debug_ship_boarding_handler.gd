@@ -37,6 +37,15 @@ func _process(_delta: float) -> void:
 					_navigation_console.open_panel()
 				return
 
+	# Machine slot — open module placement UI when near a placement zone
+	if _ship_interior.is_player_inside() and _hud:
+		var module_ui: ModulePlacementUI = _hud.get_module_placement_ui()
+		if module_ui and not module_ui.is_open():
+			var zone_index: int = _ship_interior.get_nearby_zone_index()
+			if zone_index >= 0 and InputManager.is_action_just_pressed("interact"):
+				module_ui.open(zone_index)
+				return
+
 	# Exit ship from interior exit zone
 	if _ship_interior.is_player_inside() and _ship_interior.is_player_in_exit_zone():
 		if InputManager.is_action_just_pressed("interact"):

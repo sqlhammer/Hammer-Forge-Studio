@@ -1394,6 +1394,137 @@ async def test_resumed_worker_done_clears_checkpoint() -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
+# Log archive rotation unit tests (TICKET-0191)
+# ---------------------------------------------------------------------------
+
+async def test_log_archive_on_milestone_complete() -> tuple[bool, str]:
+    """Conductor reaches milestone_complete → activity.log archived, active log reset.
+
+    Scenario: activity.log and suspension.log have content.  After calling
+    _rotate_logs_on_milestone_complete, the archived files must exist under
+    logs/ and the active log files must be empty.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_log_archive_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = REPO_ROOT
+    c.ORCH_DIR = orch_dir
+
+    try:
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state("M9", "TestPhase")
+
+        # Write content to activity.log and suspension.log
+        activity_log = paths.activity_log
+        suspension_log = paths.activity_log.parent / "suspension.log"
+        activity_log.write_text("existing activity entry\n", encoding="utf-8")
+        suspension_log.write_text('{"event":"suspended","ticket":"TICKET-0001"}\n',
+                                   encoding="utf-8")
+
+        # Run log rotation
+        conductor._rotate_logs_on_milestone_complete()
+
+        # Check archive files exist under logs/
+        archive_activity = paths.logs_dir / "activity-m9.log"
+        archive_suspension = paths.logs_dir / "suspension-m9.log"
+
+        if not archive_activity.exists():
+            return False, "Log archive: logs/activity-m9.log not created"
+        if not archive_suspension.exists():
+            return False, "Log archive: logs/suspension-m9.log not created"
+
+        # Archive must contain the original content
+        archive_text = archive_activity.read_text(encoding="utf-8")
+        if "existing activity entry" not in archive_text:
+            return False, "Log archive: original activity content not in archive"
+
+        # Archive must contain the SYSTEM log entry for the archive action
+        if "Archived activity.log" not in archive_text:
+            return False, "Log archive: 'Archived activity.log' SYSTEM entry not in archive"
+
+        # Active activity.log must be empty after truncation
+        if activity_log.read_bytes() != b"":
+            return False, "Log archive: activity.log not truncated after archive"
+
+        # Active suspension.log must be empty after truncation
+        if suspension_log.read_bytes() != b"":
+            return False, "Log archive: suspension.log not truncated after archive"
+
+        # Archive suspension must contain original content
+        susp_archive_text = archive_suspension.read_text(encoding="utf-8")
+        if "TICKET-0001" not in susp_archive_text:
+            return False, "Log archive: original suspension content not in archive"
+
+        return True, "Log archive: activity.log and suspension.log archived, active logs reset"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+async def test_log_archive_appends_on_existing() -> tuple[bool, str]:
+    """Archive target already exists → new content is appended, not overwritten.
+
+    Scenario: logs/activity-m9.log already has content from a previous run.
+    After calling _rotate_logs_on_milestone_complete, the archive must contain
+    both the old content and the new content.
+    """
+    tmp_dir = Path(tempfile.mkdtemp(prefix="hfs_test_log_append_"))
+    orch_dir = tmp_dir / "orchestrator"
+    orch_dir.mkdir()
+    (orch_dir / "results").mkdir()
+    (orch_dir / "logs").mkdir()
+
+    import orchestrator.conductor as c
+    orig_repo_root = c.REPO_ROOT
+    orig_orch_dir = c.ORCH_DIR
+    c.REPO_ROOT = REPO_ROOT
+    c.ORCH_DIR = orch_dir
+
+    try:
+        paths = _make_checkpoint_paths(orch_dir)
+        config = load_config(paths)
+        conductor = Conductor(paths=paths, config=config)
+        conductor.state = create_initial_state("M9", "TestPhase")
+
+        # Pre-create archive with existing content (simulate milestone restart)
+        archive_activity = paths.logs_dir / "activity-m9.log"
+        archive_activity.write_text("old archive content\n", encoding="utf-8")
+
+        # Write new content to active activity.log
+        activity_log = paths.activity_log
+        activity_log.write_text("new activity entry\n", encoding="utf-8")
+
+        # Run log rotation
+        conductor._rotate_logs_on_milestone_complete()
+
+        # Archive must contain BOTH old and new content (appended, not overwritten)
+        archive_text = archive_activity.read_text(encoding="utf-8")
+        if "old archive content" not in archive_text:
+            return False, "Log archive append: old content was overwritten (not appended)"
+        if "new activity entry" not in archive_text:
+            return False, "Log archive append: new content not found in archive"
+
+        # Active log must be truncated
+        if activity_log.read_bytes() != b"":
+            return False, "Log archive append: activity.log not truncated after append"
+
+        return True, "Log archive append: content appended to existing archive, active log reset"
+    finally:
+        c.REPO_ROOT = orig_repo_root
+        c.ORCH_DIR = orig_orch_dir
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
 
@@ -1699,6 +1830,31 @@ def main():
         print(f"  Result: {res_passed}/{res_total} PASSED, {res_total - res_passed} FAILED")
     print("=" * 60)
 
+    # Run log archive rotation unit tests (TICKET-0191)
+    async def _run_archive_tests():
+        return [
+            await test_log_archive_on_milestone_complete(),
+            await test_log_archive_appends_on_existing(),
+        ]
+
+    archive_checks = asyncio.run(_run_archive_tests())
+
+    print()
+    print("=" * 60)
+    print("  Log Archive Rotation Tests (TICKET-0191)")
+    print("=" * 60)
+    for ok, msg in archive_checks:
+        tag = "PASS" if ok else "FAIL"
+        print(f"  [{tag}] {msg}")
+    arc_passed = sum(1 for ok, _ in archive_checks if ok)
+    arc_total = len(archive_checks)
+    print()
+    if arc_passed == arc_total:
+        print(f"  Result: {arc_passed}/{arc_total} PASSED")
+    else:
+        print(f"  Result: {arc_passed}/{arc_total} PASSED, {arc_total - arc_passed} FAILED")
+    print("=" * 60)
+
     # Exit non-zero if any test suite failed
     all_passed = (
         harness_exit == 0
@@ -1708,6 +1864,7 @@ def main():
         and r3_passed == r3_total
         and gate_passed == gate_total
         and res_passed == res_total
+        and arc_passed == arc_total
     )
     sys.exit(0 if all_passed else 1)
 

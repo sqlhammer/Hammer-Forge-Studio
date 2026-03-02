@@ -2,7 +2,7 @@
 id: TICKET-0191
 title: "Log archive rotation at milestone close"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P3
 owner: tools-devops-engineer
 created_by: producer
@@ -59,3 +59,4 @@ See `docs/engineering/orchestrator-resilience-plan.md` Task 3 Section 3.4 (Reten
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — log archive rotation (split from TICKET-0187)
+- 2026-03-02 [tools-devops-engineer] Starting work — implementing log archive rotation on milestone_complete, checkpoint anomaly scan, and tests

@@ -73,3 +73,4 @@ After all resilience implementation tickets are complete, this ticket updates al
 
 - 2026-02-27 [producer] Created ticket — documentation updates for resilience system
 - 2026-03-02 [producer] Starting work — creating resilience runbook, updating CLAUDE.md, template, architecture doc, and config reference
+- 2026-03-02 [producer] DONE — commit b7ffb78 on main. Created orchestrator-resilience-runbook.md and orchestrator-config-reference.md; updated CLAUDE.md (Suspension & Resume + milestone close step 7), agents/_template/CLAUDE.md (Resume Protocol), and orchestration-architecture.md (LIMIT_WAIT state, checkpoint system, suspension log).

@@ -2,7 +2,7 @@
 id: TICKET-0188
 title: "Documentation — resilience runbook, CLAUDE.md updates, and config reference"
 type: TASK
-status: OPEN
+status: DONE
 priority: P2
 owner: producer
 created_by: producer
@@ -22,7 +22,7 @@ After all resilience implementation tickets are complete, this ticket updates al
 ## Acceptance Criteria
 
 ### Resilience Runbook
-- [ ] Create `docs/engineering/orchestrator-resilience-runbook.md` covering:
+- [x] Create `docs/engineering/orchestrator-resilience-runbook.md` covering:
   - What is a suspension checkpoint and when is one created
   - How to read `orchestrator/suspension.log` (field reference, event types)
   - How to manually inspect/clear checkpoints in `orchestrator/checkpoints/`
@@ -32,32 +32,32 @@ After all resilience implementation tickets are complete, this ticket updates al
   - Reference to the full risk analysis in `docs/engineering/orchestrator-resilience-plan.md`
 
 ### CLAUDE.md Updates
-- [ ] Add a "Suspension & Resume" subsection under the "Git Workflow" section in root `CLAUDE.md` explaining:
+- [x] Add a "Suspension & Resume" subsection under the "Git Workflow" section in root `CLAUDE.md` explaining:
   - Checkpoint files exist at `orchestrator/checkpoints/` and are runtime state (not committed)
   - If an agent is dispatched with `{checkpoint_context}`, it must follow resume instructions instead of starting fresh
   - Agents must never delete checkpoint files manually — the conductor manages them
-- [ ] Add checkpoint cleanup as step 7 in the "On Milestone Close" checklist: "Verify `orchestrator/checkpoints/` is empty. If any checkpoint files remain, investigate before closing — they indicate unresolved suspended work."
+- [x] Add checkpoint cleanup as step 7 in the "On Milestone Close" checklist: "Verify `orchestrator/checkpoints/` is empty. If any checkpoint files remain, investigate before closing — they indicate unresolved suspended work."
 
 ### Agent CLAUDE.md Template Update
-- [ ] Update `agents/_template/CLAUDE.md` to include a "Resume Protocol" section explaining:
+- [x] Update `agents/_template/CLAUDE.md` to include a "Resume Protocol" section explaining:
   - If your dispatch prompt includes a "Resume Context" section, you are resuming interrupted work
   - Follow the remaining steps listed in the resume context exactly
   - Do not redo completed steps (e.g., do not re-commit already-committed code)
   - Report outcome normally — the conductor tracks that this was a resume
 
 ### Orchestration Architecture Doc
-- [ ] Update `docs/engineering/orchestration-architecture.md` to document:
+- [x] Update `docs/engineering/orchestration-architecture.md` to document:
   - The new `LIMIT_WAIT` state in the state machine diagram
   - The checkpoint system (directory, schema, lifecycle)
   - The suspension log (`suspension.log` — format, retention)
   - Gate deferral on unresolved checkpoints
 
 ### Config Reference
-- [ ] Update `orchestrator/config.json` inline comments or create `docs/engineering/orchestrator-config-reference.md` documenting all config fields including new `limit_wait` section.
+- [x] Update `orchestrator/config.json` inline comments or create `docs/engineering/orchestrator-config-reference.md` documenting all config fields including new `limit_wait` section.
 
 ### Testing
-- [ ] All documentation references actual file paths and schemas that exist in the codebase (no stale references).
-- [ ] Runbook scenarios are tested against the actual conductor behavior (manual verification).
+- [x] All documentation references actual file paths and schemas that exist in the codebase (no stale references).
+- [x] Runbook scenarios are tested against the actual conductor behavior (manual verification).
 
 ## Implementation Notes
 
@@ -72,3 +72,4 @@ After all resilience implementation tickets are complete, this ticket updates al
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — documentation updates for resilience system
+- 2026-03-02 [producer] Starting work — creating resilience runbook, updating CLAUDE.md, template, architecture doc, and config reference

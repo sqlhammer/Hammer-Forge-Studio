@@ -90,6 +90,16 @@ This step must complete before marking the ticket `DONE`.
 - When on `main`: push directly — each completed ticket moves `main` forward
 - When in a worktree: push the branch, open a PR, and self-merge immediately — do not wait for the Systems Programmer to merge
 
+### Suspension & Resume
+
+The orchestrator uses a **checkpoint system** to recover from agent failures (usage limits, timeouts, crashes) without losing partial work.
+
+- **Checkpoint files** exist at `orchestrator/checkpoints/{TICKET-NNNN}.checkpoint.json` and are runtime state — they are **never committed to git**. The conductor creates and deletes them automatically.
+- If an agent's dispatch prompt includes a `## Checkpoint Context` section, the agent **must follow the resume instructions in that section** rather than starting the ticket from scratch. Completed steps listed in the checkpoint must not be repeated.
+- **Agents must never delete checkpoint files manually.** The conductor manages their lifecycle — premature deletion causes resume context loss.
+
+See `docs/engineering/orchestrator-resilience-runbook.md` for operator guidance on checkpoints, `LIMIT_WAIT`, and gate deferral.
+
 ### Code Review Protocol
 - Code review happens via separate `REVIEW` tickets assigned to Systems Programmer
 - Review tickets depend on the implementation ticket being `DONE` and committed
@@ -138,7 +148,8 @@ When the QA phase gate passes **and** the Studio Head has completed the UAT sign
 4. ✅ Update the **Release Goals** table in `docs/studio/prd.md` — set the milestone row to `Complete`, fill in the QA sign-off date, and confirm the description is accurate
 5. ✅ Post the final Phase Gate Summary report to `docs/studio/reports/`
 6. ✅ Commit and push all doc updates to `main`
-7. ✅ Clean up milestone branches — delete all feature branches used during the milestone (e.g., branches matching `orch/*/TICKET-*`, `feature/m<N>/`, or `feature/t<N>/`) from remote. These are safe to delete once all changes are merged to `main`
+7. ✅ Verify `orchestrator/checkpoints/` is empty. If any checkpoint files remain, investigate before closing — they indicate unresolved suspended work. See `docs/engineering/orchestrator-resilience-runbook.md` for resolution steps.
+8. ✅ Clean up milestone branches — delete all feature branches used during the milestone (e.g., branches matching `orch/*/TICKET-*`, `feature/m<N>/`, or `feature/t<N>/`) from remote. These are safe to delete once all changes are merged to `main`
 
 ## Studio Head Touchpoints
 

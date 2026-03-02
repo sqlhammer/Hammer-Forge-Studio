@@ -180,6 +180,20 @@ This agent must **NOT** do the following without explicit Studio Head approval:
 
 ---
 
+## Resume Protocol
+
+When the orchestrator re-dispatches a ticket after an interruption, your dispatch prompt will include a `## Checkpoint Context` section. If that section is present and non-empty:
+
+1. **You are resuming interrupted work** — do not treat this as a fresh start.
+2. **Read the checkpoint context carefully.** It lists the steps already completed (e.g., "committed implementation on branch X, PR not yet created") and the remaining steps you need to perform.
+3. **Do not redo completed steps.** If the checkpoint says code was committed, do not re-implement or re-commit. Pick up from where the previous session left off.
+4. **Do not delete the checkpoint file.** The conductor manages checkpoint lifecycle automatically.
+5. **Report outcome normally.** Use the standard JSON result schema. The conductor tracks that this was a resume — you do not need to signal it specially.
+
+If `## Checkpoint Context` is absent or empty, treat the dispatch as a normal (non-resume) execution.
+
+---
+
 ## Decision Log Format
 
 When making a significant autonomous decision (architectural choice, scope interpretation, tradeoff), append to `agents/<slug>/decisions.md`:

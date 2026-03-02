@@ -59,11 +59,16 @@ Today, spawning agents is manual: the Studio Head opens a PowerShell terminal, s
     |                  |
     |                  ├──(more work)──> PLANNING
     |                  ├──(phase complete)──> GATE_BLOCKED
+    |                  ├──(usage limit mass failure)──> LIMIT_WAIT
     |                  └──(error)──> HALTED
     |
     |               GATE_BLOCKED ──(human approves)──> PLANNING
     |                  |
     |                  └──(human rejects / gate fail)──> HALTED
+    |
+    |               LIMIT_WAIT ──(cooldown expires)──> PLANNING
+    |                  |
+    |                  └──(max cycles exceeded)──> HALTED
     |
     └──(human resume)── HALTED ──(human abort)──> IDLE
 ```
@@ -76,6 +81,7 @@ Today, spawning agents is manual: the Studio Head opens a PowerShell terminal, s
 | `WORKING` | Workers executing. Conductor monitoring PIDs. |
 | `EVALUATING` | All workers done. Conductor merging branches, Producer assessing results. |
 | `GATE_BLOCKED` | Phase gate fired. System halted. Waiting for Studio Head approval. |
+| `LIMIT_WAIT` | Usage limit detected (Producer or ≥50% of wave workers). Conductor sleeping for `cooldown_minutes` before retrying. Transitions back to PLANNING after cooldown expires. Transitions to HALTED if `max_cooldown_cycles` is exceeded. |
 | `HALTED` | Error or manual stop. Requires human intervention to resume or abort. |
 
 ### 1.3 File-Based State Artifacts
@@ -90,6 +96,9 @@ orchestrator/
 ├── config.json              # User configuration (budgets, models, timeouts)
 ├── state.json               # Current state machine position + active workers
 ├── activity.log             # Append-only audit trail
+├── suspension.log           # Structured JSON-lines log for suspension events (auto-created)
+├── checkpoints/             # Per-ticket suspension checkpoints (auto-created, never committed)
+│   └── TICKET-NNNN.checkpoint.json
 ├── prompts/
 │   ├── plan_wave.md         # Prompt template for Producer planning
 │   └── worker_dispatch.md   # Prompt template for worker execution
@@ -100,6 +109,58 @@ orchestrator/
 ├── logs/                    # Per-agent execution logs (auto-created)
 └── README.md                # Usage guide
 ```
+
+### 1.3a Checkpoint System
+
+The checkpoint system enables graceful recovery from agent failures (usage limits, timeouts, crashes) without restarting tickets from scratch.
+
+**Directory:** `orchestrator/checkpoints/`
+**Gitignored:** Yes — checkpoint files are runtime state and must never be committed.
+
+**Lifecycle:**
+1. A worker exits abnormally (non-zero exit or empty stdout).
+2. Conductor probes the worktree for git state (last commit, uncommitted changes) and GitHub for PR state.
+3. Conductor writes `orchestrator/checkpoints/{TICKET-NNNN}.checkpoint.json`.
+4. On the next planning wave, the Producer prompt includes a summary of all pending checkpoints.
+5. When the ticket is re-dispatched, the conductor injects the checkpoint content into the `{checkpoint_context}` variable in `worker_dispatch.md`.
+6. The resumed agent reads the checkpoint context and picks up from the last completed step.
+7. On successful completion, the conductor deletes the checkpoint file.
+
+**Schema:**
+```json
+{
+  "ticket": "TICKET-0170",
+  "agent": "gameplay-programmer",
+  "milestone": "m9",
+  "phase": "Gameplay",
+  "wave": 12,
+  "suspended_at": "2026-02-27T14:30:00Z",
+  "reason": "usage_limit | timeout | crash | unknown",
+  "progress": {
+    "steps_completed": ["read_ticket", "verified_deps", "marked_in_progress", "implemented", "committed"],
+    "commit_hash": "abc1234",
+    "branch": "orch/gameplay-programmer/TICKET-0170",
+    "pr_url": null,
+    "pr_merged": false,
+    "ticket_status_on_disk": "IN_PROGRESS",
+    "files_changed": ["game/scripts/foo.gd"],
+    "new_gd_scripts": true
+  },
+  "notes": "Committed implementation. PR not yet created."
+}
+```
+
+**Gate deferral:** If any checkpoints exist for tickets in the current phase when the conductor would normally fire a phase gate, the gate is **deferred** and logged as `[WARNING ] Gate deferred — N unresolved checkpoint(s) exist`. A human operator must inspect and clear the checkpoints before the gate will fire. See `docs/engineering/orchestrator-resilience-runbook.md` for resolution steps.
+
+### 1.3b Suspension Log
+
+`orchestrator/suspension.log` is a structured JSON-lines file (one JSON object per line) recording all suspension-related events. It complements `activity.log` with machine-readable detail for post-mortem analysis.
+
+**Format:** JSON-lines — each line is a complete JSON object.
+
+**Events logged:** `limit_hit`, `suspended`, `resume_dispatched`, `resume_success`, `resume_failure`, `auto_remediated`, `zombie_detected`.
+
+**Retention:** Archived at milestone close to `orchestrator/logs/suspension-{milestone}.log` alongside `activity.log`.
 
 **`state.json` schema:**
 ```json

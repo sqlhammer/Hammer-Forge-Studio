@@ -73,14 +73,7 @@ func _apply_starting_inventory(inventory: Dictionary) -> void:
 func _add_environment() -> void:
 	var env: WorldEnvironment = WorldEnvironment.new()
 	env.name = "WorldEnvironment"
-	var environment: Environment = Environment.new()
-	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color("#1a1a2e")
-	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color("#404060")
-	environment.ambient_light_energy = 0.4
-	environment.tonemap_mode = Environment.TONE_MAPPER_ACES
-	env.environment = environment
+	env.environment = preload("res://environments/default_environment.tres")
 	add_child(env)
 
 	var sun: DirectionalLight3D = DirectionalLight3D.new()
@@ -89,6 +82,8 @@ func _add_environment() -> void:
 	sun.light_color = Color("#ffe0c0")
 	sun.light_energy = 1.2
 	sun.shadow_enabled = true
+	sun.shadow_opacity = 0.6
+	sun.light_angular_distance = 1.5
 	add_child(sun)
 
 

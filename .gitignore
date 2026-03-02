@@ -15,3 +15,6 @@ aws/
 
 # GDAI MCP plugin
 game/addons/gdai-mcp-plugin-godot/
+
+# Dashboard build output
+dashboard/dist/

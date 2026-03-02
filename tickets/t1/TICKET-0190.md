@@ -2,7 +2,7 @@
 id: TICKET-0190
 title: "Dashboard data parser — Python script to read tickets and milestones into JSON"
 type: FEATURE
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -64,3 +64,4 @@ Build a Python data parser that reads all ticket markdown files and `docs/studio
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — data parser for dashboard build pipeline
+- 2026-03-01 [systems-programmer] Starting work — implementing dashboard data parser

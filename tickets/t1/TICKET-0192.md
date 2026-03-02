@@ -2,7 +2,7 @@
 id: TICKET-0192
 title: "Dashboard site scaffold — HTML/CSS/JS structure with Mermaid.js"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -67,3 +67,4 @@ Create the static site scaffold for the project reporting dashboard. This establ
 ## Activity Log
 
 - 2026-02-27 [producer] Created ticket — static site scaffold for dashboard
+- 2026-03-01 [systems-programmer] Starting work — building HTML/CSS/JS scaffold with Mermaid.js

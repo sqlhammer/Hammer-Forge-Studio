@@ -5,7 +5,7 @@ class_name TerrainChunk
 extends RefCounted
 
 
-# ── Private Variables ─────────────────────────────────────
+# ── Public Variables ──────────────────────────────────────
 
 ## Grid position of this chunk in the 2D spatial grid (column, row).
 var grid_position: Vector2i = Vector2i.ZERO

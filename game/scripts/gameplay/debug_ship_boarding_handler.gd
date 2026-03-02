@@ -1,6 +1,6 @@
 # DebugShipBoardingHandler - Boarding logic for debug-launched sessions - Owner: gameplay-programmer
-# Mirrors the enter/exit ship logic in TestWorld for DebugWorld sessions where
-# TestWorld is never instantiated. Added as a child of DebugWorld by DebugLauncher.
+# Mirrors the enter/exit ship logic in GameWorld for DebugWorld sessions where
+# GameWorld is not instantiated directly. Added as a child of DebugWorld by DebugLauncher.
 # Ticket: TICKET-0208
 class_name DebugShipBoardingHandler
 extends Node
@@ -29,7 +29,7 @@ func _process(_delta: float) -> void:
 			_begin_enter_ship()
 			return
 
-	# Cockpit navigation console — must be checked before exit zone for TestWorld parity
+	# Cockpit navigation console — must be checked before exit zone for GameWorld parity
 	if _ship_interior.is_player_inside() and not (_navigation_console and _navigation_console.is_open()):
 		if _ship_interior.is_player_near_cockpit_console():
 			if InputManager.is_action_just_pressed("interact"):

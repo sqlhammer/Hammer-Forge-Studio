@@ -2,7 +2,7 @@
 id: TICKET-0234
 title: "Root Game: Deprecate TestWorld — remove files and update affected tests"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: qa-engineer
 created_by: producer
@@ -61,3 +61,4 @@ The following test files currently reference `TestWorld` or `test_world.tscn` an
 ## Activity Log
 
 - 2026-02-28 [producer] Created ticket — TestWorld deprecation and test migration for Root Game phase
+- 2026-03-01 [qa-engineer] Starting work — all dependencies DONE (TICKET-0230, TICKET-0232, TICKET-0233). Deleting TestWorld files and updating affected tests.

@@ -2,7 +2,7 @@
 id: TICKET-0269
 title: "FEATURE: Wire InventoryActionPopup into inventory screen — Y button, grid pause, hint bar, gamepad controls descriptor"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -26,34 +26,34 @@ See `docs/studio/design-proposals/gamepad-inventory-actions.md` — **Modified O
 ## Acceptance Criteria
 
 ### Popup trigger
-- [ ] Pressing **Y (JOY_BUTTON_Y)** while a slot is focused opens `InventoryActionPopup` for the focused slot index.
-- [ ] Pressing Y with no slot focused does nothing (popup does not open).
-- [ ] No existing keyboard shortcut (G, Enter, Right-click) is removed or broken.
+- [x] Pressing **Y (JOY_BUTTON_Y)** while a slot is focused opens `InventoryActionPopup` for the focused slot index.
+- [x] Pressing Y with no slot focused does nothing (popup does not open).
+- [x] No existing keyboard shortcut (G, Enter, Right-click) is removed or broken.
 
 ### Grid input pause
-- [ ] While the popup is open, stick/D-pad navigation input does **not** move the focused slot in the grid beneath.
-- [ ] When the popup closes (either via action or cancel), grid navigation resumes immediately from the previously focused slot.
+- [x] While the popup is open, stick/D-pad navigation input does **not** move the focused slot in the grid beneath.
+- [x] When the popup closes (either via action or cancel), grid navigation resumes immediately from the previously focused slot.
 
 ### Action routing
-- [ ] `action_requested("drop", slot_index)` → calls the existing drop logic (the same path triggered by G / right-click today, as implemented in TICKET-0218).
-- [ ] `action_requested("destroy", slot_index)` → calls the existing destroy logic (the same path triggered by Enter / confirm today, as implemented in TICKET-0219). The popup's built-in hold-to-confirm in TICKET-0268 replaces the keyboard confirm dialog for gamepad — the underlying inventory destroy method is called directly without re-prompting.
+- [x] `action_requested("drop", slot_index)` → calls the existing drop logic (the same path triggered by G / right-click today, as implemented in TICKET-0218).
+- [x] `action_requested("destroy", slot_index)` → calls the existing destroy logic (the same path triggered by Enter / confirm today, as implemented in TICKET-0219). The popup's built-in hold-to-confirm in TICKET-0268 replaces the keyboard confirm dialog for gamepad — the underlying inventory destroy method is called directly without re-prompting.
 
 ### Controls descriptor (bottom bar)
-- [ ] When **keyboard/mouse** is the active device, the existing descriptor is shown unchanged:
+- [x] When **keyboard/mouse** is the active device, the existing descriptor is shown unchanged:
   `[G] Drop | [Enter/A] Destroy | [Right-Click] Drop`
-- [ ] When **gamepad** is the active device, the descriptor updates to:
+- [x] When **gamepad** is the active device, the descriptor updates to:
   `[Y] Actions`
-- [ ] The descriptor updates dynamically when the player switches device mid-session (no scene reload required), consistent with the device-detection system from TICKET-0267.
-- [ ] If no slot is focused, the descriptor is hidden or blank on both devices.
+- [x] The descriptor updates dynamically when the player switches device mid-session (no scene reload required), consistent with the device-detection system from TICKET-0267.
+- [x] If no slot is focused, the descriptor is hidden or blank on both devices.
 
 ### Hint bar (while popup is open)
-- [ ] While the popup is open, the persistent HUD hint bar (bottom-right) temporarily displays:
+- [x] While the popup is open, the persistent HUD hint bar (bottom-right) temporarily displays:
   `[A] Confirm / Hold to Destroy   [B] Cancel   D-pad ↑↓ Navigate`
-- [ ] When the popup closes, the hint bar reverts to the standard gameplay hints.
+- [x] When the popup closes, the hint bar reverts to the standard gameplay hints.
 
 ### Tests
-- [ ] Unit tests cover: Y press opens popup for focused slot, Y press with no focus is a no-op, drop signal routes to drop logic, destroy signal routes to destroy logic, grid navigation is blocked while popup is open and resumes after close, controls descriptor shows correct text per device.
-- [ ] Full test suite passes with no new failures.
+- [x] Unit tests cover: Y press opens popup for focused slot, Y press with no focus is a no-op, drop signal routes to drop logic, destroy signal routes to destroy logic, grid navigation is blocked while popup is open and resumes after close, controls descriptor shows correct text per device.
+- [x] Full test suite passes with no new failures.
 
 ## Implementation Notes
 
@@ -92,3 +92,4 @@ func _on_action_popup_cancelled() -> void:
 
 - 2026-03-02 [producer] Filed — depends on TICKET-0268 (popup component). Completes the Option B gamepad inventory action implementation.
 - 2026-03-02 [gameplay-programmer] Starting work — TICKET-0268 is DONE, all dependencies satisfied.
+- 2026-03-02 [gameplay-programmer] DONE — Implementation complete. Commit 8e93567 (branch), merge commit b5e56d7 (main), PR #298 (merged). Wired InventoryActionPopup into inventory_screen.gd with Y-button trigger, grid pause, action routing, device-aware controls descriptor, hint bar override. Added ui_action_menu input action to InputManager. Created test_inventory_screen_popup_unit.gd with 14 tests covering all acceptance criteria.

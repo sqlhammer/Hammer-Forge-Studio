@@ -2,7 +2,7 @@
 id: TICKET-0243
 title: "BUG — Interaction prompt HUD does not switch to gamepad button hint when gamepad is active"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -29,11 +29,11 @@ Two compounding issues:
 
 ## Acceptance Criteria
 
-- [ ] When a gamepad is the active input device, the interaction prompt key badge displays the mapped gamepad button name (e.g., "A" for `JOY_BUTTON_A`).
-- [ ] When the player switches back to keyboard, the badge reverts to the keyboard key (e.g., "E").
-- [ ] The persistent headlamp control hint also updates when the device switches.
-- [ ] The refresh happens within the same frame the device change is detected (driven by the signal, not polling).
-- [ ] Existing unit tests pass. Add a test for the device-aware label lookup if coverage is absent.
+- [x] When a gamepad is the active input device, the interaction prompt key badge displays the mapped gamepad button name (e.g., "A" for `JOY_BUTTON_A`).
+- [x] When the player switches back to keyboard, the badge reverts to the keyboard key (e.g., "E").
+- [x] The persistent headlamp control hint also updates when the device switches.
+- [x] The refresh happens within the same frame the device change is detected (driven by the signal, not polling).
+- [x] Existing unit tests pass. Add a test for the device-aware label lookup if coverage is absent.
 
 ## Implementation Notes
 
@@ -105,3 +105,4 @@ Ensure the prompt dictionary includes an `"action"` key so the HUD knows which a
 ## Activity Log
 
 - 2026-03-01 [producer] Created ticket — player-reported: interaction prompt always shows keyboard key even on gamepad; depends on TICKET-0244 (interact must be mapped to a gamepad button before label can be shown)
+- 2026-03-02 [gameplay-programmer] Starting work — all dependencies verified DONE (TICKET-0235, TICKET-0244)

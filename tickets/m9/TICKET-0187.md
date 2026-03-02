@@ -2,12 +2,12 @@
 id: TICKET-0187
 title: "Structured suspension logging and gate deferral on unresolved checkpoints"
 type: FEATURE
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: tools-devops-engineer
 created_by: producer
 created_at: 2026-02-27
-updated_at: 2026-02-27
+updated_at: 2026-03-02
 milestone: "M9"
 phase: "Orchestrator Resilience"
 depends_on: [TICKET-0183]
@@ -70,3 +70,4 @@ See `docs/engineering/orchestrator-resilience-plan.md` Task 3 (Logging Specifica
 - 2026-02-27 [producer] Created ticket — structured suspension logging and gate deferral
 - 2026-02-27 [producer] Moved log archive rotation to dedicated TICKET-0191
 - 2026-03-02 [tools-devops-engineer] Starting work — implementing SuspensionLogger, suspension event logging, and gate deferral
+- 2026-03-02 [tools-devops-engineer] DONE — merge commit d6e6322, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/285 merged. Implemented SuspensionLogger class, added suspension.log to .gitignore, added suspension event logging (limit_hit, suspended, resume_dispatched, resume_success, resume_failure, auto_remediated, zombie_detected) across conductor, implemented _check_gate_deferral, integrated gate deferral into no_work handler, updated _auto_remediate_merged_pr to use self.suspension_logger.log(), added 2 unit tests (gate deferral + dual-log verification). Resolved merge conflicts with TICKET-0185/0186/0189/0190. All 26 harness tests pass.

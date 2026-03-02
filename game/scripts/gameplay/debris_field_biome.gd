@@ -485,24 +485,30 @@ func _build_deposits() -> void:
 
 
 ## Creates a Deposit node from deposit info dictionary.
+## Uses DeepResourceNode for infinite (deep) deposits, plain Deposit for surface.
 func _create_deposit_from_info(deposit_info: Dictionary) -> Deposit:
-	var deposit: Deposit = Deposit.new()
+	var is_deep: bool = deposit_info.get("infinite", false)
+	var deposit: Deposit
+	if is_deep:
+		deposit = DeepResourceNode.new()
+	else:
+		deposit = Deposit.new()
 	var resource_type: ResourceDefs.ResourceType = deposit_info.get("resource_type", ResourceDefs.ResourceType.SCRAP_METAL)
 	var purity: ResourceDefs.Purity = deposit_info.get("purity", ResourceDefs.Purity.THREE_STAR)
 	var density_tier: ResourceDefs.DensityTier = deposit_info.get("density_tier", ResourceDefs.DensityTier.MEDIUM)
 	var quantity: int = deposit_info.get("quantity", SURFACE_DEPOSIT_QUANTITY)
 
 	deposit.setup(resource_type, purity, density_tier, quantity)
-	deposit.infinite = deposit_info.get("infinite", false)
-	deposit.yield_rate = deposit_info.get("yield_rate", 1.0)
-	deposit.drone_accessible = deposit_info.get("drone_accessible", true)
+	if not is_deep:
+		deposit.yield_rate = deposit_info.get("yield_rate", 1.0)
+		deposit.drone_accessible = deposit_info.get("drone_accessible", true)
 
 	var pos: Vector3 = deposit_info.get("position", Vector3.ZERO)
 	deposit.position = pos
 
 	# Name the deposit descriptively
 	var type_name: String = ResourceDefs.get_resource_name(resource_type)
-	var depth_label: String = "Deep" if deposit.infinite else "Surface"
+	var depth_label: String = "Deep" if is_deep else "Surface"
 	deposit.name = "%s_%s_%d" % [depth_label, type_name.replace(" ", ""), deposit.get_instance_id()]
 
 	return deposit

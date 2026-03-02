@@ -7,7 +7,7 @@ Execute **{ticket_id}**. Read the ticket file at `tickets/{milestone}/{ticket_id
 ## Execution Steps
 
 1. **Read the ticket** at `tickets/{milestone}/{ticket_id}.md` and verify all `depends_on` are DONE. If any dependency is not DONE, report `outcome: "blocked"` immediately.
-2. **Pre-claim check**: Verify the ticket status is not already `IN_PROGRESS`. If the ticket file shows `status: IN_PROGRESS`, output `outcome: "blocked"` with `summary: "Ticket is already IN_PROGRESS — possible duplicate dispatch"` and stop immediately.
+2. **Pre-claim check**: If the section below marked `## Checkpoint Context` is **absent or empty**, verify the ticket status is not already `IN_PROGRESS`. If the ticket file shows `status: IN_PROGRESS` and there is no checkpoint context, output `outcome: "blocked"` with `summary: "Ticket is already IN_PROGRESS — possible duplicate dispatch"` and stop immediately. **Skip this check** when a `## Checkpoint Context` section is present — that section means this is a conductor-initiated resume of an interrupted session, and the ticket being IN_PROGRESS is expected.
 3. **Update the ticket status** to `IN_PROGRESS` — add an Activity Log entry with timestamp and "Starting work".
 4. **Complete all acceptance criteria** listed in the ticket. Follow the coding standards in `docs/engineering/coding-standards.md`.
 5. **Commit your work** with message: `{ticket_id}: {ticket_title}`
@@ -18,6 +18,10 @@ Execute **{ticket_id}**. Read the ticket file at `tickets/{milestone}/{ticket_id
 ## Producer Notes
 
 {prompt_supplement}
+
+## Checkpoint Context
+
+{checkpoint_context}
 
 ## Important Rules
 

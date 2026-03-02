@@ -2,7 +2,7 @@
 id: TICKET-0263
 title: "BUG: Gamepad cannot open inventory — no input action mapped to inventory toggle"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -46,3 +46,4 @@ No gamepad input opens inventory. The inventory screen is unreachable on gamepad
 
 - 2026-03-02 [producer] Filed — UAT rejection on TICKET-0218. Studio Head reported no gamepad button opens inventory during drop-items playtest.
 - 2026-03-02 [gameplay-programmer] Starting work — adding JOY_BUTTON_BACK gamepad binding to inventory_toggle action.
+- 2026-03-02 [gameplay-programmer] DONE — commit e9079fe, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/289 merged. Added JOY_BUTTON_BACK to inventory_toggle action and updated hint text.

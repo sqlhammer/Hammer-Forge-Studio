@@ -2,12 +2,12 @@
 id: TICKET-0232
 title: "Root Game: Create game root scene with debug-mode routing; set as project main scene"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
 created_at: 2026-02-28
-updated_at: 2026-02-28
+updated_at: 2026-03-01
 milestone: "M9"
 phase: "Root Game"
 depends_on: [TICKET-0231]
@@ -21,14 +21,14 @@ Create the root `game` scene — the project's new main scene. It acts as a rout
 
 ## Acceptance Criteria
 
-- [ ] New script `game/scripts/gameplay/game.gd` with `class_name Game extends Node`.
-- [ ] New scene `game/scenes/gameplay/game.tscn` using `Game` as its script.
-- [ ] In `_ready()`:
+- [x] New script `game/scripts/gameplay/game.gd` with `class_name Game extends Node`.
+- [x] New scene `game/scenes/gameplay/game.tscn` using `Game` as its script.
+- [x] In `_ready()`:
   - If `OS.is_debug_build()` is `true`: instantiate `DebugLauncher` (preloaded from `res://scenes/debug/debug_launcher.tscn`) and add it as a child.
   - Else: call `get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")`.
-- [ ] `game.tscn` is set as the project's **Main Scene** in `project.godot` (`application/run/main_scene`).
-- [ ] `Global.log()` call in `_ready()` noting which path is taken (debug vs release).
-- [ ] No other scenes (test_world, debug_launcher) are referenced in `project.godot` as the main scene.
+- [x] `game.tscn` is set as the project's **Main Scene** in `project.godot` (`application/run/main_scene`).
+- [x] `Global.log()` call in `_ready()` noting which path is taken (debug vs release).
+- [x] No other scenes (test_world, debug_launcher) are referenced in `project.godot` as the main scene.
 
 ## Implementation Notes
 
@@ -41,3 +41,5 @@ Create the root `game` scene — the project's new main scene. It acts as a rout
 ## Activity Log
 
 - 2026-02-28 [producer] Created ticket — game root scene and project entry point for Root Game phase
+- 2026-03-01 [gameplay-programmer] Starting work — creating Game root scene with debug/release routing
+- 2026-03-01 [gameplay-programmer] DONE — Implementation merged via PR #252 (commit 43d17a0, merge commit 6413070). Created game.gd and game.tscn, set as project main scene. UID pending Godot editor scan. All acceptance criteria met.

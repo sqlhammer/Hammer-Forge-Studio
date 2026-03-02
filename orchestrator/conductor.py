@@ -287,6 +287,49 @@ def read_ticket_status(ticket_id: str, milestone: str) -> str:
     return "UNKNOWN"
 
 
+def _mark_ticket_done_on_disk(
+    ticket_id: str,
+    milestone: str,
+    pr_number: int | None,
+) -> bool:
+    """Update a ticket file to DONE status on disk.
+
+    Sets ``status: DONE``, updates ``updated_at:`` to today, and appends an
+    auto-completion entry to the ticket's Activity Log section.
+
+    Returns True on success, False if the file could not be found or written.
+    """
+    ticket_path = REPO_ROOT / "tickets" / milestone / f"{ticket_id}.md"
+    if not ticket_path.exists():
+        ticket_path = REPO_ROOT / "tickets" / milestone.lower() / f"{ticket_id}.md"
+    if not ticket_path.exists():
+        return False
+
+    try:
+        text = ticket_path.read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    text = re.sub(r"^status:\s*\S+", f"status: DONE", text, flags=re.MULTILINE)
+    text = re.sub(r"^updated_at:\s*\S+", f"updated_at: {today}", text, flags=re.MULTILINE)
+
+    pr_ref = f"PR #{pr_number}" if pr_number is not None else "a merged PR"
+    log_entry = (
+        f"\n- {today} [conductor] Auto-completed — {pr_ref} was merged but "
+        "agent session terminated before updating ticket status"
+    )
+    if "## Activity Log" in text:
+        text = text.rstrip() + log_entry + "\n"
+
+    try:
+        ticket_path.write_text(text, encoding="utf-8")
+    except OSError:
+        return False
+
+    return True
+
+
 def validate_dependencies(
     ticket_id: str,
     milestone: str,
@@ -1296,12 +1339,16 @@ class Conductor:
                         if ticket not in session_done:
                             session_done.append(ticket)
                     elif is_limit:
-                        self._write_checkpoint(worker, exit_code, stdout, stderr)
-                        usage_limit_failures.append(ticket)
-                        self._queue_retry(ticket, reason="usage_limit")
+                        checkpoint = self._write_checkpoint(worker, exit_code, stdout, stderr)
+                        branch = checkpoint.get("progress", {}).get("branch") or ""
+                        if not self._auto_remediate_merged_pr(ticket, branch, agent, wave_tickets):
+                            usage_limit_failures.append(ticket)
+                            self._queue_retry(ticket, reason="usage_limit")
                     else:
-                        self._write_checkpoint(worker, exit_code, stdout, stderr)
-                        self._queue_retry(ticket)
+                        checkpoint = self._write_checkpoint(worker, exit_code, stdout, stderr)
+                        branch = checkpoint.get("progress", {}).get("branch") or ""
+                        if not self._auto_remediate_merged_pr(ticket, branch, agent, wave_tickets):
+                            self._queue_retry(ticket)
                     continue
 
                 # Try to parse result
@@ -1361,12 +1408,16 @@ class Conductor:
                     if ticket not in session_done:
                         session_done.append(ticket)
                 elif is_limit:
-                    self._write_checkpoint(worker, exit_code, stdout, stderr)
-                    usage_limit_failures.append(ticket)
-                    self._queue_retry(ticket, reason="usage_limit")
+                    checkpoint = self._write_checkpoint(worker, exit_code, stdout, stderr)
+                    branch = checkpoint.get("progress", {}).get("branch") or ""
+                    if not self._auto_remediate_merged_pr(ticket, branch, agent, wave_tickets):
+                        usage_limit_failures.append(ticket)
+                        self._queue_retry(ticket, reason="usage_limit")
                 else:
-                    self._write_checkpoint(worker, exit_code, stdout, stderr)
-                    self._queue_retry(ticket)
+                    checkpoint = self._write_checkpoint(worker, exit_code, stdout, stderr)
+                    branch = checkpoint.get("progress", {}).get("branch") or ""
+                    if not self._auto_remediate_merged_pr(ticket, branch, agent, wave_tickets):
+                        self._queue_retry(ticket)
             else:
                 empty = not stdout.strip() and not stderr.strip()
                 label = "CRASH" if empty else "FAILED"
@@ -1384,12 +1435,16 @@ class Conductor:
                     if ticket not in session_done:
                         session_done.append(ticket)
                 elif is_limit:
-                    self._write_checkpoint(worker, exit_code, stdout, stderr)
-                    usage_limit_failures.append(ticket)
-                    self._queue_retry(ticket, reason="usage_limit")
+                    checkpoint = self._write_checkpoint(worker, exit_code, stdout, stderr)
+                    branch = checkpoint.get("progress", {}).get("branch") or ""
+                    if not self._auto_remediate_merged_pr(ticket, branch, agent, wave_tickets):
+                        usage_limit_failures.append(ticket)
+                        self._queue_retry(ticket, reason="usage_limit")
                 else:
-                    self._write_checkpoint(worker, exit_code, stdout, stderr)
-                    self._queue_retry(ticket)
+                    checkpoint = self._write_checkpoint(worker, exit_code, stdout, stderr)
+                    branch = checkpoint.get("progress", {}).get("branch") or ""
+                    if not self._auto_remediate_merged_pr(ticket, branch, agent, wave_tickets):
+                        self._queue_retry(ticket)
 
         # Record completed wave
         self.state["completed_waves"].append({
@@ -1751,11 +1806,130 @@ class Conductor:
             except OSError:
                 pass
 
+    def _check_merged_pr(self, ticket_id: str, branch: str) -> dict | None:
+        """Check whether a PR for *branch* has been merged to main.
+
+        Uses ``gh pr list --state all`` so that PRs whose source branch has
+        already been deleted from the remote are still queryable.
+
+        Returns the first merged PR data dict (keys: number, url, state,
+        merged) if one exists, or ``None`` if no merged PR is found or if the
+        query fails.
+        """
+        if not branch:
+            return None
+        try:
+            result = subprocess.run(
+                [
+                    "gh", "pr", "list",
+                    "--head", branch,
+                    "--json", "number,url,state,merged",
+                    "--state", "all",
+                ],
+                capture_output=True, text=True, timeout=15,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                prs = json.loads(result.stdout)
+                for pr in prs:
+                    if pr.get("merged", False):
+                        return pr
+        except (json.JSONDecodeError, subprocess.TimeoutExpired, OSError):
+            pass
+        return None
+
+    def _auto_remediate_merged_pr(
+        self,
+        ticket_id: str,
+        branch: str,
+        agent: str,
+        wave_tickets: list[str],
+    ) -> bool:
+        """Auto-remediate Risk R3: PR merged but ticket still IN_PROGRESS on disk.
+
+        Calls ``_check_merged_pr``.  If a merged PR is found AND the ticket is
+        IN_PROGRESS on disk:
+        - Updates the ticket file to DONE on disk.
+        - Adds the ticket to ``completed_this_session``.
+        - Deletes any checkpoint file for the ticket.
+        - Appends the ticket to *wave_tickets* (counts as a wave completion).
+        - Logs a CLEANUP entry to activity.log and an auto_remediated entry to
+          suspension.log (TICKET-0187 will formalise the suspension logger; for
+          now a simple JSON-lines append is used).
+
+        Returns True when auto-remediation was performed so the caller can skip
+        queuing a retry; False when no merged PR was found (caller should
+        proceed normally).
+        """
+        pr_data = self._check_merged_pr(ticket_id, branch)
+        if pr_data is None:
+            return False
+
+        milestone = self.state.get("milestone", "")
+        ticket_status = read_ticket_status(ticket_id, milestone)
+        if ticket_status != "IN_PROGRESS":
+            return False
+
+        pr_number = pr_data.get("number")
+        pr_url = pr_data.get("url", "")
+
+        if not _mark_ticket_done_on_disk(ticket_id, milestone, pr_number):
+            self.logger.log(
+                "WARNING",
+                f"{ticket_id}: auto-remediation failed — could not update ticket file",
+            )
+            return False
+
+        # Track as completed in this session
+        session_done = self.state.setdefault("completed_this_session", [])
+        if ticket_id not in session_done:
+            session_done.append(ticket_id)
+
+        # Include in wave completion set
+        if ticket_id not in wave_tickets:
+            wave_tickets.append(ticket_id)
+
+        # Remove checkpoint (work is done)
+        self._delete_checkpoint(ticket_id)
+
+        # Log to activity.log
+        self.logger.log(
+            "CLEANUP",
+            f"{ticket_id} auto-completed — PR #{pr_number} merged, ticket updated to DONE",
+        )
+
+        # Write a structured entry to suspension.log (TICKET-0187 will formalise this)
+        try:
+            suspension_log_path = self.paths.activity_log.parent / "suspension.log"
+            entry = {
+                "timestamp": now_iso(),
+                "event": "auto_remediated",
+                "agent": agent,
+                "ticket": ticket_id,
+                "milestone": milestone,
+                "phase": self.state.get("phase", ""),
+                "wave": self.state.get("wave_number", 0),
+                "checkpoint_path": str(
+                    ORCH_DIR / "checkpoints" / f"{ticket_id}.checkpoint.json"
+                ),
+                "notes": (
+                    f"PR #{pr_number} ({pr_url}) was merged but agent session "
+                    "terminated before updating ticket status"
+                ),
+            }
+            with suspension_log_path.open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(entry) + "\n")
+                fh.flush()
+        except OSError:
+            pass
+
+        return True
+
     def _scan_checkpoints_on_startup(self):
         """Scan checkpoints/ for zombie tickets from previous sessions.
 
         Called once at the start of run() before the main loop.
         - DONE on disk  → auto-remediate: add to completed_this_session, delete checkpoint.
+        - IN_PROGRESS with merged PR → R3 auto-remediate via _auto_remediate_merged_pr.
         - IN_PROGRESS   → log zombie warning (will be re-dispatched with checkpoint context).
         Clears any stale active_ticket_ids entries that correspond to checkpoints.
         """
@@ -1794,6 +1968,21 @@ class Conductor:
                     cp_file.unlink()
                 except OSError:
                     pass
+            elif ticket_status == "IN_PROGRESS":
+                # R3 auto-remediation: check whether the PR was merged even
+                # though the agent exited before updating the ticket.
+                branch = cp_data.get("progress", {}).get("branch") or ""
+                agent = cp_data.get("agent", "unknown")
+                dummy_wave_tickets: list[str] = []
+                if self._auto_remediate_merged_pr(
+                    ticket_id, branch, agent, dummy_wave_tickets
+                ):
+                    # auto-remediation already added to completed_this_session
+                    pass
+                else:
+                    self.logger.log("CLEANUP",
+                        f"{ticket_id} was zombie — checkpoint exists from previous session "
+                        f"(status={ticket_status})")
             else:
                 self.logger.log("CLEANUP",
                     f"{ticket_id} was zombie — checkpoint exists from previous session "

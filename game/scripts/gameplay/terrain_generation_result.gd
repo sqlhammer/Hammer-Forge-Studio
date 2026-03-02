@@ -6,7 +6,7 @@ class_name TerrainGenerationResult
 extends RefCounted
 
 
-# ── Private Variables ─────────────────────────────────────
+# ── Public Variables ──────────────────────────────────────
 
 ## The fully assembled terrain ArrayMesh with vertices, normals, and UVs.
 var terrain_mesh: ArrayMesh = null

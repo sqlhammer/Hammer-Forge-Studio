@@ -7,7 +7,7 @@ class_name BiomeArchetypeConfig
 extends RefCounted
 
 
-# ── Private Variables ─────────────────────────────────────
+# ── Public Variables ──────────────────────────────────────
 
 ## Human-readable archetype identifier.
 var archetype_name: String = ""

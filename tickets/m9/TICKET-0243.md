@@ -2,7 +2,7 @@
 id: TICKET-0243
 title: "BUG — Interaction prompt HUD does not switch to gamepad button hint when gamepad is active"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -106,3 +106,4 @@ Ensure the prompt dictionary includes an `"action"` key so the HUD knows which a
 
 - 2026-03-01 [producer] Created ticket — player-reported: interaction prompt always shows keyboard key even on gamepad; depends on TICKET-0244 (interact must be mapped to a gamepad button before label can be shown)
 - 2026-03-02 [gameplay-programmer] Starting work — all dependencies verified DONE (TICKET-0235, TICKET-0244)
+- 2026-03-02 [gameplay-programmer] Implementation complete. Added device-aware get_action_input_label() to HUD, connected InputManager.input_device_changed signal, added joypad label helpers, updated all 5 prompt sources with "action" field. Commit 1fe7cf3, PR #279 (merged as b1f177a). Marking DONE.

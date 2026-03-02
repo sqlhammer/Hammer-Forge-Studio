@@ -12,7 +12,7 @@ enum FeatureType { PLATEAU, CLEARING, RESOURCE_SPAWN, WALKABLE_CLEARANCE }
 enum AccessType { NONE, RAMP }
 
 
-# ── Private Variables ─────────────────────────────────────
+# ── Public Variables ──────────────────────────────────────
 
 ## The type of terrain feature requested.
 var type: FeatureType = FeatureType.PLATEAU

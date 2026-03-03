@@ -3,4 +3,296 @@
 [ext_resource type="Script" uid="uid://ux2goc4qo8a2" path="res://scripts/ui/tech_tree_panel.gd" id="1_ttp"]
 
 [node name="TechTreePanel" type="CanvasLayer"]
+layer = 2
+visible = false
 script = ExtResource("1_ttp")
+
+[node name="DimLayer" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="DimRect" type="ColorRect" parent="DimLayer"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Center" type="CenterContainer" parent="DimLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainPanel" type="PanelContainer" parent="DimLayer/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(960, 600)
+pivot_offset = Vector2(480, 300)
+
+[node name="OuterVBox" type="VBoxContainer" parent="DimLayer/Center/MainPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox"]
+layout_mode = 2
+text = "TECH TREE"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="TitleDivider" type="HSeparator" parent="DimLayer/Center/MainPanel/OuterVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ContentHBox" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="GraphContainer" type="Control" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(620, 420)
+
+[node name="Card0" type="PanelContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 100)
+offset_left = 250.0
+offset_top = 40.0
+offset_right = 370.0
+offset_bottom = 140.0
+mouse_filter = 0
+
+[node name="CardVBox0" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card0"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CardIcon0" type="TextureRect" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card0/CardVBox0"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+size_flags_horizontal = 4
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CardName0" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card0/CardVBox0"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="StateRow0" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card0/CardVBox0"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="StateIcon0" type="TextureRect" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card0/CardVBox0/StateRow0"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(16, 16)
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 6
+
+[node name="StateLabel0" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card0/CardVBox0/StateRow0"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="Card1" type="PanelContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 100)
+offset_left = 250.0
+offset_top = 220.0
+offset_right = 370.0
+offset_bottom = 320.0
+mouse_filter = 0
+
+[node name="CardVBox1" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card1"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CardIcon1" type="TextureRect" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card1/CardVBox1"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+size_flags_horizontal = 4
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CardName1" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card1/CardVBox1"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="StateRow1" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card1/CardVBox1"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="StateIcon1" type="TextureRect" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card1/CardVBox1/StateRow1"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(16, 16)
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 6
+
+[node name="StateLabel1" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer/Card1/CardVBox1/StateRow1"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="ConnectorLine" type="Line2D" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/GraphContainer"]
+unique_name_in_owner = true
+width = 2.0
+default_color = Color(0.102, 0.153, 0.212, 1)
+points = PackedVector2Array(310, 140, 310, 220)
+
+[node name="DetailPanel" type="PanelContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(280, 0)
+
+[node name="DetailVBox" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DetailNameLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailPanel/DetailVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="DetailDivider" type="HSeparator" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailPanel/DetailVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DetailDescLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailPanel/DetailVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+autowrap_mode = 3
+
+[node name="DetailCostLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailPanel/DetailVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="DetailHaveLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailPanel/DetailVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="DetailStatusLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailPanel/DetailVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+
+[node name="UnlockButton" type="Button" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailPanel/DetailVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(200, 40)
+text = "UNLOCK"
+theme_override_font_sizes/font_size = 18
+
+[node name="Footer" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="Instructions" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/Footer"]
+layout_mode = 2
+text = "[Up/Down] Navigate  [Enter] Unlock  [Esc] Close"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="CloseButton" type="Button" parent="DimLayer/Center/MainPanel/OuterVBox/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 32)
+text = "Close"
+theme_override_font_sizes/font_size = 14
+
+[node name="ConfirmOverlay" type="Control" parent="DimLayer"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="ConfirmDim" type="ColorRect" parent="DimLayer/ConfirmOverlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.3)
+
+[node name="ConfirmCenter" type="CenterContainer" parent="DimLayer/ConfirmOverlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ConfirmDialog" type="PanelContainer" parent="DimLayer/ConfirmOverlay/ConfirmCenter"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(360, 180)
+
+[node name="ConfirmVBox" type="VBoxContainer" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ConfirmNameLabel" type="Label" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/ConfirmVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="ConfirmDivider" type="HSeparator" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/ConfirmVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ConfirmCostLabel" type="Label" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/ConfirmVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+autowrap_mode = 3
+
+[node name="ConfirmButtonRow" type="HBoxContainer" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/ConfirmVBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="ConfirmButton" type="Button" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/ConfirmVBox/ConfirmButtonRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 40)
+text = "CONFIRM"
+theme_override_font_sizes/font_size = 16
+
+[node name="CancelButton" type="Button" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/ConfirmVBox/ConfirmButtonRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 40)
+text = "CANCEL"
+theme_override_font_sizes/font_size = 16

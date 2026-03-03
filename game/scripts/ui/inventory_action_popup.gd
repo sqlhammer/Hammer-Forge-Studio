@@ -1,4 +1,4 @@
-# InventoryActionPopup - Context popup for gamepad inventory item actions (drop, destroy, cancel) - Owner: gameplay-programmer
+## InventoryActionPopup - Context popup for gamepad inventory item actions (drop, destroy, cancel) - Owner: gameplay-programmer
 ## Self-contained action popup that presents Drop Item, Destroy (hold-to-confirm), and Cancel
 ## rows over a focused inventory slot. Manages its own focus, D-pad/stick navigation, and
 ## hold-to-confirm logic. Emits action_requested or cancelled signals without calling any

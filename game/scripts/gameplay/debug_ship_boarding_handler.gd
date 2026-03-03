@@ -1,7 +1,7 @@
-# DebugShipBoardingHandler - Boarding logic for debug-launched sessions - Owner: gameplay-programmer
-# Mirrors the enter/exit ship logic in GameWorld for DebugWorld sessions where
-# GameWorld is not instantiated directly. Added as a child of DebugWorld by DebugLauncher.
-# Ticket: TICKET-0208
+## DebugShipBoardingHandler - Boarding logic for debug-launched sessions - Owner: gameplay-programmer
+## Mirrors the enter/exit ship logic in GameWorld for DebugWorld sessions where
+## GameWorld is not instantiated directly. Added as a child of DebugWorld by DebugLauncher.
+## Ticket: TICKET-0208
 class_name DebugShipBoardingHandler
 extends Node
 

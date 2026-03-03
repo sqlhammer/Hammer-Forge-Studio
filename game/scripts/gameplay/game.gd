@@ -1,7 +1,7 @@
 ## Root game scene — single entry point for the entire project.
 ## In debug builds, instantiates DebugLauncher as a child.
 ## In release builds, transitions to MainMenu.
-# Game - Root game entry point with debug/release routing - Owner: gameplay-programmer
+## Game - Root game entry point with debug/release routing - Owner: gameplay-programmer
 class_name Game
 extends Node
 

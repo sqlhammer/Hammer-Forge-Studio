@@ -7,12 +7,6 @@ extends CanvasLayer
 signal closed
 
 # ── Constants ─────────────────────────────────────────────
-const PANEL_WIDTH: float = 960.0
-const PANEL_HEIGHT: float = 600.0
-const CARD_WIDTH: float = 120.0
-const CARD_HEIGHT: float = 100.0
-const DETAIL_WIDTH: float = 280.0
-const GRAPH_WIDTH: float = 620.0
 
 ## Style colors matching UI style guide
 const COLOR_SURFACE := Color("#0A0F18", 0.95)
@@ -32,8 +26,6 @@ const COLOR_LOCKED_BORDER := Color("#1A2736")
 
 # ── Private Variables ─────────────────────────────────────
 var _is_open: bool = false
-var _dim_rect: ColorRect = null
-var _main_panel: PanelContainer = null
 var _focused_index: int = 0
 var _node_ids: Array[String] = []
 var _node_cards: Array[PanelContainer] = []
@@ -41,33 +33,55 @@ var _card_styles: Array[StyleBoxFlat] = []
 var _card_labels: Array[Label] = []
 var _card_state_labels: Array[Label] = []
 var _card_state_icons: Array[TextureRect] = []
-var _connector_line: Line2D = null
-var _detail_name_label: Label = null
-var _detail_desc_label: Label = null
-var _detail_cost_label: Label = null
-var _detail_have_label: Label = null
-var _detail_status_label: Label = null
-var _unlock_button: Button = null
-var _confirm_overlay: Control = null
-var _confirm_name_label: Label = null
-var _confirm_cost_label: Label = null
-var _confirm_button: Button = null
-var _cancel_button: Button = null
 var _confirm_visible: bool = false
-var _graph_container: Control = null
 var _pulse_tween: Tween = null
 var _lock_tex: Texture2D = null
 var _unlock_check_tex: Texture2D = null
 var _unlock_chevron_tex: Texture2D = null
 
+# ── Onready Variables ─────────────────────────────────────
+@onready var _dim_rect: ColorRect = %DimRect
+@onready var _main_panel: PanelContainer = %MainPanel
+@onready var _graph_container: Control = %GraphContainer
+@onready var _connector_line: Line2D = %ConnectorLine
+@onready var _card_0: PanelContainer = %Card0
+@onready var _card_1: PanelContainer = %Card1
+@onready var _card_icon_0: TextureRect = %CardIcon0
+@onready var _card_icon_1: TextureRect = %CardIcon1
+@onready var _card_name_0: Label = %CardName0
+@onready var _card_name_1: Label = %CardName1
+@onready var _state_icon_0: TextureRect = %StateIcon0
+@onready var _state_icon_1: TextureRect = %StateIcon1
+@onready var _state_label_0: Label = %StateLabel0
+@onready var _state_label_1: Label = %StateLabel1
+@onready var _detail_panel: PanelContainer = %DetailPanel
+@onready var _detail_name_label: Label = %DetailNameLabel
+@onready var _detail_desc_label: Label = %DetailDescLabel
+@onready var _detail_cost_label: Label = %DetailCostLabel
+@onready var _detail_have_label: Label = %DetailHaveLabel
+@onready var _detail_status_label: Label = %DetailStatusLabel
+@onready var _unlock_button: Button = %UnlockButton
+@onready var _close_button: Button = %CloseButton
+@onready var _confirm_overlay: Control = %ConfirmOverlay
+@onready var _confirm_dialog: PanelContainer = %ConfirmDialog
+@onready var _confirm_name_label: Label = %ConfirmNameLabel
+@onready var _confirm_cost_label: Label = %ConfirmCostLabel
+@onready var _confirm_button: Button = %ConfirmButton
+@onready var _cancel_button: Button = %CancelButton
+@onready var _title_divider: HSeparator = %TitleDivider
+@onready var _detail_divider: HSeparator = %DetailDivider
+@onready var _confirm_divider: HSeparator = %ConfirmDivider
+
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	layer = 2
-	process_mode = Node.PROCESS_MODE_INHERIT
-	visible = false
 	_node_ids = TechTreeDefs.get_all_node_ids()
-	_build_ui()
+	_lock_tex = load("res://assets/icons/hud/icon_hud_lock.svg") as Texture2D
+	_unlock_check_tex = load("res://assets/icons/hud/icon_hud_unlock_check.svg") as Texture2D
+	_unlock_chevron_tex = load("res://assets/icons/hud/icon_hud_unlock_chevron.svg") as Texture2D
+	_populate_card_arrays()
+	_populate_card_data()
+	_apply_styles()
 	_connect_signals()
 
 func _input(event: InputEvent) -> void:
@@ -149,26 +163,27 @@ func select_node_by_index(index: int) -> void:
 
 # ── Private Methods ───────────────────────────────────────
 
-func _build_ui() -> void:
-	# Dim background
-	var dim_layer := Control.new()
-	dim_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(dim_layer)
+func _populate_card_arrays() -> void:
+	_node_cards = [_card_0, _card_1]
+	_card_labels = [_card_name_0, _card_name_1]
+	_card_state_labels = [_state_label_0, _state_label_1]
+	_card_state_icons = [_state_icon_0, _state_icon_1]
 
-	_dim_rect = ColorRect.new()
-	_dim_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_dim_rect.color = COLOR_DIM
-	dim_layer.add_child(_dim_rect)
+func _populate_card_data() -> void:
+	var card_icons: Array[TextureRect] = [_card_icon_0, _card_icon_1]
+	for i: int in range(_node_ids.size()):
+		var node_icon_path: String = TechTreeDefs.get_icon_path(_node_ids[i])
+		if not node_icon_path.is_empty():
+			card_icons[i].texture = load(node_icon_path) as Texture2D
+		_card_labels[i].text = TechTreeDefs.get_display_name(_node_ids[i])
+	# Ensure card descendants pass mouse events through to the card
+	_set_descendants_mouse_ignore(_card_0)
+	_card_0.mouse_filter = Control.MOUSE_FILTER_STOP
+	_set_descendants_mouse_ignore(_card_1)
+	_card_1.mouse_filter = Control.MOUSE_FILTER_STOP
 
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.add_child(center)
-
-	# Main panel
-	_main_panel = PanelContainer.new()
-	_main_panel.custom_minimum_size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
-	_main_panel.pivot_offset = Vector2(PANEL_WIDTH / 2.0, PANEL_HEIGHT / 2.0)
+func _apply_styles() -> void:
+	# Main panel style
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_SURFACE
 	panel_style.border_color = COLOR_BORDER
@@ -176,84 +191,9 @@ func _build_ui() -> void:
 	panel_style.set_corner_radius_all(8)
 	panel_style.set_content_margin_all(24)
 	_main_panel.add_theme_stylebox_override("panel", panel_style)
-	center.add_child(_main_panel)
 
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 12)
-	_main_panel.add_child(vbox)
-
-	# Title
-	var title := Label.new()
-	title.text = "TECH TREE"
-	title.add_theme_font_size_override("font_size", 28)
-	title.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(title)
-
-	_add_divider(vbox)
-
-	# HBox: graph + detail
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 16)
-	vbox.add_child(hbox)
-
-	# Graph area
-	_graph_container = Control.new()
-	_graph_container.custom_minimum_size = Vector2(GRAPH_WIDTH, 420.0)
-	hbox.add_child(_graph_container)
-
-	# Cache state indicator textures (loaded once, used in every _refresh_card call)
-	_lock_tex = load("res://assets/icons/hud/icon_hud_lock.svg") as Texture2D
-	_unlock_check_tex = load("res://assets/icons/hud/icon_hud_unlock_check.svg") as Texture2D
-	_unlock_chevron_tex = load("res://assets/icons/hud/icon_hud_unlock_chevron.svg") as Texture2D
-
-	_build_node_cards()
-	_build_connector()
-
-	# Detail panel
-	var detail_panel := _build_detail_panel()
-	hbox.add_child(detail_panel)
-
-	# Footer row: instructions + close button
-	var footer := HBoxContainer.new()
-	footer.alignment = BoxContainer.ALIGNMENT_CENTER
-	footer.add_theme_constant_override("separation", 16)
-	vbox.add_child(footer)
-
-	var instructions := Label.new()
-	instructions.text = "[Up/Down] Navigate  [Enter] Unlock  [Esc] Close"
-	instructions.add_theme_font_size_override("font_size", 14)
-	instructions.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	footer.add_child(instructions)
-
-	var close_button := Button.new()
-	close_button.text = "Close"
-	close_button.custom_minimum_size = Vector2(80, 32)
-	close_button.add_theme_font_size_override("font_size", 14)
-	_style_close_button(close_button)
-	close_button.pressed.connect(close)
-	footer.add_child(close_button)
-
-	# Confirmation dialog (hidden)
-	_build_confirm_dialog(dim_layer)
-
-func _build_node_cards() -> void:
-	var card_x: float = (GRAPH_WIDTH - CARD_WIDTH) / 2.0
-	var card_positions: Array[Vector2] = [
-		Vector2(card_x, 40.0),
-		Vector2(card_x, 220.0),
-	]
-
-	for i: int in range(_node_ids.size()):
-		var card := PanelContainer.new()
-		card.custom_minimum_size = Vector2(CARD_WIDTH, CARD_HEIGHT)
-		card.position = card_positions[i]
-		card.mouse_filter = Control.MOUSE_FILTER_STOP
-
-		# Mouse hover and click support
-		card.mouse_entered.connect(_on_card_mouse_entered.bind(i))
-		card.gui_input.connect(_on_card_gui_input.bind(i))
-
+	# Card styles (stored for dynamic updates in _refresh_card)
+	for card: PanelContainer in _node_cards:
 		var style := StyleBoxFlat.new()
 		style.bg_color = COLOR_PANEL_BG
 		style.border_color = COLOR_LOCKED_BORDER
@@ -261,197 +201,51 @@ func _build_node_cards() -> void:
 		style.set_corner_radius_all(6)
 		style.set_content_margin_all(12)
 		card.add_theme_stylebox_override("panel", style)
-		_graph_container.add_child(card)
-
-		var card_vbox := VBoxContainer.new()
-		card_vbox.add_theme_constant_override("separation", 4)
-		card.add_child(card_vbox)
-
-		# Module icon
-		var icon_rect := TextureRect.new()
-		icon_rect.custom_minimum_size = Vector2(48, 48)
-		icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon_rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		var node_icon_path: String = TechTreeDefs.get_icon_path(_node_ids[i])
-		if not node_icon_path.is_empty():
-			icon_rect.texture = load(node_icon_path) as Texture2D
-		card_vbox.add_child(icon_rect)
-
-		# Node name
-		var name_label := Label.new()
-		name_label.text = TechTreeDefs.get_display_name(_node_ids[i])
-		name_label.add_theme_font_size_override("font_size", 14)
-		name_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		card_vbox.add_child(name_label)
-
-		# State row: icon + label
-		var state_row := HBoxContainer.new()
-		state_row.add_theme_constant_override("separation", 4)
-		state_row.alignment = BoxContainer.ALIGNMENT_CENTER
-		card_vbox.add_child(state_row)
-
-		var state_icon := TextureRect.new()
-		state_icon.custom_minimum_size = Vector2(16, 16)
-		state_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		state_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		state_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		state_row.add_child(state_icon)
-
-		var state_label := Label.new()
-		state_label.add_theme_font_size_override("font_size", 14)
-		state_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		state_row.add_child(state_label)
-
-		# Ensure all descendants pass mouse events through to the card
-		_set_descendants_mouse_ignore(card)
-		card.mouse_filter = Control.MOUSE_FILTER_STOP
-
-		_node_cards.append(card)
 		_card_styles.append(style)
-		_card_labels.append(name_label)
-		_card_state_labels.append(state_label)
-		_card_state_icons.append(state_icon)
 
-func _build_connector() -> void:
-	_connector_line = Line2D.new()
-	_connector_line.width = 2.0
-	_connector_line.default_color = COLOR_LOCKED_BORDER
-	# Connect from bottom of first card to top of second card
-	var card_x: float = (GRAPH_WIDTH - CARD_WIDTH) / 2.0
-	var center_x: float = card_x + CARD_WIDTH / 2.0
-	var top_card_bottom: float = 40.0 + CARD_HEIGHT
-	var bottom_card_top: float = 220.0
-	_connector_line.add_point(Vector2(center_x, top_card_bottom))
-	_connector_line.add_point(Vector2(center_x, bottom_card_top))
-	_graph_container.add_child(_connector_line)
+	# Detail panel style
+	var detail_style := StyleBoxFlat.new()
+	detail_style.bg_color = COLOR_PANEL_BG
+	detail_style.border_color = Color(COLOR_NEUTRAL, 0.3)
+	detail_style.set_border_width_all(1)
+	detail_style.set_corner_radius_all(6)
+	detail_style.set_content_margin_all(16)
+	_detail_panel.add_theme_stylebox_override("panel", detail_style)
 
-func _build_detail_panel() -> PanelContainer:
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
-	var style := StyleBoxFlat.new()
-	style.bg_color = COLOR_PANEL_BG
-	style.border_color = Color(COLOR_NEUTRAL, 0.3)
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(6)
-	style.set_content_margin_all(16)
-	panel.add_theme_stylebox_override("panel", style)
+	# Confirm dialog style
+	var confirm_style := StyleBoxFlat.new()
+	confirm_style.bg_color = COLOR_SURFACE
+	confirm_style.border_color = Color(COLOR_NEUTRAL, 0.4)
+	confirm_style.set_border_width_all(1)
+	confirm_style.set_corner_radius_all(8)
+	confirm_style.set_content_margin_all(24)
+	_confirm_dialog.add_theme_stylebox_override("panel", confirm_style)
 
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 8)
-	panel.add_child(vbox)
+	# Divider styles
+	var div_style := StyleBoxFlat.new()
+	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
+	div_style.set_content_margin_all(0)
+	_title_divider.add_theme_stylebox_override("separator", div_style)
+	_detail_divider.add_theme_stylebox_override("separator", div_style)
+	_confirm_divider.add_theme_stylebox_override("separator", div_style)
 
-	# Node name
-	_detail_name_label = Label.new()
-	_detail_name_label.add_theme_font_size_override("font_size", 20)
-	_detail_name_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	vbox.add_child(_detail_name_label)
-
-	_add_divider(vbox)
-
-	# Description
-	_detail_desc_label = Label.new()
-	_detail_desc_label.add_theme_font_size_override("font_size", 14)
-	_detail_desc_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_detail_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vbox.add_child(_detail_desc_label)
-
-	# Cost label
-	_detail_cost_label = Label.new()
-	_detail_cost_label.add_theme_font_size_override("font_size", 16)
-	_detail_cost_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	vbox.add_child(_detail_cost_label)
-
-	# "You have" label
-	_detail_have_label = Label.new()
-	_detail_have_label.add_theme_font_size_override("font_size", 16)
-	vbox.add_child(_detail_have_label)
-
-	# Status label (UNLOCKED / LOCKED)
-	_detail_status_label = Label.new()
-	_detail_status_label.add_theme_font_size_override("font_size", 18)
-	vbox.add_child(_detail_status_label)
-
-	# Unlock button
-	_unlock_button = Button.new()
-	_unlock_button.text = "UNLOCK"
-	_unlock_button.custom_minimum_size = Vector2(200, 40)
-	_unlock_button.add_theme_font_size_override("font_size", 18)
+	# Button styles
 	_style_button(_unlock_button, COLOR_TEAL)
-	_unlock_button.pressed.connect(_on_unlock_pressed)
-	vbox.add_child(_unlock_button)
-
-	return panel
-
-func _build_confirm_dialog(parent: Control) -> void:
-	_confirm_overlay = Control.new()
-	_confirm_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_confirm_overlay.visible = false
-	parent.add_child(_confirm_overlay)
-
-	var dim := ColorRect.new()
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim.color = Color("#000000", 0.3)
-	_confirm_overlay.add_child(dim)
-
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_confirm_overlay.add_child(center)
-
-	var dialog := PanelContainer.new()
-	dialog.custom_minimum_size = Vector2(360, 180)
-	var style := StyleBoxFlat.new()
-	style.bg_color = COLOR_SURFACE
-	style.border_color = Color(COLOR_NEUTRAL, 0.4)
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(8)
-	style.set_content_margin_all(24)
-	dialog.add_theme_stylebox_override("panel", style)
-	center.add_child(dialog)
-
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 12)
-	dialog.add_child(vbox)
-
-	_confirm_name_label = Label.new()
-	_confirm_name_label.add_theme_font_size_override("font_size", 20)
-	_confirm_name_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	vbox.add_child(_confirm_name_label)
-
-	_add_divider(vbox)
-
-	_confirm_cost_label = Label.new()
-	_confirm_cost_label.add_theme_font_size_override("font_size", 16)
-	_confirm_cost_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_confirm_cost_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vbox.add_child(_confirm_cost_label)
-
-	var button_row := HBoxContainer.new()
-	button_row.add_theme_constant_override("separation", 16)
-	button_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	vbox.add_child(button_row)
-
-	_confirm_button = Button.new()
-	_confirm_button.text = "CONFIRM"
-	_confirm_button.custom_minimum_size = Vector2(120, 40)
-	_confirm_button.add_theme_font_size_override("font_size", 16)
 	_style_button(_confirm_button, COLOR_GREEN)
-	_confirm_button.pressed.connect(_on_confirm_pressed)
-	button_row.add_child(_confirm_button)
-
-	_cancel_button = Button.new()
-	_cancel_button.text = "CANCEL"
-	_cancel_button.custom_minimum_size = Vector2(120, 40)
-	_cancel_button.add_theme_font_size_override("font_size", 16)
 	_style_button(_cancel_button, COLOR_NEUTRAL)
-	_cancel_button.pressed.connect(_close_confirm_dialog)
-	button_row.add_child(_cancel_button)
+	_style_close_button(_close_button)
 
 func _connect_signals() -> void:
 	TechTree.node_unlocked.connect(_on_node_unlocked)
 	PlayerInventory.item_added.connect(_on_inventory_changed)
 	PlayerInventory.item_removed.connect(_on_inventory_changed)
+	_unlock_button.pressed.connect(_on_unlock_pressed)
+	_close_button.pressed.connect(close)
+	_confirm_button.pressed.connect(_on_confirm_pressed)
+	_cancel_button.pressed.connect(_close_confirm_dialog)
+	for i: int in range(_node_cards.size()):
+		_node_cards[i].mouse_entered.connect(_on_card_mouse_entered.bind(i))
+		_node_cards[i].gui_input.connect(_on_card_gui_input.bind(i))
 
 func _refresh_all() -> void:
 	for i: int in range(_node_ids.size()):
@@ -523,7 +317,6 @@ func _refresh_detail() -> void:
 	if _focused_index < 0 or _focused_index >= _node_ids.size():
 		return
 	var node_id: String = _node_ids[_focused_index]
-	var entry: Dictionary = TechTreeDefs.get_node_entry(node_id)
 	var display_name: String = TechTreeDefs.get_display_name(node_id)
 
 	_detail_name_label.text = display_name
@@ -669,14 +462,6 @@ func _style_close_button(button: Button) -> void:
 	button.add_theme_stylebox_override("pressed", pressed_style)
 	button.add_theme_color_override("font_color", COLOR_NEUTRAL)
 	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
-
-func _add_divider(parent: Node) -> void:
-	var divider := HSeparator.new()
-	var div_style := StyleBoxFlat.new()
-	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
-	div_style.set_content_margin_all(0)
-	divider.add_theme_stylebox_override("separator", div_style)
-	parent.add_child(divider)
 
 func _animate_open() -> void:
 	_dim_rect.modulate.a = 0.0

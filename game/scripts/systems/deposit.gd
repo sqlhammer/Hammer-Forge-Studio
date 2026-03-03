@@ -15,6 +15,7 @@ enum ScanState {
 signal quantity_changed(remaining: int, total: int)
 signal scan_state_changed(new_state: ScanState)
 signal depleted
+signal respawned
 
 # ── Exported Variables ────────────────────────────────────
 @export var resource_type: ResourceDefs.ResourceType = ResourceDefs.ResourceType.SCRAP_METAL
@@ -36,10 +37,12 @@ signal depleted
 var _remaining_quantity: int = 0
 var _scan_state: ScanState = ScanState.UNDISCOVERED
 var _pattern_line_count: int = 0
+var _is_respawning: bool = false
 
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
 	_remaining_quantity = total_quantity
+	depleted.connect(_start_respawn)
 
 # ── Public Methods ────────────────────────────────────────
 
@@ -57,6 +60,10 @@ func is_depleted() -> bool:
 	if infinite:
 		return false
 	return _remaining_quantity <= 0
+
+## Returns true if the deposit is currently waiting to respawn.
+func is_respawning() -> bool:
+	return _is_respawning
 
 ## Returns the current scan state.
 func get_scan_state() -> ScanState:
@@ -166,6 +173,7 @@ func serialize() -> Dictionary:
 		"infinite": infinite,
 		"yield_rate": yield_rate,
 		"drone_accessible": drone_accessible,
+		"is_respawning": _is_respawning,
 		"position": {
 			"x": global_position.x,
 			"y": global_position.y,
@@ -200,6 +208,10 @@ func deserialize(data: Dictionary) -> void:
 			pos.get("y", 0.0) as float,
 			pos.get("z", 0.0) as float,
 		)
+	# Restart respawn timer with full duration on load (in-progress timers reset)
+	var was_respawning: bool = data.get("is_respawning", false) as bool
+	if was_respawning and not infinite:
+		_start_respawn()
 
 ## Resolves the display label for the given input action from the InputMap.
 ## Handles keyboard keys and mouse buttons. Returns "?" if no event is mapped.
@@ -221,6 +233,43 @@ func _get_action_key_label(action: String) -> String:
 				_:
 					return "Mouse %d" % mb_event.button_index
 	return "?"
+
+## Begins the respawn countdown after depletion. Hides the deposit and disables
+## collision until the timer expires. Skipped for infinite (deep) deposits.
+func _start_respawn() -> void:
+	if infinite:
+		return
+	_is_respawning = true
+	visible = false
+	var collision: CollisionShape3D = get_node_or_null("DepositCollision") as CollisionShape3D
+	if collision:
+		collision.disabled = true
+	var respawn_time: float = ResourceRespawnConfig.get_respawn_time(resource_type)
+	# Reuse existing timer if present (e.g., from a previous respawn cycle)
+	var timer: Timer = get_node_or_null("RespawnTimer") as Timer
+	if not timer:
+		timer = Timer.new()
+		timer.name = "RespawnTimer"
+		timer.one_shot = true
+		timer.timeout.connect(_on_respawn_timer_timeout)
+		add_child(timer)
+	timer.wait_time = respawn_time
+	timer.start()
+	Global.debug_log("Deposit: respawn started — %s will respawn in %.0fs" % [
+		ResourceDefs.get_resource_name(resource_type), respawn_time])
+
+## Restores the deposit to full yield when the respawn timer expires.
+func _on_respawn_timer_timeout() -> void:
+	_remaining_quantity = total_quantity
+	_is_respawning = false
+	visible = true
+	var collision: CollisionShape3D = get_node_or_null("DepositCollision") as CollisionShape3D
+	if collision:
+		collision.disabled = false
+	quantity_changed.emit(_remaining_quantity, total_quantity)
+	respawned.emit()
+	Global.debug_log("Deposit: respawned — %s (%d units)" % [
+		ResourceDefs.get_resource_name(resource_type), _remaining_quantity])
 
 func _calculate_pattern_lines() -> int:
 	match deposit_tier:

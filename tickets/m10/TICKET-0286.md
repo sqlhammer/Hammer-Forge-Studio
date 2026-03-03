@@ -2,7 +2,7 @@
 id: TICKET-0286
 title: "M10 Resources — In-biome timed resource node respawn (D-007)"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -101,3 +101,4 @@ equivalent). When filtering results, exclude deposits where `visible == false` (
   - Config is per-resource-type; all types default to 300 s (5 min) for playtesting
   - Deep resource nodes (infinite) are excluded
   - No resource scarcity pressure goal at this phase
+- 2026-03-03 [gameplay-programmer] Starting work — implementing resource respawn config and deposit timer logic

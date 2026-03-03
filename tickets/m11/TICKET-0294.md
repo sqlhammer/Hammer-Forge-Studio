@@ -2,7 +2,7 @@
 id: TICKET-0294
 title: "M11 Scene-First remediation — HUD Readout components (scanner_readout, ship_globals_hud, ship_stats_sidebar)"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -23,10 +23,10 @@ Refactor 3 HUD readout scripts that programmatically construct their display nod
 
 ## Acceptance Criteria
 
-- [ ] `scanner_readout.gd`: create `scanner_readout.tscn`; move entire readout (VBoxContainer, icon TextureRect, multiple Labels, HSeparator, 5 star TextureRects, panel style override) to scene; remove LAYOUT_IN_READY violations (visible, custom_minimum_size at lines 42–43)
-- [ ] `ship_globals_hud.gd`: create `ship_globals_hud.tscn`; move entire panel (PanelContainer, title Label, HSeparator, 4 variable rows each HBoxContainer+TextureRect+ProgressBar+Label) to scene; remove LAYOUT_IN_READY violations (mouse_filter, position.x, visible, modulate.a at lines 56–62)
-- [ ] `ship_stats_sidebar.gd`: create `ship_stats_sidebar.tscn`; move entire sidebar (PanelContainer, title, HSeparator, 4 variable rows, alerts section) to scene
-- [ ] All three: replace `_build_ui()`/`_build_display()` node construction with `@onready` vars; verify HUD displays correctly in-game
+- [x] `scanner_readout.gd`: create `scanner_readout.tscn`; move entire readout (VBoxContainer, icon TextureRect, multiple Labels, HSeparator, 5 star TextureRects, panel style override) to scene; remove LAYOUT_IN_READY violations (visible, custom_minimum_size at lines 42–43)
+- [x] `ship_globals_hud.gd`: create `ship_globals_hud.tscn`; move entire panel (PanelContainer, title Label, HSeparator, 4 variable rows each HBoxContainer+TextureRect+ProgressBar+Label) to scene; remove LAYOUT_IN_READY violations (mouse_filter, position.x, visible, modulate.a at lines 56–62)
+- [x] `ship_stats_sidebar.gd`: create `ship_stats_sidebar.tscn`; move entire sidebar (PanelContainer, title, HSeparator, 4 variable rows, alerts section) to scene
+- [x] All three: replace `_build_ui()`/`_build_display()` node construction with `@onready` vars; verify HUD displays correctly in-game
 
 ---
 
@@ -46,3 +46,4 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 
 - 2026-03-03 [producer] Created ticket — Phase 2 remediation from M11 GDScript audit report (TICKET-0290)
 - 2026-03-03 [gameplay-programmer] Starting work — refactoring 3 HUD readout components to scene-first pattern
+- 2026-03-03 [gameplay-programmer] Complete — commit 9a9c4d5, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/336

@@ -263,20 +263,24 @@ func _connect_signals() -> void:
 	_load_fuel_button.pressed.connect(_on_load_fuel_pressed)
 
 func _clamp_panel_to_viewport() -> void:
+	if not _main_panel:
+		return
 	var max_height: float = get_viewport().get_visible_rect().size.y * 0.92
 	_main_panel.custom_minimum_size.y = min(PANEL_HEIGHT, max_height)
 
 func _refresh_biome_nodes() -> void:
 	# Clear existing dynamic biome buttons
-	for child: Node in _dest_row.get_children():
-		child.queue_free()
+	if _dest_row:
+		for child: Node in _dest_row.get_children():
+			child.queue_free()
 	_biome_node_buttons.clear()
 	_biome_node_ids.clear()
 
 	# Update current biome display
 	var current_data: BiomeData = BiomeRegistry.get_biome(NavigationSystem.current_biome)
 	var current_name: String = current_data.display_name if current_data else NavigationSystem.current_biome
-	_current_biome_label.text = "◉ %s" % current_name.to_upper()
+	if _current_biome_label:
+		_current_biome_label.text = "◉ %s" % current_name.to_upper()
 
 	# Build biome destination buttons dynamically from BiomeRegistry
 	for biome_id: String in BiomeRegistry.BIOME_IDS:
@@ -284,7 +288,8 @@ func _refresh_biome_nodes() -> void:
 			continue
 		_biome_node_ids.append(biome_id)
 		var biome_button: PanelContainer = _build_biome_node_button(biome_id)
-		_dest_row.add_child(biome_button)
+		if _dest_row:
+			_dest_row.add_child(biome_button)
 		_biome_node_buttons[biome_id] = biome_button
 
 	_update_map_visuals()

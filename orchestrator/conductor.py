@@ -804,8 +804,10 @@ async def run_claude(
 
     cmd.extend(["--dangerously-skip-permissions"])
 
-    # The prompt goes last
-    cmd.append(prompt)
+    # Pass the prompt via stdin to avoid Windows command-line length limits
+    # (WinError 206: "The filename or extension is too long").
+    # claude -p reads from stdin when no prompt argument is given.
+    prompt_bytes = prompt.encode("utf-8")
 
     effective_cwd = str(cwd) if cwd else str(REPO_ROOT)
     timeout_seconds = timeout_minutes * 60
@@ -821,6 +823,7 @@ async def run_claude(
         proc = await asyncio.create_subprocess_exec(
             *cmd,
             cwd=effective_cwd,
+            stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
@@ -830,7 +833,7 @@ async def run_claude(
 
         try:
             stdout_bytes, stderr_bytes = await asyncio.wait_for(
-                proc.communicate(), timeout=timeout_seconds
+                proc.communicate(input=prompt_bytes), timeout=timeout_seconds
             )
         except asyncio.TimeoutError:
             proc.kill()

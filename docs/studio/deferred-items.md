@@ -1,7 +1,7 @@
 # Deferred Work Items
 
 **Owner:** producer
-**Last Updated:** 2026-03-03 (M10 kickoff — D-001, D-015, D-033, D-034, D-035 scheduled; D-005, D-006, D-008, D-025 closed; D-007 requirements confirmed, TICKET-0286 created)
+**Last Updated:** 2026-03-03 (M10 kickoff — D-001, D-015, D-033, D-034, D-035 scheduled; D-005, D-006, D-008, D-025 closed; D-007 requirements confirmed, TICKET-0286 created; D-036 added — Ping Wheel UX refinement from Studio Head playtest)
 
 > Tracks gameplay features and systems that were intentionally descoped from a milestone during planning. Each item references the design spec it originates from and the milestone where it was deferred. These items MUST be revisited and scheduled into a future milestone — they are not optional cuts, they are postponed work.
 
@@ -83,6 +83,12 @@
 |----|-------------|------------|-----------------|---------------------|--------|--------------|
 | D-034 | Enter Ship interaction should require the player to be pointing at a physical surface of the ship's external mesh — currently the interact trigger zone fires regardless of aim direction, making it possible to "enter" the ship while facing away from it or through opaque geometry | `docs/design/systems/mobile-base.md` | Gameplay feel improvement discovered during M9 UAT; not a blocker for the core loop; requires raycasting against the ship exterior mesh collision shape | M10 | Scheduled | TICKET-0280 |
 | D-035 | Assign gamepad buttons to **Ping**, **Jump**, and **Headlamp** in the PersistentControls HUD — currently only Interact (A), Inventory (Select), and Item Actions (Y) are mapped; Ping (Q), Jump (Space), and Headlamp (F) have no gamepad bindings; a designer must propose a full input scheme (considering remaining available buttons: B, X, LB, RB, LT, RT, D-pad, L3, R3) and present options to the Studio Head for approval before implementation | N/A (M9 UAT finding) | Deferred from M9 to keep gamepad bug scope manageable; requires design sign-off before binding assignments are finalized | M10 | Scheduled | TICKET-0276, TICKET-0277, TICKET-0278, TICKET-0279 |
+
+### From M10 — Visual Asset Refinement
+
+| ID | Description | Design Ref | Reason Deferred | Suggested Milestone | Status | Scheduled In |
+|----|-------------|------------|-----------------|---------------------|--------|--------------|
+| D-036 | Ping Wheel UX refinement — four changes identified during Studio Head playtest: (1) selector slices are too narrow; move label text below the icon and widen each slice so icon + text fit without clipping; (2) increase the wheel's outer radius to give more room per slice and to accommodate more resource types as they are added; (3) keep the center circle area transparent so the player can see the world through the wheel's hub; (4) while the wheel is open, the right joystick / mouse must stop driving the camera and instead control ping selection — left joystick and WASD continue moving the player; (5) if the right joystick returns to center or the mouse cursor enters the center circle, deselect the current ping — releasing the ping button in that state fires nothing | `docs/design/systems/meaningful-mining.md` | Ping Wheel shipped in M10 (TICKET-0281) as a functional first pass; layout and input-mode issues identified during first Studio Head playtest; non-blocking for M10 close but must be resolved before Ping Wheel is considered shippable | M10 or M11 | Open | — |
 
 ---
 

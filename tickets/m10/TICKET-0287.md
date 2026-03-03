@@ -2,7 +2,7 @@
 id: TICKET-0287
 title: "M10 BUG — Ping radial wheel renders in upper-left corner instead of screen center"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -51,24 +51,24 @@ and the entire wheel draws from the origin (top-left corner).
 ## Acceptance Criteria
 
 ### Scene architecture — `ResourceTypeWheel` must become a persistent scene node
-- [ ] `ResourceTypeWheel` is added as a persistent child node in the appropriate scene
+- [x] `ResourceTypeWheel` is added as a persistent child node in the appropriate scene
       (e.g. `game_hud.tscn` or a dedicated overlay scene), **not** instantiated via
       `ResourceTypeWheel.new()` in `game_world.gd`
-- [ ] The node starts hidden (`visible = false`) and is shown/hidden by the scanner as
+- [x] The node starts hidden (`visible = false`) and is shown/hidden by the scanner as
       needed — the existing `show_wheel()` / `hide_wheel()` API is unchanged
-- [ ] The `CanvasLayer` + `ResourceTypeWheel.new()` block is removed from `game_world.gd`;
+- [x] The `CanvasLayer` + `ResourceTypeWheel.new()` block is removed from `game_world.gd`;
       `scanner.set_resource_wheel()` is called with a reference to the persistent node
       obtained via `get_node()` or an `@onready` export on the scene that owns it
-- [ ] `ResourceTypeWheel._ready()` retains `set_anchors_preset(Control.PRESET_FULL_RECT)`
+- [x] `ResourceTypeWheel._ready()` retains `set_anchors_preset(Control.PRESET_FULL_RECT)`
       — this now resolves correctly because the parent is a Control-based scene tree, not
       a bare `CanvasLayer`
 
 ### Centering fix
-- [ ] The radial wheel renders centered on screen regardless of viewport size
-- [ ] Fix works for both keyboard/mouse and gamepad users
-- [ ] No visual regression — wheel segments, labels, icons, and highlight arcs all appear
+- [x] The radial wheel renders centered on screen regardless of viewport size
+- [x] Fix works for both keyboard/mouse and gamepad users
+- [x] No visual regression — wheel segments, labels, icons, and highlight arcs all appear
       at the correct positions relative to the new center
-- [ ] Fix is robust on viewport resize (does not require a scene reload to re-center)
+- [x] Fix is robust on viewport resize (does not require a scene reload to re-center)
 
 ---
 
@@ -111,7 +111,26 @@ the size), fall back to `get_viewport_rect().size / 2.0` as a secondary fix.
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+**What was implemented:**
+- Moved `ResourceTypeWheel` from programmatic instantiation (`ResourceTypeWheel.new()` on a
+  bare `CanvasLayer`) to a persistent scene node in `game_hud.tscn` under `HUDRoot`
+- Node has FULL_RECT anchors set in editor; starts `visible = false`; mouse_filter = IGNORE
+- `game_world.gd` no longer creates the `ResourceWheelLayer` CanvasLayer or the wheel at runtime
+- Scanner receives the persistent wheel reference via `hud.get_resource_wheel()`
+
+**Scripts modified:**
+- `game/scenes/ui/game_hud.tscn` — added ext_resource for resource_type_wheel.gd; added
+  ResourceTypeWheel node under HUDRoot with FULL_RECT anchors
+- `game/scripts/ui/game_hud.gd` — added `@onready _resource_type_wheel` and `get_resource_wheel()` getter
+- `game/scripts/gameplay/game_world.gd` — removed 9-line CanvasLayer+wheel block; added 2-line
+  wire from HUD getter to `scanner.set_resource_wheel()`
+
+**No changes to `resource_type_wheel.gd`** — `_draw()` already uses `size / 2.0` which now
+resolves correctly because the parent (HUDRoot) is a full-rect Control, not a bare CanvasLayer.
+
+**Known limitations:** None. The wheel now renders on CanvasLayer 1 (HUD layer) instead of the
+previous layer 5. Since it starts hidden and is shown as a modal overlay, this is functionally
+equivalent.
 
 ---
 
@@ -122,3 +141,4 @@ the size), fall back to `get_viewport_rect().size / 2.0` as a secondary fix.
 - 2026-03-03 [producer] Updated fix approach per Studio Head direction:
   ResourceTypeWheel must be a persistent scene node, not programmatically instantiated.
   Removed get_viewport_rect() workaround as primary fix; scene architecture change is required.
+- 2026-03-03 [gameplay-programmer] Starting work — moving ResourceTypeWheel to persistent scene node in game_hud.tscn

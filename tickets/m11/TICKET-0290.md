@@ -2,7 +2,7 @@
 id: TICKET-0290
 title: "M11 Producer — build Phase 2 remediation tickets from audit report"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: producer
 created_by: producer
@@ -94,3 +94,4 @@ The Phase 3 QA ticket should include these acceptance criteria:
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — build Phase 2 remediation tickets from audit report
+- 2026-03-03 [producer] Starting work — creating Phase 2 remediation tickets and Phase 3 QA ticket from audit report

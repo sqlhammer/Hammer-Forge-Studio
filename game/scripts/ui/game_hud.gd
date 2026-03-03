@@ -56,6 +56,7 @@ func setup(camera: Camera3D, player: CharacterBody3D, scanner: Scanner, mining: 
 
 	# Connect scanner signals
 	scanner.ping_completed.connect(_on_ping_completed)
+	scanner.deposit_ping_revealed.connect(_on_deposit_ping_revealed)
 	scanner.analysis_completed.connect(_on_analysis_completed)
 	scanner.analysis_started.connect(_on_analysis_started)
 	scanner.analysis_cancelled.connect(_on_analysis_cancelled)
@@ -180,7 +181,11 @@ func _create_crosshair() -> Control:
 
 func _on_ping_completed(deposits: Array[Deposit]) -> void:
 	Global.debug_log("HUD: ping completed — %d deposits detected" % deposits.size())
-	_compass_bar.add_ping_markers(deposits)
+	# Markers are no longer added here — they appear progressively via deposit_ping_revealed
+
+func _on_deposit_ping_revealed(deposit: Deposit) -> void:
+	var single: Array[Deposit] = [deposit]
+	_compass_bar.add_ping_markers(single)
 
 func _on_analysis_started(_deposit: Deposit) -> void:
 	Global.debug_log("HUD: analysis started — showing scan progress")

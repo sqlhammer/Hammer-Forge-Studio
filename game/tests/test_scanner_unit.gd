@@ -39,7 +39,7 @@ func after_each() -> void:
 
 func register_tests() -> void:
 	# Constants
-	add_test("ping_range_is_320", _test_ping_range_is_320)
+	add_test("ping_range_is_1000", _test_ping_range_is_1000)
 	add_test("ping_cooldown_is_1_second", _test_ping_cooldown_is_1_second)
 	add_test("analysis_duration_is_2_5_seconds", _test_analysis_duration_is_2_5_seconds)
 	add_test("analysis_max_range_is_5", _test_analysis_max_range_is_5)
@@ -72,9 +72,9 @@ func register_tests() -> void:
 
 # ── Test Methods: Constants ──────────────────────────────
 
-func _test_ping_range_is_320() -> void:
-	assert_equal(Scanner.PING_RANGE, 320.0,
-		"PING_RANGE should be 320.0 (quadrupled per TICKET-0205)")
+func _test_ping_range_is_1000() -> void:
+	assert_equal(Scanner.PING_RANGE, 1000.0,
+		"PING_RANGE should be 1000.0 (expanded per TICKET-0282)")
 
 
 func _test_ping_cooldown_is_1_second() -> void:

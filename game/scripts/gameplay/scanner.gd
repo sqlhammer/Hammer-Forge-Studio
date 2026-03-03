@@ -6,13 +6,15 @@ extends Node
 
 # ── Signals ──────────────────────────────────────────────
 signal ping_completed(deposits: Array[Deposit])
+signal deposit_ping_revealed(deposit: Deposit)
 signal analysis_started(deposit: Deposit)
 signal analysis_progress_changed(progress: float)
 signal analysis_completed(deposit: Deposit)
 signal analysis_cancelled
 
 # ── Constants ─────────────────────────────────────────────
-const PING_RANGE: float = 320.0
+const PING_RANGE: float = 1000.0
+const PING_SPEED: float = 100.0
 const PING_COOLDOWN: float = 1.0
 const ANALYSIS_DURATION: float = 2.5
 const ANALYSIS_MAX_RANGE: float = 5.0
@@ -21,9 +23,9 @@ const FACING_DISTANCE_CONE_DEG: float = 45.0
 const INTERACTION_RAY_LENGTH: float = 6.0
 
 ## Ping ring visual
-const PING_RING_DURATION: float = 2.0
 const PING_RING_COLOR := Color("#00D4AA", 0.8)
 const PING_RING_Y_OFFSET: float = 0.2
+const PING_RING_FADE_TIME: float = 1.0
 
 ## Hold threshold in seconds — hold longer than this to open the radial wheel
 const HOLD_THRESHOLD: float = 0.2
@@ -47,6 +49,15 @@ var _ping_hold_time: float = -1.0
 var _wheel_showing: bool = false
 var _selected_resource_type: ResourceDefs.ResourceType = ResourceDefs.ResourceType.NONE
 
+## Ping propagation state
+var _ping_propagating: bool = false
+var _ping_ring_radius: float = 0.0
+var _ping_ring_fading: bool = false
+var _ping_ring_fade_elapsed: float = 0.0
+var _ping_pending_reveals: Array[Dictionary] = []
+var _ping_ring_node: MeshInstance3D = null
+var _ping_ring_material: StandardMaterial3D = null
+
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _process(delta: float) -> void:
@@ -54,6 +65,7 @@ func _process(delta: float) -> void:
 		return
 	_update_ping_cooldown(delta)
 	_check_ping_input()
+	_update_ping_propagation(delta)
 	_update_analysis(delta)
 
 # ── Public Methods ────────────────────────────────────────
@@ -198,6 +210,7 @@ func _get_quick_ping_type() -> ResourceDefs.ResourceType:
 
 ## Fires a scanner ping filtered to a specific resource type.
 ## Only deposits matching the filter type are pinged and included in the result.
+## Data is computed upfront; compass markers appear progressively as the ring expands.
 func _do_ping(filter_type: ResourceDefs.ResourceType) -> void:
 	_ping_cooldown_timer = PING_COOLDOWN
 	var player_pos: Vector3 = _player.global_position
@@ -211,7 +224,7 @@ func _do_ping(filter_type: ResourceDefs.ResourceType) -> void:
 	for deposit: Deposit in filtered_deposits:
 		if not deposit.is_pinged():
 			deposit.ping()
-	_spawn_ping_ring()
+	_start_ping_propagation(filtered_deposits, player_pos)
 	ping_completed.emit(filtered_deposits)
 
 
@@ -291,6 +304,34 @@ func _cast_interaction_ray() -> Dictionary:
 	query.collision_mask = PhysicsLayers.INTERACTABLE
 	return space_state.intersect_ray(query)
 
+## Sets up the progressive reveal state and spawns the expanding ring mesh.
+func _start_ping_propagation(deposits: Array[Deposit], origin: Vector3) -> void:
+	# Stop any existing propagation before starting a new one
+	if _ping_propagating:
+		_stop_ping_propagation()
+
+	_ping_ring_radius = 0.0
+	_ping_propagating = true
+	_ping_ring_fading = false
+	_ping_ring_fade_elapsed = 0.0
+	_ping_pending_reveals.clear()
+
+	for deposit: Deposit in deposits:
+		var distance: float = origin.distance_to(deposit.global_position)
+		_ping_pending_reveals.append({
+			"deposit": deposit,
+			"distance": distance,
+		})
+
+	# Sort by distance so closest deposits reveal first
+	_ping_pending_reveals.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return a["distance"] < b["distance"]
+	)
+
+	_spawn_ping_ring()
+
+
+## Creates the ring mesh for the propagation VFX. Driven frame-by-frame, not by tween.
 func _spawn_ping_ring() -> void:
 	var ring := MeshInstance3D.new()
 	ring.name = "PingRing"
@@ -315,13 +356,71 @@ func _spawn_ping_ring() -> void:
 	ring.global_position = ring_pos
 	ring.scale = Vector3.ONE
 
-	# Torus outer_radius is 0.5, so scale factor = PING_RANGE / 0.5 = PING_RANGE * 2
-	var final_scale: float = PING_RANGE * 2.0
-	var tween: Tween = ring.create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(ring, "scale", Vector3(final_scale, 1.0, final_scale), PING_RING_DURATION).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	tween.tween_property(mat, "albedo_color:a", 0.0, PING_RING_DURATION).set_ease(Tween.EASE_IN)
-	tween.tween_property(mat, "emission_energy_multiplier", 0.0, PING_RING_DURATION)
-	tween.set_parallel(false)
-	tween.tween_callback(ring.queue_free)
-	Global.debug_log("Scanner: ping ring spawned")
+	_ping_ring_node = ring
+	_ping_ring_material = mat
+	Global.debug_log("Scanner: ping ring spawned — propagating at %s m/s" % str(PING_SPEED))
+
+
+## Advances the ring radius each frame and reveals deposits as the ring reaches them.
+func _update_ping_propagation(delta: float) -> void:
+	if not _ping_propagating:
+		return
+
+	if not _ping_ring_fading:
+		# Expand the ring at constant speed
+		_ping_ring_radius += PING_SPEED * delta
+
+		# Reveal deposits whose distance the ring has reached
+		while _ping_pending_reveals.size() > 0:
+			var entry: Dictionary = _ping_pending_reveals[0]
+			var deposit_distance: float = entry["distance"]
+			if _ping_ring_radius >= deposit_distance:
+				var deposit: Deposit = entry["deposit"] as Deposit
+				if is_instance_valid(deposit):
+					deposit_ping_revealed.emit(deposit)
+				_ping_pending_reveals.remove_at(0)
+			else:
+				break
+
+		# Update the ring mesh scale and alpha
+		if is_instance_valid(_ping_ring_node):
+			# Torus outer_radius is 0.5 — scale factor = radius / 0.5
+			var ring_scale: float = _ping_ring_radius * 2.0
+			_ping_ring_node.scale = Vector3(ring_scale, 1.0, ring_scale)
+			# Fade alpha gradually as ring expands so it doesn't obscure gameplay
+			var expansion_progress: float = _ping_ring_radius / PING_RANGE
+			var alpha: float = lerpf(0.8, 0.2, expansion_progress)
+			_ping_ring_material.albedo_color.a = alpha
+			var emission: float = lerpf(2.0, 0.4, expansion_progress)
+			_ping_ring_material.emission_energy_multiplier = emission
+
+		# Transition to fade when the ring hits the range cap
+		if _ping_ring_radius >= PING_RANGE:
+			_ping_ring_fading = true
+			_ping_ring_fade_elapsed = 0.0
+			# Reveal any remaining deposits that haven't been revealed yet
+			for entry: Dictionary in _ping_pending_reveals:
+				var deposit: Deposit = entry["deposit"] as Deposit
+				if is_instance_valid(deposit):
+					deposit_ping_revealed.emit(deposit)
+			_ping_pending_reveals.clear()
+	else:
+		# Fade out the ring after reaching max range
+		_ping_ring_fade_elapsed += delta
+		var fade_progress: float = _ping_ring_fade_elapsed / PING_RING_FADE_TIME
+		if is_instance_valid(_ping_ring_node):
+			_ping_ring_material.albedo_color.a = lerpf(0.2, 0.0, fade_progress)
+			_ping_ring_material.emission_energy_multiplier = lerpf(0.4, 0.0, fade_progress)
+		if fade_progress >= 1.0:
+			_stop_ping_propagation()
+
+
+## Cleans up the propagation state and frees the ring mesh.
+func _stop_ping_propagation() -> void:
+	_ping_propagating = false
+	_ping_ring_fading = false
+	_ping_pending_reveals.clear()
+	if is_instance_valid(_ping_ring_node):
+		_ping_ring_node.queue_free()
+	_ping_ring_node = null
+	_ping_ring_material = null

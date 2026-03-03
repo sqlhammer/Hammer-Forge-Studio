@@ -2,7 +2,7 @@
 id: TICKET-0282
 title: "M10 Scanner — Animated ping propagation ring with progressive compass reveal (D-015)"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -74,3 +74,4 @@ Suggested `PING_SPEED = 100.0` m/s — ring reaches max range in 10 seconds. Tun
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — M10 scanner: animated ping propagation (D-015)
+- 2026-03-03 [gameplay-programmer] Starting work

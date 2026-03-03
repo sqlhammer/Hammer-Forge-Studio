@@ -2,7 +2,7 @@
 id: TICKET-0277
 title: "M10 Input — Assign gamepad A to 'jump', LB to 'ping'; rename action 'scan' → 'ping'"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -87,3 +87,4 @@ mechanism in InputManager suppresses `jump` when UI is open, preventing conflict
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — M10 gamepad: A→jump, LB→ping, rename scan→ping
+- 2026-03-03 [gameplay-programmer] Starting work

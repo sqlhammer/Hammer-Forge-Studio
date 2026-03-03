@@ -61,7 +61,7 @@ func _ready() -> void:
 	if HeadLamp.is_equipped():
 		_add_headlamp_control()
 	# Register scene-defined persistent controls for device-aware label updates
-	_persistent_controls["scan"] = $PersistentControls/ControlsList/PingRow/KeyLabel as Label
+	_persistent_controls["ping"] = $PersistentControls/ControlsList/PingRow/KeyLabel as Label
 	_persistent_controls["inventory_toggle"] = $PersistentControls/ControlsList/InventoryRow/KeyLabel as Label
 	# Refresh prompt labels when input device changes (keyboard ↔ gamepad)
 	InputManager.input_device_changed.connect(_on_input_device_changed)

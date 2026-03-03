@@ -49,9 +49,9 @@ func _update_display() -> void:
 	
 	# Action buttons
 	var interact: String = "E" if InputManager.is_action_pressed("interact") else "-"
-	var scan: String = "Q" if InputManager.is_action_pressed("scan") else "-"
+	var ping: String = "Q" if InputManager.is_action_pressed("ping") else "-"
 	var switch_view: String = "Tab" if InputManager.is_action_pressed("switch_view") else "-"
-	_action_label.text = "Actions: Interact=%s Scan=%s SwitchView=%s" % [interact, scan, switch_view]
+	_action_label.text = "Actions: Interact=%s Ping=%s SwitchView=%s" % [interact, ping, switch_view]
 
 ## Called when InputManager detects device change.
 func _on_input_device_changed(device: String) -> void:

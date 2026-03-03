@@ -2,7 +2,7 @@
 id: TICKET-0305
 title: "BUG — Ship boarding ContextualPrompt shows when player is not aiming at the hull"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -50,15 +50,15 @@ path from the aim check back to the prompt display layer.
 
 ## Acceptance Criteria
 
-- [ ] The "Enter Ship" contextual prompt is only shown when the player is **both** within the
+- [x] The "Enter Ship" contextual prompt is only shown when the player is **both** within the
       ship enter zone **and** aiming at the ship hull (i.e., the same condition that allows the
       boarding action to fire)
-- [ ] When the player is in the zone but aims away from the ship, the prompt hides
-- [ ] When the player turns back toward the hull, the prompt reappears promptly (next frame)
-- [ ] The fix applies in both `GameWorld` and `DebugWorld` sessions (both use
+- [x] When the player is in the zone but aims away from the ship, the prompt hides
+- [x] When the player turns back toward the hull, the prompt reappears promptly (next frame)
+- [x] The fix applies in both `GameWorld` and `DebugWorld` sessions (both use
       `DebugShipBoardingHandler`)
-- [ ] No regression: prompt still hides correctly when the player enters the ship
-- [ ] No regression: all other interaction prompts (deposits, machine slots, cockpit console,
+- [x] No regression: prompt still hides correctly when the player enters the ship
+- [x] No regression: all other interaction prompts (deposits, machine slots, cockpit console,
       exit zone) are unaffected
 
 ---
@@ -131,7 +131,7 @@ Refer to:
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+Added `_aim_valid` state to `ShipEnterZone` with `set_aim_valid()` setter. `DebugShipBoardingHandler._process()` now calls `_is_aiming_at_ship()` every frame while the player is in the enter zone and syncs the result to the zone via `set_aim_valid()`. The aim validity resets to `false` on zone exit. No changes to `InteractionPromptHUD` or `GameWorld` were needed — both use `DebugShipBoardingHandler` which now drives the aim sync.
 
 ---
 
@@ -139,3 +139,5 @@ Refer to:
 
 - 2026-03-03 [producer] Created — TICKET-0280 left "Enter Ship" ContextualPrompt showing
   even when aim check would block boarding; prompt and action are no longer in sync
+- 2026-03-03 [gameplay-programmer] IN_PROGRESS — Starting work
+- 2026-03-03 [gameplay-programmer] DONE — Commit af7c2c4, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/323

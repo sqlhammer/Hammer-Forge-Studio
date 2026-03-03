@@ -2,7 +2,7 @@
 id: TICKET-0308
 title: "BUG — InventoryActionPopup visible by default and not found as child after TICKET-0293"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: qa-engineer
@@ -112,3 +112,4 @@ Test output from M11 Phase Gate QA run (2026-03-03):
 
 - 2026-03-03 [qa-engineer] Filed — P2 regression from TICKET-0293; inventory action popup broken (13 test failures). Blocks TICKET-0304 Phase Gate QA sign-off.
 - 2026-03-03 [gameplay-programmer] Starting work — fixing popup default visibility, ensuring programmatic popup creation for test compatibility, guarding null signal connections, closing popup from cancelled handler.
+- 2026-03-03 [gameplay-programmer] DONE — commit 4f5faf6, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/347 merged.

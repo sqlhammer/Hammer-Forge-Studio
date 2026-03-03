@@ -6,6 +6,11 @@ class_name DebugShipBoardingHandler
 extends Node
 
 
+# ── Constants ─────────────────────────────────────────────
+
+## Raycast distance for boarding aim check — generous to avoid needing to press against the hull.
+const BOARDING_RAY_LENGTH: float = 30.0
+
 # ── Private Variables ─────────────────────────────────────
 
 var _ship_interior: ShipInterior = null
@@ -13,6 +18,8 @@ var _first_person: CharacterBody3D = null
 var _ship_enter_zone: ShipEnterZone = null
 var _hud: GameHUD = null
 var _navigation_console: NavigationConsole = null
+var _camera: Camera3D = null
+var _ship_exterior: Node3D = null
 var _player_near_ship_entrance: bool = false
 var _transitioning: bool = false
 
@@ -23,10 +30,11 @@ func _process(_delta: float) -> void:
 	if _transitioning or not _ship_interior:
 		return
 
-	# Enter ship from exterior
+	# Enter ship from exterior — require aiming at the ship hull
 	if _player_near_ship_entrance and not _ship_interior.is_player_inside():
 		if InputManager.is_action_just_pressed("interact"):
-			_begin_enter_ship()
+			if _is_aiming_at_ship():
+				_begin_enter_ship()
 			return
 
 	# Cockpit navigation console — must be checked before exit zone for GameWorld parity
@@ -63,12 +71,16 @@ func setup(
 	enter_zone: ShipEnterZone,
 	hud: GameHUD,
 	navigation_console: NavigationConsole = null,
+	camera: Camera3D = null,
+	ship_exterior: Node3D = null,
 ) -> void:
 	_ship_interior = ship_interior
 	_first_person = first_person
 	_ship_enter_zone = enter_zone
 	_hud = hud
 	_navigation_console = navigation_console
+	_camera = camera
+	_ship_exterior = ship_exterior
 	enter_zone.body_entered.connect(_on_ship_enter_zone_entered)
 	enter_zone.body_exited.connect(_on_ship_enter_zone_exited)
 	ship_interior.player_entered_ship.connect(_on_player_entered_ship)
@@ -76,6 +88,34 @@ func setup(
 
 
 # ── Private Methods ───────────────────────────────────────
+
+## Returns true if the player camera is pointing at the ship exterior mesh.
+## Casts a ray from the camera along its forward vector and checks if the hit
+## collider is a descendant of the ship exterior node (in the "ship" group).
+func _is_aiming_at_ship() -> bool:
+	if not _camera:
+		# No camera reference — fall back to allowing boarding (graceful degradation)
+		return true
+	var space_state: PhysicsDirectSpaceState3D = _camera.get_world_3d().direct_space_state
+	var from: Vector3 = _camera.global_position
+	var forward: Vector3 = -_camera.global_transform.basis.z
+	var to: Vector3 = from + forward * BOARDING_RAY_LENGTH
+	var query := PhysicsRayQueryParameters3D.create(from, to)
+	query.collision_mask = PhysicsLayers.ENVIRONMENT
+	var result: Dictionary = space_state.intersect_ray(query)
+	if result.is_empty():
+		return false
+	var collider: Object = result.get("collider")
+	if not collider or not (collider is Node):
+		return false
+	# Walk up the parent chain to see if the hit belongs to a ship node
+	var node: Node = collider as Node
+	while node:
+		if node.is_in_group("ship"):
+			return true
+		node = node.get_parent()
+	return false
+
 
 func _begin_enter_ship() -> void:
 	_transitioning = true

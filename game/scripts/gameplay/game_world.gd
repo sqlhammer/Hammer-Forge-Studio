@@ -287,10 +287,13 @@ func _setup_ship_boarding(first_person: CharacterBody3D, hud: GameHUD) -> void:
 	ship_interior.set_exterior_position(ship.position + Vector3(0.0, 0.0, 24.0))
 
 	# Boarding handler processes E-press input for enter/exit
+	var camera: Camera3D = null
+	if first_person.has_method("get_camera"):
+		camera = first_person.get_camera()
 	var handler := DebugShipBoardingHandler.new()
 	handler.name = "ShipBoardingHandler"
 	add_child(handler)
-	handler.setup(ship_interior, first_person, enter_zone, hud, hud.get_navigation_console())
+	handler.setup(ship_interior, first_person, enter_zone, hud, hud.get_navigation_console(), camera, ship)
 
 	Global.debug_log("GameWorld: ship boarding zone and interior ready")
 

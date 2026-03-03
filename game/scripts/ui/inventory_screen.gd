@@ -69,8 +69,10 @@ var _confirm_visible: bool = false
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
+	_ensure_popup_exists()
 	_populate_slot_arrays()
-	_apply_styles()
+	if _main_panel:
+		_apply_styles()
 	_connect_signals()
 	Global.debug_log("InventoryScreen: ready")
 
@@ -235,6 +237,18 @@ func get_controls_descriptor_text() -> String:
 
 # ── Private Methods ───────────────────────────────────────
 
+func _ensure_popup_exists() -> void:
+	# When instanced from .tscn, @onready populates _action_popup.
+	# When created via new() (e.g., in tests), create the popup programmatically.
+	if _action_popup == null:
+		_action_popup = InventoryActionPopup.new()
+		_action_popup.name = "InventoryActionPopup"
+		add_child(_action_popup)
+	if _detail_drop_hint == null:
+		_detail_drop_hint = Label.new()
+		_detail_drop_hint.name = "DetailDropHint"
+		_detail_drop_hint.visible = false
+
 func _populate_slot_arrays() -> void:
 	# Build indexed arrays from the scene's unique-named slot nodes for O(1) access
 	for i: int in range(Inventory.MAX_SLOTS):
@@ -309,12 +323,15 @@ func _apply_styles() -> void:
 func _connect_signals() -> void:
 	PlayerInventory.slot_changed.connect(_on_slot_changed)
 	InputManager.input_device_changed.connect(_on_input_device_changed)
-	_action_popup.action_requested.connect(_on_action_popup_action_requested)
-	_action_popup.cancelled.connect(_on_action_popup_cancelled)
-	_destroy_confirm_button.pressed.connect(_on_destroy_confirmed)
-	_cancel_confirm_button.pressed.connect(_close_destroy_confirm)
+	if _action_popup:
+		_action_popup.action_requested.connect(_on_action_popup_action_requested)
+		_action_popup.cancelled.connect(_on_action_popup_cancelled)
+	if _destroy_confirm_button:
+		_destroy_confirm_button.pressed.connect(_on_destroy_confirmed)
+	if _cancel_confirm_button:
+		_cancel_confirm_button.pressed.connect(_close_destroy_confirm)
 	# Mouse hover and click for each slot
-	for i: int in range(Inventory.MAX_SLOTS):
+	for i: int in range(_slot_panels.size()):
 		_slot_panels[i].mouse_entered.connect(_on_slot_mouse_entered.bind(i))
 		_slot_panels[i].gui_input.connect(_on_slot_gui_input.bind(i))
 
@@ -573,6 +590,8 @@ func _on_action_popup_action_requested(action: String, slot_index: int) -> void:
 	Global.debug_log("InventoryScreen: action popup routed '%s' for slot %d" % [action, slot_index])
 
 func _on_action_popup_cancelled() -> void:
+	if _action_popup and _action_popup.is_open():
+		_action_popup._close()
 	_refresh_controls_descriptor()
 	Global.debug_log("InventoryScreen: action popup cancelled, grid navigation resumed")
 

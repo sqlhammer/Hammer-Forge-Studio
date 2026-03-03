@@ -2,7 +2,7 @@
 id: TICKET-0293
 title: "M11 Scene-First remediation — Inventory Screen and Inventory Action Popup"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -44,3 +44,4 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — Phase 2 remediation from M11 GDScript audit report (TICKET-0290)
+- 2026-03-03 [gameplay-programmer] Starting work — Scene-First remediation for inventory_screen.gd and inventory_action_popup.gd

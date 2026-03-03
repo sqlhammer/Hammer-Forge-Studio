@@ -42,25 +42,27 @@ var _focused_row: int = ROW_DROP
 var _is_open: bool = false
 var _is_holding_destroy: bool = false
 var _hold_progress: float = 0.0
-var _font: Font = null
 
 ## Edge-triggered latch for analog stick navigation
 var _stick_latched_y: bool = false
 
 # ── Onready Variables ─────────────────────────────────────
-var _panel: PanelContainer = null
-var _row_panels: Array[PanelContainer] = []
-var _row_labels: Array[Label] = []
-var _indicator_labels: Array[Label] = []
-var _destroy_fill_rect: ColorRect = null
-var _title_label: Label = null
+@onready var _panel: PanelContainer = %Panel
+@onready var _title_label: Label = %TitleLabel
+@onready var _destroy_fill_rect: ColorRect = %DestroyFillRect
+
+## Row panels (indexed by ROW_DROP, ROW_DESTROY, ROW_CANCEL)
+@onready var _row_panels: Array[PanelContainer] = [%DropRow, %DestroyRow, %CancelRow]
+
+## Row indicator labels (indexed by ROW_DROP, ROW_DESTROY, ROW_CANCEL)
+@onready var _indicator_labels: Array[Label] = [%DropIndicator, %DestroyIndicator, %CancelIndicator]
+
+## Row text labels (indexed by ROW_DROP, ROW_DESTROY, ROW_CANCEL)
+@onready var _row_labels: Array[Label] = [%DropLabel, %DestroyLabel, %CancelLabel]
 
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
-	visible = false
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	_font = ThemeDB.fallback_font
-	_build_ui()
+	_apply_styles()
 	Global.debug_log("InventoryActionPopup: ready")
 
 
@@ -167,10 +169,8 @@ func get_hold_progress() -> float:
 
 # ── Private Methods ───────────────────────────────────────
 
-func _build_ui() -> void:
-	# Root panel
-	_panel = PanelContainer.new()
-	_panel.custom_minimum_size = Vector2(POPUP_WIDTH, 0.0)
+func _apply_styles() -> void:
+	# Panel style
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_SURFACE
 	panel_style.border_color = COLOR_BORDER
@@ -178,73 +178,14 @@ func _build_ui() -> void:
 	panel_style.set_corner_radius_all(6)
 	panel_style.set_content_margin_all(PADDING)
 	_panel.add_theme_stylebox_override("panel", panel_style)
-	add_child(_panel)
 
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 4)
-	_panel.add_child(vbox)
-
-	# Title
-	_title_label = Label.new()
-	_title_label.text = "Item Actions"
-	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title_label.custom_minimum_size.y = TITLE_HEIGHT
-	_title_label.add_theme_font_size_override("font_size", 18)
-	_title_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	vbox.add_child(_title_label)
-
-	# Separator line
-	var separator := HSeparator.new()
-	separator.add_theme_constant_override("separation", 4)
-	vbox.add_child(separator)
-
-	# Action rows
-	var row_texts: Array[String] = ["Drop Item", "Destroy", "Cancel"]
+	# Row styles
 	for i: int in range(ROW_COUNT):
-		var row_container := PanelContainer.new()
-		row_container.custom_minimum_size = Vector2(0.0, ROW_HEIGHT)
 		var row_style := StyleBoxFlat.new()
 		row_style.bg_color = COLOR_ROW_NORMAL
 		row_style.set_corner_radius_all(4)
 		row_style.set_content_margin_all(8)
-		row_container.add_theme_stylebox_override("panel", row_style)
-
-		var hbox := HBoxContainer.new()
-		hbox.alignment = BoxContainer.ALIGNMENT_BEGIN
-
-		# Focus indicator (arrow for focused row)
-		var indicator := Label.new()
-		indicator.custom_minimum_size.x = 20.0
-		indicator.add_theme_font_size_override("font_size", 16)
-		indicator.add_theme_color_override("font_color", COLOR_TEAL)
-		hbox.add_child(indicator)
-		_indicator_labels.append(indicator)
-
-		# Row text label
-		var label := Label.new()
-		label.text = row_texts[i]
-		label.add_theme_font_size_override("font_size", 16)
-		label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		hbox.add_child(label)
-		_row_labels.append(label)
-
-		row_container.add_child(hbox)
-
-		# Destroy row gets a fill rect for hold-to-confirm progress
-		if i == ROW_DESTROY:
-			var fill := ColorRect.new()
-			fill.color = COLOR_DESTROY_FILL
-			fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			fill.set_anchors_preset(Control.PRESET_FULL_RECT)
-			fill.size.x = 0.0
-			row_container.add_child(fill)
-			# Move fill behind the HBox so text is readable
-			row_container.move_child(fill, 0)
-			_destroy_fill_rect = fill
-
-		vbox.add_child(row_container)
-		_row_panels.append(row_container)
+		_row_panels[i].add_theme_stylebox_override("panel", row_style)
 
 
 func _handle_stick_input(event: InputEventJoypadMotion) -> void:

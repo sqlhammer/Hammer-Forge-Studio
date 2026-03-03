@@ -2,7 +2,7 @@
 id: TICKET-0278
 title: "M10 Input — Assign gamepad A to 'use_item', RB to 'toggle_head_lamp'"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -64,7 +64,10 @@ and note any edge cases in Handoff Notes.
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+- Modified `game/autoloads/InputManager.gd` line 159: added `JOY_BUTTON_A` to `use_item` action
+- Modified `game/autoloads/InputManager.gd` line 160: added `JOY_BUTTON_RIGHT_SHOULDER` to `toggle_head_lamp` action
+- `JOY_BUTTON_A` is shared across `jump`, `ui_accept`, and `use_item` — no conflict expected because `set_gameplay_inputs_enabled(false)` suppresses `jump`/`use_item` when UI is open, and `inventory_screen.gd` handles `use_item` as a raw `InputEvent` in inventory context
+- No edge cases found — each action fires in its own context as designed
 
 ---
 
@@ -72,3 +75,4 @@ and note any edge cases in Handoff Notes.
 
 - 2026-03-03 [producer] Created ticket — M10 gamepad: A→use_item, RB→toggle_head_lamp
 - 2026-03-03 [gameplay-programmer] Starting work
+- 2026-03-03 [gameplay-programmer] DONE — commit 7fe9fea, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/306

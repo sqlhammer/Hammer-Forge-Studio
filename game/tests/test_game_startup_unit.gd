@@ -118,13 +118,15 @@ func _test_global_starting_inventory_retains_multiple_entries() -> void:
 # ── Test Methods: MainMenu ────────────────────────────────
 
 func _test_main_menu_instantiates_without_error() -> void:
-	_main_menu = MainMenu.new()
+	var scene: PackedScene = load("res://scenes/ui/main_menu.tscn")
+	_main_menu = scene.instantiate() as MainMenu
 	add_child(_main_menu)
 	assert_not_null(_main_menu, "MainMenu should instantiate and add to scene tree without error")
 
 
 func _test_main_menu_has_play_button_node() -> void:
-	_main_menu = MainMenu.new()
+	var scene: PackedScene = load("res://scenes/ui/main_menu.tscn")
+	_main_menu = scene.instantiate() as MainMenu
 	add_child(_main_menu)
 	var play_button: Node = _main_menu.get_node_or_null(
 		"CenterContainer/MenuLayout/PlayButton"
@@ -134,7 +136,8 @@ func _test_main_menu_has_play_button_node() -> void:
 
 
 func _test_main_menu_has_play_pressed_signal() -> void:
-	_main_menu = MainMenu.new()
+	var scene: PackedScene = load("res://scenes/ui/main_menu.tscn")
+	_main_menu = scene.instantiate() as MainMenu
 	add_child(_main_menu)
 	assert_true(_main_menu.has_signal("play_pressed"),
 		"MainMenu should declare a play_pressed signal")

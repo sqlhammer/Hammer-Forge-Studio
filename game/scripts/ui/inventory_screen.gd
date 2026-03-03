@@ -278,8 +278,8 @@ func _build_ui() -> void:
 	_combined_container.add_child(_main_panel)
 
 	# Ship stats sidebar (right side)
-	_ship_sidebar = ShipStatsSidebar.new()
-	_ship_sidebar.name = "ShipStatsSidebar"
+	var sidebar_scene: PackedScene = preload("res://scenes/ui/ship_stats_sidebar.tscn")
+	_ship_sidebar = sidebar_scene.instantiate() as ShipStatsSidebar
 	_combined_container.add_child(_ship_sidebar)
 
 	# Main vertical layout

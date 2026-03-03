@@ -36,16 +36,35 @@ var _bars: Array[ProgressBar] = []
 var _icons: Array[TextureRect] = []
 var _labels: Array[Label] = []
 var _values: Array[float] = [100.0, 100.0, 50.0, 100.0]
-var _alerts_container: VBoxContainer = null
 var _alert_labels: Array[Label] = []
 var _current_alert_keys: Array[String] = []
+
+# ── Onready Variables ─────────────────────────────────────
+@onready var _divider: HSeparator = %Divider
+@onready var _alert_divider: HSeparator = %AlertDivider
+@onready var _alerts_container: VBoxContainer = %AlertsContainer
+@onready var _power_icon: TextureRect = %PowerIcon
+@onready var _power_bar: ProgressBar = %PowerBar
+@onready var _power_label: Label = %PowerLabel
+@onready var _integrity_icon: TextureRect = %IntegrityIcon
+@onready var _integrity_bar: ProgressBar = %IntegrityBar
+@onready var _integrity_label: Label = %IntegrityLabel
+@onready var _heat_icon: TextureRect = %HeatIcon
+@onready var _heat_bar: ProgressBar = %HeatBar
+@onready var _heat_label: Label = %HeatLabel
+@onready var _oxygen_icon: TextureRect = %OxygenIcon
+@onready var _oxygen_bar: ProgressBar = %OxygenBar
+@onready var _oxygen_label: Label = %OxygenLabel
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_INHERIT
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_build_ui()
+	_bars = [_power_bar, _integrity_bar, _heat_bar, _oxygen_bar]
+	_icons = [_power_icon, _integrity_icon, _heat_icon, _oxygen_icon]
+	_labels = [_power_label, _integrity_label, _heat_label, _oxygen_label]
+	_apply_panel_style()
+	_apply_divider_styles()
+	_apply_bar_styles()
 	_connect_signals()
 	_refresh_all()
 
@@ -57,9 +76,7 @@ func refresh() -> void:
 
 # ── Private Methods ───────────────────────────────────────
 
-func _build_ui() -> void:
-	custom_minimum_size = Vector2(SIDEBAR_WIDTH, 0)
-
+func _apply_panel_style() -> void:
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_SURFACE
 	panel_style.border_color = COLOR_BORDER
@@ -71,116 +88,27 @@ func _build_ui() -> void:
 	panel_style.set_content_margin_all(12)
 	add_theme_stylebox_override("panel", panel_style)
 
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 8)
-	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(vbox)
-
-	# Title
-	var title := Label.new()
-	title.text = "SHIP"
-	title.add_theme_font_size_override("font_size", 24)
-	title.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	vbox.add_child(title)
-
-	# Divider
-	var divider := HSeparator.new()
+func _apply_divider_styles() -> void:
 	var div_style := StyleBoxFlat.new()
 	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
 	div_style.set_content_margin_all(0)
-	divider.add_theme_stylebox_override("separator", div_style)
-	vbox.add_child(divider)
+	_divider.add_theme_stylebox_override("separator", div_style)
 
-	# Variable rows
-	var icon_paths: Array[String] = [
-		"res://assets/icons/hud/icon_hud_power.svg",
-		"res://assets/icons/hud/icon_hud_integrity.svg",
-		"res://assets/icons/hud/icon_hud_heat.svg",
-		"res://assets/icons/hud/icon_hud_oxygen.svg",
-	]
-	for i: int in range(4):
-		var row := _create_variable_row(icon_paths[i], i)
-		vbox.add_child(row)
-
-	# Alerts divider
-	var alert_divider := HSeparator.new()
 	var alert_div_style := StyleBoxFlat.new()
 	alert_div_style.bg_color = Color(COLOR_NEUTRAL, 0.3)
 	alert_div_style.set_content_margin_all(0)
-	alert_divider.add_theme_stylebox_override("separator", alert_div_style)
-	vbox.add_child(alert_divider)
+	_alert_divider.add_theme_stylebox_override("separator", alert_div_style)
 
-	# Alerts section
-	var alerts_title := Label.new()
-	alerts_title.text = "ALERTS"
-	alerts_title.add_theme_font_size_override("font_size", 14)
-	alerts_title.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	vbox.add_child(alerts_title)
-
-	_alerts_container = VBoxContainer.new()
-	_alerts_container.add_theme_constant_override("separation", 4)
-	_alerts_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vbox.add_child(_alerts_container)
-
-	# Default "no alerts" label
-	var none_label := Label.new()
-	none_label.text = "(none)"
-	none_label.add_theme_font_size_override("font_size", 14)
-	none_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_alerts_container.add_child(none_label)
-
-func _create_variable_row(icon_path: String, index: int) -> HBoxContainer:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 4)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	# Ship global icon
-	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(ICON_SIZE, ICON_SIZE)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.modulate = COLOR_TEAL
-	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if not icon_path.is_empty():
-		icon.texture = load(icon_path) as Texture2D
-	row.add_child(icon)
-	_icons.append(icon)
-
-	# Progress bar
-	var bar := ProgressBar.new()
-	bar.custom_minimum_size = Vector2(BAR_WIDTH, BAR_HEIGHT)
-	bar.max_value = 100.0
-	bar.value = _values[index]
-	bar.show_percentage = false
-	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	var bar_bg := StyleBoxFlat.new()
-	bar_bg.bg_color = COLOR_BAR_BG
-	bar_bg.set_corner_radius_all(2)
-	bar.add_theme_stylebox_override("background", bar_bg)
-
-	var bar_fill := StyleBoxFlat.new()
-	bar_fill.bg_color = COLOR_TEAL
-	bar_fill.set_corner_radius_all(2)
-	bar.add_theme_stylebox_override("fill", bar_fill)
-
-	row.add_child(bar)
-	_bars.append(bar)
-
-	# Value label
-	var label := Label.new()
-	label.custom_minimum_size = Vector2(36, 0)
-	label.text = "%d%%" % int(_values[index])
-	label.add_theme_font_size_override("font_size", 18)
-	label.add_theme_color_override("font_color", COLOR_TEAL)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(label)
-	_labels.append(label)
-
-	return row
+func _apply_bar_styles() -> void:
+	for bar: ProgressBar in _bars:
+		var bar_bg := StyleBoxFlat.new()
+		bar_bg.bg_color = COLOR_BAR_BG
+		bar_bg.set_corner_radius_all(2)
+		bar.add_theme_stylebox_override("background", bar_bg)
+		var bar_fill := StyleBoxFlat.new()
+		bar_fill.bg_color = COLOR_TEAL
+		bar_fill.set_corner_radius_all(2)
+		bar.add_theme_stylebox_override("fill", bar_fill)
 
 func _connect_signals() -> void:
 	ShipState.power_changed.connect(_on_power_changed)

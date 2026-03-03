@@ -2,7 +2,7 @@
 id: TICKET-0276
 title: "M10 Input — Reassign gamepad 'interact' from A to X; audit UI for hardcoded button labels"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -74,3 +74,4 @@ separate from the gameplay `interact` action and should not change.
 
 - 2026-03-03 [producer] Created ticket — M10 gamepad input: reassign interact A→X, UI audit
 - 2026-03-03 [gameplay-programmer] Starting work
+- 2026-03-03 [gameplay-programmer] DONE — commit d383af1, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/302

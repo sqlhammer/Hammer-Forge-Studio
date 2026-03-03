@@ -80,8 +80,8 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if _is_open:
-		# Closing must bypass InputManager suppression so the toggle key always works
-		if Input.is_action_just_pressed("inventory_toggle"):
+		# Closing bypasses gameplay suppression so the toggle key always works
+		if InputManager.is_action_just_pressed_unsuppressed("inventory_toggle"):
 			close_inventory()
 	else:
 		if InputManager.is_action_just_pressed("inventory_toggle"):

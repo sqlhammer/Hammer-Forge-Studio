@@ -48,11 +48,20 @@ Logs a message if running in a debug build. Use for debug output, performance me
 
 **Public API:**
 ```gdscript
-# Query input state
+# Query input state (respects gameplay suppression)
 func is_action_pressed(action: String) -> bool
+func is_action_just_pressed(action: String) -> bool
 func get_action_strength(action: String) -> float
 func get_analog_input(stick: String) -> Vector2  # "left" or "right"; returns [-1, 1]
 func get_trigger_input(trigger: String) -> float  # "left" or "right"; returns [0, 1]
+
+# Query input state (bypasses gameplay suppression — for UI toggles that must
+# remain responsive even when gameplay inputs are disabled)
+func is_action_just_pressed_unsuppressed(action: String) -> bool
+
+# Gameplay suppression
+func set_gameplay_inputs_enabled(enabled: bool) -> void
+func is_gameplay_inputs_enabled() -> bool
 
 # Device information
 func get_current_input_device() -> String  # "keyboard" or "gamepad"

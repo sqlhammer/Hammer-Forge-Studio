@@ -2,7 +2,7 @@
 id: TICKET-0301
 title: "M11 Standards remediation — Fix direct Input.is_action_just_pressed() bypass in inventory_screen.gd"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: systems-programmer
 created_by: producer
@@ -45,3 +45,4 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — Phase 2 remediation from M11 GDScript audit report (TICKET-0290)
+- 2026-03-03 [systems-programmer] Starting work — implementing unsuppressed input check method in InputManager

@@ -30,12 +30,13 @@ func _process(_delta: float) -> void:
 	if _transitioning or not _ship_interior:
 		return
 
-	# Enter ship from exterior — require aiming at the ship hull
+	# Enter ship from exterior — sync aim validity each frame for prompt display
 	if _player_near_ship_entrance and not _ship_interior.is_player_inside():
-		if InputManager.is_action_just_pressed("interact"):
-			if _is_aiming_at_ship():
-				_begin_enter_ship()
-			return
+		var aiming: bool = _is_aiming_at_ship()
+		_ship_enter_zone.set_aim_valid(aiming)
+		if aiming and InputManager.is_action_just_pressed("interact"):
+			_begin_enter_ship()
+		return
 
 	# Cockpit navigation console — must be checked before exit zone for GameWorld parity
 	if _ship_interior.is_player_inside() and not (_navigation_console and _navigation_console.is_open()):
@@ -138,6 +139,7 @@ func _on_ship_enter_zone_entered(body: Node3D) -> void:
 func _on_ship_enter_zone_exited(body: Node3D) -> void:
 	if body == _first_person:
 		_player_near_ship_entrance = false
+		_ship_enter_zone.set_aim_valid(false)
 
 
 func _on_player_entered_ship() -> void:

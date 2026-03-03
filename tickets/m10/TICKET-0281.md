@@ -2,7 +2,7 @@
 id: TICKET-0281
 title: "M10 Scanner — Resource type selection radial wheel before ping (D-001)"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -75,3 +75,4 @@ new `ResourceTypeRegistry`) — do not hardcode Scrap Metal and Cryonite.
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — M10 scanner: resource type radial wheel (D-001)
+- 2026-03-03 [gameplay-programmer] Starting work

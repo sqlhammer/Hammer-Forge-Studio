@@ -227,6 +227,16 @@ func _setup_gameplay(player: Node3D) -> void:
 	scanner.setup(camera, first_person)
 	add_child(scanner)
 
+	# Resource type radial wheel for scanner ping — lives on its own CanvasLayer
+	var wheel_layer := CanvasLayer.new()
+	wheel_layer.name = "ResourceWheelLayer"
+	wheel_layer.layer = 5
+	add_child(wheel_layer)
+	var resource_wheel := ResourceTypeWheel.new()
+	resource_wheel.name = "ResourceTypeWheel"
+	wheel_layer.add_child(resource_wheel)
+	scanner.set_resource_wheel(resource_wheel)
+
 	# Mining
 	var mining: Mining = Mining.new()
 	mining.name = "Mining"

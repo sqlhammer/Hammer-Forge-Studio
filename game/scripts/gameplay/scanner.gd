@@ -1,5 +1,6 @@
 ## Scanner system: handles ping detection and deposit analysis.
 ## Supports first-person (raycast) and third-person (proximity) targeting.
+## Includes radial wheel for resource type selection before ping.
 class_name Scanner
 extends Node
 
@@ -24,6 +25,12 @@ const PING_RING_DURATION: float = 2.0
 const PING_RING_COLOR := Color("#00D4AA", 0.8)
 const PING_RING_Y_OFFSET: float = 0.2
 
+## Hold threshold in seconds — hold longer than this to open the radial wheel
+const HOLD_THRESHOLD: float = 0.2
+
+## Minimum mouse displacement from center to register as a direction
+const MOUSE_DIRECTION_THRESHOLD: float = 30.0
+
 # ── Private Variables ─────────────────────────────────────
 var _camera: Camera3D = null
 var _player: CharacterBody3D = null
@@ -32,6 +39,13 @@ var _analysis_target: Deposit = null
 var _analysis_progress: float = 0.0
 var _is_analyzing: bool = false
 var _view_mode: String = "first_person"
+
+## Radial wheel state
+var _resource_wheel: ResourceTypeWheel = null
+var _ping_was_pressed: bool = false
+var _ping_hold_time: float = -1.0
+var _wheel_showing: bool = false
+var _selected_resource_type: ResourceDefs.ResourceType = ResourceDefs.ResourceType.NONE
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -48,6 +62,10 @@ func _process(delta: float) -> void:
 func setup(camera: Camera3D, player: CharacterBody3D) -> void:
 	_camera = camera
 	_player = player
+
+## Assigns the radial wheel Control used for resource type selection.
+func set_resource_wheel(wheel: ResourceTypeWheel) -> void:
+	_resource_wheel = wheel
 
 ## Updates the active camera reference (used on view mode switch).
 func set_camera(camera: Camera3D) -> void:
@@ -80,20 +98,122 @@ func get_analysis_target() -> Deposit:
 func _update_ping_cooldown(delta: float) -> void:
 	_ping_cooldown_timer = maxf(_ping_cooldown_timer - delta, 0.0)
 
+## Handles hold-to-open-wheel and tap-to-quick-ping input logic.
+## Hold ping (Q / LB) beyond HOLD_THRESHOLD → opens radial wheel; release fires.
+## Tap ping (release before threshold) → fires immediately with last-used type.
 func _check_ping_input() -> void:
-	if InputManager.is_action_just_pressed("ping") and _ping_cooldown_timer <= 0.0:
-		_do_ping()
+	var ping_pressed: bool = InputManager.is_action_pressed("ping")
+	var ping_just_pressed: bool = InputManager.is_action_just_pressed("ping")
 
-func _do_ping() -> void:
+	# Start tracking on initial press
+	if ping_just_pressed:
+		_ping_hold_time = 0.0
+		_wheel_showing = false
+
+	# Accumulate hold time while pressed
+	if ping_pressed and _ping_hold_time >= 0.0:
+		_ping_hold_time += get_process_delta_time()
+
+		# Open wheel after hold threshold
+		var has_wheel: bool = _resource_wheel != null and _resource_wheel.has_segments()
+		if _ping_hold_time >= HOLD_THRESHOLD and not _wheel_showing and has_wheel:
+			_resource_wheel.show_wheel()
+			_wheel_showing = true
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			Global.debug_log("Scanner: radial wheel opened")
+
+		# Update wheel selection each frame while showing
+		if _wheel_showing and _resource_wheel:
+			var direction: Vector2 = _get_wheel_input_direction()
+			_resource_wheel.update_selection(direction)
+
+	# Detect release: was pressed last frame, not pressed this frame
+	if _ping_was_pressed and not ping_pressed:
+		if _wheel_showing:
+			_handle_wheel_release()
+		elif _ping_hold_time >= 0.0 and _ping_hold_time < HOLD_THRESHOLD:
+			_handle_tap_ping()
+		_ping_hold_time = -1.0
+		_wheel_showing = false
+
+	_ping_was_pressed = ping_pressed
+
+
+## Fires the ping with the type selected on the radial wheel.
+func _handle_wheel_release() -> void:
+	if not _resource_wheel:
+		return
+	var selected_type: ResourceDefs.ResourceType = _resource_wheel.get_selected_type()
+	_resource_wheel.hide_wheel()
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+	if selected_type == ResourceDefs.ResourceType.NONE:
+		Global.debug_log("Scanner: wheel released with no type — ping cancelled")
+		return
+	if _ping_cooldown_timer > 0.0:
+		Global.debug_log("Scanner: ping on cooldown — ignoring wheel release")
+		return
+
+	_selected_resource_type = selected_type
+	_do_ping(selected_type)
+
+
+## Fires the ping immediately with the last-used resource type (tap behavior).
+func _handle_tap_ping() -> void:
+	if _ping_cooldown_timer > 0.0:
+		return
+	var tap_type: ResourceDefs.ResourceType = _get_quick_ping_type()
+	if tap_type == ResourceDefs.ResourceType.NONE:
+		Global.debug_log("Scanner: tap ping has no type selected — ignoring")
+		return
+	_do_ping(tap_type)
+
+
+## Returns the input direction for wheel selection.
+## Keyboard/mouse uses cursor position relative to screen center.
+## Gamepad uses left stick analog input.
+func _get_wheel_input_direction() -> Vector2:
+	var device: String = InputManager.get_current_input_device()
+	if device == "gamepad":
+		return InputManager.get_analog_input("left")
+	# Mouse: position relative to viewport center (mouse is uncaptured while wheel is open)
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var center: Vector2 = viewport_size / 2.0
+	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+	var direction: Vector2 = mouse_pos - center
+	if direction.length() > MOUSE_DIRECTION_THRESHOLD:
+		return direction.normalized()
+	return Vector2.ZERO
+
+
+## Returns the resource type for a quick-tap ping.
+## Uses last manually selected type, falling back to the wheel's default.
+func _get_quick_ping_type() -> ResourceDefs.ResourceType:
+	if _selected_resource_type != ResourceDefs.ResourceType.NONE:
+		return _selected_resource_type
+	if _resource_wheel:
+		return _resource_wheel.get_last_used_type()
+	return ResourceDefs.ResourceType.NONE
+
+
+## Fires a scanner ping filtered to a specific resource type.
+## Only deposits matching the filter type are pinged and included in the result.
+func _do_ping(filter_type: ResourceDefs.ResourceType) -> void:
 	_ping_cooldown_timer = PING_COOLDOWN
 	var player_pos: Vector3 = _player.global_position
-	var deposits: Array[Deposit] = DepositRegistry.get_in_range(player_pos, PING_RANGE)
-	Global.debug_log("Scanner: ping fired — %d deposits in range" % deposits.size())
-	for deposit: Deposit in deposits:
+	var all_deposits: Array[Deposit] = DepositRegistry.get_in_range(player_pos, PING_RANGE)
+	var filtered_deposits: Array[Deposit] = []
+	for deposit: Deposit in all_deposits:
+		if deposit.resource_type == filter_type:
+			filtered_deposits.append(deposit)
+	var type_name: String = ResourceDefs.get_resource_name(filter_type)
+	Global.debug_log("Scanner: ping fired for %s — %d/%d deposits match" % [type_name, filtered_deposits.size(), all_deposits.size()])
+	for deposit: Deposit in filtered_deposits:
 		if not deposit.is_pinged():
 			deposit.ping()
 	_spawn_ping_ring()
-	ping_completed.emit(deposits)
+	ping_completed.emit(filtered_deposits)
+
 
 func _update_analysis(delta: float) -> void:
 	var holding_interact: bool = InputManager.is_action_pressed("interact")

@@ -2,7 +2,7 @@
 id: TICKET-0286
 title: "M10 Resources — In-biome timed resource node respawn (D-007)"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -89,7 +89,11 @@ equivalent). When filtering results, exclude deposits where `visible == false` (
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+- **New file:** `game/config/resource_respawn_config.gd` — `ResourceRespawnConfig` class with `RESPAWN_TIMES` const dictionary and `get_respawn_time()` static helper
+- **Modified file:** `game/scripts/systems/deposit.gd` — added `respawned` signal, `_is_respawning` state, `_start_respawn()` / `_on_respawn_timer_timeout()` methods, respawn serialization
+- **No scanner/compass changes needed** — existing `is_depleted()` filters in `DepositRegistry.get_in_range()`, `CompassBar._draw_ping_markers()`, and `CompassBar._clean_expired_markers()` already exclude depleted deposits
+- **Deep nodes unaffected** — `_start_respawn()` guards on `infinite == true`; deep nodes never emit `depleted` signal
+- **Known limitation:** Respawn timer resets to full duration on scene reload (per AC)
 
 ---
 
@@ -102,3 +106,4 @@ equivalent). When filtering results, exclude deposits where `visible == false` (
   - Deep resource nodes (infinite) are excluded
   - No resource scarcity pressure goal at this phase
 - 2026-03-03 [gameplay-programmer] Starting work — implementing resource respawn config and deposit timer logic
+- 2026-03-03 [gameplay-programmer] DONE — commit 64a6532, PR #304 (https://github.com/sqlhammer/Hammer-Forge-Studio/pull/304) merged to main

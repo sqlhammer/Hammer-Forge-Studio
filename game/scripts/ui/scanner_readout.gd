@@ -23,26 +23,21 @@ const COLOR_NEUTRAL := Color("#94A3B8")
 var _current_deposit: Deposit = null
 var _player: CharacterBody3D = null
 var _is_visible: bool = false
-var _font: Font = null
-var _font_mono: Font = null
+var _star_filled_tex: Texture2D = preload("res://assets/icons/hud/icon_hud_star_filled.svg")
+var _star_empty_tex: Texture2D = preload("res://assets/icons/hud/icon_hud_star_empty.svg")
 
-var _header_label: Label = null
-var _purity_stars: HBoxContainer = null
-var _density_label: Label = null
-var _energy_label: Label = null
-var _content_container: VBoxContainer = null
-var _star_filled_tex: Texture2D = null
-var _star_empty_tex: Texture2D = null
+# ── Onready Variables ─────────────────────────────────────
+@onready var _header_label: Label = %HeaderLabel
+@onready var _purity_stars: HBoxContainer = %PurityStars
+@onready var _density_label: Label = %DensityLabel
+@onready var _energy_label: Label = %EnergyLabel
+@onready var _divider: HSeparator = %Divider
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	_font = ThemeDB.fallback_font
-	_font_mono = ThemeDB.fallback_font
-	visible = false
-	custom_minimum_size = Vector2(READOUT_WIDTH, 0)
-	_build_ui()
 	_apply_panel_style()
+	_apply_divider_style()
 
 func _process(_delta: float) -> void:
 	if not _is_visible or not _current_deposit or not _player:
@@ -83,97 +78,6 @@ func get_current_deposit() -> Deposit:
 
 # ── Private Methods ───────────────────────────────────────
 
-func _build_ui() -> void:
-	_content_container = VBoxContainer.new()
-	_content_container.add_theme_constant_override("separation", 8)
-	add_child(_content_container)
-
-	# Header row with scanner icon
-	var header_row := HBoxContainer.new()
-	header_row.add_theme_constant_override("separation", 8)
-	_content_container.add_child(header_row)
-
-	var scan_icon := TextureRect.new()
-	scan_icon.custom_minimum_size = Vector2(20, 20)
-	scan_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	scan_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	var scan_tex: Texture2D = load("res://assets/icons/hud/icon_hud_scan_ping.svg") as Texture2D
-	if scan_tex:
-		scan_icon.texture = scan_tex
-	scan_icon.modulate = COLOR_TEAL
-	header_row.add_child(scan_icon)
-
-	_header_label = Label.new()
-	_header_label.text = "SCAN RESULTS"
-	_header_label.add_theme_font_size_override("font_size", 20)
-	_header_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	header_row.add_child(_header_label)
-
-	# Divider
-	var divider := HSeparator.new()
-	divider.add_theme_stylebox_override("separator", _create_divider_style())
-	_content_container.add_child(divider)
-
-	# Purity row
-	var purity_row := HBoxContainer.new()
-	purity_row.add_theme_constant_override("separation", 8)
-	var purity_label := Label.new()
-	purity_label.text = "Purity"
-	purity_label.custom_minimum_size.x = 80
-	purity_label.add_theme_font_size_override("font_size", 16)
-	purity_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	purity_row.add_child(purity_label)
-	_purity_stars = HBoxContainer.new()
-	_purity_stars.add_theme_constant_override("separation", 2)
-	_star_filled_tex = load("res://assets/icons/hud/icon_hud_star_filled.svg") as Texture2D
-	_star_empty_tex = load("res://assets/icons/hud/icon_hud_star_empty.svg") as Texture2D
-	for i: int in range(5):
-		var star := TextureRect.new()
-		star.custom_minimum_size = Vector2(20, 20)
-		star.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		star.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		star.texture = _star_empty_tex
-		_purity_stars.add_child(star)
-	purity_row.add_child(_purity_stars)
-	_content_container.add_child(purity_row)
-
-	# Density row
-	var density_row := HBoxContainer.new()
-	density_row.add_theme_constant_override("separation", 8)
-	var density_title := Label.new()
-	density_title.text = "Density"
-	density_title.custom_minimum_size.x = 80
-	density_title.add_theme_font_size_override("font_size", 16)
-	density_title.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	density_row.add_child(density_title)
-	_density_label = Label.new()
-	_density_label.add_theme_font_size_override("font_size", 20)
-	density_row.add_child(_density_label)
-	_content_container.add_child(density_row)
-
-	# Energy row
-	var energy_row := HBoxContainer.new()
-	energy_row.add_theme_constant_override("separation", 8)
-	var energy_title := Label.new()
-	energy_title.text = "Energy"
-	energy_title.custom_minimum_size.x = 80
-	energy_title.add_theme_font_size_override("font_size", 16)
-	energy_title.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	energy_row.add_child(energy_title)
-	var battery_micro_icon := TextureRect.new()
-	battery_micro_icon.custom_minimum_size = Vector2(16, 16)
-	battery_micro_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	battery_micro_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	var battery_micro_tex: Texture2D = load("res://assets/icons/hud/icon_hud_battery_micro.svg") as Texture2D
-	if battery_micro_tex:
-		battery_micro_icon.texture = battery_micro_tex
-	battery_micro_icon.modulate = COLOR_AMBER
-	energy_row.add_child(battery_micro_icon)
-	_energy_label = Label.new()
-	_energy_label.add_theme_font_size_override("font_size", 22)
-	energy_row.add_child(_energy_label)
-	_content_container.add_child(energy_row)
-
 func _apply_panel_style() -> void:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(COLOR_BG)
@@ -183,13 +87,13 @@ func _apply_panel_style() -> void:
 	style.set_content_margin_all(12)
 	add_theme_stylebox_override("panel", style)
 
-func _create_divider_style() -> StyleBoxFlat:
+func _apply_divider_style() -> void:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(COLOR_NEUTRAL, 0.4)
 	style.set_content_margin_all(0)
 	style.content_margin_top = 0
 	style.content_margin_bottom = 0
-	return style
+	_divider.add_theme_stylebox_override("separator", style)
 
 func _update_readout_data() -> void:
 	if not _current_deposit:
@@ -223,7 +127,6 @@ func _update_readout_data() -> void:
 		_current_deposit.deposit_tier,
 		_current_deposit.get_remaining(),
 	)
-	var battery_percent: float = SuitBattery.get_charge_percent()
 	var cost_percent: float = energy_cost / SuitBattery.max_charge * 100.0
 	_energy_label.text = "%d%%" % int(cost_percent)
 	# Warning if cost > 75% of current battery

@@ -1,6 +1,172 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" uid="uid://cm2gd3f8mcibm" path="res://scripts/ui/ship_globals_hud.gd" id="1_sgh"]
+[ext_resource type="Texture2D" path="res://assets/icons/hud/icon_hud_power.svg" id="2_pwr"]
+[ext_resource type="Texture2D" path="res://assets/icons/hud/icon_hud_integrity.svg" id="3_int"]
+[ext_resource type="Texture2D" path="res://assets/icons/hud/icon_hud_heat.svg" id="4_hea"]
+[ext_resource type="Texture2D" path="res://assets/icons/hud/icon_hud_oxygen.svg" id="5_oxy"]
 
 [node name="ShipGlobalsHUD" type="Control"]
+custom_minimum_size = Vector2(220, 180)
+mouse_filter = 2
 script = ExtResource("1_sgh")
+
+[node name="ShipStatusPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 180)
+offset_left = 252.0
+offset_right = 472.0
+offset_bottom = 180.0
+modulate = Color(1, 1, 1, 0)
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="ShipStatusPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="ShipStatusPanel/VBox"]
+layout_mode = 2
+text = "SHIP STATUS"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="Divider" type="HSeparator" parent="ShipStatusPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="PowerRow" type="HBoxContainer" parent="ShipStatusPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+mouse_filter = 2
+
+[node name="PowerIcon" type="TextureRect" parent="ShipStatusPanel/VBox/PowerRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(20, 20)
+texture = ExtResource("2_pwr")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(0, 0.831, 0.667, 1)
+mouse_filter = 2
+
+[node name="PowerBar" type="ProgressBar" parent="ShipStatusPanel/VBox/PowerRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 8)
+max_value = 100.0
+value = 100.0
+show_percentage = false
+mouse_filter = 2
+
+[node name="PowerLabel" type="Label" parent="ShipStatusPanel/VBox/PowerRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+text = "100%"
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+mouse_filter = 2
+
+[node name="IntegrityRow" type="HBoxContainer" parent="ShipStatusPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+mouse_filter = 2
+
+[node name="IntegrityIcon" type="TextureRect" parent="ShipStatusPanel/VBox/IntegrityRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(20, 20)
+texture = ExtResource("3_int")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(0, 0.831, 0.667, 1)
+mouse_filter = 2
+
+[node name="IntegrityBar" type="ProgressBar" parent="ShipStatusPanel/VBox/IntegrityRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 8)
+max_value = 100.0
+value = 100.0
+show_percentage = false
+mouse_filter = 2
+
+[node name="IntegrityLabel" type="Label" parent="ShipStatusPanel/VBox/IntegrityRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+text = "100%"
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+mouse_filter = 2
+
+[node name="HeatRow" type="HBoxContainer" parent="ShipStatusPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+mouse_filter = 2
+
+[node name="HeatIcon" type="TextureRect" parent="ShipStatusPanel/VBox/HeatRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(20, 20)
+texture = ExtResource("4_hea")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(0, 0.831, 0.667, 1)
+mouse_filter = 2
+
+[node name="HeatBar" type="ProgressBar" parent="ShipStatusPanel/VBox/HeatRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 8)
+max_value = 100.0
+value = 50.0
+show_percentage = false
+mouse_filter = 2
+
+[node name="HeatLabel" type="Label" parent="ShipStatusPanel/VBox/HeatRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+text = "50%"
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+mouse_filter = 2
+
+[node name="OxygenRow" type="HBoxContainer" parent="ShipStatusPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+mouse_filter = 2
+
+[node name="OxygenIcon" type="TextureRect" parent="ShipStatusPanel/VBox/OxygenRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(20, 20)
+texture = ExtResource("5_oxy")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(0, 0.831, 0.667, 1)
+mouse_filter = 2
+
+[node name="OxygenBar" type="ProgressBar" parent="ShipStatusPanel/VBox/OxygenRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 8)
+max_value = 100.0
+value = 100.0
+show_percentage = false
+mouse_filter = 2
+
+[node name="OxygenLabel" type="Label" parent="ShipStatusPanel/VBox/OxygenRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+text = "100%"
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+mouse_filter = 2

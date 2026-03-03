@@ -10,7 +10,7 @@ created_at: 2026-03-03
 updated_at: 2026-03-03
 milestone: "M10"
 phase: "QA"
-depends_on: [TICKET-0276, TICKET-0277, TICKET-0278, TICKET-0279, TICKET-0280, TICKET-0281, TICKET-0282, TICKET-0283, TICKET-0284]
+depends_on: [TICKET-0276, TICKET-0277, TICKET-0278, TICKET-0279, TICKET-0280, TICKET-0281, TICKET-0282, TICKET-0283, TICKET-0284, TICKET-0286]
 blocks: []
 tags: [qa, sign-off, phase-gate]
 ---
@@ -25,7 +25,7 @@ sign-off document, and marks this ticket DONE to unblock M11 kickoff.
 
 ## Acceptance Criteria
 
-- [ ] All M10 implementation tickets (TICKET-0276 through TICKET-0284) are DONE
+- [ ] All M10 implementation tickets (TICKET-0276 through TICKET-0284, TICKET-0286) are DONE
 - [ ] Full test suite passes with zero failures
 - [ ] UAT sign-off document produced and saved to
       `docs/studio/reports/YYYY-MM-DD-m10-uat-signoff.md`
@@ -51,6 +51,9 @@ The UAT sign-off document must include testable steps for:
 10. **Animated ping ring** — confirm ring expands and compass markers appear progressively
 11. **Orchestrator --max-turns** — confirm `budget_usd` is gone and `--max-turns` is dispatched correctly
 12. **D-007 follow-up** — confirm producer ticket outcome is recorded
+13. **Resource node respawn** — mine a deposit to depletion, confirm it disappears; wait
+    (or reduce config timer) and confirm it respawns; confirm deep nodes are unaffected;
+    confirm compass ping does not show depleted nodes
 
 ---
 
@@ -63,3 +66,4 @@ The UAT sign-off document must include testable steps for:
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — M10 QA phase gate sign-off
+- 2026-03-03 [producer] Added TICKET-0286 to depends_on and UAT coverage (D-007 respawn)

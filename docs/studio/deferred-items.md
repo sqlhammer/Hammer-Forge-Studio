@@ -1,7 +1,7 @@
 # Deferred Work Items
 
 **Owner:** producer
-**Last Updated:** 2026-03-03 (M10 kickoff — D-001, D-015, D-033, D-034, D-035 scheduled; D-005, D-006, D-008, D-025 closed)
+**Last Updated:** 2026-03-03 (M10 kickoff — D-001, D-015, D-033, D-034, D-035 scheduled; D-005, D-006, D-008, D-025 closed; D-007 requirements confirmed, TICKET-0286 created)
 
 > Tracks gameplay features and systems that were intentionally descoped from a milestone during planning. Each item references the design spec it originates from and the milestone where it was deferred. These items MUST be revisited and scheduled into a future milestone — they are not optional cuts, they are postponed work.
 
@@ -33,7 +33,7 @@
 | D-004 | Ship navigation between biomes | `docs/design/systems/mobile-base.md` | M3 is a single bounded test area — navigation requires biome generation and fuel systems | M8 (Ship Navigation) | Scheduled | TICKET-0159 |
 | D-005 | Resource processing (smelting, refining, crafting components) | `docs/design/gdd.md` | Core loop in M3 ends at collection — processing requires the ship's Extraction Bay module | M5 (Processing & Crafting) | Done | — |
 | D-006 | Build/upgrade from tech tree | `docs/design/gdd.md` | No tech tree in M3 — requires processing pipeline and module system first | M5 (Processing & Crafting) | Done | — |
-| D-007 | Resource node respawning | `docs/design/systems/meaningful-mining.md` | Depleted deposits stay depleted in M3 — respawn mechanics tied to biome balancing | M10 | Scheduled | TICKET-0284 (requirements interview) |
+| D-007 | Resource node respawning — in-biome timed respawn per node; per-resource-type config (default 300 s); depleted nodes hidden/disabled but not freed; deep (infinite) nodes excluded | `docs/design/systems/meaningful-mining.md` | Depleted deposits stay depleted in M3 — respawn mechanics tied to biome balancing | M10 | Scheduled | TICKET-0286 |
 | D-008 | Multiple resource types beyond Scrap Metal | `docs/design/systems/biomes.md` | M3 tutorial zone uses only Scrap Metal — additional resources arrive with new biomes and tool tiers | M5 (Biome Progression) | Done | — |
 | D-009 | Mining drones (mid-game automation) | `docs/design/systems/meaningful-mining.md` | Automation is a mid-game reward — requires drone programming UI, ship Power draw, defense modules | M5 or M6 | Scheduled | TICKET-0072 |
 | D-010 | Tool tiers beyond Hand Drill (Pneumatic, Thermal, Plasma Cutter, Resonance Bore) | `docs/design/systems/meaningful-mining.md` | M3 only has Tier 1 deposits — higher tiers arrive with biome progression | M5 (Biome Progression) | Open | — |

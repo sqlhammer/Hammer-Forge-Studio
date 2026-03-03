@@ -2,12 +2,13 @@
 id: TICKET-0284
 title: "M10 Producer — Interview Studio Head: D-007 resource respawn requirements"
 type: TASK
-status: OPEN
+status: DONE
 priority: P2
 owner: producer
 created_by: producer
 created_at: 2026-03-03
 updated_at: 2026-03-03
+completed_at: 2026-03-03
 milestone: "M10"
 phase: "Implementation"
 depends_on: []
@@ -27,11 +28,11 @@ behavior is desired and, if so, document the requirements.
 
 ## Acceptance Criteria
 
-- [ ] Producer interviews Studio Head and records their answers to the questions below
-- [ ] If additional respawn behavior is desired: document it as a new deferred item or
+- [x] Producer interviews Studio Head and records their answers to the questions below
+- [x] If additional respawn behavior is desired: document it as a new deferred item or
       new M10 ticket (create a follow-up ticket immediately)
-- [ ] If M8's implementation is sufficient: mark D-007 as Done in `docs/studio/deferred-items.md`
-- [ ] This ticket is marked DONE once the decision is recorded and any follow-up is created
+- [x] If M8's implementation is sufficient: mark D-007 as Done in `docs/studio/deferred-items.md`
+- [x] This ticket is marked DONE once the decision is recorded and any follow-up is created
 
 ---
 
@@ -61,3 +62,11 @@ behavior is desired and, if so, document the requirements.
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — M10 producer: D-007 requirements interview
+- 2026-03-03 [producer] Interviewed Studio Head. Recorded answers:
+  1. In-biome timed respawn desired. Each node tracks its own timer from depletion.
+     Default 300 s (5 min) — configurable, not hardcoded, for easy playtesting adjustment.
+  2. Per-resource-type config values; all default to 300 s.
+  3. Deep resource nodes (infinite yield) are excluded — they do not deplete.
+  4. No resource scarcity pressure goal at this phase.
+  Created TICKET-0286 for implementation. Updated D-007 in deferred-items.md → Scheduled/TICKET-0286.
+- 2026-03-03 [producer] Marked DONE

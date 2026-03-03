@@ -2,7 +2,7 @@
 id: TICKET-0298
 title: "M11 Scene-First remediation — GameWorld persistent system nodes (game_world.gd)"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -23,13 +23,13 @@ Move all persistent system nodes created via `.new()` in `game_world.gd` into th
 
 ## Acceptance Criteria
 
-- [ ] `game_world.gd` lines 74–87: move WorldEnvironment and DirectionalLight3D to `game_world.tscn` as scene children; remove `.new()` construction
-- [ ] `game_world.gd` lines 225–244: move Scanner and Mining system nodes to `game_world.tscn`; remove `.new()` construction
-- [ ] `game_world.gd` lines 231–237: move ResourceWheelLayer CanvasLayer + ResourceTypeWheel to `game_world.tscn` (CANVAS_LAYER_NEW violation)
-- [ ] `game_world.gd` lines 272–282: move ShipEnterZone + CollisionShape3D + BoxShape3D to `game_world.tscn`; remove `.new()` construction
-- [ ] `game_world.gd` lines 303–323: move DebugShipBoardingHandler and TravelSequenceManager to `game_world.tscn`; remove `.new()` construction
-- [ ] `game_world.gd` lines 373–385: move DebugOverlay CanvasLayer + Label to `game_world.tscn` (CANVAS_LAYER_NEW/LAYOUT_IN_READY violation)
-- [ ] Replace all programmatic node creation with `@onready var` references; verify game world loads and all systems initialize correctly
+- [x] `game_world.gd` lines 74–87: move WorldEnvironment and DirectionalLight3D to `game_world.tscn` as scene children; remove `.new()` construction
+- [x] `game_world.gd` lines 225–244: move Scanner and Mining system nodes to `game_world.tscn`; remove `.new()` construction
+- [x] `game_world.gd` lines 231–237: move ResourceWheelLayer CanvasLayer + ResourceTypeWheel to `game_world.tscn` (CANVAS_LAYER_NEW violation) — **N/A: ResourceWheelLayer was already refactored into the HUD scene prior to this ticket; no code to remediate**
+- [x] `game_world.gd` lines 272–282: move ShipEnterZone + CollisionShape3D + BoxShape3D to `game_world.tscn`; remove `.new()` construction
+- [x] `game_world.gd` lines 303–323: move DebugShipBoardingHandler and TravelSequenceManager to `game_world.tscn`; remove `.new()` construction
+- [x] `game_world.gd` lines 373–385: move DebugOverlay CanvasLayer + Label to `game_world.tscn` (CANVAS_LAYER_NEW/LAYOUT_IN_READY violation)
+- [x] Replace all programmatic node creation with `@onready var` references; verify game world loads and all systems initialize correctly
 
 ---
 
@@ -48,3 +48,4 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — Phase 2 remediation from M11 GDScript audit report (TICKET-0290)
+- 2026-03-03 [gameplay-programmer] Starting work — moving 6 groups of persistent nodes from game_world.gd into game_world.tscn

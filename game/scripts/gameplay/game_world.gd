@@ -22,6 +22,16 @@ const _BIOME_SCRIPTS: Dictionary = {
 }
 
 
+# ── Onready Variables ─────────────────────────────────────
+
+@onready var _scanner: Scanner = $Scanner
+@onready var _mining: Mining = $Mining
+@onready var _ship_enter_zone: ShipEnterZone = $ShipEnterZone
+@onready var _ship_boarding_handler: DebugShipBoardingHandler = $ShipBoardingHandler
+@onready var _travel_sequence_manager: TravelSequenceManager = $TravelSequenceManager
+@onready var _debug_overlay: CanvasLayer = $DebugOverlay
+
+
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
@@ -40,8 +50,7 @@ func _ready() -> void:
 	if not starting_inv.is_empty():
 		_apply_starting_inventory(starting_inv)
 
-	# Build world structure
-	_add_environment()
+	# Build world structure (WorldEnvironment + Sun are scene children — no code needed)
 	var biome: Node3D = _build_biome(biome_id)
 	if biome == null:
 		push_error("GameWorld: failed to create biome '%s' — aborting world build" % biome_id)
@@ -67,24 +76,6 @@ func _apply_starting_inventory(inventory: Dictionary) -> void:
 		var resource_name: String = ResourceDefs.get_resource_name(resource_type)
 		Global.debug_log("GameWorld: granted %d %s" % [quantity, resource_name])
 	Global.debug_log("GameWorld: starting inventory applied")
-
-
-## Adds environment lighting (sky, ambient, directional light) to this world.
-func _add_environment() -> void:
-	var env: WorldEnvironment = WorldEnvironment.new()
-	env.name = "WorldEnvironment"
-	env.environment = preload("res://environments/default_environment.tres")
-	add_child(env)
-
-	var sun: DirectionalLight3D = DirectionalLight3D.new()
-	sun.name = "Sun"
-	sun.rotation_degrees = Vector3(-45, 30, 0)
-	sun.light_color = Color("#ffe0c0")
-	sun.light_energy = 1.2
-	sun.shadow_enabled = true
-	sun.shadow_opacity = 0.6
-	sun.light_angular_distance = 1.5
-	add_child(sun)
 
 
 ## Builds the biome container and instantiates the selected biome.
@@ -221,28 +212,20 @@ func _setup_gameplay(player: Node3D) -> void:
 	first_person.collision_layer = PhysicsLayers.PLAYER
 	first_person.collision_mask = PhysicsLayers.ENVIRONMENT | PhysicsLayers.INTERACTABLE
 
-	# Scanner
-	var scanner: Scanner = Scanner.new()
-	scanner.name = "Scanner"
-	scanner.setup(camera, first_person)
-	add_child(scanner)
-
-	# Mining
-	var mining: Mining = Mining.new()
-	mining.name = "Mining"
-	mining.setup(camera, first_person, scanner)
-	add_child(mining)
+	# Scanner and Mining are scene children — just call setup()
+	_scanner.setup(camera, first_person)
+	_mining.setup(camera, first_person, _scanner)
 
 	# HUD
 	var hud_scene: PackedScene = preload("res://scenes/ui/game_hud.tscn")
 	var hud: GameHUD = hud_scene.instantiate() as GameHUD
 	hud.name = "HUD"
 	add_child(hud)
-	hud.setup(camera, first_person, scanner, mining)
+	hud.setup(camera, first_person, _scanner, _mining)
 
 	# Wire scanner to the persistent ResourceTypeWheel in the HUD
 	var resource_wheel: ResourceTypeWheel = hud.get_resource_wheel()
-	scanner.set_resource_wheel(resource_wheel)
+	_scanner.set_resource_wheel(resource_wheel)
 
 	# Ship boarding
 	_setup_ship_boarding(first_person, hud)
@@ -254,27 +237,16 @@ func _setup_gameplay(player: Node3D) -> void:
 	_setup_item_drop(first_person, hud)
 
 
-## Creates a ShipEnterZone on the ship and a ShipInterior underground so the player
-## can board the ship. The zone is parented to the ship so it follows automatically.
+## Reparents the scene-authored ShipEnterZone to the Ship, loads a ShipInterior
+## underground, and wires the boarding handler so the player can board the ship.
 func _setup_ship_boarding(first_person: CharacterBody3D, hud: GameHUD) -> void:
 	var ship: Node3D = get_node_or_null("Ship") as Node3D
 	if ship == null:
 		push_error("GameWorld: no Ship node found — cannot set up boarding zone")
 		return
 
-	# Full-hull boarding zone sized to match the ship bounding box
-	var enter_zone := ShipEnterZone.new()
-	enter_zone.name = "ShipEnterZone"
-	enter_zone.collision_layer = 0
-	enter_zone.collision_mask = PhysicsLayers.PLAYER
-	var enter_col := CollisionShape3D.new()
-	var enter_shape := BoxShape3D.new()
-	enter_shape.size = Vector3(28.0, 14.0, 50.0)
-	enter_col.shape = enter_shape
-	enter_col.position = Vector3(0.0, 4.5, 0.0)
-	enter_zone.add_child(enter_col)
-	ship.add_child(enter_zone)
-	enter_zone.add_to_group("interaction_prompt_source")
+	# Reparent scene-authored ShipEnterZone from GameWorld to Ship so it tracks ship position
+	_ship_enter_zone.reparent(ship, false)
 
 	# Ship interior placed underground to isolate from exterior world
 	var interior_scene: PackedScene = load("res://scenes/gameplay/ship_interior.tscn") as PackedScene
@@ -290,20 +262,17 @@ func _setup_ship_boarding(first_person: CharacterBody3D, hud: GameHUD) -> void:
 	# Exterior exit position is ship world position + hull Z-edge offset
 	ship_interior.set_exterior_position(ship.position + Vector3(0.0, 0.0, 24.0))
 
-	# Boarding handler processes E-press input for enter/exit
+	# Boarding handler is a scene child — just call setup()
 	var camera: Camera3D = null
 	if first_person.has_method("get_camera"):
 		camera = first_person.get_camera()
-	var handler := DebugShipBoardingHandler.new()
-	handler.name = "ShipBoardingHandler"
-	add_child(handler)
-	handler.setup(ship_interior, first_person, enter_zone, hud, hud.get_navigation_console(), camera, ship)
+	_ship_boarding_handler.setup(ship_interior, first_person, _ship_enter_zone, hud, hud.get_navigation_console(), camera, ship)
 
 	Global.debug_log("GameWorld: ship boarding zone and interior ready")
 
 
-## Creates a TravelSequenceManager so NavigationSystem.travel_completed triggers
-## the full biome transition (fade out, swap, fade in).
+## Wires the scene-authored TravelSequenceManager so NavigationSystem.travel_completed
+## triggers the full biome transition (fade out, swap, fade in).
 func _setup_travel_sequence(player: Node3D) -> void:
 	var ship: ShipExterior = get_node_or_null("Ship") as ShipExterior
 	var biome_container: Node3D = get_node_or_null("BiomeContent") as Node3D
@@ -312,13 +281,11 @@ func _setup_travel_sequence(player: Node3D) -> void:
 		push_error("GameWorld: cannot set up travel sequence — missing Ship or BiomeContent")
 		return
 
-	var travel_manager: TravelSequenceManager = TravelSequenceManager.new()
-	travel_manager.name = "TravelSequenceManager"
-	add_child(travel_manager)
-	travel_manager.setup(player, ship, biome_container, ship_interior)
+	# TravelSequenceManager is a scene child — just call setup()
+	_travel_sequence_manager.setup(player, ship, biome_container, ship_interior)
 
 	# Update ship interior positions after biome swap
-	travel_manager.travel_sequence_completed.connect(
+	_travel_sequence_manager.travel_sequence_completed.connect(
 		func(destination_id: String) -> void:
 			if ship_interior and ship:
 				var exit_offset: Vector3 = Vector3(0.0, 0.0, 24.0)
@@ -362,18 +329,7 @@ func _setup_item_drop(first_person: CharacterBody3D, hud: GameHUD) -> void:
 	Global.debug_log("GameWorld: item drop handler ready")
 
 
-## Adds a [DEBUG] label overlay visible during sessions with modified starting inventory.
+## Shows the [DEBUG] label overlay for sessions with modified starting inventory.
+## The overlay is authored in game_world.tscn with visible = false by default.
 func _add_debug_overlay() -> void:
-	var overlay: CanvasLayer = CanvasLayer.new()
-	overlay.name = "DebugOverlay"
-	overlay.layer = 10
-
-	var label: Label = Label.new()
-	label.name = "DebugLabel"
-	label.text = "[DEBUG]"
-	label.add_theme_font_size_override("font_size", 24)
-	label.add_theme_color_override("font_color", Color.RED)
-	label.position = Vector2(16, 16)
-	overlay.add_child(label)
-
-	add_child(overlay)
+	_debug_overlay.visible = true

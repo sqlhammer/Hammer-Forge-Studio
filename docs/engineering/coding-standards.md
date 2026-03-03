@@ -2,7 +2,7 @@
 
 **Owner:** systems-programmer
 **Status:** Active
-**Last Updated:** 2026-02-25
+**Last Updated:** 2026-03-03
 **Sources:** Hammer Forge Studio standards + [Godot GDScript Style Guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
 
 > All GDScript produced by any agent must follow these standards. Systems Programmer enforces via code review. The official Godot style guide applies as a baseline; the rules below take precedence wherever they differ.
@@ -119,6 +119,27 @@ Examples of objects that must each be a scene:
 - Subscenes for type variants are allowed (e.g., `deposit_scrap_metal.tscn` inherits from `deposit.tscn`), but the base type must itself be a scene
 - Each scene must be independently openable and runnable in the Godot editor
 
+#### Scene-First Rule (Editor Visibility)
+
+**The Godot editor must reflect the actual runtime structure of the game.** If a node exists at runtime, it must exist in a `.tscn` file and be visible in the editor scene tree. Nodes should not be conjured from script and hidden from the editor.
+
+**Rule:** Do not use `.new()` to create nodes that are persistent or semi-persistent parts of the scene — nodes that are always present and shown/hidden as needed. Author them in the scene editor instead. The only acceptable use of `.new()` at runtime is for truly dynamic objects: entities that are spawned in response to gameplay events and later freed (e.g., projectiles, dropped items, particle effects, enemy instances).
+
+| Situation | Correct approach |
+|-----------|------------------|
+| UI overlay that is shown/hidden (e.g., radial wheel, pause menu, HUD panel) | Author as a persistent node in `.tscn`; start `visible = false`; show/hide from script |
+| Always-present system node (e.g., a manager, a layer, a registry) | Place in scene tree in editor; wire via `@onready` or exported reference |
+| Object spawned dynamically at runtime (e.g., a deposit, a drone, a bullet) | Use `.new()` or `instantiate()` — this is the intended use case |
+| `CanvasLayer` for a persistent overlay | Place in scene as a named child node; do not call `CanvasLayer.new()` in `_ready()` |
+
+**Why this matters:** When nodes are created in script, the editor scene tree is a lie — it shows an empty or skeletal structure that bears no resemblance to what runs in game. This makes debugging, iteration, and visual editing impossible. A designer or engineer must be able to open any scene and immediately understand its runtime structure from the editor alone.
+
+**Symptoms of a violation:**
+- A script's `_ready()` calls `.new()` on a node type and then `add_child()` on the result for a node that is always present
+- A `CanvasLayer`, `Control`, or `Node` is created programmatically and used as a permanent organizational layer
+- A node's anchors, size, or visual properties are set in code because the node was never placed in the editor where layout resolves naturally
+- The editor scene tree looks empty or minimal while the running game has significantly more nodes
+
 #### General Scene Guidelines
 
 - **Break scenes into independently runnable and testable units** — each scene should be playable in isolation where possible
@@ -126,7 +147,7 @@ Examples of objects that must each be a scene:
 - Export configuration variables where it improves editor usability and in-scene testing
 - Use `Marker2D` and `Marker3D` node types for spawn points and important positions — never use raw `Vector2`/`Vector3` constants for locations
 - Use `AnimationPlayer` for animations — never cycle frames in code
-- **Prefer adding nodes directly in scene (.tscn) files over programmatic creation in scripts** — declare node hierarchies and properties in the editor whenever possible. Setting node properties directly in the scene editor is preferred over setting them in code. Scripted node creation and configuration is not forbidden but is not preferred.
+- Set node properties (position, size, anchors, modulate, visibility) in the scene editor, not in `_ready()` — script-based property initialization is a fallback for values that cannot be expressed in the editor, not a default
 
 ---
 
@@ -189,6 +210,8 @@ move_and_collide(Vector2(horizontal_velocity, vertical_velocity))
 - `Marker2D` / `Marker3D` for spawn and reference points
 - `AnimationPlayer` for all animations
 - Named local variables for multi-component expressions before passing to methods
+- Persistent scene nodes for all UI overlays, HUD elements, and system layers — author in `.tscn`, start hidden, show/hide from script
+- `@onready` variables or `@export` node references to wire persistent nodes — never `get_node()` with a magic path to a node that was created in script
 
 ---
 
@@ -205,6 +228,10 @@ move_and_collide(Vector2(horizontal_velocity, vertical_velocity))
 - `extends "res://..."` string-path inheritance — use `class_name` instead
 - Multi-component expressions passed directly as method arguments
 - **Leaving Godot Editor errors or unaddressed warnings in code** — see "Godot Editor Compliance" section
+- **Programmatic creation of persistent nodes** — do not call `.new()` + `add_child()` for nodes that are always present in the scene; author them in the `.tscn` instead (see "Scene-First Rule")
+- **`CanvasLayer.new()` for persistent overlays** — place as a named node in the scene editor; creating organizational layers at runtime makes the editor tree a misleading skeleton
+- **Setting layout properties in code that belong in the editor** — anchors, size, position, visibility, and modulate of persistent nodes must be set in the scene editor, not in `_ready()`
+- **Runtime `_ready()` scene construction** — `_ready()` should wire references and initialize state, not build the scene tree
 
 ---
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" uid="uid://q1ud6g7dowe4" path="res://scripts/ui/game_hud.gd" id="1_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/compass_bar.tscn" id="2_cmp"]
@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/interaction_prompt_hud.tscn" id="15_iph"]
 [ext_resource type="PackedScene" path="res://scenes/ui/navigation_console.tscn" id="16_nav"]
 [ext_resource type="PackedScene" path="res://scenes/ui/fuel_gauge.tscn" id="17_fgl"]
+[ext_resource type="Script" uid="uid://do34j4w8n74hb" path="res://scripts/ui/resource_type_wheel.gd" id="18_rtw"]
 
 [node name="GameHUD" type="CanvasLayer"]
 layer = 1
@@ -106,3 +107,13 @@ grow_vertical = 2
 [node name="NavigationConsole" parent="." instance=ExtResource("16_nav")]
 
 [node name="InteractionPromptHUD" parent="." instance=ExtResource("15_iph")]
+
+[node name="ResourceTypeWheel" type="Control" parent="HUDRoot"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+script = ExtResource("18_rtw")

@@ -25,6 +25,7 @@ var _mining_ref: Mining = null
 @onready var _module_placement_ui: ModulePlacementUI = $ModulePlacementUI
 @onready var _navigation_console: NavigationConsole = $NavigationConsole
 @onready var _interaction_prompt_hud: InteractionPromptHUD = $InteractionPromptHUD
+@onready var _resource_type_wheel: ResourceTypeWheel = $HUDRoot/ResourceTypeWheel
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -135,6 +136,10 @@ func get_interaction_prompt_hud() -> InteractionPromptHUD:
 ## Returns the fuel gauge HUD element.
 func get_fuel_gauge() -> FuelGauge:
 	return _fuel_gauge
+
+## Returns the resource type radial wheel for scanner ping selection.
+func get_resource_wheel() -> ResourceTypeWheel:
+	return _resource_type_wheel
 
 # ── Private Methods ───────────────────────────────────────
 

@@ -7,7 +7,8 @@ const COMPASS_WIDTH: float = 600.0
 const COMPASS_HEIGHT: float = 32.0
 const MARKER_PERSIST_TIME: float = 60.0
 const MARKER_FADE_TIME: float = 2.0
-const DISTANCE_CONE_DEG: float = 45.0
+const DISTANCE_CONE_DEG: float = 45.0  # Used by ship marker only
+const DISTANCE_CONE_HALF_PX: float = (16.0 * 3.0) / 2.0  # 3× ping icon width (must match ping_size), half for each side
 const MAX_MARKERS: int = 30
 
 ## Style colors matching UI style guide
@@ -251,11 +252,9 @@ func _draw_ping_markers(player_yaw: float) -> void:
 			])
 			draw_colored_polygon(tri_points, marker_color)
 
-		# Show distance if facing within cone
-		var angle_diff: float = absf(bearing - player_yaw)
-		if angle_diff > 180.0:
-			angle_diff = 360.0 - angle_diff
-		if angle_diff <= DISTANCE_CONE_DEG / 2.0:
+		# Show distance if marker is near compass center (pixel-space check)
+		var center_x: float = COMPASS_WIDTH / 2.0
+		if absf(screen_x - center_x) <= DISTANCE_CONE_HALF_PX:
 			var dist: float = player_pos.distance_to(deposit.global_position)
 			var dist_text: String = "%dm" % int(dist)
 			var text_size: Vector2 = _font_mono.get_string_size(dist_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 18)

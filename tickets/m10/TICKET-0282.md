@@ -27,25 +27,25 @@ spatial reference for why markers appear progressively over several seconds.
 ## Acceptance Criteria
 
 ### Ping Ring VFX
-- [ ] A visual ring originates at the player position on ping fire and expands outward
-- [ ] Ring expansion speed is constant and matches the marker reveal rate exactly
-- [ ] Ring has a hard cap at 1000 m radius, then fades out
-- [ ] Ring is visible in first-person and third-person views
-- [ ] Ring does not obscure gameplay or interfere with the player's ability to see deposits
+- [x] A visual ring originates at the player position on ping fire and expands outward
+- [x] Ring expansion speed is constant and matches the marker reveal rate exactly
+- [x] Ring has a hard cap at 1000 m radius, then fades out
+- [x] Ring is visible in first-person and third-person views
+- [x] Ring does not obscure gameplay or interfere with the player's ability to see deposits
 
 ### Progressive Marker Reveal
-- [ ] Compass markers for pinged deposits appear only when the expanding ping front
+- [x] Compass markers for pinged deposits appear only when the expanding ping front
       reaches their world position, not immediately on ping fire
-- [ ] Reveal timing is derived from `distance / ping_speed` — no separate timer per deposit
-- [ ] Deposits beyond the 1000 m range cap are never revealed by this ping
-- [ ] Multiple deposits at similar distances appear within the same frame (acceptable) —
+- [x] Reveal timing is derived from `distance / ping_speed` — no separate timer per deposit
+- [x] Deposits beyond the 1000 m range cap are never revealed by this ping
+- [x] Multiple deposits at similar distances appear within the same frame (acceptable) —
       do not artificially serialize reveals that happen within the same tick
 
 ### No Regressions
-- [ ] `ping_completed` signal still emits (may fire at ring-start with full deposit list;
+- [x] `ping_completed` signal still emits (may fire at ring-start with full deposit list;
       the progressive reveal is a visual layer only — underlying data is still computed upfront)
-- [ ] Ping cooldown still applies from the moment ping fires, not when the ring finishes
-- [ ] Existing compass and HUD code that consumes `ping_completed` still works correctly
+- [x] Ping cooldown still applies from the moment ping fires, not when the ring finishes
+- [x] Existing compass and HUD code that consumes `ping_completed` still works correctly
 
 ---
 
@@ -67,10 +67,11 @@ Suggested `PING_SPEED = 100.0` m/s — ring reaches max range in 10 seconds. Tun
 
 ## Handoff Notes
 
-- Modified `game/scripts/gameplay/scanner.gd`: Replaced tween-based ring with frame-driven propagation system. Added `deposit_ping_revealed` signal, `PING_SPEED` (100 m/s), updated `PING_RANGE` (320→1000m). New methods: `_start_ping_propagation()`, `_update_ping_propagation()`, `_stop_ping_propagation()`. Ring expands at constant speed, deposits revealed progressively as ring reaches them.
+- Modified `game/scripts/gameplay/scanner.gd`: Replaced tween-based ring with frame-driven propagation system. Added `deposit_ping_revealed` signal, `PING_SPEED` (100 m/s), updated `PING_RANGE` (320->1000m). New methods: `_start_ping_propagation()`, `_update_ping_propagation()`, `_stop_ping_propagation()`. Ring expands at constant speed, deposits revealed progressively as ring reaches them.
 - Modified `game/scripts/ui/game_hud.gd`: Connected `deposit_ping_revealed` signal. Compass markers now added one-by-one as ring reaches each deposit instead of all at once on `ping_completed`.
 - Modified `game/tests/test_scanner_unit.gd`: Updated PING_RANGE assertion from 320.0 to 1000.0.
 - `ping_completed` still fires immediately with full deposit list — no regression to downstream consumers.
+- Commit: `ba2900d`, PR: #314
 
 ---
 

@@ -3,4 +3,293 @@
 [ext_resource type="Script" path="res://scripts/ui/navigation_console.gd" id="1_nav"]
 
 [node name="NavigationConsole" type="CanvasLayer"]
+layer = 2
+process_mode = 1
+visible = false
 script = ExtResource("1_nav")
+
+[node name="DimLayer" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="DimRect" type="ColorRect" parent="DimLayer"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Center" type="CenterContainer" parent="DimLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainPanel" type="PanelContainer" parent="DimLayer/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(900, 600)
+pivot_offset = Vector2(450, 300)
+
+[node name="OuterVBox" type="VBoxContainer" parent="DimLayer/Center/MainPanel"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="TitleRow" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/TitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "NAVIGATION CONSOLE"
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="CloseButton" type="Button" parent="DimLayer/Center/MainPanel/OuterVBox/TitleRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 32)
+text = "CLOSE"
+theme_override_font_sizes/font_size = 16
+
+[node name="Divider1" type="HSeparator" parent="DimLayer/Center/MainPanel/OuterVBox"]
+layout_mode = 2
+
+[node name="ContentHBox" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="MapColumn" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(540, 0)
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="MapHeader" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/MapColumn"]
+layout_mode = 2
+text = "BIOME MAP"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="MapPanel" type="PanelContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/MapColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MapVBox" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/MapColumn/MapPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="CurrentBiomePanel" type="PanelContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/MapColumn/MapPanel/MapVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 40)
+size_flags_horizontal = 4
+
+[node name="CurrentBiomeLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/MapColumn/MapPanel/MapVBox/CurrentBiomePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="PathLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/MapColumn/MapPanel/MapVBox"]
+layout_mode = 2
+text = "│"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0.478, 0.388, 1)
+
+[node name="DestRow" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/MapColumn/MapPanel/MapVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="VDivider" type="VSeparator" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox"]
+layout_mode = 2
+
+[node name="DetailScroll" type="ScrollContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(300, 0)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="DetailColumn" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="FuelHeader" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+layout_mode = 2
+text = "SHIP FUEL"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="FuelTankLevelLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="FuelInventoryCountLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="LoadFuelButton" type="Button" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(200, 40)
+text = "LOAD FUEL CELLS"
+theme_override_font_sizes/font_size = 16
+
+[node name="FuelStatusLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.29, 0.871, 0.502, 1)
+
+[node name="FuelDivider" type="HSeparator" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+layout_mode = 2
+
+[node name="DestinationHeader" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+layout_mode = 2
+text = "DESTINATION"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="DestinationDivider" type="HSeparator" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+layout_mode = 2
+
+[node name="DetailPromptLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Select a destination"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="DetailNameLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="DetailTierLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="DetailDivider" type="HSeparator" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+layout_mode = 2
+
+[node name="DetailDistanceLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+text = "Distance"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="DetailDistanceValue" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="DetailFuelCostLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+text = "Estimated Fuel Cost"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="DetailFuelCostValue" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="DetailYourFuelLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+text = "Ship Tank"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="DetailYourFuelValue" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+theme_override_font_sizes/font_size = 22
+
+[node name="DetailSufficiencyLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+theme_override_font_sizes/font_size = 14
+
+[node name="SufficiencyDivider" type="HSeparator" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+layout_mode = 2
+
+[node name="ButtonCenter" type="CenterContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+layout_mode = 2
+
+[node name="ConfirmButton" type="Button" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn/ButtonCenter"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(240, 52)
+disabled = true
+text = "CONFIRM TRAVEL"
+theme_override_font_sizes/font_size = 20
+
+[node name="ConfirmDisabledReason" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ContentHBox/DetailScroll/DetailColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 0.42, 0.353, 1)
+
+[node name="Divider2" type="HSeparator" parent="DimLayer/Center/MainPanel/OuterVBox"]
+layout_mode = 2
+
+[node name="ActionBar" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 60)
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="Instructions" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ActionBar"]
+layout_mode = 2
+text = "[Arrows] Select  [Enter] Confirm  [Esc] Close"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="CancelButton" type="Button" parent="DimLayer/Center/MainPanel/OuterVBox/ActionBar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 40)
+text = "CANCEL"
+theme_override_font_sizes/font_size = 20

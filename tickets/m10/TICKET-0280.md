@@ -2,7 +2,7 @@
 id: TICKET-0280
 title: "M10 Feel — Ship boarding requires aiming at ship exterior mesh (D-034)"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -68,3 +68,4 @@ against the hull to board — the current trigger zone range is the right refere
 
 - 2026-03-03 [producer] Created ticket — M10 feel: ship boarding raycast (D-034)
 - 2026-03-03 [gameplay-programmer] Starting work — adding camera-forward raycast to ship boarding handler
+- 2026-03-03 [gameplay-programmer] DONE — commit c7647af, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/303

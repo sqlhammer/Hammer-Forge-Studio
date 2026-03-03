@@ -1,6 +1,58 @@
-[gd_scene load_steps=2 format=3 uid="uid://clmabt0he2jjf"]
+[gd_scene load_steps=9 format=3 uid="uid://clmabt0he2jjf"]
 
 [ext_resource type="Script" uid="uid://cr5s7m4bvxa1p" path="res://scripts/gameplay/game_world.gd" id="1_script"]
+[ext_resource type="Environment" uid="uid://c1ryqvhryu6em" path="res://environments/default_environment.tres" id="2_env"]
+[ext_resource type="Script" uid="uid://cfvi7t4vuvr37" path="res://scripts/gameplay/scanner.gd" id="3_scanner"]
+[ext_resource type="Script" uid="uid://c8geg1quinsr6" path="res://scripts/gameplay/mining.gd" id="4_mining"]
+[ext_resource type="Script" uid="uid://bx2vk7t8cxoxy" path="res://scripts/gameplay/ship_enter_zone.gd" id="5_enter_zone"]
+[ext_resource type="Script" uid="uid://dkb8r5h3jl4a8" path="res://scripts/gameplay/debug_ship_boarding_handler.gd" id="6_boarding"]
+[ext_resource type="Script" uid="uid://bjyqdjdejdh0d" path="res://scripts/gameplay/travel_sequence_manager.gd" id="7_travel"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_enter"]
+size = Vector3(28, 14, 50)
 
 [node name="GameWorld" type="Node3D"]
 script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("2_env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0, -0.5, -0.353553, 0.707107, -0.612372, 0.353553, 0.707107, 0.612372, 0, 0, 0)
+light_color = Color(1, 0.878431, 0.752941, 1)
+light_energy = 1.2
+light_angular_distance = 1.5
+shadow_enabled = true
+shadow_opacity = 0.6
+
+[node name="Scanner" type="Node" parent="."]
+script = ExtResource("3_scanner")
+
+[node name="Mining" type="Node" parent="."]
+script = ExtResource("4_mining")
+
+[node name="ShipEnterZone" type="Area3D" parent="." groups=["interaction_prompt_source"]]
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("5_enter_zone")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ShipEnterZone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+shape = SubResource("BoxShape3D_enter")
+
+[node name="ShipBoardingHandler" type="Node" parent="."]
+script = ExtResource("6_boarding")
+
+[node name="TravelSequenceManager" type="Node" parent="."]
+script = ExtResource("7_travel")
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+layer = 10
+visible = false
+
+[node name="DebugLabel" type="Label" parent="DebugOverlay"]
+offset_left = 16.0
+offset_top = 16.0
+text = "[DEBUG]"
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_font_sizes/font_size = 24

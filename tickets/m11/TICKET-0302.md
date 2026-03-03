@@ -2,7 +2,7 @@
 id: TICKET-0302
 title: "M11 Standards remediation — Add element types to Array declarations and type loop variables (6 files)"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: systems-programmer
 created_by: producer
@@ -46,7 +46,7 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+Note: `FabricatorDefs.get_inputs()` still returns untyped `Array` — the `Array[Dictionary]` assignment in fabricator_panel.gd relies on Godot's runtime type coercion. A follow-up ticket could type that return value as well.
 
 ---
 
@@ -54,3 +54,4 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 
 - 2026-03-03 [producer] Created ticket — Phase 2 remediation from M11 GDScript audit report (TICKET-0290)
 - 2026-03-03 [systems-programmer] Starting work — applying type annotations across 6 files
+- 2026-03-03 [systems-programmer] DONE — commit 6774873, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/322 (merged)

@@ -2,7 +2,7 @@
 id: TICKET-0288
 title: "M10 Compass — Narrow resource distance readout cone to 3× ping icon width"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -98,3 +98,4 @@ const DISTANCE_CONE_HALF_PX: float = (PING_ICON_SIZE * 3.0) / 2.0
 
 - 2026-03-03 [producer] Created ticket — narrow compass distance readout cone to 3× ping icon width
 - 2026-03-03 [gameplay-programmer] Starting work — implementing pixel-space cone check
+- 2026-03-03 [gameplay-programmer] DONE — commit 03a6f06, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/318 (merged)

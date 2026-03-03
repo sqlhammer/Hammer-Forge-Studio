@@ -3,4 +3,307 @@
 [ext_resource type="Script" uid="uid://bvvc1vya8yhwh" path="res://scripts/ui/automation_hub_panel.gd" id="1_ahp"]
 
 [node name="AutomationHubPanel" type="CanvasLayer"]
+layer = 2
+visible = false
 script = ExtResource("1_ahp")
+
+[node name="DimLayer" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="DimRect" type="ColorRect" parent="DimLayer"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Center" type="CenterContainer" parent="DimLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainPanel" type="PanelContainer" parent="DimLayer/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(900, 620)
+pivot_offset = Vector2(450, 310)
+
+[node name="OuterVBox" type="VBoxContainer" parent="DimLayer/Center/MainPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox"]
+layout_mode = 2
+text = "AUTOMATION HUB"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="TitleDivider" type="HSeparator" parent="DimLayer/Center/MainPanel/OuterVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ColumnsHBox" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="ConfigColumn" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(520, 0)
+theme_override_constants/separation = 8
+
+[node name="ConfigHeader" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn"]
+layout_mode = 2
+text = "DRONE PROGRAM"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="DepositTypeRow" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+theme_override_constants/separation = 4
+
+[node name="DepositTypeTitle" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/DepositTypeRow"]
+layout_mode = 2
+text = "TARGET: DEPOSIT TYPE"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="DepositTypeHBox" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/DepositTypeRow"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LeftArrow" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/DepositTypeRow/DepositTypeHBox"]
+layout_mode = 2
+text = "<"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="DepositTypeLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/DepositTypeRow/DepositTypeHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="RightArrow" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/DepositTypeRow/DepositTypeHBox"]
+layout_mode = 2
+text = ">"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="PurityRow" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+theme_override_constants/separation = 4
+
+[node name="PurityTitle" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/PurityRow"]
+layout_mode = 2
+text = "MIN PURITY"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="PurityHBox" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/PurityRow"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LeftArrow" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/PurityRow/PurityHBox"]
+layout_mode = 2
+text = "<"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="PurityLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/PurityRow/PurityHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="RightArrow" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/PurityRow/PurityHBox"]
+layout_mode = 2
+text = ">"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="TierRow" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+theme_override_constants/separation = 4
+
+[node name="TierTitle" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/TierRow"]
+layout_mode = 2
+text = "TOOL TIER"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="TierHBox" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/TierRow"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LeftArrow" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/TierRow/TierHBox"]
+layout_mode = 2
+text = "<"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="ToolTierLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/TierRow/TierHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="RightArrow" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/TierRow/TierHBox"]
+layout_mode = 2
+text = ">"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="RadiusRow" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+theme_override_constants/separation = 4
+
+[node name="RadiusTitle" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/RadiusRow"]
+layout_mode = 2
+text = "EXTRACTION RADIUS"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="RadiusHBox" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/RadiusRow"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RadiusSlider" type="HSlider" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/RadiusRow/RadiusHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(350, 20)
+min_value = 50.0
+max_value = 500.0
+step = 25.0
+value = 200.0
+
+[node name="RadiusValueLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/RadiusRow/RadiusHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(60, 0)
+text = "200m"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="PriorityRow" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+theme_override_constants/separation = 4
+
+[node name="PriorityTitle" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/PriorityRow"]
+layout_mode = 2
+text = "PRIORITY"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="PriorityHBox" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/PriorityRow"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LeftArrow" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/PriorityRow/PriorityHBox"]
+layout_mode = 2
+text = "<"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="PriorityLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/PriorityRow/PriorityHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="RightArrow" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn/PriorityRow/PriorityHBox"]
+layout_mode = 2
+text = ">"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="PoolStatsLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="ActivateButton" type="Button" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/ConfigColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+text = "ACTIVATE DRONES"
+theme_override_font_sizes/font_size = 18
+
+[node name="VerticalDivider" type="VSeparator" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="StatusColumn" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(340, 0)
+theme_override_constants/separation = 8
+
+[node name="ActiveDronesLabel" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/StatusColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="StatusDivider" type="HSeparator" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/StatusColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DroneStatusContainer" type="VBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/StatusColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Spacer" type="Control" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/StatusColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DeactivateButton" type="Button" parent="DimLayer/Center/MainPanel/OuterVBox/ColumnsHBox/StatusColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+visible = false
+text = "DEACTIVATE DRONES"
+theme_override_font_sizes/font_size = 16
+
+[node name="Footer" type="HBoxContainer" parent="DimLayer/Center/MainPanel/OuterVBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="Instructions" type="Label" parent="DimLayer/Center/MainPanel/OuterVBox/Footer"]
+layout_mode = 2
+text = "[Up/Down] Navigate  [Left/Right] Adjust  [Enter] Activate  [Esc] Close"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="CloseButton" type="Button" parent="DimLayer/Center/MainPanel/OuterVBox/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 32)
+text = "Close"
+theme_override_font_sizes/font_size = 14

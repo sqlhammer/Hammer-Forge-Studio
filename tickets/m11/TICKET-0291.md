@@ -2,7 +2,7 @@
 id: TICKET-0291
 title: "M11 Scene-First remediation — Ship Machine Panels (recycler_panel, fabricator_panel, automation_hub_panel)"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -45,3 +45,4 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — Phase 2 remediation from M11 GDScript audit report (TICKET-0290)
+- 2026-03-03 [gameplay-programmer] Starting work — refactoring recycler_panel, fabricator_panel, automation_hub_panel to scene-first pattern

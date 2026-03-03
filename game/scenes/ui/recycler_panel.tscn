@@ -3,4 +3,232 @@
 [ext_resource type="Script" uid="uid://c7udgomx88usx" path="res://scripts/ui/recycler_panel.gd" id="1_rec"]
 
 [node name="RecyclerPanel" type="CanvasLayer"]
+layer = 3
+visible = false
 script = ExtResource("1_rec")
+
+[node name="DimLayer" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="DimRect" type="ColorRect" parent="DimLayer"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Center" type="CenterContainer" parent="DimLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainPanel" type="PanelContainer" parent="DimLayer/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(480, 400)
+pivot_offset = Vector2(240, 200)
+
+[node name="VBox" type="VBoxContainer" parent="DimLayer/Center/MainPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="DimLayer/Center/MainPanel/VBox"]
+layout_mode = 2
+text = "RECYCLER"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="StatusLabel" type="Label" parent="DimLayer/Center/MainPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Ready"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="Divider" type="HSeparator" parent="DimLayer/Center/MainPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SlotRow" type="CenterContainer" parent="DimLayer/Center/MainPanel/VBox"]
+layout_mode = 2
+
+[node name="SlotHBox" type="HBoxContainer" parent="DimLayer/Center/MainPanel/VBox/SlotRow"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="InputContainer" type="VBoxContainer" parent="DimLayer/Center/MainPanel/VBox/SlotRow/SlotHBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="InputHeader" type="Label" parent="DimLayer/Center/MainPanel/VBox/SlotRow/SlotHBox/InputContainer"]
+layout_mode = 2
+text = "INPUT"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="InputSlot" type="PanelContainer" parent="DimLayer/Center/MainPanel/VBox/SlotRow/SlotHBox/InputContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(72, 72)
+
+[node name="InputIcon" type="TextureRect" parent="DimLayer/Center/MainPanel/VBox/SlotRow/SlotHBox/InputContainer/InputSlot"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 40)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+
+[node name="InputCountLabel" type="Label" parent="DimLayer/Center/MainPanel/VBox/SlotRow/SlotHBox/InputContainer/InputSlot"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Arrow" type="Label" parent="DimLayer/Center/MainPanel/VBox/SlotRow/SlotHBox"]
+layout_mode = 2
+text = "→"
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="OutputContainer" type="VBoxContainer" parent="DimLayer/Center/MainPanel/VBox/SlotRow/SlotHBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="OutputHeader" type="Label" parent="DimLayer/Center/MainPanel/VBox/SlotRow/SlotHBox/OutputContainer"]
+layout_mode = 2
+text = "OUTPUT"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="OutputSlot" type="PanelContainer" parent="DimLayer/Center/MainPanel/VBox/SlotRow/SlotHBox/OutputContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(72, 72)
+
+[node name="OutputIcon" type="TextureRect" parent="DimLayer/Center/MainPanel/VBox/SlotRow/SlotHBox/OutputContainer/OutputSlot"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 40)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+
+[node name="OutputCountLabel" type="Label" parent="DimLayer/Center/MainPanel/VBox/SlotRow/SlotHBox/OutputContainer/OutputSlot"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="RecipeLabel" type="Label" parent="DimLayer/Center/MainPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="ProgressSection" type="VBoxContainer" parent="DimLayer/Center/MainPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ProgressBar" type="ProgressBar" parent="DimLayer/Center/MainPanel/VBox/ProgressSection"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 16)
+max_value = 1.0
+value = 0.0
+show_percentage = false
+
+[node name="ProgressLabel" type="Label" parent="DimLayer/Center/MainPanel/VBox/ProgressSection"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="ButtonRow" type="CenterContainer" parent="DimLayer/Center/MainPanel/VBox"]
+layout_mode = 2
+
+[node name="ButtonHBox" type="HBoxContainer" parent="DimLayer/Center/MainPanel/VBox/ButtonRow"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="StartButton" type="Button" parent="DimLayer/Center/MainPanel/VBox/ButtonRow/ButtonHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(140, 40)
+text = "START"
+theme_override_font_sizes/font_size = 20
+
+[node name="CollectButton" type="Button" parent="DimLayer/Center/MainPanel/VBox/ButtonRow/ButtonHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(140, 40)
+text = "COLLECT"
+theme_override_font_sizes/font_size = 20
+
+[node name="FeedbackLabel" type="Label" parent="DimLayer/Center/MainPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 0.42, 0.353, 1)
+
+[node name="AvailableLabel" type="Label" parent="DimLayer/Center/MainPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="Footer" type="HBoxContainer" parent="DimLayer/Center/MainPanel/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="Instructions" type="Label" parent="DimLayer/Center/MainPanel/VBox/Footer"]
+layout_mode = 2
+text = "[Esc] Close"
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="CloseButton" type="Button" parent="DimLayer/Center/MainPanel/VBox/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 32)
+text = "Close"
+theme_override_font_sizes/font_size = 14

@@ -1,11 +1,651 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=47 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/ship_interior.gd" id="1_rhr8w"]
 [ext_resource type="PackedScene" path="res://scenes/objects/cockpit_console.tscn" id="5_cockpit_console"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/ship_status_display.tscn" id="6_display"]
+[ext_resource type="Script" path="res://scripts/gameplay/ship_exit_zone.gd" id="7_exit"]
+[ext_resource type="Script" path="res://scripts/gameplay/cockpit_console_prompt_area.gd" id="8_console"]
+
+[sub_resource type="StandardMaterial3D" id="mat_floor"]
+albedo_color = Color(0.290196, 0.290196, 0.290196, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="mat_dark"]
+albedo_color = Color(0.164706, 0.164706, 0.164706, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="mat_machine"]
+albedo_color = Color(0.2, 0.2, 0.2, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="mat_corridor"]
+albedo_color = Color(0.333333, 0.333333, 0.333333, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="mat_zone_0"]
+transparency = 1
+albedo_color = Color(0, 0.831373, 0.666667, 0.3)
+emission_enabled = true
+emission = Color(0, 0.831373, 0.666667, 1)
+emission_energy_multiplier = 0.3
+
+[sub_resource type="StandardMaterial3D" id="mat_zone_1"]
+transparency = 1
+albedo_color = Color(0, 0.831373, 0.666667, 0.3)
+emission_enabled = true
+emission = Color(0, 0.831373, 0.666667, 1)
+emission_energy_multiplier = 0.3
+
+[sub_resource type="StandardMaterial3D" id="mat_zone_2"]
+transparency = 1
+albedo_color = Color(0, 0.831373, 0.666667, 0.3)
+emission_enabled = true
+emission = Color(0, 0.831373, 0.666667, 1)
+emission_energy_multiplier = 0.3
+
+[sub_resource type="StandardMaterial3D" id="mat_zone_3"]
+transparency = 1
+albedo_color = Color(0, 0.831373, 0.666667, 0.3)
+emission_enabled = true
+emission = Color(0, 0.831373, 0.666667, 1)
+emission_energy_multiplier = 0.3
+
+[sub_resource type="StandardMaterial3D" id="mat_terminal"]
+albedo_color = Color(0.164706, 0.290196, 0.290196, 1)
+emission_enabled = true
+emission = Color(0, 0.831373, 0.666667, 1)
+emission_energy_multiplier = 0.4
+
+[sub_resource type="StandardMaterial3D" id="mat_viewport"]
+shading_mode = 2
+
+[sub_resource type="BoxMesh" id="bm_12_01_12"]
+size = Vector3(12, 0.1, 12)
+
+[sub_resource type="BoxMesh" id="bm_12_01_6"]
+size = Vector3(12, 0.1, 6)
+
+[sub_resource type="BoxMesh" id="bm_4_01_2"]
+size = Vector3(4, 0.1, 2)
+
+[sub_resource type="BoxMesh" id="bm_4_01_4"]
+size = Vector3(4, 0.1, 4)
+
+[sub_resource type="BoxMesh" id="bm_02_3_12"]
+size = Vector3(0.2, 3, 12)
+
+[sub_resource type="BoxMesh" id="bm_4_3_02"]
+size = Vector3(4, 3, 0.2)
+
+[sub_resource type="BoxMesh" id="bm_02_3_6"]
+size = Vector3(0.2, 3, 6)
+
+[sub_resource type="BoxMesh" id="bm_4_15_02"]
+size = Vector3(4, 1.5, 0.2)
+
+[sub_resource type="BoxMesh" id="bm_02_3_2"]
+size = Vector3(0.2, 3, 2)
+
+[sub_resource type="BoxMesh" id="bm_4_3_2"]
+size = Vector3(4, 3, 2)
+
+[sub_resource type="BoxMesh" id="bm_02_3_4"]
+size = Vector3(0.2, 3, 4)
+
+[sub_resource type="BoxMesh" id="bm_42_01_01"]
+size = Vector3(4.2, 0.1, 0.1)
+
+[sub_resource type="BoxMesh" id="bm_01_15_01"]
+size = Vector3(0.1, 1.5, 0.1)
+
+[sub_resource type="BoxMesh" id="bm_terminal"]
+size = Vector3(1, 1.5, 0.3)
+
+[sub_resource type="PlaneMesh" id="pm_zone"]
+size = Vector2(3, 3)
+
+[sub_resource type="QuadMesh" id="qm_viewport"]
+size = Vector2(4, 1.5)
+
+[sub_resource type="BoxShape3D" id="bs_12_01_12"]
+size = Vector3(12, 0.1, 12)
+
+[sub_resource type="BoxShape3D" id="bs_12_01_6"]
+size = Vector3(12, 0.1, 6)
+
+[sub_resource type="BoxShape3D" id="bs_4_01_2"]
+size = Vector3(4, 0.1, 2)
+
+[sub_resource type="BoxShape3D" id="bs_4_01_4"]
+size = Vector3(4, 0.1, 4)
+
+[sub_resource type="BoxShape3D" id="bs_02_3_12"]
+size = Vector3(0.2, 3, 12)
+
+[sub_resource type="BoxShape3D" id="bs_4_3_02"]
+size = Vector3(4, 3, 0.2)
+
+[sub_resource type="BoxShape3D" id="bs_02_3_6"]
+size = Vector3(0.2, 3, 6)
+
+[sub_resource type="BoxShape3D" id="bs_4_15_02"]
+size = Vector3(4, 1.5, 0.2)
+
+[sub_resource type="BoxShape3D" id="bs_02_3_2"]
+size = Vector3(0.2, 3, 2)
+
+[sub_resource type="BoxShape3D" id="bs_4_3_2"]
+size = Vector3(4, 3, 2)
+
+[sub_resource type="BoxShape3D" id="bs_02_3_4"]
+size = Vector3(0.2, 3, 4)
+
+[sub_resource type="BoxShape3D" id="bs_zone"]
+size = Vector3(4, 2, 4)
+
+[sub_resource type="BoxShape3D" id="bs_exit"]
+size = Vector3(4, 2, 1)
+
+[sub_resource type="BoxShape3D" id="bs_terminal_area"]
+size = Vector3(2, 2, 1.5)
+
+[sub_resource type="BoxShape3D" id="bs_console_area"]
+size = Vector3(3, 2, 2)
 
 [node name="ShipInterior" type="Node3D"]
 script = ExtResource("1_rhr8w")
+
+[node name="MachineRoomFloor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 2)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MachineRoomFloor"]
+mesh = SubResource("bm_12_01_12")
+material_override = SubResource("mat_floor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MachineRoomFloor"]
+shape = SubResource("bs_12_01_12")
+
+[node name="CockpitFloor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -9)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CockpitFloor"]
+mesh = SubResource("bm_12_01_6")
+material_override = SubResource("mat_floor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CockpitFloor"]
+shape = SubResource("bs_12_01_6")
+
+[node name="CorridorFloor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -5)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CorridorFloor"]
+mesh = SubResource("bm_4_01_2")
+material_override = SubResource("mat_corridor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CorridorFloor"]
+shape = SubResource("bs_4_01_2")
+
+[node name="VestibuleFloor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 10)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VestibuleFloor"]
+mesh = SubResource("bm_4_01_4")
+material_override = SubResource("mat_corridor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VestibuleFloor"]
+shape = SubResource("bs_4_01_4")
+
+[node name="MachineRoomCeiling" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 2)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MachineRoomCeiling"]
+mesh = SubResource("bm_12_01_12")
+material_override = SubResource("mat_dark")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MachineRoomCeiling"]
+shape = SubResource("bs_12_01_12")
+
+[node name="CockpitCeiling" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -9)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CockpitCeiling"]
+mesh = SubResource("bm_12_01_6")
+material_override = SubResource("mat_dark")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CockpitCeiling"]
+shape = SubResource("bs_12_01_6")
+
+[node name="CorridorCeiling" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -5)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CorridorCeiling"]
+mesh = SubResource("bm_4_01_2")
+material_override = SubResource("mat_dark")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CorridorCeiling"]
+shape = SubResource("bs_4_01_2")
+
+[node name="VestibuleCeiling" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 10)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VestibuleCeiling"]
+mesh = SubResource("bm_4_01_4")
+material_override = SubResource("mat_dark")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VestibuleCeiling"]
+shape = SubResource("bs_4_01_4")
+
+[node name="MachineRoomWallWest" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.5, 2)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MachineRoomWallWest"]
+mesh = SubResource("bm_02_3_12")
+material_override = SubResource("mat_machine")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MachineRoomWallWest"]
+shape = SubResource("bs_02_3_12")
+
+[node name="MachineRoomWallEast" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, 2)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MachineRoomWallEast"]
+mesh = SubResource("bm_02_3_12")
+material_override = SubResource("mat_machine")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MachineRoomWallEast"]
+shape = SubResource("bs_02_3_12")
+
+[node name="MachineRoomWallNorthLeft" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, -4)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MachineRoomWallNorthLeft"]
+mesh = SubResource("bm_4_3_02")
+material_override = SubResource("mat_machine")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MachineRoomWallNorthLeft"]
+shape = SubResource("bs_4_3_02")
+
+[node name="MachineRoomWallNorthRight" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.5, -4)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MachineRoomWallNorthRight"]
+mesh = SubResource("bm_4_3_02")
+material_override = SubResource("mat_machine")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MachineRoomWallNorthRight"]
+shape = SubResource("bs_4_3_02")
+
+[node name="MachineRoomWallSouthLeft" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, 8)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MachineRoomWallSouthLeft"]
+mesh = SubResource("bm_4_3_02")
+material_override = SubResource("mat_machine")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MachineRoomWallSouthLeft"]
+shape = SubResource("bs_4_3_02")
+
+[node name="MachineRoomWallSouthRight" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.5, 8)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MachineRoomWallSouthRight"]
+mesh = SubResource("bm_4_3_02")
+material_override = SubResource("mat_machine")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MachineRoomWallSouthRight"]
+shape = SubResource("bs_4_3_02")
+
+[node name="CockpitWallWest" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1.5, -9)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CockpitWallWest"]
+mesh = SubResource("bm_02_3_6")
+material_override = SubResource("mat_dark")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CockpitWallWest"]
+shape = SubResource("bs_02_3_6")
+
+[node name="CockpitWallEast" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, -9)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CockpitWallEast"]
+mesh = SubResource("bm_02_3_6")
+material_override = SubResource("mat_dark")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CockpitWallEast"]
+shape = SubResource("bs_02_3_6")
+
+[node name="CockpitWallNorthLeft" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, -12)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CockpitWallNorthLeft"]
+mesh = SubResource("bm_4_3_02")
+material_override = SubResource("mat_dark")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CockpitWallNorthLeft"]
+shape = SubResource("bs_4_3_02")
+
+[node name="CockpitWallNorthRight" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.5, -12)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CockpitWallNorthRight"]
+mesh = SubResource("bm_4_3_02")
+material_override = SubResource("mat_dark")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CockpitWallNorthRight"]
+shape = SubResource("bs_4_3_02")
+
+[node name="CockpitWallNorthBelow" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, -12)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CockpitWallNorthBelow"]
+mesh = SubResource("bm_4_15_02")
+material_override = SubResource("mat_dark")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CockpitWallNorthBelow"]
+shape = SubResource("bs_4_15_02")
+
+[node name="CockpitWallSouthLeft" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, -6)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CockpitWallSouthLeft"]
+mesh = SubResource("bm_4_3_02")
+material_override = SubResource("mat_dark")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CockpitWallSouthLeft"]
+shape = SubResource("bs_4_3_02")
+
+[node name="CockpitWallSouthRight" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.5, -6)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CockpitWallSouthRight"]
+mesh = SubResource("bm_4_3_02")
+material_override = SubResource("mat_dark")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CockpitWallSouthRight"]
+shape = SubResource("bs_4_3_02")
+
+[node name="CorridorWallWest" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.5, -5)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CorridorWallWest"]
+mesh = SubResource("bm_02_3_2")
+material_override = SubResource("mat_corridor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CorridorWallWest"]
+shape = SubResource("bs_02_3_2")
+
+[node name="CorridorWallEast" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.5, -5)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CorridorWallEast"]
+mesh = SubResource("bm_02_3_2")
+material_override = SubResource("mat_corridor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CorridorWallEast"]
+shape = SubResource("bs_02_3_2")
+
+[node name="CorridorFillWest" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, -5)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CorridorFillWest"]
+mesh = SubResource("bm_4_3_2")
+material_override = SubResource("mat_machine")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CorridorFillWest"]
+shape = SubResource("bs_4_3_2")
+
+[node name="CorridorFillEast" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.5, -5)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CorridorFillEast"]
+mesh = SubResource("bm_4_3_2")
+material_override = SubResource("mat_machine")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CorridorFillEast"]
+shape = SubResource("bs_4_3_2")
+
+[node name="VestibuleWallWest" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.5, 10)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VestibuleWallWest"]
+mesh = SubResource("bm_02_3_4")
+material_override = SubResource("mat_corridor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VestibuleWallWest"]
+shape = SubResource("bs_02_3_4")
+
+[node name="VestibuleWallEast" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.5, 10)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VestibuleWallEast"]
+mesh = SubResource("bm_02_3_4")
+material_override = SubResource("mat_corridor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VestibuleWallEast"]
+shape = SubResource("bs_02_3_4")
+
+[node name="VestibuleWallSouth" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 12)
+collision_layer = 4
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VestibuleWallSouth"]
+mesh = SubResource("bm_4_3_02")
+material_override = SubResource("mat_corridor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VestibuleWallSouth"]
+shape = SubResource("bs_4_3_02")
+
+[node name="ViewportFrameBottom" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -11.95)
+mesh = SubResource("bm_42_01_01")
+material_override = SubResource("mat_machine")
+
+[node name="ViewportFrameLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2.25, -11.95)
+mesh = SubResource("bm_01_15_01")
+material_override = SubResource("mat_machine")
+
+[node name="ViewportFrameRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2.25, -11.95)
+mesh = SubResource("bm_01_15_01")
+material_override = SubResource("mat_machine")
+
+[node name="ViewportFrameTop" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -11.95)
+mesh = SubResource("bm_42_01_01")
+material_override = SubResource("mat_machine")
+
+[node name="ZoneMarker_0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0.01, 4.5)
+mesh = SubResource("pm_zone")
+material_override = SubResource("mat_zone_0")
+
+[node name="ZoneMarker_1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.01, 4.5)
+mesh = SubResource("pm_zone")
+material_override = SubResource("mat_zone_1")
+
+[node name="ZoneMarker_2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0.01, -0.5)
+mesh = SubResource("pm_zone")
+material_override = SubResource("mat_zone_2")
+
+[node name="ZoneMarker_3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.01, -0.5)
+mesh = SubResource("pm_zone")
+material_override = SubResource("mat_zone_3")
+
+[node name="PlacementZone_0" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="ZoneShape_0" type="CollisionShape3D" parent="PlacementZone_0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 1, 5)
+shape = SubResource("bs_zone")
+
+[node name="PlacementZone_1" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="ZoneShape_1" type="CollisionShape3D" parent="PlacementZone_1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1, 5)
+shape = SubResource("bs_zone")
+
+[node name="PlacementZone_2" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="ZoneShape_2" type="CollisionShape3D" parent="PlacementZone_2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 1, 0)
+shape = SubResource("bs_zone")
+
+[node name="PlacementZone_3" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="ZoneShape_3" type="CollisionShape3D" parent="PlacementZone_3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1, 0)
+shape = SubResource("bs_zone")
+
+[node name="InteriorSpawn" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
+
+[node name="ExteriorSpawn" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 14)
+
+[node name="ExitTrigger" type="Area3D" parent="." groups=["interaction_prompt_source"]]
+script = ExtResource("7_exit")
+collision_layer = 0
+collision_mask = 1
+
+[node name="ExitTriggerShape" type="CollisionShape3D" parent="ExitTrigger"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 11.5)
+shape = SubResource("bs_exit")
+
+[node name="StatusDisplayArea" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -9)
+
+[node name="ViewportArea" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, -12)
+
+[node name="ExteriorViewport" type="SubViewport" parent="."]
+size = Vector2i(512, 256)
+render_target_update_mode = 4
+
+[node name="ExteriorCamera" type="Camera3D" parent="ExteriorViewport"]
+fov = 70.0
+
+[node name="ViewportWindow" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, -11.97)
+mesh = SubResource("qm_viewport")
+material_override = SubResource("mat_viewport")
+
+[node name="MachineRoomLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, 2)
+light_color = Color(0.878431, 0.878431, 0.878431, 1)
+light_energy = 2.0
+shadow_enabled = false
+omni_range = 15.0
+omni_attenuation = 0.5
+
+[node name="CockpitLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, -9)
+light_color = Color(0.878431, 0.878431, 0.878431, 1)
+light_energy = 2.0
+shadow_enabled = false
+omni_range = 12.0
+omni_attenuation = 0.5
+
+[node name="FadeLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="FadeRect" type="ColorRect" parent="FadeLayer"]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="TerminalMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.75, -3.8)
+mesh = SubResource("bm_terminal")
+material_override = SubResource("mat_terminal")
+
+[node name="TerminalArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="TerminalShape" type="CollisionShape3D" parent="TerminalArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1, -3)
+shape = SubResource("bs_terminal_area")
+
+[node name="CockpitConsoleArea" type="Area3D" parent="." groups=["interaction_prompt_source"]]
+script = ExtResource("8_console")
+collision_layer = 0
+collision_mask = 1
+
+[node name="CockpitConsoleShape" type="CollisionShape3D" parent="CockpitConsoleArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -11.5)
+shape = SubResource("bs_console_area")
 
 [node name="CockpitConsole" parent="." instance=ExtResource("5_cockpit_console")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -11.5)
@@ -29,3 +669,6 @@ variable_type = "heat"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.825, 1.5, -11.85)
 variable_name = "OXYGEN"
 variable_type = "oxygen"
+
+[connection signal="body_entered" from="ExitTrigger" to="." method="_on_exit_zone_entered"]
+[connection signal="body_exited" from="ExitTrigger" to="." method="_on_exit_zone_exited"]

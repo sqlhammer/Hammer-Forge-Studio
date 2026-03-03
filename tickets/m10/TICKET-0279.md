@@ -2,7 +2,7 @@
 id: TICKET-0279
 title: "M10 Input — Assign gamepad Right Trigger to 'use_tool'"
 type: TASK
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -103,10 +103,16 @@ the joypad variant when on gamepad. The fix to `_get_action_joypad_label` in
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+- Added `_add_joy_axis_to_existing_action()` helper in `game/autoloads/InputManager.gd` — registers `InputEventJoypadMotion` events on existing actions
+- Called helper to map `JOY_AXIS_TRIGGER_RIGHT` to `use_tool` with 0.5 threshold in `_setup_input_actions()`
+- Updated `_get_action_joypad_label()` in `game/scripts/ui/interaction_prompt_hud.gd` to handle `InputEventJoypadMotion`
+- Added `_joy_axis_name()` method for LT/RT display labels
+- No new scripts created, no changes to existing public API surface
 
 ---
 
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — M10 gamepad: RT→use_tool, trigger axis support
+- 2026-03-03 [gameplay-programmer] Starting work
+- 2026-03-03 [gameplay-programmer] Implementation complete — commit b71ca00, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/307

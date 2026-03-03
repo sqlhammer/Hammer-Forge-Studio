@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-03-03 (M11 Phase 2 remediation tickets (TICKET-0291–0303) and Phase 3 QA ticket (TICKET-0304) added; M11 now 16 total tickets)
+**Last Updated:** 2026-03-03 (M10 closed — Studio Head UAT sign-off granted; tickets archived to _archive/m10/)
 
 > Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
@@ -35,7 +35,7 @@
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Complete | 56 | 0 | 56 | 2026-03-01 |
 | M9 | Foundation & Hardening — Canonical game launch architecture, orchestrator hardening, gamepad fixes, and M8 playtest polish | — | Complete | 39 | 0 | 39 | 2026-03-02 |
-| M10 | Input & Feel Refinement — Gamepad remapping, scanner UX, boarding feel, orchestrator cleanup, resource respawn | — | Active | 13 | 12 | 1 | — |
+| M10 | Input & Feel Refinement — Gamepad remapping, scanner UX, boarding feel, orchestrator cleanup, resource respawn | — | Complete | 13 | 0 | 13 | 2026-03-03 |
 | M11 | GDScript Standards Compliance Pass — Full codebase audit and Scene-First Rule remediation | — | Active | 16 | 14 | 2 | — |
 | M12 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
 | M13 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |

@@ -15,7 +15,7 @@
 | **Prepared By** | qa-engineer |
 | **Date Prepared** | 2026-03-03 |
 | **Test Build** | 0c5c02f (main branch — all 10 M10 implementation tickets merged) |
-| **Sign-Off Status** | ⏳ DRAFT — 15/15 UAT items covered; ready for Studio Head review |
+| **Sign-Off Status** | ✅ APPROVED — 15/15 UAT items approved by Studio Head (2026-03-03) |
 
 ---
 
@@ -63,7 +63,7 @@
 
 **Automated coverage:** `test_input_manager_unit.gd` — `ping` action existence assertion confirms scan→ping rename; interact binding verified in code review (no automated hardware test possible).
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -84,7 +84,7 @@
 
 **Automated coverage:** Jump binding added to InputManager; unit tests confirm `jump` action is registered.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -105,7 +105,7 @@
 
 **Automated coverage:** `test_input_manager_unit.gd` — asserts `ping` action is registered (renamed from `scan`). `test_scanner_unit.gd` — scanner unit tests pass.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -128,7 +128,7 @@
 
 **Automated coverage:** `test_input_manager_unit.gd` — action registration verified. Manual context-switch test required.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -149,7 +149,7 @@
 
 **Automated coverage:** `test_head_lamp_unit.gd` — headlamp toggle behavior verified.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -172,7 +172,7 @@
 
 **Automated coverage:** Trigger axis registration verified in code review. HUD label lookup updated to handle `InputEventJoypadMotion`.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -194,7 +194,7 @@
 
 **Automated coverage:** Label resolution logic confirmed via code audit — no hardcoded button strings found in any `.gd` or `.tscn` file outside the `_joy_button_name()` lookup table (which is the correct pattern).
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -221,7 +221,7 @@
 
 **Automated coverage:** None — raycast behavior requires manual play-test verification.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -249,7 +249,7 @@
 
 **Automated coverage:** `test_scanner_unit.gd` — scanner state machine and ping flow tests pass. Manual playtest required to verify wheel UI and input behavior.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -273,7 +273,7 @@
 
 **Automated coverage:** `test_scanner_unit.gd` — `ping_range_is_1000` assertion confirms PING_RANGE = 1000.0 m (updated from 320 m in TICKET-0282). Progressive reveal timing is manual-only.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -293,7 +293,7 @@
 
 **Automated coverage:** Code audit — zero `budget_usd` or `get_budget` references remain in the orchestrator. M10's multi-wave run (7+ waves) confirms dispatch operates correctly with the new config.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -313,7 +313,7 @@
 
 **Automated coverage:** Process artifact — no automated tests. Implementation covered by TICKET-0286 below.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -350,7 +350,7 @@
 
 **Automated coverage:** `test_resource_respawn_unit.gd` (biome-change system) and `test_deposit_unit.gd` (deposit state machine) confirm related behavioral contracts. Timed respawn behavior requires manual verification due to timer dependency.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -375,7 +375,7 @@
 
 **Automated coverage:** UI position is a layout property — no unit test. Manual playtest required. Regression guard: confirmed no `position = Vector2.ZERO` or explicit offset assignments in `resource_type_wheel.gd` outside the anchor/centering logic.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -399,7 +399,7 @@
 
 **Automated coverage:** `test_compass_bar_unit.gd` covers compass marker logic. The cone threshold is a display-layer property — manual playtest required to verify label visibility at range boundaries.
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — no issues
 
 ---
 
@@ -418,8 +418,8 @@
 > Complete this section after all checkboxes above are marked.
 
 **Total Features:** 15
-**Approved:** (to be filled by Studio Head)
-**Rejected:** (to be filled by Studio Head)
+**Approved:** 15
+**Rejected:** 0
 
 **Gate Condition:** All 15 features must be `✅ Approved` for sign-off to be granted.
 
@@ -427,7 +427,7 @@
 
 **Studio Head Sign-Off:**
 
-- [ ] All features approved — milestone is cleared for close
+- [x] All features approved — milestone is cleared for close
 
 **Signed off by:** Studio Head
-**Date:** YYYY-MM-DD
+**Date:** 2026-03-03

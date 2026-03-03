@@ -164,7 +164,7 @@ The following are explicitly **not** being built and should not be scoped into a
 | M7 | **Complete** | 2026-02-26 | Ship Interior: cockpit, machine room, scene architecture overhaul |
 | M8 | **Complete** | 2026-03-01 | Ship Navigation: biome-to-biome travel, fuel system |
 | M9 | **Complete** | 2026-03-02 | Foundation & Hardening: canonical game launch architecture, orchestrator hardening, gamepad fixes, and M8 playtest polish |
-| M10 | Active | — | Input & Feel Refinement: gamepad remapping, scanner UX, boarding feel, orchestrator cleanup |
+| M10 | **Complete** | 2026-03-03 | Input & Feel Refinement: gamepad remapping, scanner UX, boarding feel, orchestrator cleanup, resource respawn |
 | M11 | Planning | — | Visual Asset Refinement: polished art pass on existing assets |
 | M12 | Planning | — | Movement & Usability Refinement: game feel, controls, HUD/UX tuning |
 | M13 | Planning | — | Content Expansion: material resources, crafting recipes, tech tree depth |

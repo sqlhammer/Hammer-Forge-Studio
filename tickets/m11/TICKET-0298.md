@@ -2,7 +2,7 @@
 id: TICKET-0298
 title: "M11 Scene-First remediation — GameWorld persistent system nodes (game_world.gd)"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -49,3 +49,4 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 
 - 2026-03-03 [producer] Created ticket — Phase 2 remediation from M11 GDScript audit report (TICKET-0290)
 - 2026-03-03 [gameplay-programmer] Starting work — moving 6 groups of persistent nodes from game_world.gd into game_world.tscn
+- 2026-03-03 [gameplay-programmer] DONE — commit efef2fb, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/343 (merged). All 6 node groups moved to scene; ResourceWheelLayer was already resolved in prior work.

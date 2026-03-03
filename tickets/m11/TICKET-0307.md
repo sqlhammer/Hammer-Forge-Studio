@@ -2,7 +2,7 @@
 id: TICKET-0307
 title: "BUG — HUD CompassBar/MiningProgress/MiningMinigameOverlay anchor presets reset to 0 after TICKET-0300"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: qa-engineer
@@ -91,3 +91,4 @@ Test output from M11 Phase Gate QA run (2026-03-03):
 
 - 2026-03-03 [qa-engineer] Filed — P2 regression from TICKET-0300; HUD layout broken for 3 nodes. Blocks TICKET-0304 Phase Gate QA sign-off.
 - 2026-03-03 [gameplay-programmer] Starting work — root cause: redundant individual anchor_* overrides in game_hud.tscn reset anchors_preset to 0 at runtime
+- 2026-03-03 [gameplay-programmer] DONE — commit b552175, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/346 (merged). Removed redundant anchor/grow overrides from 3 instanced nodes.

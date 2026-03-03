@@ -2,7 +2,7 @@
 id: TICKET-0297
 title: "M11 Scene-First remediation — Ship Interior (ship_interior.gd full scene refactor)"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -47,3 +47,4 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 
 - 2026-03-03 [producer] Created ticket — Phase 2 remediation from M11 GDScript audit report (TICKET-0290)
 - 2026-03-03 [gameplay-programmer] Starting work — scene-first refactor of ship_interior.gd
+- 2026-03-03 [gameplay-programmer] DONE — implementation committed in 8abe583, merged via PR #339. All acceptance criteria verified: ship_interior.tscn created, all builder methods removed, FadeLayer moved to scene, all nodes use @onready references.

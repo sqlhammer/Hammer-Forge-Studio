@@ -62,7 +62,9 @@ var _stick_latched_y: bool = false
 
 # ── Built-in Virtual Methods ──────────────────────────────
 func _ready() -> void:
-	_apply_styles()
+	visible = false
+	if _panel:
+		_apply_styles()
 	Global.debug_log("InventoryActionPopup: ready")
 
 

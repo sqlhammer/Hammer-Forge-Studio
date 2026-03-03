@@ -136,6 +136,8 @@ func _find_ship_in_tree() -> void:
 
 ## Handles new nodes entering the scene tree — wires ship target when a ShipExterior spawns.
 func _on_tree_node_added(node: Node) -> void:
+	if not is_inside_tree():
+		return
 	if is_instance_valid(_ship_target):
 		get_tree().node_added.disconnect(_on_tree_node_added)
 		return

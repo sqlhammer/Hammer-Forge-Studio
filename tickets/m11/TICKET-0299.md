@@ -2,7 +2,7 @@
 id: TICKET-0299
 title: "M11 Scene-First remediation — Ship Status Display and Travel Fade Layer"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -49,3 +49,4 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 
 - 2026-03-03 [producer] Created ticket — Phase 2 remediation from M11 GDScript audit report (TICKET-0290)
 - 2026-03-03 [gameplay-programmer] Starting work
+- 2026-03-03 [gameplay-programmer] Implementation complete. Commit 0ef94e9, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/341 (merged). Marked DONE.

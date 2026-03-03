@@ -2,7 +2,7 @@
 id: TICKET-0306
 title: "BUG — tech_tree_defs.gd get_prerequisites() returns empty due to Array[String] type mismatch"
 type: BUG
-status: OPEN
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: qa-engineer
@@ -118,3 +118,5 @@ static func get_prerequisites(node_id: String) -> Array[String]:
 ## Activity Log
 
 - 2026-03-03 [qa-engineer] Filed — P1 regression from TICKET-0302; tech tree prerequisites fully broken. Blocks TICKET-0304 Phase Gate QA sign-off.
+- 2026-03-03 [systems-programmer] IN_PROGRESS — Starting work. Applying fix: change `var raw: Array[String]` to untyped `var raw: Array` and iterate+cast into typed result.
+- 2026-03-03 [systems-programmer] DONE — Fix committed and merged. Commit: 8d3d2eb, merge commit: bee447f. PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/352

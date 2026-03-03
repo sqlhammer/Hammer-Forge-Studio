@@ -9,11 +9,6 @@ signal drone_deployed(drone_id: int, program: DroneProgram)
 signal drones_recalled
 
 # ── Constants ─────────────────────────────────────────────
-const PANEL_WIDTH: float = 900.0
-const PANEL_HEIGHT: float = 620.0
-const CONFIG_WIDTH: float = 520.0
-const STATUS_WIDTH: float = 340.0
-const FILTER_ROW_HEIGHT: float = 56.0
 
 ## Style colors matching UI style guide
 const COLOR_SURFACE := Color("#0A0F18", 0.95)
@@ -25,9 +20,7 @@ const COLOR_GREEN := Color("#4ADE80")
 const COLOR_TEXT_PRIMARY := Color("#F1F5F9")
 const COLOR_TEXT_SECONDARY := Color("#94A3B8")
 const COLOR_NEUTRAL := Color("#94A3B8")
-const COLOR_DIM := Color("#000000", 0.5)
 const COLOR_PANEL_BG := Color("#0F1923", 0.85)
-const COLOR_CONTROL_BG := Color("#1A2736", 0.9)
 
 ## Drone state colors
 const COLOR_IDLE := Color("#94A3B8")
@@ -46,8 +39,6 @@ const PRIORITY_OPTIONS: Array[String] = ["Highest Purity First", "Nearest First"
 
 # ── Private Variables ─────────────────────────────────────
 var _is_open: bool = false
-var _dim_rect: ColorRect = null
-var _main_panel: PanelContainer = null
 var _drones_active: bool = false
 var _refresh_timer: float = 0.0
 
@@ -59,23 +50,6 @@ var _tool_tier: int = 1
 var _extraction_radius: float = 200.0
 var _priority_index: int = 0
 
-## Config column elements
-var _deposit_type_label: Label = null
-var _purity_label: Label = null
-var _purity_stars_label: Label = null
-var _tool_tier_label: Label = null
-var _radius_slider: HSlider = null
-var _radius_value_label: Label = null
-var _priority_label: Label = null
-var _pool_stats_label: Label = null
-var _activate_button: Button = null
-var _config_container: VBoxContainer = null
-
-## Status column elements
-var _drone_status_container: VBoxContainer = null
-var _active_drones_label: Label = null
-var _deactivate_button: Button = null
-
 ## Hub/ship position for distance calculations
 var _hub_position: Vector3 = Vector3.ZERO
 
@@ -83,13 +57,30 @@ var _hub_position: Vector3 = Vector3.ZERO
 var _focused_row: int = 0
 const FOCUS_ROW_COUNT: int = 6  # 5 filters + activate button
 
+# ── Onready Variables ─────────────────────────────────────
+@onready var _dim_rect: ColorRect = %DimRect
+@onready var _main_panel: PanelContainer = %MainPanel
+@onready var _config_container: VBoxContainer = %ConfigColumn
+@onready var _deposit_type_label: Label = %DepositTypeLabel
+@onready var _purity_label: Label = %PurityLabel
+@onready var _tool_tier_label: Label = %ToolTierLabel
+@onready var _radius_slider: HSlider = %RadiusSlider
+@onready var _radius_value_label: Label = %RadiusValueLabel
+@onready var _priority_label: Label = %PriorityLabel
+@onready var _pool_stats_label: Label = %PoolStatsLabel
+@onready var _activate_button: Button = %ActivateButton
+@onready var _active_drones_label: Label = %ActiveDronesLabel
+@onready var _drone_status_container: VBoxContainer = %DroneStatusContainer
+@onready var _deactivate_button: Button = %DeactivateButton
+@onready var _close_button: Button = %CloseButton
+@onready var _title_divider: HSeparator = %TitleDivider
+@onready var _status_divider: HSeparator = %StatusDivider
+@onready var _vertical_divider: VSeparator = %VerticalDivider
+
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	layer = 2
-	process_mode = Node.PROCESS_MODE_INHERIT
-	visible = false
-	_build_ui()
+	_apply_styles()
 	_connect_signals()
 
 func _process(delta: float) -> void:
@@ -170,26 +161,8 @@ func setup(hub_position: Vector3) -> void:
 
 # ── Private Methods ───────────────────────────────────────
 
-func _build_ui() -> void:
-	# Dim background
-	var dim_layer := Control.new()
-	dim_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(dim_layer)
-
-	_dim_rect = ColorRect.new()
-	_dim_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_dim_rect.color = COLOR_DIM
-	dim_layer.add_child(_dim_rect)
-
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.add_child(center)
-
+func _apply_styles() -> void:
 	# Main panel
-	_main_panel = PanelContainer.new()
-	_main_panel.custom_minimum_size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
-	_main_panel.pivot_offset = Vector2(PANEL_WIDTH / 2.0, PANEL_HEIGHT / 2.0)
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_SURFACE
 	panel_style.border_color = COLOR_BORDER
@@ -197,223 +170,31 @@ func _build_ui() -> void:
 	panel_style.set_corner_radius_all(8)
 	panel_style.set_content_margin_all(24)
 	_main_panel.add_theme_stylebox_override("panel", panel_style)
-	center.add_child(_main_panel)
 
-	var outer_vbox := VBoxContainer.new()
-	outer_vbox.add_theme_constant_override("separation", 12)
-	_main_panel.add_child(outer_vbox)
-
-	# Title
-	var title := Label.new()
-	title.text = "AUTOMATION HUB"
-	title.add_theme_font_size_override("font_size", 28)
-	title.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	outer_vbox.add_child(title)
-
-	_add_divider(outer_vbox)
-
-	# HBox: config (left) + status (right)
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 24)
-	outer_vbox.add_child(hbox)
-
-	# Left column: program config
-	_config_container = _build_config_column()
-	hbox.add_child(_config_container)
+	# Dividers
+	var div_style := StyleBoxFlat.new()
+	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
+	div_style.set_content_margin_all(0)
+	_title_divider.add_theme_stylebox_override("separator", div_style)
+	var status_div_style: StyleBoxFlat = div_style.duplicate() as StyleBoxFlat
+	_status_divider.add_theme_stylebox_override("separator", status_div_style)
 
 	# Vertical divider
-	var v_divider := VSeparator.new()
 	var vdiv_style := StyleBoxFlat.new()
 	vdiv_style.bg_color = Color(COLOR_NEUTRAL, 0.3)
 	vdiv_style.set_content_margin_all(0)
-	v_divider.add_theme_stylebox_override("separator", vdiv_style)
-	hbox.add_child(v_divider)
+	_vertical_divider.add_theme_stylebox_override("separator", vdiv_style)
 
-	# Right column: drone status
-	var right_col := _build_status_column()
-	hbox.add_child(right_col)
-
-	# Footer row: instructions + close button
-	var footer := HBoxContainer.new()
-	footer.alignment = BoxContainer.ALIGNMENT_CENTER
-	footer.add_theme_constant_override("separation", 16)
-	outer_vbox.add_child(footer)
-
-	var instructions := Label.new()
-	instructions.text = "[Up/Down] Navigate  [Left/Right] Adjust  [Enter] Activate  [Esc] Close"
-	instructions.add_theme_font_size_override("font_size", 14)
-	instructions.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	footer.add_child(instructions)
-
-	var close_button := Button.new()
-	close_button.text = "Close"
-	close_button.custom_minimum_size = Vector2(80, 32)
-	close_button.add_theme_font_size_override("font_size", 14)
-	_style_close_button(close_button)
-	close_button.pressed.connect(close)
-	footer.add_child(close_button)
-
-func _build_config_column() -> VBoxContainer:
-	var col := VBoxContainer.new()
-	col.custom_minimum_size = Vector2(CONFIG_WIDTH, 0)
-	col.add_theme_constant_override("separation", 8)
-
-	var header := Label.new()
-	header.text = "DRONE PROGRAM"
-	header.add_theme_font_size_override("font_size", 16)
-	header.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	col.add_child(header)
-
-	# Row 0: Deposit Type
-	var type_row := _build_filter_row("TARGET: DEPOSIT TYPE")
-	col.add_child(type_row)
-	_deposit_type_label = type_row.get_meta("value_label") as Label
-
-	# Row 1: Min Purity
-	var purity_row := _build_filter_row("MIN PURITY")
-	col.add_child(purity_row)
-	_purity_label = purity_row.get_meta("value_label") as Label
-
-	# Row 2: Tool Tier
-	var tier_row := _build_filter_row("TOOL TIER")
-	col.add_child(tier_row)
-	_tool_tier_label = tier_row.get_meta("value_label") as Label
-
-	# Row 3: Extraction Radius
-	var radius_row := _build_radius_row()
-	col.add_child(radius_row)
-
-	# Row 4: Priority
-	var priority_row := _build_filter_row("PRIORITY")
-	col.add_child(priority_row)
-	_priority_label = priority_row.get_meta("value_label") as Label
-
-	# Pool stats
-	_pool_stats_label = Label.new()
-	_pool_stats_label.add_theme_font_size_override("font_size", 14)
-	_pool_stats_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	col.add_child(_pool_stats_label)
-
-	# Activate button (Row 5)
-	_activate_button = Button.new()
-	_activate_button.text = "ACTIVATE DRONES"
-	_activate_button.custom_minimum_size = Vector2(0, 48)
-	_activate_button.add_theme_font_size_override("font_size", 18)
+	# Buttons
 	_style_button(_activate_button, COLOR_TEAL)
-	_activate_button.pressed.connect(_on_activate_pressed)
-	col.add_child(_activate_button)
-
-	return col
-
-func _build_filter_row(label_text: String) -> VBoxContainer:
-	var row := VBoxContainer.new()
-	row.custom_minimum_size = Vector2(0, FILTER_ROW_HEIGHT)
-	row.add_theme_constant_override("separation", 4)
-
-	var label := Label.new()
-	label.text = label_text
-	label.add_theme_font_size_override("font_size", 14)
-	label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	row.add_child(label)
-
-	var control_hbox := HBoxContainer.new()
-	control_hbox.add_theme_constant_override("separation", 8)
-	row.add_child(control_hbox)
-
-	var left_arrow := Label.new()
-	left_arrow.text = "<"
-	left_arrow.add_theme_font_size_override("font_size", 20)
-	left_arrow.add_theme_color_override("font_color", COLOR_TEAL)
-	control_hbox.add_child(left_arrow)
-
-	var value_label := Label.new()
-	value_label.add_theme_font_size_override("font_size", 18)
-	value_label.add_theme_color_override("font_color", COLOR_TEAL)
-	value_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	control_hbox.add_child(value_label)
-
-	var right_arrow := Label.new()
-	right_arrow.text = ">"
-	right_arrow.add_theme_font_size_override("font_size", 20)
-	right_arrow.add_theme_color_override("font_color", COLOR_TEAL)
-	control_hbox.add_child(right_arrow)
-
-	row.set_meta("value_label", value_label)
-
-	return row
-
-func _build_radius_row() -> VBoxContainer:
-	var row := VBoxContainer.new()
-	row.custom_minimum_size = Vector2(0, FILTER_ROW_HEIGHT)
-	row.add_theme_constant_override("separation", 4)
-
-	var label := Label.new()
-	label.text = "EXTRACTION RADIUS"
-	label.add_theme_font_size_override("font_size", 14)
-	label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	row.add_child(label)
-
-	var control_hbox := HBoxContainer.new()
-	control_hbox.add_theme_constant_override("separation", 8)
-	row.add_child(control_hbox)
-
-	_radius_slider = HSlider.new()
-	_radius_slider.min_value = RADIUS_MIN
-	_radius_slider.max_value = RADIUS_MAX
-	_radius_slider.step = RADIUS_STEP
-	_radius_slider.value = _extraction_radius
-	_radius_slider.custom_minimum_size = Vector2(350, 20)
-	_radius_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_radius_slider.value_changed.connect(_on_radius_changed)
-	control_hbox.add_child(_radius_slider)
-
-	_radius_value_label = Label.new()
-	_radius_value_label.text = "%dm" % int(_extraction_radius)
-	_radius_value_label.add_theme_font_size_override("font_size", 18)
-	_radius_value_label.add_theme_color_override("font_color", COLOR_TEAL)
-	_radius_value_label.custom_minimum_size = Vector2(60, 0)
-	control_hbox.add_child(_radius_value_label)
-
-	return row
-
-func _build_status_column() -> VBoxContainer:
-	var col := VBoxContainer.new()
-	col.custom_minimum_size = Vector2(STATUS_WIDTH, 0)
-	col.add_theme_constant_override("separation", 8)
-
-	_active_drones_label = Label.new()
-	_active_drones_label.text = "ACTIVE DRONES (0/%d)" % AutomationHub.get_max_drones()
-	_active_drones_label.add_theme_font_size_override("font_size", 16)
-	_active_drones_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	col.add_child(_active_drones_label)
-
-	_add_divider(col)
-
-	# Drone status cards container
-	_drone_status_container = VBoxContainer.new()
-	_drone_status_container.add_theme_constant_override("separation", 8)
-	col.add_child(_drone_status_container)
-
-	# Spacer to push deactivate to bottom
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(spacer)
-
-	# Deactivate button
-	_deactivate_button = Button.new()
-	_deactivate_button.text = "DEACTIVATE DRONES"
-	_deactivate_button.custom_minimum_size = Vector2(0, 48)
-	_deactivate_button.add_theme_font_size_override("font_size", 16)
 	_style_button(_deactivate_button, COLOR_CORAL)
-	_deactivate_button.pressed.connect(_on_deactivate_pressed)
-	_deactivate_button.visible = false
-	col.add_child(_deactivate_button)
-
-	return col
+	_style_close_button(_close_button)
 
 func _connect_signals() -> void:
+	_activate_button.pressed.connect(_on_activate_pressed)
+	_deactivate_button.pressed.connect(_on_deactivate_pressed)
+	_close_button.pressed.connect(close)
+	_radius_slider.value_changed.connect(_on_radius_changed)
 	AutomationHub.drone_started.connect(_on_drone_started)
 	AutomationHub.drone_completed.connect(_on_drone_completed)
 	AutomationHub.drone_returned.connect(_on_drone_returned)
@@ -659,14 +440,6 @@ func _style_close_button(button: Button) -> void:
 	button.add_theme_stylebox_override("pressed", pressed_style)
 	button.add_theme_color_override("font_color", COLOR_NEUTRAL)
 	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
-
-func _add_divider(parent: Node) -> void:
-	var divider := HSeparator.new()
-	var div_style := StyleBoxFlat.new()
-	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
-	div_style.set_content_margin_all(0)
-	divider.add_theme_stylebox_override("separator", div_style)
-	parent.add_child(divider)
 
 func _animate_open() -> void:
 	_dim_rect.modulate.a = 0.0

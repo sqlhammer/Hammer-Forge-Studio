@@ -7,11 +7,6 @@ extends CanvasLayer
 signal closed
 
 # ── Constants ─────────────────────────────────────────────
-const PANEL_WIDTH: float = 860.0
-const PANEL_HEIGHT: float = 560.0
-const DETAIL_WIDTH: float = 480.0
-const LIST_WIDTH: float = 340.0
-const SLOT_SIZE: float = 72.0
 
 ## Style colors matching UI style guide
 const COLOR_SURFACE := Color("#0A0F18", 0.95)
@@ -25,9 +20,6 @@ const COLOR_TEXT_SECONDARY := Color("#94A3B8")
 const COLOR_NEUTRAL := Color("#94A3B8")
 const COLOR_SLOT_BG := Color("#1A2736", 0.8)
 const COLOR_BAR_BG := Color("#1A2736")
-const COLOR_DIM := Color("#000000", 0.5)
-const COLOR_PANEL_BG := Color("#0F1923", 0.85)
-const COLOR_LIST_BG := Color("#0F1923", 0.85)
 
 ## Recipe categories for the list
 const RECIPE_CATEGORIES: Dictionary = {
@@ -37,46 +29,50 @@ const RECIPE_CATEGORIES: Dictionary = {
 
 # ── Private Variables ─────────────────────────────────────
 var _is_open: bool = false
-var _dim_rect: ColorRect = null
-var _main_panel: PanelContainer = null
 var _selected_recipe_id: String = ""
 var _recipe_ids: Array[String] = []
 var _selected_index: int = -1
 var _focus_on_list: bool = true
-
-## Left column detail elements
-var _recipe_name_label: Label = null
-var _input_slot_icon: TextureRect = null
-var _input_slot_label: Label = null
-var _output_slot_icon: TextureRect = null
-var _output_slot_label: Label = null
-var _input_desc_label: Label = null
-var _output_desc_label: Label = null
-var _have_label: Label = null
-var _progress_bar: ProgressBar = null
-var _progress_label: Label = null
-var _start_button: Button = null
-var _feedback_label: Label = null
-
-## Right column list elements
-var _recipe_list_container: VBoxContainer = null
 var _recipe_rows: Array[PanelContainer] = []
 var _recipe_row_labels: Array[Label] = []
 var _recipe_row_indicators: Array[ColorRect] = []
 var _recipe_row_dots: Array[ColorRect] = []
-var _list_scroll: ScrollContainer = null
 var _last_detail_recipe_id: String = ""
 var _cached_input_tex: Texture2D = null
 var _cached_output_tex: Texture2D = null
 
+# ── Onready Variables ─────────────────────────────────────
+@onready var _dim_rect: ColorRect = %DimRect
+@onready var _main_panel: PanelContainer = %MainPanel
+@onready var _input_slot: PanelContainer = %InputSlot
+@onready var _input_slot_icon: TextureRect = %InputIcon
+@onready var _input_slot_label: Label = %InputCountLabel
+@onready var _input_desc_label: Label = %InputDescLabel
+@onready var _output_slot: PanelContainer = %OutputSlot
+@onready var _output_slot_icon: TextureRect = %OutputIcon
+@onready var _output_slot_label: Label = %OutputCountLabel
+@onready var _output_desc_label: Label = %OutputDescLabel
+@onready var _recipe_name_label: Label = %RecipeNameLabel
+@onready var _have_label: Label = %HaveLabel
+@onready var _progress_bar: ProgressBar = %ProgressBar
+@onready var _progress_label: Label = %ProgressLabel
+@onready var _start_button: Button = %StartButton
+@onready var _feedback_label: Label = %FeedbackLabel
+@onready var _close_button: Button = %CloseButton
+@onready var _recipe_list_container: VBoxContainer = %RecipeListContainer
+@onready var _list_scroll: ScrollContainer = %ListScroll
+@onready var _title_divider: HSeparator = %TitleDivider
+@onready var _detail_divider: HSeparator = %DetailDivider
+@onready var _have_divider: HSeparator = %HaveDivider
+@onready var _recipe_divider: HSeparator = %RecipeDivider
+@onready var _vertical_divider: VSeparator = %VerticalDivider
+
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	layer = 2
-	process_mode = Node.PROCESS_MODE_INHERIT
-	visible = false
 	_recipe_ids = FabricatorDefs.get_all_recipe_ids()
-	_build_ui()
+	_apply_styles()
+	_populate_recipe_list()
 	_connect_signals()
 
 func _input(event: InputEvent) -> void:
@@ -162,26 +158,8 @@ func select_recipe_by_index(index: int) -> void:
 
 # ── Private Methods ───────────────────────────────────────
 
-func _build_ui() -> void:
-	# Dim background
-	var dim_layer := Control.new()
-	dim_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(dim_layer)
-
-	_dim_rect = ColorRect.new()
-	_dim_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_dim_rect.color = COLOR_DIM
-	dim_layer.add_child(_dim_rect)
-
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.add_child(center)
-
+func _apply_styles() -> void:
 	# Main panel
-	_main_panel = PanelContainer.new()
-	_main_panel.custom_minimum_size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
-	_main_panel.pivot_offset = Vector2(PANEL_WIDTH / 2.0, PANEL_HEIGHT / 2.0)
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_SURFACE
 	panel_style.border_color = COLOR_BORDER
@@ -189,261 +167,55 @@ func _build_ui() -> void:
 	panel_style.set_corner_radius_all(8)
 	panel_style.set_content_margin_all(24)
 	_main_panel.add_theme_stylebox_override("panel", panel_style)
-	center.add_child(_main_panel)
 
-	var outer_vbox := VBoxContainer.new()
-	outer_vbox.add_theme_constant_override("separation", 12)
-	_main_panel.add_child(outer_vbox)
+	# Slot styles
+	var slot_style := StyleBoxFlat.new()
+	slot_style.bg_color = COLOR_SLOT_BG
+	slot_style.border_color = Color(COLOR_NEUTRAL, 0.3)
+	slot_style.set_border_width_all(1)
+	slot_style.set_corner_radius_all(4)
+	slot_style.set_content_margin_all(4)
+	_input_slot.add_theme_stylebox_override("panel", slot_style)
+	var output_slot_style: StyleBoxFlat = slot_style.duplicate() as StyleBoxFlat
+	_output_slot.add_theme_stylebox_override("panel", output_slot_style)
 
-	# Title
-	var title := Label.new()
-	title.text = "FABRICATOR"
-	title.add_theme_font_size_override("font_size", 28)
-	title.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	outer_vbox.add_child(title)
-
-	_add_divider(outer_vbox)
-
-	# HBox: detail (left) + recipe list (right)
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 16)
-	outer_vbox.add_child(hbox)
-
-	# Left column: job detail
-	var left_col := _build_detail_column()
-	hbox.add_child(left_col)
+	# Divider styles
+	var div_style := StyleBoxFlat.new()
+	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
+	div_style.set_content_margin_all(0)
+	_title_divider.add_theme_stylebox_override("separator", div_style)
+	_detail_divider.add_theme_stylebox_override("separator", div_style.duplicate())
+	_have_divider.add_theme_stylebox_override("separator", div_style.duplicate())
+	_recipe_divider.add_theme_stylebox_override("separator", div_style.duplicate())
 
 	# Vertical divider
-	var v_divider := VSeparator.new()
 	var vdiv_style := StyleBoxFlat.new()
 	vdiv_style.bg_color = Color(COLOR_NEUTRAL, 0.3)
 	vdiv_style.set_content_margin_all(0)
-	v_divider.add_theme_stylebox_override("separator", vdiv_style)
-	hbox.add_child(v_divider)
+	_vertical_divider.add_theme_stylebox_override("separator", vdiv_style)
 
-	# Right column: recipe list
-	var right_col := _build_recipe_list()
-	hbox.add_child(right_col)
-
-	# Footer row: instructions + close button
-	var footer := HBoxContainer.new()
-	footer.alignment = BoxContainer.ALIGNMENT_CENTER
-	footer.add_theme_constant_override("separation", 16)
-	outer_vbox.add_child(footer)
-
-	var instructions := Label.new()
-	instructions.text = "[Up/Down] Select  [Left/Enter] Start  [Esc] Close"
-	instructions.add_theme_font_size_override("font_size", 14)
-	instructions.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	footer.add_child(instructions)
-
-	var close_button := Button.new()
-	close_button.text = "Close"
-	close_button.custom_minimum_size = Vector2(80, 32)
-	close_button.add_theme_font_size_override("font_size", 14)
-	_style_close_button(close_button)
-	close_button.pressed.connect(close)
-	footer.add_child(close_button)
-
-func _build_detail_column() -> VBoxContainer:
-	var col := VBoxContainer.new()
-	col.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
-	col.add_theme_constant_override("separation", 12)
-
-	# Selected recipe name
-	_recipe_name_label = Label.new()
-	_recipe_name_label.text = "Select a recipe >"
-	_recipe_name_label.add_theme_font_size_override("font_size", 24)
-	_recipe_name_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	col.add_child(_recipe_name_label)
-
-	_add_divider(col)
-
-	# Slot row: input → output
-	var slot_row := _build_slot_row()
-	col.add_child(slot_row)
-
-	# Resource availability
-	_have_label = Label.new()
-	_have_label.add_theme_font_size_override("font_size", 16)
-	_have_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	col.add_child(_have_label)
-
-	_add_divider(col)
-
-	# Progress section
-	var progress_section := _build_progress_section()
-	col.add_child(progress_section)
-
-	# Button row
-	var button_center := CenterContainer.new()
-	col.add_child(button_center)
-
-	_start_button = Button.new()
-	_start_button.text = "START"
-	_start_button.custom_minimum_size = Vector2(120, 48)
-	_start_button.add_theme_font_size_override("font_size", 20)
-	_style_button(_start_button, COLOR_TEAL)
-	_start_button.pressed.connect(_on_start_pressed)
-	button_center.add_child(_start_button)
-
-	# Feedback label
-	_feedback_label = Label.new()
-	_feedback_label.add_theme_font_size_override("font_size", 16)
-	_feedback_label.add_theme_color_override("font_color", COLOR_CORAL)
-	_feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(_feedback_label)
-
-	return col
-
-func _build_slot_row() -> CenterContainer:
-	var center := CenterContainer.new()
-
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 20)
-	center.add_child(hbox)
-
-	# Input slot
-	var input_container := _create_labeled_slot("INPUT")
-	hbox.add_child(input_container)
-	_input_slot_icon = input_container.get_meta("icon") as TextureRect
-	_input_slot_label = input_container.get_meta("label") as Label
-
-	# Input description
-	_input_desc_label = Label.new()
-	_input_desc_label.add_theme_font_size_override("font_size", 12)
-	_input_desc_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_input_desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	input_container.add_child(_input_desc_label)
-
-	# Arrow
-	var arrow := Label.new()
-	arrow.text = ">>>"
-	arrow.add_theme_font_size_override("font_size", 24)
-	arrow.add_theme_color_override("font_color", COLOR_BORDER)
-	arrow.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	hbox.add_child(arrow)
-
-	# Output slot
-	var output_container := _create_labeled_slot("OUTPUT")
-	hbox.add_child(output_container)
-	_output_slot_icon = output_container.get_meta("icon") as TextureRect
-	_output_slot_label = output_container.get_meta("label") as Label
-
-	# Output description
-	_output_desc_label = Label.new()
-	_output_desc_label.add_theme_font_size_override("font_size", 12)
-	_output_desc_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_output_desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	output_container.add_child(_output_desc_label)
-
-	return center
-
-func _create_labeled_slot(slot_label_text: String) -> VBoxContainer:
-	var container := VBoxContainer.new()
-	container.add_theme_constant_override("separation", 4)
-
-	var header := Label.new()
-	header.text = slot_label_text
-	header.add_theme_font_size_override("font_size", 12)
-	header.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	container.add_child(header)
-
-	var slot := PanelContainer.new()
-	slot.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
-	var style := StyleBoxFlat.new()
-	style.bg_color = COLOR_SLOT_BG
-	style.border_color = Color(COLOR_NEUTRAL, 0.3)
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
-	style.set_content_margin_all(4)
-	slot.add_theme_stylebox_override("panel", style)
-	container.add_child(slot)
-
-	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(40, 40)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.visible = false
-	slot.add_child(icon)
-
-	var count_label := Label.new()
-	count_label.add_theme_font_size_override("font_size", 14)
-	count_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	count_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-	count_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	count_label.visible = false
-	slot.add_child(count_label)
-
-	container.set_meta("icon", icon)
-	container.set_meta("label", count_label)
-
-	return container
-
-func _build_progress_section() -> VBoxContainer:
-	var section := VBoxContainer.new()
-	section.add_theme_constant_override("separation", 4)
-
-	_progress_bar = ProgressBar.new()
-	_progress_bar.custom_minimum_size = Vector2(340, 16)
-	_progress_bar.max_value = 1.0
-	_progress_bar.value = 0.0
-	_progress_bar.show_percentage = false
-
+	# Progress bar
 	var bar_bg := StyleBoxFlat.new()
 	bar_bg.bg_color = COLOR_BAR_BG
 	bar_bg.set_corner_radius_all(4)
 	_progress_bar.add_theme_stylebox_override("background", bar_bg)
-
 	var bar_fill := StyleBoxFlat.new()
 	bar_fill.bg_color = COLOR_TEAL
 	bar_fill.set_corner_radius_all(4)
 	_progress_bar.add_theme_stylebox_override("fill", bar_fill)
-	section.add_child(_progress_bar)
 
-	_progress_label = Label.new()
-	_progress_label.add_theme_font_size_override("font_size", 14)
-	_progress_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_progress_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	section.add_child(_progress_label)
+	# Buttons
+	_style_button(_start_button, COLOR_TEAL)
+	_style_close_button(_close_button)
 
-	return section
-
-func _build_recipe_list() -> VBoxContainer:
-	var col := VBoxContainer.new()
-	col.custom_minimum_size = Vector2(LIST_WIDTH, 0)
-	col.add_theme_constant_override("separation", 4)
-
-	# List header
-	var header := Label.new()
-	header.text = "RECIPES"
-	header.add_theme_font_size_override("font_size", 16)
-	header.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	col.add_child(header)
-
-	_add_divider(col)
-
-	# Scroll container
-	_list_scroll = ScrollContainer.new()
-	_list_scroll.custom_minimum_size = Vector2(LIST_WIDTH, 380)
-	_list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	col.add_child(_list_scroll)
-
-	_recipe_list_container = VBoxContainer.new()
-	_recipe_list_container.add_theme_constant_override("separation", 4)
-	_list_scroll.add_child(_recipe_list_container)
-
-	# Build recipe rows by category
+func _populate_recipe_list() -> void:
+	# Recipe rows are dynamic (data-driven) — built at runtime from FabricatorDefs
 	var last_category: String = ""
 	for i: int in range(_recipe_ids.size()):
 		var recipe_id: String = _recipe_ids[i]
 		var category: String = RECIPE_CATEGORIES.get(recipe_id, "OTHER")
 
 		if category != last_category:
-			# Category header
 			var cat_label := Label.new()
 			cat_label.text = category
 			cat_label.add_theme_font_size_override("font_size", 14)
@@ -454,8 +226,6 @@ func _build_recipe_list() -> VBoxContainer:
 		var row := _build_recipe_row(recipe_id)
 		_recipe_list_container.add_child(row)
 
-	return col
-
 func _build_recipe_row(recipe_id: String) -> PanelContainer:
 	var row := PanelContainer.new()
 	row.custom_minimum_size = Vector2(0, 56)
@@ -465,7 +235,6 @@ func _build_recipe_row(recipe_id: String) -> PanelContainer:
 	row_style.set_content_margin_all(8)
 	row.add_theme_stylebox_override("panel", row_style)
 
-	# Mouse hover and click support — use current row count as the index
 	var row_index: int = _recipe_rows.size()
 	row.mouse_entered.connect(_on_recipe_row_mouse_entered.bind(row_index))
 	row.gui_input.connect(_on_recipe_row_gui_input.bind(row_index))
@@ -475,13 +244,11 @@ func _build_recipe_row(recipe_id: String) -> PanelContainer:
 	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(hbox)
 
-	# Selection indicator
 	var indicator := ColorRect.new()
 	indicator.custom_minimum_size = Vector2(4, 40)
 	indicator.color = Color.TRANSPARENT
 	hbox.add_child(indicator)
 
-	# Recipe icon
 	var icon := TextureRect.new()
 	icon.custom_minimum_size = Vector2(32, 32)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -492,7 +259,6 @@ func _build_recipe_row(recipe_id: String) -> PanelContainer:
 		icon.texture = load(recipe_icon_path) as Texture2D
 	hbox.add_child(icon)
 
-	# Text block
 	var text_vbox := VBoxContainer.new()
 	text_vbox.add_theme_constant_override("separation", 2)
 	text_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -504,7 +270,6 @@ func _build_recipe_row(recipe_id: String) -> PanelContainer:
 	name_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
 	text_vbox.add_child(name_label)
 
-	# Input cost summary
 	var inputs: Array[Dictionary] = FabricatorDefs.get_inputs(recipe_id)
 	var cost_text: String = ""
 	for input: Dictionary in inputs:
@@ -521,13 +286,11 @@ func _build_recipe_row(recipe_id: String) -> PanelContainer:
 	cost_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
 	text_vbox.add_child(cost_label)
 
-	# Affordability dot
 	var dot := ColorRect.new()
 	dot.custom_minimum_size = Vector2(12, 12)
 	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hbox.add_child(dot)
 
-	# Ensure all descendants pass mouse events through to the row
 	_set_descendants_mouse_ignore(row)
 	row.mouse_filter = Control.MOUSE_FILTER_STOP
 
@@ -538,7 +301,52 @@ func _build_recipe_row(recipe_id: String) -> PanelContainer:
 
 	return row
 
+func _style_button(button: Button, accent_color: Color) -> void:
+	var normal_style := StyleBoxFlat.new()
+	normal_style.bg_color = Color(accent_color, 0.2)
+	normal_style.border_color = accent_color
+	normal_style.set_border_width_all(1)
+	normal_style.set_corner_radius_all(4)
+	normal_style.set_content_margin_all(8)
+	button.add_theme_stylebox_override("normal", normal_style)
+	button.add_theme_stylebox_override("hover", normal_style)
+
+	var pressed_style: StyleBoxFlat = normal_style.duplicate() as StyleBoxFlat
+	pressed_style.bg_color = Color(accent_color, 0.4)
+	button.add_theme_stylebox_override("pressed", pressed_style)
+
+	var disabled_style: StyleBoxFlat = normal_style.duplicate() as StyleBoxFlat
+	disabled_style.bg_color = Color(accent_color, 0.05)
+	disabled_style.border_color = Color(accent_color, 0.3)
+	button.add_theme_stylebox_override("disabled", disabled_style)
+
+	var focus_style: StyleBoxFlat = normal_style.duplicate() as StyleBoxFlat
+	focus_style.border_color = COLOR_TEAL
+	focus_style.set_border_width_all(2)
+	button.add_theme_stylebox_override("focus", focus_style)
+
+	button.add_theme_color_override("font_color", accent_color)
+	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
+	button.add_theme_color_override("font_disabled_color", Color(accent_color, 0.3))
+
+func _style_close_button(button: Button) -> void:
+	var normal_style := StyleBoxFlat.new()
+	normal_style.bg_color = Color(COLOR_NEUTRAL, 0.2)
+	normal_style.border_color = COLOR_NEUTRAL
+	normal_style.set_border_width_all(1)
+	normal_style.set_corner_radius_all(4)
+	normal_style.set_content_margin_all(8)
+	button.add_theme_stylebox_override("normal", normal_style)
+	button.add_theme_stylebox_override("hover", normal_style)
+	var pressed_style: StyleBoxFlat = normal_style.duplicate() as StyleBoxFlat
+	pressed_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
+	button.add_theme_stylebox_override("pressed", pressed_style)
+	button.add_theme_color_override("font_color", COLOR_NEUTRAL)
+	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
+
 func _connect_signals() -> void:
+	_start_button.pressed.connect(_on_start_pressed)
+	_close_button.pressed.connect(close)
 	Fabricator.job_started.connect(_on_job_started)
 	Fabricator.job_progress_changed.connect(_on_job_progress)
 	Fabricator.job_completed.connect(_on_job_completed)
@@ -562,11 +370,9 @@ func _refresh_recipe_list() -> void:
 		var indicator: ColorRect = _recipe_row_indicators[i]
 		var dot: ColorRect = _recipe_row_dots[i]
 
-		# Selection indicator
 		var is_selected: bool = i == _selected_index
 		indicator.color = COLOR_TEAL if is_selected else Color.TRANSPARENT
 
-		# Row highlighting
 		var row_style: StyleBoxFlat = row.get_theme_stylebox("panel") as StyleBoxFlat
 		if is_selected:
 			row_style.bg_color = Color(COLOR_SLOT_BG, 0.8)
@@ -575,13 +381,11 @@ func _refresh_recipe_list() -> void:
 			row_style.bg_color = Color.TRANSPARENT
 			name_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
 
-		# Processing lock
 		if is_processing:
 			row.modulate = Color(1, 1, 1, 0.4)
 		else:
 			row.modulate = Color.WHITE
 
-		# Affordability dot
 		var can_afford: bool = _can_afford_recipe(recipe_id)
 		dot.color = COLOR_GREEN if can_afford else COLOR_AMBER
 
@@ -603,7 +407,6 @@ func _refresh_detail() -> void:
 	_recipe_name_label.text = FabricatorDefs.get_recipe_name(recipe_id)
 	_recipe_name_label.add_theme_color_override("font_color", COLOR_TEAL)
 
-	# Reload icon textures only when the selected recipe changes
 	var recipe_changed: bool = recipe_id != _last_detail_recipe_id
 	if recipe_changed:
 		_last_detail_recipe_id = recipe_id
@@ -672,7 +475,6 @@ func _refresh_detail() -> void:
 		_output_slot_label.visible = false
 		_output_desc_label.text = ""
 
-	# Button state
 	var can_start: bool = not Fabricator.is_job_active() and _can_afford_recipe(recipe_id)
 	_start_button.disabled = not can_start
 
@@ -705,57 +507,6 @@ func _move_list_focus(direction: int) -> void:
 		_selected_index = new_index
 		_selected_recipe_id = _recipe_ids[_selected_index]
 		_refresh_ui()
-
-func _style_button(button: Button, accent_color: Color) -> void:
-	var normal_style := StyleBoxFlat.new()
-	normal_style.bg_color = Color(accent_color, 0.2)
-	normal_style.border_color = accent_color
-	normal_style.set_border_width_all(1)
-	normal_style.set_corner_radius_all(4)
-	normal_style.set_content_margin_all(8)
-	button.add_theme_stylebox_override("normal", normal_style)
-	button.add_theme_stylebox_override("hover", normal_style)
-
-	var pressed_style: StyleBoxFlat = normal_style.duplicate() as StyleBoxFlat
-	pressed_style.bg_color = Color(accent_color, 0.4)
-	button.add_theme_stylebox_override("pressed", pressed_style)
-
-	var disabled_style: StyleBoxFlat = normal_style.duplicate() as StyleBoxFlat
-	disabled_style.bg_color = Color(accent_color, 0.05)
-	disabled_style.border_color = Color(accent_color, 0.3)
-	button.add_theme_stylebox_override("disabled", disabled_style)
-
-	var focus_style: StyleBoxFlat = normal_style.duplicate() as StyleBoxFlat
-	focus_style.border_color = COLOR_TEAL
-	focus_style.set_border_width_all(2)
-	button.add_theme_stylebox_override("focus", focus_style)
-
-	button.add_theme_color_override("font_color", accent_color)
-	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
-	button.add_theme_color_override("font_disabled_color", Color(accent_color, 0.3))
-
-func _style_close_button(button: Button) -> void:
-	var normal_style := StyleBoxFlat.new()
-	normal_style.bg_color = Color(COLOR_NEUTRAL, 0.2)
-	normal_style.border_color = COLOR_NEUTRAL
-	normal_style.set_border_width_all(1)
-	normal_style.set_corner_radius_all(4)
-	normal_style.set_content_margin_all(8)
-	button.add_theme_stylebox_override("normal", normal_style)
-	button.add_theme_stylebox_override("hover", normal_style)
-	var pressed_style: StyleBoxFlat = normal_style.duplicate() as StyleBoxFlat
-	pressed_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
-	button.add_theme_stylebox_override("pressed", pressed_style)
-	button.add_theme_color_override("font_color", COLOR_NEUTRAL)
-	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
-
-func _add_divider(parent: Node) -> void:
-	var divider := HSeparator.new()
-	var div_style := StyleBoxFlat.new()
-	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
-	div_style.set_content_margin_all(0)
-	divider.add_theme_stylebox_override("separator", div_style)
-	parent.add_child(divider)
 
 func _animate_open() -> void:
 	_dim_rect.modulate.a = 0.0

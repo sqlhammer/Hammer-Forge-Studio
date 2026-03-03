@@ -7,9 +7,6 @@ extends CanvasLayer
 signal closed
 
 # ── Constants ─────────────────────────────────────────────
-const PANEL_WIDTH: float = 480.0
-const PANEL_HEIGHT: float = 400.0
-const SLOT_SIZE: float = 72.0
 
 ## Style colors matching UI style guide
 const COLOR_SURFACE := Color("#0A0F18", 0.95)
@@ -22,34 +19,48 @@ const COLOR_TEXT_SECONDARY := Color("#94A3B8")
 const COLOR_NEUTRAL := Color("#94A3B8")
 const COLOR_SLOT_BG := Color("#1A2736", 0.8)
 const COLOR_BAR_BG := Color("#1A2736")
-const COLOR_DIM := Color("#000000", 0.5)
 
 # ── Private Variables ─────────────────────────────────────
 var _is_open: bool = false
-var _dim_rect: ColorRect = null
-var _main_panel: PanelContainer = null
-var _input_slot_icon: TextureRect = null
-var _input_slot_label: Label = null
-var _output_slot_icon: TextureRect = null
-var _output_slot_label: Label = null
-var _progress_bar: ProgressBar = null
-var _progress_label: Label = null
-var _start_button: Button = null
-var _collect_button: Button = null
-var _status_label: Label = null
-var _feedback_label: Label = null
-var _available_label: Label = null
 var _input_icon_tex: Texture2D = null
 var _output_icon_tex: Texture2D = null
+
+# ── Onready Variables ─────────────────────────────────────
+@onready var _dim_rect: ColorRect = %DimRect
+@onready var _main_panel: PanelContainer = %MainPanel
+@onready var _input_slot: PanelContainer = %InputSlot
+@onready var _input_slot_icon: TextureRect = %InputIcon
+@onready var _input_slot_label: Label = %InputCountLabel
+@onready var _output_slot: PanelContainer = %OutputSlot
+@onready var _output_slot_icon: TextureRect = %OutputIcon
+@onready var _output_slot_label: Label = %OutputCountLabel
+@onready var _progress_bar: ProgressBar = %ProgressBar
+@onready var _progress_label: Label = %ProgressLabel
+@onready var _start_button: Button = %StartButton
+@onready var _collect_button: Button = %CollectButton
+@onready var _status_label: Label = %StatusLabel
+@onready var _feedback_label: Label = %FeedbackLabel
+@onready var _available_label: Label = %AvailableLabel
+@onready var _recipe_label: Label = %RecipeLabel
+@onready var _close_button: Button = %CloseButton
+@onready var _divider: HSeparator = %Divider
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	layer = 3
-	process_mode = Node.PROCESS_MODE_INHERIT
-	visible = false
-	_build_ui()
+	_apply_styles()
 	_connect_signals()
+	_recipe_label.text = "%d Scrap Metal → %d Metal (%.0fs)" % [
+		Recycler.RECIPE_INPUT_QUANTITY,
+		Recycler.RECIPE_OUTPUT_QUANTITY,
+		Recycler.PROCESSING_TIME,
+	]
+	var input_icon_path: String = ResourceDefs.get_icon_path(Recycler.RECIPE_INPUT_TYPE)
+	if not input_icon_path.is_empty():
+		_input_icon_tex = load(input_icon_path) as Texture2D
+	var output_icon_path: String = ResourceDefs.get_icon_path(Recycler.RECIPE_OUTPUT_TYPE)
+	if not output_icon_path.is_empty():
+		_output_icon_tex = load(output_icon_path) as Texture2D
 
 func _input(event: InputEvent) -> void:
 	if not _is_open:
@@ -89,26 +100,8 @@ func is_open() -> bool:
 
 # ── Private Methods ───────────────────────────────────────
 
-func _build_ui() -> void:
-	# Dim background
-	var dim_layer := Control.new()
-	dim_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(dim_layer)
-
-	_dim_rect = ColorRect.new()
-	_dim_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_dim_rect.color = COLOR_DIM
-	dim_layer.add_child(_dim_rect)
-
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.add_child(center)
-
+func _apply_styles() -> void:
 	# Main panel
-	_main_panel = PanelContainer.new()
-	_main_panel.custom_minimum_size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
-	_main_panel.pivot_offset = Vector2(PANEL_WIDTH / 2.0, PANEL_HEIGHT / 2.0)
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_SURFACE
 	panel_style.border_color = COLOR_BORDER
@@ -116,225 +109,38 @@ func _build_ui() -> void:
 	panel_style.set_corner_radius_all(8)
 	panel_style.set_content_margin_all(24)
 	_main_panel.add_theme_stylebox_override("panel", panel_style)
-	center.add_child(_main_panel)
 
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
-	_main_panel.add_child(vbox)
-
-	# Title
-	var title := Label.new()
-	title.text = "RECYCLER"
-	title.add_theme_font_size_override("font_size", 28)
-	title.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(title)
-
-	# Status label
-	_status_label = Label.new()
-	_status_label.text = "Ready"
-	_status_label.add_theme_font_size_override("font_size", 16)
-	_status_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(_status_label)
+	# Slot styles
+	var slot_style := StyleBoxFlat.new()
+	slot_style.bg_color = COLOR_SLOT_BG
+	slot_style.border_color = Color(COLOR_NEUTRAL, 0.3)
+	slot_style.set_border_width_all(1)
+	slot_style.set_corner_radius_all(4)
+	slot_style.set_content_margin_all(4)
+	_input_slot.add_theme_stylebox_override("panel", slot_style)
+	var output_slot_style: StyleBoxFlat = slot_style.duplicate() as StyleBoxFlat
+	_output_slot.add_theme_stylebox_override("panel", output_slot_style)
 
 	# Divider
-	_add_divider(vbox)
+	var div_style := StyleBoxFlat.new()
+	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
+	div_style.set_content_margin_all(0)
+	_divider.add_theme_stylebox_override("separator", div_style)
 
-	# Slot row: Input → Arrow → Output
-	var slot_row := _build_slot_row()
-	vbox.add_child(slot_row)
-
-	# Recipe label
-	var recipe_label := Label.new()
-	recipe_label.text = "%d Scrap Metal → %d Metal (%.0fs)" % [
-		Recycler.RECIPE_INPUT_QUANTITY,
-		Recycler.RECIPE_OUTPUT_QUANTITY,
-		Recycler.PROCESSING_TIME,
-	]
-	recipe_label.add_theme_font_size_override("font_size", 16)
-	recipe_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	recipe_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(recipe_label)
-
-	# Progress section
-	var progress_section := _build_progress_section()
-	vbox.add_child(progress_section)
-
-	# Button row
-	var button_row := _build_button_row()
-	vbox.add_child(button_row)
-
-	# Feedback label
-	_feedback_label = Label.new()
-	_feedback_label.add_theme_font_size_override("font_size", 16)
-	_feedback_label.add_theme_color_override("font_color", COLOR_CORAL)
-	_feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(_feedback_label)
-
-	# Available resources label
-	_available_label = Label.new()
-	_available_label.add_theme_font_size_override("font_size", 14)
-	_available_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_available_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(_available_label)
-
-	# Footer row: instructions + close button
-	var footer := HBoxContainer.new()
-	footer.alignment = BoxContainer.ALIGNMENT_CENTER
-	footer.add_theme_constant_override("separation", 16)
-	vbox.add_child(footer)
-
-	var instructions := Label.new()
-	instructions.text = "[Esc] Close"
-	instructions.add_theme_font_size_override("font_size", 14)
-	instructions.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	footer.add_child(instructions)
-
-	var close_button := Button.new()
-	close_button.text = "Close"
-	close_button.custom_minimum_size = Vector2(80, 32)
-	close_button.add_theme_font_size_override("font_size", 14)
-	_style_button(close_button, COLOR_NEUTRAL)
-	close_button.pressed.connect(close)
-	footer.add_child(close_button)
-
-	# Cache slot icon textures (resource types are constants, textures never change)
-	var input_icon_path: String = ResourceDefs.get_icon_path(Recycler.RECIPE_INPUT_TYPE)
-	if not input_icon_path.is_empty():
-		_input_icon_tex = load(input_icon_path) as Texture2D
-	var output_icon_path: String = ResourceDefs.get_icon_path(Recycler.RECIPE_OUTPUT_TYPE)
-	if not output_icon_path.is_empty():
-		_output_icon_tex = load(output_icon_path) as Texture2D
-
-func _build_slot_row() -> CenterContainer:
-	var center := CenterContainer.new()
-
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 20)
-	center.add_child(hbox)
-
-	# Input slot
-	var input_container := _create_labeled_slot("INPUT")
-	hbox.add_child(input_container)
-	_input_slot_icon = input_container.get_meta("icon") as TextureRect
-	_input_slot_label = input_container.get_meta("label") as Label
-
-	# Arrow
-	var arrow := Label.new()
-	arrow.text = "→"
-	arrow.add_theme_font_size_override("font_size", 32)
-	arrow.add_theme_color_override("font_color", COLOR_TEAL)
-	arrow.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	hbox.add_child(arrow)
-
-	# Output slot
-	var output_container := _create_labeled_slot("OUTPUT")
-	hbox.add_child(output_container)
-	_output_slot_icon = output_container.get_meta("icon") as TextureRect
-	_output_slot_label = output_container.get_meta("label") as Label
-
-	return center
-
-func _create_labeled_slot(slot_label_text: String) -> VBoxContainer:
-	var container := VBoxContainer.new()
-	container.add_theme_constant_override("separation", 4)
-
-	var header := Label.new()
-	header.text = slot_label_text
-	header.add_theme_font_size_override("font_size", 12)
-	header.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	container.add_child(header)
-
-	var slot := PanelContainer.new()
-	slot.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
-	var style := StyleBoxFlat.new()
-	style.bg_color = COLOR_SLOT_BG
-	style.border_color = Color(COLOR_NEUTRAL, 0.3)
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
-	style.set_content_margin_all(4)
-	slot.add_theme_stylebox_override("panel", style)
-	container.add_child(slot)
-
-	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(40, 40)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.visible = false
-	slot.add_child(icon)
-
-	var count_label := Label.new()
-	count_label.add_theme_font_size_override("font_size", 14)
-	count_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	count_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-	count_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	count_label.visible = false
-	slot.add_child(count_label)
-
-	# Store references as metadata on the container
-	container.set_meta("icon", icon)
-	container.set_meta("label", count_label)
-
-	return container
-
-func _build_progress_section() -> VBoxContainer:
-	var section := VBoxContainer.new()
-	section.add_theme_constant_override("separation", 4)
-
-	_progress_bar = ProgressBar.new()
-	_progress_bar.custom_minimum_size = Vector2(0, 16)
-	_progress_bar.max_value = 1.0
-	_progress_bar.value = 0.0
-	_progress_bar.show_percentage = false
-
+	# Progress bar
 	var bar_bg := StyleBoxFlat.new()
 	bar_bg.bg_color = COLOR_BAR_BG
 	bar_bg.set_corner_radius_all(4)
 	_progress_bar.add_theme_stylebox_override("background", bar_bg)
-
 	var bar_fill := StyleBoxFlat.new()
 	bar_fill.bg_color = COLOR_TEAL
 	bar_fill.set_corner_radius_all(4)
 	_progress_bar.add_theme_stylebox_override("fill", bar_fill)
-	section.add_child(_progress_bar)
 
-	_progress_label = Label.new()
-	_progress_label.add_theme_font_size_override("font_size", 14)
-	_progress_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_progress_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	section.add_child(_progress_label)
-
-	return section
-
-func _build_button_row() -> CenterContainer:
-	var center := CenterContainer.new()
-
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 16)
-	center.add_child(hbox)
-
-	# Start button
-	_start_button = Button.new()
-	_start_button.text = "START"
-	_start_button.custom_minimum_size = Vector2(140, 40)
-	_start_button.add_theme_font_size_override("font_size", 20)
+	# Buttons
 	_style_button(_start_button, COLOR_TEAL)
-	_start_button.pressed.connect(_on_start_pressed)
-	hbox.add_child(_start_button)
-
-	# Collect button
-	_collect_button = Button.new()
-	_collect_button.text = "COLLECT"
-	_collect_button.custom_minimum_size = Vector2(140, 40)
-	_collect_button.add_theme_font_size_override("font_size", 20)
 	_style_button(_collect_button, COLOR_AMBER)
-	_collect_button.pressed.connect(_on_collect_pressed)
-	hbox.add_child(_collect_button)
-
-	return center
+	_style_button(_close_button, COLOR_NEUTRAL)
 
 func _style_button(button: Button, accent_color: Color) -> void:
 	var normal_style := StyleBoxFlat.new()
@@ -359,15 +165,10 @@ func _style_button(button: Button, accent_color: Color) -> void:
 	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
 	button.add_theme_color_override("font_disabled_color", Color(accent_color, 0.3))
 
-func _add_divider(parent: Node) -> void:
-	var divider := HSeparator.new()
-	var div_style := StyleBoxFlat.new()
-	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
-	div_style.set_content_margin_all(0)
-	divider.add_theme_stylebox_override("separator", div_style)
-	parent.add_child(divider)
-
 func _connect_signals() -> void:
+	_start_button.pressed.connect(_on_start_pressed)
+	_collect_button.pressed.connect(_on_collect_pressed)
+	_close_button.pressed.connect(close)
 	Recycler.job_started.connect(_on_job_started)
 	Recycler.job_progress_changed.connect(_on_job_progress)
 	Recycler.job_completed.connect(_on_job_completed)

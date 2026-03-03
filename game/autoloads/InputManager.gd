@@ -79,6 +79,12 @@ func is_action_just_pressed(action: String) -> bool:
 		return false
 	return Input.is_action_just_pressed(action)
 
+## Returns true if the specified action was just pressed this frame, ignoring
+## gameplay input suppression. Use for UI toggle actions (e.g., inventory_toggle)
+## that must remain responsive even when gameplay inputs are disabled.
+func is_action_just_pressed_unsuppressed(action: String) -> bool:
+	return Input.is_action_just_pressed(action)
+
 ## Returns the analog strength (0.0 - 1.0) of the specified action.
 func get_action_strength(action: String) -> float:
 	if not _gameplay_inputs_enabled and action in GAMEPLAY_ACTIONS:

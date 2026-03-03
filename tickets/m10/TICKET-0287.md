@@ -2,7 +2,7 @@
 id: TICKET-0287
 title: "M10 BUG — Ping radial wheel renders in upper-left corner instead of screen center"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -142,3 +142,4 @@ equivalent.
   ResourceTypeWheel must be a persistent scene node, not programmatically instantiated.
   Removed get_viewport_rect() workaround as primary fix; scene architecture change is required.
 - 2026-03-03 [gameplay-programmer] Starting work — moving ResourceTypeWheel to persistent scene node in game_hud.tscn
+- 2026-03-03 [gameplay-programmer] DONE — commit 3cc3c50, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/316 (merged)

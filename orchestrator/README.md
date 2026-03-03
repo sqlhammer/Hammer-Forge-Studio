@@ -66,14 +66,15 @@ python orchestrator/status.py --log 20         # include last 20 log entries
 
 ### Approve a Phase Gate
 
-When a phase completes, the conductor transitions to `GATE_BLOCKED` and writes `pending_gate.json` inside the instance directory. To approve, create `gate_response.json` in the same directory:
+When a phase completes, the conductor transitions to `GATE_BLOCKED` and writes `pending_gate.json` inside the instance directory. Use `approve_gate.py` to approve the gate:
 
 ```bash
-# Write gate_response.json to the instance directory:
-echo '{"next_phase": "Phase 2 — Remediation"}' > orchestrator/instances/M11/gate_response.json
+python orchestrator/approve_gate.py                  # auto-detect instance, confirm first
+python orchestrator/approve_gate.py --force          # no prompt
+python orchestrator/approve_gate.py --instance M11  # target a specific instance
 ```
 
-The conductor polls for this file every 30 seconds. Once found, it reads `next_phase`, cleans up both gate files, and advances to `PLANNING`.
+The script reads `pending_gate.json`, displays the current milestone, phase, next phase, and gate timestamp, then prompts for confirmation before writing `gate_response.json`. The conductor polls for this file every 30 seconds. Once found, it reads `next_phase`, cleans up both gate files, and advances to `PLANNING`.
 
 ### Resume Planning After New Tickets Are Added
 

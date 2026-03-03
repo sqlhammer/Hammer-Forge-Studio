@@ -21,7 +21,7 @@ signal input_device_changed(device: String)  # "keyboard" or "gamepad"
 # ── Constants (gameplay actions suppressed when UI is open) ─
 const GAMEPLAY_ACTIONS: Array[String] = [
 	"move_forward", "move_backward", "move_left", "move_right",
-	"interact", "scan", "use_tool", "switch_view", "jump",
+	"interact", "ping", "use_tool", "switch_view", "jump",
 	"inventory_toggle", "use_item", "toggle_head_lamp",
 	"ship_forward", "ship_backward", "ship_left", "ship_right",
 	"ship_accelerate", "ship_emergency_stop",
@@ -150,11 +150,11 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("camera_look_horizontal", [])  # Mouse only
 	_add_action_if_missing("camera_look_vertical", [])  # Mouse only
 	_add_action_if_missing("interact", [KEY_E], [], [JOY_BUTTON_X])
-	_add_action_if_missing("scan", [KEY_Q])
+	_add_action_if_missing("ping", [KEY_Q], [], [JOY_BUTTON_LEFT_SHOULDER])
 	_add_action_if_missing("use_tool", [], [MOUSE_BUTTON_LEFT])
 	_add_action_if_missing("switch_view", [KEY_TAB])
 	_add_action_if_missing("pause", [KEY_ESCAPE])
-	_add_action_if_missing("jump", [KEY_SPACE])
+	_add_action_if_missing("jump", [KEY_SPACE], [], [JOY_BUTTON_A])
 	_add_action_if_missing("inventory_toggle", [KEY_I], [], [JOY_BUTTON_BACK])
 	_add_action_if_missing("use_item", [KEY_G])
 	_add_action_if_missing("toggle_head_lamp", [KEY_F])

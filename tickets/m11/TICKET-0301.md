@@ -2,7 +2,7 @@
 id: TICKET-0301
 title: "M11 Standards remediation — Fix direct Input.is_action_just_pressed() bypass in inventory_screen.gd"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: systems-programmer
 created_by: producer
@@ -46,3 +46,4 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 
 - 2026-03-03 [producer] Created ticket — Phase 2 remediation from M11 GDScript audit report (TICKET-0290)
 - 2026-03-03 [systems-programmer] Starting work — implementing unsuppressed input check method in InputManager
+- 2026-03-03 [systems-programmer] DONE — added InputManager.is_action_just_pressed_unsuppressed(), replaced direct Input call in inventory_screen.gd, updated architecture docs. Commit 2b1c210, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/325 (merged)

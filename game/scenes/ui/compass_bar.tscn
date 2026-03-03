@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dkatno8pe35a1" path="res://scripts/ui/compass_bar.gd" id="1_cmp"]
 
 [node name="CompassBar" type="Control"]
+custom_minimum_size = Vector2(600, 56)
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5

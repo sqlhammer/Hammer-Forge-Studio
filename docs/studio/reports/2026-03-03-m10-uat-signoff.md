@@ -15,7 +15,7 @@
 | **Prepared By** | qa-engineer |
 | **Date Prepared** | 2026-03-03 |
 | **Test Build** | 0c5c02f (main branch — all 10 M10 implementation tickets merged) |
-| **Sign-Off Status** | ⏳ DRAFT — 13/15 UAT items covered; items 14–15 pending TICKET-0287 and TICKET-0288 |
+| **Sign-Off Status** | ⏳ DRAFT — 15/15 UAT items covered; ready for Studio Head review |
 
 ---
 
@@ -354,6 +354,55 @@
 
 ---
 
+### Bug Fixes
+
+---
+
+#### Ping Radial Wheel — Renders at Screen Center (TICKET-0287)
+
+**Verification Method:** `manual-playtest`
+
+**What changed:** The resource-type radial wheel was rendering at the upper-left corner of the screen (position 0, 0) instead of the screen center. The `ResourceTypeWheel` Control node's anchor and offset settings were corrected so the wheel centers itself on the viewport. No logic changes — purely a UI layout fix.
+
+**How to test:**
+1. Launch to any biome (F5 → LAUNCH → Play).
+2. **Hold Q** on keyboard (or **LB** on gamepad) for more than 0.2 seconds.
+3. Observe where the radial wheel appears.
+4. Confirm the wheel appears at the **center of the screen**, not the upper-left corner.
+5. Move the mouse (or left stick) to select a resource type and release to ping — confirm the wheel closes and ping fires normally.
+
+**Expected result:** Radial wheel renders at viewport center when activated. All selection and ping-fire behavior is unchanged.
+
+**Automated coverage:** UI position is a layout property — no unit test. Manual playtest required. Regression guard: confirmed no `position = Vector2.ZERO` or explicit offset assignments in `resource_type_wheel.gd` outside the anchor/centering logic.
+
+- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+
+---
+
+#### Compass Distance Cone — Resource Label Only Near Compass Center (TICKET-0288)
+
+**Verification Method:** `manual-playtest`
+
+**What changed:** The resource distance readout label on the compass previously appeared for any resource marker, regardless of how far it was from compass center. It now only appears when the marker is within 3× the ping icon width of the compass center point. Ship distance label behavior is unchanged (it always shows). This focuses the distance information on the most relevant nearby resource and reduces HUD clutter.
+
+**How to test:**
+1. Launch to a biome with resource deposits at varying distances.
+2. Fire a scanner ping (tap Q / LB).
+3. Observe the compass — resource markers appear progressively as the ping ring expands.
+4. **At the compass center:** a resource marker that is nearly directly ahead (within 3× ping icon width of center) should show its **distance label** (e.g., "142 m").
+5. **Toward the edges of the compass:** resource markers far from the center should show the **marker icon only** — no distance label.
+6. Rotate the player so a distant resource marker drifts toward compass center — confirm the **distance label appears** as it enters the cone.
+7. Rotate away — confirm the distance label **disappears** as the marker exits the cone.
+8. Verify the **ship distance label** still appears at all times when the ship marker is on the compass (not limited by the cone).
+
+**Expected result:** Resource distance label visible only when marker is within 3× ping icon width of compass center. Ship distance label always visible. Marker icon visible at all compass positions.
+
+**Automated coverage:** `test_compass_bar_unit.gd` covers compass marker logic. The cone threshold is a display-layer property — manual playtest required to verify label visibility at range boundaries.
+
+- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+
+---
+
 ## Rejection Notes
 
 > List any rejected features here with detail. QA Engineer will triage and open bug tickets.
@@ -368,11 +417,11 @@
 
 > Complete this section after all checkboxes above are marked.
 
-**Total Features:** 13
+**Total Features:** 15
 **Approved:** (to be filled by Studio Head)
 **Rejected:** (to be filled by Studio Head)
 
-**Gate Condition:** All 13 features must be `✅ Approved` for sign-off to be granted.
+**Gate Condition:** All 15 features must be `✅ Approved` for sign-off to be granted.
 
 ---
 

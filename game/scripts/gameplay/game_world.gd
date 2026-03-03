@@ -312,7 +312,8 @@ func _setup_travel_sequence(player: Node3D) -> void:
 		push_error("GameWorld: cannot set up travel sequence — missing Ship or BiomeContent")
 		return
 
-	var travel_manager: TravelSequenceManager = TravelSequenceManager.new()
+	var travel_scene: PackedScene = load("res://scenes/gameplay/travel_sequence_manager.tscn") as PackedScene
+	var travel_manager: TravelSequenceManager = travel_scene.instantiate() as TravelSequenceManager
 	travel_manager.name = "TravelSequenceManager"
 	add_child(travel_manager)
 	travel_manager.setup(player, ship, biome_container, ship_interior)

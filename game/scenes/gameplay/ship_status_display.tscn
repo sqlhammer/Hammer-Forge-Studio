@@ -1,6 +1,90 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/ship_status_display.gd" id="1_script"]
 
+[sub_resource type="StandardMaterial3D" id="mat_frame"]
+albedo_color = Color(0.2, 0.2, 0.2, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="box_frame"]
+size = Vector3(0.52, 0.27, 0.015)
+
+[sub_resource type="StyleBoxFlat" id="sbf_panel_bg"]
+bg_color = Color(0.0588235, 0.0980392, 0.137255, 1)
+
+[sub_resource type="StyleBoxFlat" id="sbf_bar_bg"]
+bg_color = Color(0.101961, 0.152941, 0.211765, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="sbf_bar_fill"]
+bg_color = Color(0, 0.831373, 0.666667, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StandardMaterial3D" id="mat_screen"]
+shading_mode = 2
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="QuadMesh" id="quad_screen"]
+size = Vector2(0.5, 0.25)
+
 [node name="ShipStatusDisplay" type="Node3D"]
 script = ExtResource("1_script")
+
+[node name="Frame" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.008)
+mesh = SubResource("box_frame")
+material_override = SubResource("mat_frame")
+
+[node name="DisplayViewport" type="SubViewport" parent="."]
+size = Vector2i(256, 128)
+render_target_update_mode = 4
+
+[node name="Background" type="Panel" parent="DisplayViewport"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("sbf_panel_bg")
+
+[node name="NameLabel" type="Label" parent="DisplayViewport"]
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 128.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(0.580392, 0.639216, 0.721569, 1)
+theme_override_font_sizes/font_size = 20
+
+[node name="ValueLabel" type="Label" parent="DisplayViewport"]
+offset_left = 128.0
+offset_top = 4.0
+offset_right = 244.0
+offset_bottom = 44.0
+theme_override_colors/font_color = Color(0, 0.831373, 0.666667, 1)
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 2
+text = "100%"
+
+[node name="StatusBar" type="ProgressBar" parent="DisplayViewport"]
+offset_left = 12.0
+offset_top = 60.0
+offset_right = 244.0
+offset_bottom = 78.0
+custom_minimum_size = Vector2(232, 18)
+theme_override_styles/background = SubResource("sbf_bar_bg")
+theme_override_styles/fill = SubResource("sbf_bar_fill")
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="ScreenMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("quad_screen")
+material_override = SubResource("mat_screen")

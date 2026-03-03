@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-03-01 (T1 closed — Complete)
+**Last Updated:** 2026-03-03 (M10 kickoff — scope defined)
 
 > Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
@@ -35,13 +35,14 @@
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Complete | 56 | 0 | 56 | 2026-03-01 |
 | M9 | Foundation & Hardening — Canonical game launch architecture, orchestrator hardening, gamepad fixes, and M8 playtest polish | — | Complete | 39 | 0 | 39 | 2026-03-02 |
-| M10 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
-| M11 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
-| M12 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
-| M13 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
-| M14 | Mega-Project Arc — Full tech tree, endgame sequence | — | Planning | — | — | — | — |
-| M15 | Alpha — Full playthrough possible | — | Planning | — | — | — | — |
-| M16 | Beta — External testing | — | Planning | — | — | — | — |
+| M10 | Input & Feel Refinement — Gamepad remapping, scanner UX, boarding feel, orchestrator cleanup | — | Active | 10 | 10 | 0 | — |
+| M11 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
+| M12 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
+| M13 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
+| M14 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
+| M15 | Mega-Project Arc — Full tech tree, endgame sequence | — | Planning | — | — | — | — |
+| M16 | Alpha — Full playthrough possible | — | Planning | — | — | — | — |
+| M17 | Beta — External testing | — | Planning | — | — | — | — |
 
 ### Tooling Milestones
 
@@ -544,23 +545,33 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M10 — Visual Asset Refinement
+### M10 — Input & Feel Refinement ✅ Kicked off 2026-03-03
 
-**Goal:** Polished art pass on all existing game assets — terrain, ship interior, player character, resource nodes, and UI surfaces.
+**Goal:** Gamepad input remapping, scanner UX improvements, ship boarding feel fix, and orchestrator dead-code cleanup.
 
-**Scope:** TBD — to be defined at M10 kickoff following M9 close.
+**Scope:**
+- Gamepad input remapping: interact→X, A→jump, LB→ping, A→use_item, RB→toggle_head_lamp, RT→use_tool
+- Rename input action `scan` → `ping` across codebase
+- Trigger axis support in InputManager + HUD label
+- Ship boarding raycast (aim at hull required)
+- Scanner radial wheel (resource type selection before ping)
+- Animated ping propagation ring with progressive compass reveal
+- Orchestrator: replace dead USD budget caps with per-agent `--max-turns`
+- Producer interview: D-007 respawn requirements
 
-**Phases:** To be defined at M10 kickoff — requires Studio Head approval before agents begin work.
+**Phases:** Implementation → QA
+
+**Tickets:** TICKET-0276 through TICKET-0285 (10 total)
 
 **Dependencies:** M9
 
 ---
 
-### M11 — Movement & Usability Refinement
+### M11 — Visual Asset Refinement
 
-**Goal:** Game feel, first-person controls, and HUD/UX tuning pass.
+**Goal:** Polished art pass on all existing game assets — terrain, ship interior, player character, resource nodes, and UI surfaces.
 
-**Scope:** TBD — to be defined after M10 closes.
+**Scope:** TBD — to be defined at M11 kickoff following M10 close.
 
 **Phases:** To be defined at M11 kickoff — requires Studio Head approval before agents begin work.
 
@@ -568,9 +579,9 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M12 — Content Expansion
+### M12 — Movement & Usability Refinement
 
-**Goal:** Additional material resources, crafting recipes, and tech tree depth.
+**Goal:** Game feel, first-person controls, and HUD/UX tuning pass.
 
 **Scope:** TBD — to be defined after M11 closes.
 
@@ -580,9 +591,9 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M13 — Biome Progression
+### M13 — Content Expansion
 
-**Goal:** Full Tier 1–3 biome progression with escalating threats and resource gates.
+**Goal:** Additional material resources, crafting recipes, and tech tree depth.
 
 **Scope:** TBD — to be defined after M12 closes.
 
@@ -592,11 +603,11 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M14 — Mega-Project Arc
+### M14 — Biome Progression
 
-**Goal:** Complete tech tree and endgame sequence playable end-to-end.
+**Goal:** Full Tier 1–3 biome progression with escalating threats and resource gates.
 
-**Scope:** TBD
+**Scope:** TBD — to be defined after M13 closes.
 
 **Phases:** To be defined at M14 kickoff — requires Studio Head approval before agents begin work.
 
@@ -604,9 +615,9 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M15 — Alpha
+### M15 — Mega-Project Arc
 
-**Goal:** Full playthrough from ship start to Naer-Reth activation is possible.
+**Goal:** Complete tech tree and endgame sequence playable end-to-end.
 
 **Scope:** TBD
 
@@ -616,15 +627,27 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M16 — Beta / External Testing
+### M16 — Alpha
 
-**Goal:** External testers can complete the game. Polish and bug-fix pass.
+**Goal:** Full playthrough from ship start to Naer-Reth activation is possible.
 
 **Scope:** TBD
 
 **Phases:** To be defined at M16 kickoff — requires Studio Head approval before agents begin work.
 
 **Dependencies:** M15
+
+---
+
+### M17 — Beta / External Testing
+
+**Goal:** External testers can complete the game. Polish and bug-fix pass.
+
+**Scope:** TBD
+
+**Phases:** To be defined at M17 kickoff — requires Studio Head approval before agents begin work.
+
+**Dependencies:** M16
 
 ---
 

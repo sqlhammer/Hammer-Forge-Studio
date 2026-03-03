@@ -10,7 +10,7 @@ created_at: 2026-03-03
 updated_at: 2026-03-03
 milestone: "M10"
 phase: "QA"
-depends_on: [TICKET-0276, TICKET-0277, TICKET-0278, TICKET-0279, TICKET-0280, TICKET-0281, TICKET-0282, TICKET-0283, TICKET-0284, TICKET-0286, TICKET-0287]
+depends_on: [TICKET-0276, TICKET-0277, TICKET-0278, TICKET-0279, TICKET-0280, TICKET-0281, TICKET-0282, TICKET-0283, TICKET-0284, TICKET-0286, TICKET-0287, TICKET-0288]
 blocks: []
 tags: [qa, sign-off, phase-gate]
 ---
@@ -25,7 +25,7 @@ sign-off document, and marks this ticket DONE to unblock M11 kickoff.
 
 ## Acceptance Criteria
 
-- [ ] All M10 implementation tickets (TICKET-0276 through TICKET-0284, TICKET-0286, TICKET-0287) are DONE
+- [ ] All M10 implementation tickets (TICKET-0276 through TICKET-0284, TICKET-0286–TICKET-0288) are DONE
 - [ ] Full test suite passes with zero failures
 - [ ] UAT sign-off document produced and saved to
       `docs/studio/reports/YYYY-MM-DD-m10-uat-signoff.md`
@@ -55,6 +55,8 @@ The UAT sign-off document must include testable steps for:
     (or reduce config timer) and confirm it respawns; confirm deep nodes are unaffected;
     confirm compass ping does not show depleted nodes
 14. **Ping radial wheel centering** — confirm wheel renders at screen center, not upper-left
+15. **Compass distance cone** — confirm resource distance label only appears when the marker
+    is within 3× the ping icon width of compass center; confirm ship distance label is unchanged
 
 ---
 
@@ -69,3 +71,4 @@ The UAT sign-off document must include testable steps for:
 - 2026-03-03 [producer] Created ticket — M10 QA phase gate sign-off
 - 2026-03-03 [producer] Added TICKET-0286 to depends_on and UAT coverage (D-007 respawn)
 - 2026-03-03 [producer] Added TICKET-0287 to depends_on and UAT coverage (radial wheel centering bug)
+- 2026-03-03 [producer] Added TICKET-0288 to depends_on and UAT coverage (compass distance cone)

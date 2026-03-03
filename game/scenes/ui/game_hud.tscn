@@ -56,6 +56,14 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="ScannerReadout" parent="HUDRoot" instance=ExtResource("4_scn")]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -160.0
+offset_right = -80.0
+offset_bottom = -160.0
 
 [node name="BatteryBar" parent="HUDRoot" instance=ExtResource("5_bat")]
 anchor_top = 1.0
@@ -76,6 +84,12 @@ offset_right = 100.0
 offset_bottom = -32.0
 
 [node name="PickupNotifications" parent="HUDRoot" instance=ExtResource("6_pkn")]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -292.0
+offset_right = -32.0
 
 [node name="MiningMinigameOverlay" parent="HUDRoot" instance=ExtResource("7_mgo")]
 anchors_preset = 8
@@ -91,6 +105,17 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="ShipGlobalsHUD" parent="HUDRoot" instance=ExtResource("8_sgh")]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -252.0
+offset_top = -212.0
+offset_right = -32.0
+offset_bottom = -32.0
+grow_horizontal = 0
+grow_vertical = 0
 
 [node name="InventoryScreen" parent="." instance=ExtResource("9_inv")]
 

@@ -36,8 +36,6 @@ const STICK_DEAD_ZONE: float = 0.5
 
 # ── Private Variables ─────────────────────────────────────
 var _is_open: bool = false
-var _dim_rect: ColorRect = null
-var _main_panel: PanelContainer = null
 var _selected_biome_id: String = ""
 var _biome_node_buttons: Dictionary = {}
 var _biome_node_ids: Array[String] = []
@@ -48,38 +46,35 @@ var _focus_on_map: bool = true
 var _stick_latched_x: bool = false
 var _stick_latched_y: bool = false
 
-## Detail panel elements
-var _detail_name_label: Label = null
-var _detail_tier_label: Label = null
-var _detail_distance_label: Label = null
-var _detail_distance_value: Label = null
-var _detail_fuel_cost_label: Label = null
-var _detail_fuel_cost_value: Label = null
-var _detail_your_fuel_label: Label = null
-var _detail_your_fuel_value: Label = null
-var _detail_sufficiency_label: Label = null
-var _confirm_button: Button = null
-var _confirm_disabled_reason: Label = null
-var _cancel_button: Button = null
-var _detail_prompt_label: Label = null
-var _detail_container: ScrollContainer = null
-
-## Ship fuel section elements
-var _fuel_tank_level_label: Label = null
-var _fuel_inventory_count_label: Label = null
-var _load_fuel_button: Button = null
-var _fuel_status_label: Label = null
-
-## Current biome node display
-var _current_biome_label: Label = null
+# ── Onready Variables ─────────────────────────────────────
+@onready var _dim_rect: ColorRect = %DimRect
+@onready var _main_panel: PanelContainer = %MainPanel
+@onready var _close_button: Button = %CloseButton
+@onready var _dest_row: HBoxContainer = %DestRow
+@onready var _detail_container: ScrollContainer = %DetailScroll
+@onready var _current_biome_label: Label = %CurrentBiomeLabel
+@onready var _fuel_tank_level_label: Label = %FuelTankLevelLabel
+@onready var _fuel_inventory_count_label: Label = %FuelInventoryCountLabel
+@onready var _load_fuel_button: Button = %LoadFuelButton
+@onready var _fuel_status_label: Label = %FuelStatusLabel
+@onready var _detail_prompt_label: Label = %DetailPromptLabel
+@onready var _detail_name_label: Label = %DetailNameLabel
+@onready var _detail_tier_label: Label = %DetailTierLabel
+@onready var _detail_distance_label: Label = %DetailDistanceLabel
+@onready var _detail_distance_value: Label = %DetailDistanceValue
+@onready var _detail_fuel_cost_label: Label = %DetailFuelCostLabel
+@onready var _detail_fuel_cost_value: Label = %DetailFuelCostValue
+@onready var _detail_your_fuel_label: Label = %DetailYourFuelLabel
+@onready var _detail_your_fuel_value: Label = %DetailYourFuelValue
+@onready var _detail_sufficiency_label: Label = %DetailSufficiencyLabel
+@onready var _confirm_button: Button = %ConfirmButton
+@onready var _confirm_disabled_reason: Label = %ConfirmDisabledReason
+@onready var _cancel_button: Button = %CancelButton
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	layer = 2
-	process_mode = Node.PROCESS_MODE_INHERIT
-	visible = false
-	_build_ui()
+	_apply_styles()
 	_connect_signals()
 
 func _input(event: InputEvent) -> void:
@@ -197,26 +192,8 @@ func is_open() -> bool:
 
 # ── Private Methods ───────────────────────────────────────
 
-func _build_ui() -> void:
-	# Dim background
-	var dim_layer := Control.new()
-	dim_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(dim_layer)
-
-	_dim_rect = ColorRect.new()
-	_dim_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_dim_rect.color = COLOR_DIM
-	dim_layer.add_child(_dim_rect)
-
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.add_child(center)
-
+func _apply_styles() -> void:
 	# Main panel
-	_main_panel = PanelContainer.new()
-	_main_panel.custom_minimum_size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
-	_main_panel.pivot_offset = Vector2(PANEL_WIDTH / 2.0, PANEL_HEIGHT / 2.0)
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_SURFACE
 	panel_style.border_color = COLOR_BORDER
@@ -224,99 +201,17 @@ func _build_ui() -> void:
 	panel_style.set_corner_radius_all(8)
 	panel_style.set_content_margin_all(24)
 	_main_panel.add_theme_stylebox_override("panel", panel_style)
-	center.add_child(_main_panel)
 
-	var outer_vbox := VBoxContainer.new()
-	outer_vbox.add_theme_constant_override("separation", 0)
-	_main_panel.add_child(outer_vbox)
-
-	# Title bar
-	_build_title_bar(outer_vbox)
-	_add_divider(outer_vbox)
-
-	# Content area: map (left) + detail (right)
-	var content_hbox := HBoxContainer.new()
-	content_hbox.add_theme_constant_override("separation", 16)
-	content_hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	outer_vbox.add_child(content_hbox)
-
-	# Left column: biome map
-	var map_column := _build_map_column()
-	content_hbox.add_child(map_column)
-
-	# Vertical divider
-	var v_divider := VSeparator.new()
-	var vdiv_style := StyleBoxFlat.new()
-	vdiv_style.bg_color = Color(COLOR_NEUTRAL, 0.3)
-	vdiv_style.set_content_margin_all(0)
-	v_divider.add_theme_stylebox_override("separator", vdiv_style)
-	content_hbox.add_child(v_divider)
-
-	# Right column: destination detail
-	_detail_container = _build_detail_column()
-	content_hbox.add_child(_detail_container)
-
-	# Action bar (bottom)
-	_add_divider(outer_vbox)
-	_build_action_bar(outer_vbox)
-
-func _build_title_bar(parent: VBoxContainer) -> void:
-	var title_row := HBoxContainer.new()
-	title_row.custom_minimum_size = Vector2(0, TITLE_HEIGHT)
-	title_row.add_theme_constant_override("separation", 8)
-	parent.add_child(title_row)
-
-	var title := Label.new()
-	title.text = "NAVIGATION CONSOLE"
-	title.add_theme_font_size_override("font_size", 32)
-	title.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	title_row.add_child(title)
-
-	var close_button := Button.new()
-	close_button.text = "CLOSE"
-	close_button.custom_minimum_size = Vector2(80, 32)
-	close_button.add_theme_font_size_override("font_size", 16)
-	_style_secondary_button(close_button)
-	close_button.pressed.connect(close_panel)
-	title_row.add_child(close_button)
-
-func _build_map_column() -> VBoxContainer:
-	var col := VBoxContainer.new()
-	col.custom_minimum_size = Vector2(MAP_WIDTH, 0)
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_theme_constant_override("separation", 8)
-
-	# Map section header
-	var header := Label.new()
-	header.text = "BIOME MAP"
-	header.add_theme_font_size_override("font_size", 14)
-	header.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	col.add_child(header)
-
-	# Map container with panel background
-	var map_panel := PanelContainer.new()
-	map_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	# Map panel background
+	var map_panel: PanelContainer = _dest_row.get_parent().get_parent() as PanelContainer
 	var map_bg := StyleBoxFlat.new()
 	map_bg.bg_color = COLOR_PANEL_BG
 	map_bg.set_content_margin_all(20)
 	map_bg.set_corner_radius_all(4)
 	map_panel.add_theme_stylebox_override("panel", map_bg)
-	col.add_child(map_panel)
 
-	var map_vbox := VBoxContainer.new()
-	map_vbox.add_theme_constant_override("separation", 16)
-	map_panel.add_child(map_vbox)
-
-	# Current location node (displayed at top of map)
-	_current_biome_label = Label.new()
-	_current_biome_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_current_biome_label.add_theme_font_size_override("font_size", 16)
-	_current_biome_label.add_theme_color_override("font_color", COLOR_TEAL)
-
-	var current_node_panel := PanelContainer.new()
-	current_node_panel.custom_minimum_size = Vector2(200, 40)
+	# Current biome panel style
+	var current_node_panel: PanelContainer = _current_biome_label.get_parent() as PanelContainer
 	var current_style := StyleBoxFlat.new()
 	current_style.bg_color = Color("#1A2736", 0.9)
 	current_style.border_color = COLOR_TEAL
@@ -324,38 +219,75 @@ func _build_map_column() -> VBoxContainer:
 	current_style.set_corner_radius_all(4)
 	current_style.set_content_margin_all(8)
 	current_node_panel.add_theme_stylebox_override("panel", current_style)
-	current_node_panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	current_node_panel.add_child(_current_biome_label)
-	map_vbox.add_child(current_node_panel)
 
-	# Travel path indicator
-	var path_label := Label.new()
-	path_label.text = "│"
-	path_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	path_label.add_theme_font_size_override("font_size", 16)
-	path_label.add_theme_color_override("font_color", Color("#007A63"))
-	map_vbox.add_child(path_label)
+	# Vertical divider style
+	var v_divider: VSeparator = _main_panel.get_child(0).get_child(2) as VSeparator
+	var vdiv_style := StyleBoxFlat.new()
+	vdiv_style.bg_color = Color(COLOR_NEUTRAL, 0.3)
+	vdiv_style.set_content_margin_all(0)
+	v_divider.add_theme_stylebox_override("separator", vdiv_style)
 
-	# Destination nodes row
-	var dest_row := HBoxContainer.new()
-	dest_row.add_theme_constant_override("separation", 12)
-	dest_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	dest_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	map_vbox.add_child(dest_row)
+	# Divider styles
+	_apply_divider_styles()
 
-	# Build biome destination buttons dynamically from BiomeRegistry
+	# Buttons
+	_style_teal_button(_confirm_button)
+	_style_teal_button(_load_fuel_button)
+	_style_secondary_button(_close_button)
+	_style_secondary_button(_cancel_button)
+
+func _apply_divider_styles() -> void:
+	var div_style := StyleBoxFlat.new()
+	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
+	div_style.set_content_margin_all(0)
+	# Apply to all HSeparators in the scene
+	for node: Node in get_tree().get_nodes_in_group(""):
+		pass
+	# Apply to the specific dividers by traversing known paths
+	var outer_vbox: VBoxContainer = _main_panel.get_child(0) as VBoxContainer
+	# Divider1 and Divider2
+	for child: Node in outer_vbox.get_children():
+		if child is HSeparator:
+			(child as HSeparator).add_theme_stylebox_override("separator", div_style.duplicate())
+	# Detail column dividers
+	var detail_col: VBoxContainer = _detail_container.get_child(0) as VBoxContainer
+	for child: Node in detail_col.get_children():
+		if child is HSeparator:
+			(child as HSeparator).add_theme_stylebox_override("separator", div_style.duplicate())
+
+func _connect_signals() -> void:
+	FuelSystem.fuel_changed.connect(_on_fuel_changed)
+	_close_button.pressed.connect(close_panel)
+	_cancel_button.pressed.connect(close_panel)
+	_confirm_button.pressed.connect(_on_confirm_pressed)
+	_load_fuel_button.pressed.connect(_on_load_fuel_pressed)
+
+func _clamp_panel_to_viewport() -> void:
+	var max_height: float = get_viewport().get_visible_rect().size.y * 0.92
+	_main_panel.custom_minimum_size.y = min(PANEL_HEIGHT, max_height)
+
+func _refresh_biome_nodes() -> void:
+	# Clear existing dynamic biome buttons
+	for child: Node in _dest_row.get_children():
+		child.queue_free()
 	_biome_node_buttons.clear()
 	_biome_node_ids.clear()
 
+	# Update current biome display
+	var current_data: BiomeData = BiomeRegistry.get_biome(NavigationSystem.current_biome)
+	var current_name: String = current_data.display_name if current_data else NavigationSystem.current_biome
+	_current_biome_label.text = "◉ %s" % current_name.to_upper()
+
+	# Build biome destination buttons dynamically from BiomeRegistry
 	for biome_id: String in BiomeRegistry.BIOME_IDS:
 		if biome_id == NavigationSystem.current_biome:
 			continue
 		_biome_node_ids.append(biome_id)
-		var biome_button := _build_biome_node_button(biome_id)
-		dest_row.add_child(biome_button)
+		var biome_button: PanelContainer = _build_biome_node_button(biome_id)
+		_dest_row.add_child(biome_button)
 		_biome_node_buttons[biome_id] = biome_button
 
-	return col
+	_update_map_visuals()
 
 func _build_biome_node_button(biome_id: String) -> PanelContainer:
 	var biome_data: BiomeData = BiomeRegistry.get_biome(biome_id)
@@ -413,190 +345,6 @@ func _build_biome_node_button(biome_id: String) -> PanelContainer:
 	panel.add_child(click_button)
 
 	return panel
-
-func _build_detail_column() -> ScrollContainer:
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(DETAIL_WIDTH, 0)
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-
-	var col := VBoxContainer.new()
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_theme_constant_override("separation", 8)
-	scroll.add_child(col)
-
-	# SHIP FUEL section — always visible when panel is open
-	var fuel_header := Label.new()
-	fuel_header.text = "SHIP FUEL"
-	fuel_header.add_theme_font_size_override("font_size", 14)
-	fuel_header.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	col.add_child(fuel_header)
-
-	_fuel_tank_level_label = Label.new()
-	_fuel_tank_level_label.add_theme_font_size_override("font_size", 20)
-	_fuel_tank_level_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	col.add_child(_fuel_tank_level_label)
-
-	_fuel_inventory_count_label = Label.new()
-	_fuel_inventory_count_label.add_theme_font_size_override("font_size", 14)
-	_fuel_inventory_count_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	col.add_child(_fuel_inventory_count_label)
-
-	_load_fuel_button = Button.new()
-	_load_fuel_button.text = "LOAD FUEL CELLS"
-	_load_fuel_button.custom_minimum_size = Vector2(200, 40)
-	_load_fuel_button.add_theme_font_size_override("font_size", 16)
-	_style_teal_button(_load_fuel_button)
-	_load_fuel_button.pressed.connect(_on_load_fuel_pressed)
-	col.add_child(_load_fuel_button)
-
-	_fuel_status_label = Label.new()
-	_fuel_status_label.add_theme_font_size_override("font_size", 14)
-	_fuel_status_label.add_theme_color_override("font_color", COLOR_GREEN)
-	_fuel_status_label.visible = false
-	col.add_child(_fuel_status_label)
-
-	_add_divider(col)
-
-	# Section header
-	var header := Label.new()
-	header.text = "DESTINATION"
-	header.add_theme_font_size_override("font_size", 14)
-	header.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	col.add_child(header)
-
-	_add_divider(col)
-
-	# Empty state prompt
-	_detail_prompt_label = Label.new()
-	_detail_prompt_label.text = "Select a destination"
-	_detail_prompt_label.add_theme_font_size_override("font_size", 16)
-	_detail_prompt_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	col.add_child(_detail_prompt_label)
-
-	# Destination name
-	_detail_name_label = Label.new()
-	_detail_name_label.add_theme_font_size_override("font_size", 24)
-	_detail_name_label.add_theme_color_override("font_color", COLOR_TEAL)
-	_detail_name_label.visible = false
-	col.add_child(_detail_name_label)
-
-	# Tier badge
-	_detail_tier_label = Label.new()
-	_detail_tier_label.add_theme_font_size_override("font_size", 14)
-	_detail_tier_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_detail_tier_label.visible = false
-	col.add_child(_detail_tier_label)
-
-	_add_divider(col)
-
-	# Distance row
-	_detail_distance_label = Label.new()
-	_detail_distance_label.text = "Distance"
-	_detail_distance_label.add_theme_font_size_override("font_size", 14)
-	_detail_distance_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_detail_distance_label.visible = false
-	col.add_child(_detail_distance_label)
-
-	_detail_distance_value = Label.new()
-	_detail_distance_value.add_theme_font_size_override("font_size", 22)
-	_detail_distance_value.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	_detail_distance_value.visible = false
-	col.add_child(_detail_distance_value)
-
-	# Fuel cost row
-	_detail_fuel_cost_label = Label.new()
-	_detail_fuel_cost_label.text = "Estimated Fuel Cost"
-	_detail_fuel_cost_label.add_theme_font_size_override("font_size", 14)
-	_detail_fuel_cost_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_detail_fuel_cost_label.visible = false
-	col.add_child(_detail_fuel_cost_label)
-
-	_detail_fuel_cost_value = Label.new()
-	_detail_fuel_cost_value.add_theme_font_size_override("font_size", 22)
-	_detail_fuel_cost_value.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	_detail_fuel_cost_value.visible = false
-	col.add_child(_detail_fuel_cost_value)
-
-	# Your fuel row
-	_detail_your_fuel_label = Label.new()
-	_detail_your_fuel_label.text = "Ship Tank"
-	_detail_your_fuel_label.add_theme_font_size_override("font_size", 14)
-	_detail_your_fuel_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_detail_your_fuel_label.visible = false
-	col.add_child(_detail_your_fuel_label)
-
-	_detail_your_fuel_value = Label.new()
-	_detail_your_fuel_value.add_theme_font_size_override("font_size", 22)
-	_detail_your_fuel_value.visible = false
-	col.add_child(_detail_your_fuel_value)
-
-	# Sufficiency indicator
-	_detail_sufficiency_label = Label.new()
-	_detail_sufficiency_label.add_theme_font_size_override("font_size", 14)
-	_detail_sufficiency_label.visible = false
-	col.add_child(_detail_sufficiency_label)
-
-	_add_divider(col)
-
-	# Confirm travel button
-	var button_center := CenterContainer.new()
-	col.add_child(button_center)
-
-	_confirm_button = Button.new()
-	_confirm_button.text = "CONFIRM TRAVEL"
-	_confirm_button.custom_minimum_size = Vector2(240, 52)
-	_confirm_button.add_theme_font_size_override("font_size", 20)
-	_confirm_button.disabled = true
-	_style_teal_button(_confirm_button)
-	_confirm_button.pressed.connect(_on_confirm_pressed)
-	button_center.add_child(_confirm_button)
-
-	# Disabled reason label
-	_confirm_disabled_reason = Label.new()
-	_confirm_disabled_reason.add_theme_font_size_override("font_size", 14)
-	_confirm_disabled_reason.add_theme_color_override("font_color", COLOR_CORAL)
-	_confirm_disabled_reason.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_confirm_disabled_reason.visible = false
-	col.add_child(_confirm_disabled_reason)
-
-	return scroll
-
-func _build_action_bar(parent: VBoxContainer) -> void:
-	var bar := HBoxContainer.new()
-	bar.custom_minimum_size = Vector2(0, ACTION_HEIGHT)
-	bar.alignment = BoxContainer.ALIGNMENT_CENTER
-	bar.add_theme_constant_override("separation", 16)
-	parent.add_child(bar)
-
-	var instructions := Label.new()
-	instructions.text = "[Arrows] Select  [Enter] Confirm  [Esc] Close"
-	instructions.add_theme_font_size_override("font_size", 14)
-	instructions.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	bar.add_child(instructions)
-
-	_cancel_button = Button.new()
-	_cancel_button.text = "CANCEL"
-	_cancel_button.custom_minimum_size = Vector2(120, 40)
-	_cancel_button.add_theme_font_size_override("font_size", 20)
-	_style_secondary_button(_cancel_button)
-	_cancel_button.pressed.connect(close_panel)
-	bar.add_child(_cancel_button)
-
-func _connect_signals() -> void:
-	FuelSystem.fuel_changed.connect(_on_fuel_changed)
-
-func _clamp_panel_to_viewport() -> void:
-	var max_height: float = get_viewport().get_visible_rect().size.y * 0.92
-	_main_panel.custom_minimum_size.y = min(PANEL_HEIGHT, max_height)
-
-func _refresh_biome_nodes() -> void:
-	# Update current biome display
-	var current_data: BiomeData = BiomeRegistry.get_biome(NavigationSystem.current_biome)
-	var current_name: String = current_data.display_name if current_data else NavigationSystem.current_biome
-	_current_biome_label.text = "◉ %s" % current_name.to_upper()
-	_update_map_visuals()
 
 func _update_map_visuals() -> void:
 	for i: int in range(_biome_node_ids.size()):
@@ -855,14 +603,6 @@ func _style_secondary_button(button: Button) -> void:
 
 	button.add_theme_color_override("font_color", COLOR_NEUTRAL)
 	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
-
-func _add_divider(parent: Node) -> void:
-	var divider := HSeparator.new()
-	var div_style := StyleBoxFlat.new()
-	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
-	div_style.set_content_margin_all(0)
-	divider.add_theme_stylebox_override("separator", div_style)
-	parent.add_child(divider)
 
 func _animate_open() -> void:
 	_dim_rect.modulate.a = 0.0

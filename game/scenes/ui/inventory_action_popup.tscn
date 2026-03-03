@@ -5,4 +5,110 @@
 [node name="InventoryActionPopup" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+visible = false
+mouse_filter = 0
 script = ExtResource("1_iap")
+
+[node name="Panel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+custom_minimum_size = Vector2(260, 0)
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 36)
+text = "Item Actions"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Separator" type="HSeparator" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="DropRow" type="PanelContainer" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+
+[node name="HBox" type="HBoxContainer" parent="Panel/VBox/DropRow"]
+layout_mode = 2
+alignment = 0
+
+[node name="DropIndicator" type="Label" parent="Panel/VBox/DropRow/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(20, 0)
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="DropLabel" type="Label" parent="Panel/VBox/DropRow/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Drop Item"
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="DestroyRow" type="PanelContainer" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+
+[node name="DestroyFillRect" type="ColorRect" parent="Panel/VBox/DestroyRow"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 9
+anchor_right = 0.0
+anchor_bottom = 1.0
+grow_vertical = 2
+color = Color(1, 0.42, 0.353, 0.4)
+mouse_filter = 2
+
+[node name="HBox" type="HBoxContainer" parent="Panel/VBox/DestroyRow"]
+layout_mode = 2
+alignment = 0
+
+[node name="DestroyIndicator" type="Label" parent="Panel/VBox/DestroyRow/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(20, 0)
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="DestroyLabel" type="Label" parent="Panel/VBox/DestroyRow/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Destroy"
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="CancelRow" type="PanelContainer" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+
+[node name="HBox" type="HBoxContainer" parent="Panel/VBox/CancelRow"]
+layout_mode = 2
+alignment = 0
+
+[node name="CancelIndicator" type="Label" parent="Panel/VBox/CancelRow/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(20, 0)
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+
+[node name="CancelLabel" type="Label" parent="Panel/VBox/CancelRow/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Cancel"
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)

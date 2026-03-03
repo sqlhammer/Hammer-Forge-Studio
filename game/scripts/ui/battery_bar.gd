@@ -35,7 +35,7 @@ var _icon_texture: Texture2D = null
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(TOTAL_WIDTH, TOTAL_HEIGHT)
+	# custom_minimum_size set in battery_bar.tscn (scene-first)
 	_font_mono = ThemeDB.fallback_font
 	_icon_texture = load("res://assets/icons/hud/icon_hud_battery.svg") as Texture2D
 	SuitBattery.charge_changed.connect(_on_charge_changed)

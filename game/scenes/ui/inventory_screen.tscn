@@ -1,6 +1,699 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" uid="uid://c318bgeqpt31o" path="res://scripts/ui/inventory_screen.gd" id="1_inv"]
+[ext_resource type="PackedScene" path="res://scenes/ui/inventory_action_popup.tscn" id="2_iap"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ship_stats_sidebar.tscn" id="3_sss"]
 
 [node name="InventoryScreen" type="CanvasLayer"]
+layer = 2
+visible = false
 script = ExtResource("1_inv")
+
+[node name="DimLayer" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="DimRect" type="ColorRect" parent="DimLayer"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Center" type="CenterContainer" parent="DimLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CombinedContainer" type="HBoxContainer" parent="DimLayer/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 0
+pivot_offset = Vector2(380, 240)
+
+[node name="MainPanel" type="PanelContainer" parent="DimLayer/Center/CombinedContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(580, 480)
+
+[node name="VBox" type="VBoxContainer" parent="DimLayer/Center/CombinedContainer/MainPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox"]
+layout_mode = 2
+text = "INVENTORY"
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Divider" type="HSeparator" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox"]
+layout_mode = 2
+
+[node name="GridCenter" type="CenterContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox"]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter"]
+unique_name_in_owner = true
+layout_mode = 2
+columns = 5
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+
+[node name="Slot0" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon0" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot0"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count0" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot0"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot1" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon1" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot1"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count1" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot1"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot2" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon2" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot2"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count2" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot2"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot3" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon3" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot3"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count3" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot3"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot4" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon4" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot4"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count4" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot4"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot5" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon5" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot5"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count5" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot5"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot6" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon6" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot6"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count6" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot6"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot7" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon7" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot7"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count7" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot7"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot8" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon8" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot8"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count8" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot8"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot9" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon9" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot9"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count9" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot9"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot10" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon10" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot10"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count10" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot10"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot11" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon11" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot11"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count11" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot11"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot12" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon12" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot12"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count12" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot12"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot13" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon13" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot13"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count13" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot13"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="Slot14" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(80, 80)
+mouse_filter = 0
+
+[node name="Icon14" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot14"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(48, 48)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Count14" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/GridCenter/Grid/Slot14"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+visible = false
+horizontal_alignment = 2
+vertical_alignment = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="DetailPanel" type="PanelContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DetailHBox" type="HBoxContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/DetailPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DetailIcon" type="TextureRect" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/DetailPanel/DetailHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(32, 32)
+visible = false
+expand_mode = 1
+stretch_mode = 6
+size_flags_vertical = 4
+
+[node name="DetailNameLabel" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/DetailPanel/DetailHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="DetailStarsContainer" type="HBoxContainer" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/DetailPanel/DetailHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Star0" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/DetailPanel/DetailHBox/DetailStarsContainer"]
+layout_mode = 2
+text = "★"
+theme_override_font_sizes/font_size = 16
+
+[node name="Star1" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/DetailPanel/DetailHBox/DetailStarsContainer"]
+layout_mode = 2
+text = "★"
+theme_override_font_sizes/font_size = 16
+
+[node name="Star2" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/DetailPanel/DetailHBox/DetailStarsContainer"]
+layout_mode = 2
+text = "★"
+theme_override_font_sizes/font_size = 16
+
+[node name="Star3" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/DetailPanel/DetailHBox/DetailStarsContainer"]
+layout_mode = 2
+text = "★"
+theme_override_font_sizes/font_size = 16
+
+[node name="Star4" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/DetailPanel/DetailHBox/DetailStarsContainer"]
+layout_mode = 2
+text = "★"
+theme_override_font_sizes/font_size = 16
+
+[node name="DetailQuantityLabel" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox/DetailPanel/DetailHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="DetailDropHint" type="Label" parent="DimLayer/Center/CombinedContainer/MainPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+text = "[G] Drop  |  [Enter/A] Destroy  |  [Right-Click] Drop"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="ShipStatsSidebar" parent="DimLayer/Center/CombinedContainer" instance=ExtResource("3_sss")]
+unique_name_in_owner = true
+
+[node name="ConfirmOverlay" type="Control" parent="DimLayer"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="ConfirmDim" type="ColorRect" parent="DimLayer/ConfirmOverlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.3)
+
+[node name="ConfirmCenter" type="CenterContainer" parent="DimLayer/ConfirmOverlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ConfirmDialog" type="PanelContainer" parent="DimLayer/ConfirmOverlay/ConfirmCenter"]
+layout_mode = 2
+custom_minimum_size = Vector2(400, 200)
+
+[node name="DialogVBox" type="VBoxContainer" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ConfirmTitleLabel" type="Label" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/DialogVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+
+[node name="DialogDivider" type="HSeparator" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/DialogVBox"]
+layout_mode = 2
+
+[node name="ConfirmMessageLabel" type="Label" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/DialogVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+
+[node name="ButtonRow" type="HBoxContainer" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/DialogVBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="DestroyConfirmButton" type="Button" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/DialogVBox/ButtonRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 40)
+text = "DESTROY"
+theme_override_font_sizes/font_size = 16
+
+[node name="CancelConfirmButton" type="Button" parent="DimLayer/ConfirmOverlay/ConfirmCenter/ConfirmDialog/DialogVBox/ButtonRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 40)
+text = "CANCEL"
+theme_override_font_sizes/font_size = 16
+
+[node name="InventoryActionPopup" parent="DimLayer" instance=ExtResource("2_iap")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2

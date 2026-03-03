@@ -40,42 +40,38 @@ var _focused_slot: int = 0
 var _slot_panels: Array[PanelContainer] = []
 var _slot_icons: Array[TextureRect] = []
 var _slot_count_labels: Array[Label] = []
-var _detail_icon: TextureRect = null
-var _detail_name_label: Label = null
-var _detail_stars_container: HBoxContainer = null
-var _detail_quantity_label: Label = null
-var _detail_drop_hint: Label = null
-var _dim_rect: ColorRect = null
-var _main_panel: PanelContainer = null
-var _combined_container: HBoxContainer = null
-var _ship_sidebar: ShipStatsSidebar = null
-var _font: Font = null
 
 ## Edge-triggered latch for analog stick navigation (per-axis)
 var _stick_latched_x: bool = false
 var _stick_latched_y: bool = false
 
-## Gamepad action popup state
-var _action_popup: InventoryActionPopup = null
-
 ## Destroy confirmation dialog state
 var _confirm_visible: bool = false
-var _confirm_overlay: Control = null
-var _confirm_title_label: Label = null
-var _confirm_message_label: Label = null
-var _destroy_confirm_button: Button = null
-var _cancel_confirm_button: Button = null
+
+# ── Onready Variables ─────────────────────────────────────
+@onready var _dim_rect: ColorRect = %DimRect
+@onready var _main_panel: PanelContainer = %MainPanel
+@onready var _combined_container: HBoxContainer = %CombinedContainer
+@onready var _ship_sidebar: ShipStatsSidebar = %ShipStatsSidebar
+@onready var _detail_icon: TextureRect = %DetailIcon
+@onready var _detail_name_label: Label = %DetailNameLabel
+@onready var _detail_stars_container: HBoxContainer = %DetailStarsContainer
+@onready var _detail_quantity_label: Label = %DetailQuantityLabel
+@onready var _detail_drop_hint: Label = %DetailDropHint
+@onready var _detail_panel: PanelContainer = %DetailPanel
+@onready var _action_popup: InventoryActionPopup = %InventoryActionPopup
+@onready var _confirm_overlay: Control = %ConfirmOverlay
+@onready var _confirm_title_label: Label = %ConfirmTitleLabel
+@onready var _confirm_message_label: Label = %ConfirmMessageLabel
+@onready var _destroy_confirm_button: Button = %DestroyConfirmButton
+@onready var _cancel_confirm_button: Button = %CancelConfirmButton
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	layer = 2
-	process_mode = Node.PROCESS_MODE_INHERIT
-	visible = false
-	_font = ThemeDB.fallback_font
-	_build_ui()
-	PlayerInventory.slot_changed.connect(_on_slot_changed)
-	InputManager.input_device_changed.connect(_on_input_device_changed)
+	_populate_slot_arrays()
+	_apply_styles()
+	_connect_signals()
 	Global.debug_log("InventoryScreen: ready")
 
 func _process(_delta: float) -> void:
@@ -239,32 +235,21 @@ func get_controls_descriptor_text() -> String:
 
 # ── Private Methods ───────────────────────────────────────
 
-func _build_ui() -> void:
-	# Dim background
-	var dim_layer := Control.new()
-	dim_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(dim_layer)
+func _populate_slot_arrays() -> void:
+	# Build indexed arrays from the scene's unique-named slot nodes for O(1) access
+	for i: int in range(Inventory.MAX_SLOTS):
+		var slot_name: String = "Slot%d" % i
+		var icon_name: String = "Icon%d" % i
+		var count_name: String = "Count%d" % i
+		var slot: PanelContainer = get_node("%" + slot_name) as PanelContainer
+		var icon: TextureRect = get_node("%" + icon_name) as TextureRect
+		var count_label: Label = get_node("%" + count_name) as Label
+		_slot_panels.append(slot)
+		_slot_icons.append(icon)
+		_slot_count_labels.append(count_label)
 
-	_dim_rect = ColorRect.new()
-	_dim_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_dim_rect.color = COLOR_DIM
-	dim_layer.add_child(_dim_rect)
-
-	# Center container
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.add_child(center)
-
-	# Combined container for inventory + sidebar
-	_combined_container = HBoxContainer.new()
-	_combined_container.add_theme_constant_override("separation", 0)
-	_combined_container.pivot_offset = Vector2(COMBINED_WIDTH / 2.0, PANEL_HEIGHT / 2.0)
-	center.add_child(_combined_container)
-
-	# Main panel (left side — inventory grid)
-	_main_panel = PanelContainer.new()
-	_main_panel.custom_minimum_size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
+func _apply_styles() -> void:
+	# Main panel style
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_SURFACE
 	panel_style.border_color = COLOR_BORDER
@@ -275,221 +260,63 @@ func _build_ui() -> void:
 	panel_style.corner_radius_bottom_right = 0
 	panel_style.set_content_margin_all(24)
 	_main_panel.add_theme_stylebox_override("panel", panel_style)
-	_combined_container.add_child(_main_panel)
 
-	# Ship stats sidebar (right side)
-	var sidebar_scene: PackedScene = preload("res://scenes/ui/ship_stats_sidebar.tscn")
-	_ship_sidebar = sidebar_scene.instantiate() as ShipStatsSidebar
-	_combined_container.add_child(_ship_sidebar)
-
-	# Main vertical layout
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
-	_main_panel.add_child(vbox)
-
-	# Title
-	var title := Label.new()
-	title.text = "INVENTORY"
-	title.add_theme_font_size_override("font_size", 32)
-	title.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	vbox.add_child(title)
-
-	# Divider
-	var divider := HSeparator.new()
-	var div_style := StyleBoxFlat.new()
-	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
-	div_style.set_content_margin_all(0)
-	divider.add_theme_stylebox_override("separator", div_style)
-	vbox.add_child(divider)
-
-	# Grid container centered
-	var grid_center := CenterContainer.new()
-	vbox.add_child(grid_center)
-
-	var grid := GridContainer.new()
-	grid.columns = GRID_COLUMNS
-	grid.add_theme_constant_override("h_separation", int(SLOT_GAP))
-	grid.add_theme_constant_override("v_separation", int(SLOT_GAP))
-	grid_center.add_child(grid)
-
-	# Create slots
+	# Slot styles
 	for i: int in range(Inventory.MAX_SLOTS):
-		var slot: PanelContainer = _create_slot(i)
-		grid.add_child(slot)
-		_slot_panels.append(slot)
+		var style := StyleBoxFlat.new()
+		style.bg_color = COLOR_SLOT_BG
+		style.border_color = COLOR_SLOT_BORDER
+		style.set_border_width_all(1)
+		style.set_corner_radius_all(4)
+		style.set_content_margin_all(4)
+		_slot_panels[i].add_theme_stylebox_override("panel", style)
 
-	# Detail area
-	var detail_panel := PanelContainer.new()
+	# Detail panel style
 	var detail_style := StyleBoxFlat.new()
 	detail_style.bg_color = Color("#1A2736", 0.8)
 	detail_style.set_corner_radius_all(4)
 	detail_style.set_content_margin_all(12)
-	detail_panel.add_theme_stylebox_override("panel", detail_style)
-	vbox.add_child(detail_panel)
+	_detail_panel.add_theme_stylebox_override("panel", detail_style)
 
-	var detail_hbox := HBoxContainer.new()
-	detail_hbox.add_theme_constant_override("separation", 12)
-	detail_panel.add_child(detail_hbox)
+	# Divider style
+	var divider: HSeparator = _main_panel.get_node("VBox/Divider") as HSeparator
+	var div_style := StyleBoxFlat.new()
+	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
+	div_style.set_content_margin_all(0)
+	divider.add_theme_stylebox_override("separator", div_style)
 
-	_detail_icon = TextureRect.new()
-	_detail_icon.custom_minimum_size = Vector2(32, 32)
-	_detail_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_detail_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_detail_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_detail_icon.visible = false
-	detail_hbox.add_child(_detail_icon)
+	# Confirm dialog style
+	var confirm_dialog: PanelContainer = _confirm_overlay.get_node("ConfirmCenter/ConfirmDialog") as PanelContainer
+	var confirm_style := StyleBoxFlat.new()
+	confirm_style.bg_color = COLOR_SURFACE
+	confirm_style.border_color = COLOR_CORAL
+	confirm_style.set_border_width_all(1)
+	confirm_style.set_corner_radius_all(8)
+	confirm_style.set_content_margin_all(24)
+	confirm_dialog.add_theme_stylebox_override("panel", confirm_style)
 
-	_detail_name_label = Label.new()
-	_detail_name_label.add_theme_font_size_override("font_size", 20)
-	_detail_name_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	_detail_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	detail_hbox.add_child(_detail_name_label)
-
-	_detail_stars_container = HBoxContainer.new()
-	_detail_stars_container.add_theme_constant_override("separation", 2)
-	for j: int in range(5):
-		var star := Label.new()
-		star.text = "★"
-		star.add_theme_font_size_override("font_size", 16)
-		_detail_stars_container.add_child(star)
-	detail_hbox.add_child(_detail_stars_container)
-
-	_detail_quantity_label = Label.new()
-	_detail_quantity_label.add_theme_font_size_override("font_size", 18)
-	_detail_quantity_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_detail_quantity_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	detail_hbox.add_child(_detail_quantity_label)
-
-	# Drop and destroy hints below the detail area
-	_detail_drop_hint = Label.new()
-	_detail_drop_hint.add_theme_font_size_override("font_size", 14)
-	_detail_drop_hint.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_detail_drop_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_detail_drop_hint.text = "[G] Drop  |  [Enter/A] Destroy  |  [Right-Click] Drop"
-	_detail_drop_hint.visible = false
-	vbox.add_child(_detail_drop_hint)
-
-	# Build destroy confirmation dialog on top of everything
-	_build_destroy_confirm_dialog(dim_layer)
-
-	# Build gamepad action popup on top of everything (rendered above confirm dialog)
-	_action_popup = InventoryActionPopup.new()
-	_action_popup.name = "InventoryActionPopup"
-	_action_popup.set_anchors_preset(Control.PRESET_CENTER)
-	_action_popup.action_requested.connect(_on_action_popup_action_requested)
-	_action_popup.cancelled.connect(_on_action_popup_cancelled)
-	dim_layer.add_child(_action_popup)
-
-func _build_destroy_confirm_dialog(parent: Control) -> void:
-	_confirm_overlay = Control.new()
-	_confirm_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_confirm_overlay.visible = false
-	parent.add_child(_confirm_overlay)
-
-	var dim := ColorRect.new()
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim.color = Color("#000000", 0.3)
-	_confirm_overlay.add_child(dim)
-
-	var confirm_center := CenterContainer.new()
-	confirm_center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_confirm_overlay.add_child(confirm_center)
-
-	var dialog := PanelContainer.new()
-	dialog.custom_minimum_size = Vector2(400, 200)
-	var style := StyleBoxFlat.new()
-	style.bg_color = COLOR_SURFACE
-	style.border_color = COLOR_CORAL
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(8)
-	style.set_content_margin_all(24)
-	dialog.add_theme_stylebox_override("panel", style)
-	confirm_center.add_child(dialog)
-
-	var dialog_vbox := VBoxContainer.new()
-	dialog_vbox.add_theme_constant_override("separation", 12)
-	dialog.add_child(dialog_vbox)
-
-	_confirm_title_label = Label.new()
-	_confirm_title_label.add_theme_font_size_override("font_size", 22)
-	_confirm_title_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	dialog_vbox.add_child(_confirm_title_label)
-
-	# Dialog divider
-	var dialog_divider := HSeparator.new()
+	# Confirm dialog divider style
+	var dialog_divider: HSeparator = confirm_dialog.get_node("DialogVBox/DialogDivider") as HSeparator
 	var dialog_div_style := StyleBoxFlat.new()
 	dialog_div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
 	dialog_div_style.set_content_margin_all(0)
 	dialog_divider.add_theme_stylebox_override("separator", dialog_div_style)
-	dialog_vbox.add_child(dialog_divider)
 
-	_confirm_message_label = Label.new()
-	_confirm_message_label.add_theme_font_size_override("font_size", 16)
-	_confirm_message_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_confirm_message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	dialog_vbox.add_child(_confirm_message_label)
-
-	var button_row := HBoxContainer.new()
-	button_row.add_theme_constant_override("separation", 16)
-	button_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	dialog_vbox.add_child(button_row)
-
-	_destroy_confirm_button = Button.new()
-	_destroy_confirm_button.text = "DESTROY"
-	_destroy_confirm_button.custom_minimum_size = Vector2(120, 40)
-	_destroy_confirm_button.add_theme_font_size_override("font_size", 16)
+	# Button styles
 	_style_button(_destroy_confirm_button, COLOR_CORAL)
-	_destroy_confirm_button.pressed.connect(_on_destroy_confirmed)
-	button_row.add_child(_destroy_confirm_button)
-
-	_cancel_confirm_button = Button.new()
-	_cancel_confirm_button.text = "CANCEL"
-	_cancel_confirm_button.custom_minimum_size = Vector2(120, 40)
-	_cancel_confirm_button.add_theme_font_size_override("font_size", 16)
 	_style_button(_cancel_confirm_button, COLOR_NEUTRAL)
+
+func _connect_signals() -> void:
+	PlayerInventory.slot_changed.connect(_on_slot_changed)
+	InputManager.input_device_changed.connect(_on_input_device_changed)
+	_action_popup.action_requested.connect(_on_action_popup_action_requested)
+	_action_popup.cancelled.connect(_on_action_popup_cancelled)
+	_destroy_confirm_button.pressed.connect(_on_destroy_confirmed)
 	_cancel_confirm_button.pressed.connect(_close_destroy_confirm)
-	button_row.add_child(_cancel_confirm_button)
-
-func _create_slot(index: int) -> PanelContainer:
-	var slot := PanelContainer.new()
-	slot.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
-	slot.mouse_filter = Control.MOUSE_FILTER_STOP
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = COLOR_SLOT_BG
-	style.border_color = COLOR_SLOT_BORDER
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
-	style.set_content_margin_all(4)
-	slot.add_theme_stylebox_override("panel", style)
-
-	# Mouse hover and click support
-	slot.mouse_entered.connect(_on_slot_mouse_entered.bind(index))
-	slot.gui_input.connect(_on_slot_gui_input.bind(index))
-
-	# Item icon
-	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(48, 48)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.visible = false
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	slot.add_child(icon)
-	_slot_icons.append(icon)
-
-	# Stack count label
-	var count_label := Label.new()
-	count_label.add_theme_font_size_override("font_size", 14)
-	count_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	count_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-	count_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	count_label.visible = false
-	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	slot.add_child(count_label)
-	_slot_count_labels.append(count_label)
-
-	return slot
+	# Mouse hover and click for each slot
+	for i: int in range(Inventory.MAX_SLOTS):
+		_slot_panels[i].mouse_entered.connect(_on_slot_mouse_entered.bind(i))
+		_slot_panels[i].gui_input.connect(_on_slot_gui_input.bind(i))
 
 func _refresh_all_slots() -> void:
 	for i: int in range(Inventory.MAX_SLOTS):

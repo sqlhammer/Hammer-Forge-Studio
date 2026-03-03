@@ -29,24 +29,24 @@ var _zone_index: int = -1
 var _module_ids: Array[String] = []
 var _selected_index: int = 0
 var _row_panels: Array[PanelContainer] = []
-var _cost_label: Label = null
-var _power_label: Label = null
-var _description_label: Label = null
-var _feedback_label: Label = null
-var _tech_tree_label: Label = null
-var _dim_rect: ColorRect = null
-var _main_panel: PanelContainer = null
-var _module_list_container: VBoxContainer = null
-var _empty_label: Label = null
+
+# ── Onready Variables ─────────────────────────────────────
+@onready var _dim_rect: ColorRect = %DimRect
+@onready var _main_panel: PanelContainer = %MainPanel
+@onready var _module_list_container: VBoxContainer = %ModuleListContainer
+@onready var _empty_label: Label = %EmptyLabel
+@onready var _description_label: Label = %DescriptionLabel
+@onready var _cost_label: Label = %CostLabel
+@onready var _power_label: Label = %PowerLabel
+@onready var _tech_tree_label: Label = %TechTreeLabel
+@onready var _feedback_label: Label = %FeedbackLabel
+@onready var _cancel_button: Button = %CancelButton
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	layer = 3
-	process_mode = Node.PROCESS_MODE_INHERIT
-	visible = false
-	_build_ui()
-	ModuleManager.install_failed.connect(_on_install_failed)
+	_apply_styles()
+	_connect_signals()
 
 func _input(event: InputEvent) -> void:
 	if not _is_open:
@@ -113,26 +113,8 @@ func select_module_by_index(index: int) -> void:
 
 # ── Private Methods ───────────────────────────────────────
 
-func _build_ui() -> void:
-	# Dim background
-	var dim_layer := Control.new()
-	dim_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(dim_layer)
-
-	_dim_rect = ColorRect.new()
-	_dim_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_dim_rect.color = COLOR_DIM
-	dim_layer.add_child(_dim_rect)
-
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim_layer.add_child(center)
-
+func _apply_styles() -> void:
 	# Main panel
-	_main_panel = PanelContainer.new()
-	_main_panel.custom_minimum_size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
-	_main_panel.pivot_offset = Vector2(PANEL_WIDTH / 2.0, PANEL_HEIGHT / 2.0)
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_SURFACE
 	panel_style.border_color = COLOR_BORDER
@@ -140,97 +122,30 @@ func _build_ui() -> void:
 	panel_style.set_corner_radius_all(8)
 	panel_style.set_content_margin_all(20)
 	_main_panel.add_theme_stylebox_override("panel", panel_style)
-	center.add_child(_main_panel)
 
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 12)
-	_main_panel.add_child(vbox)
-
-	# Title
-	var title := Label.new()
-	title.text = "INSTALL MODULE"
-	title.add_theme_font_size_override("font_size", 28)
-	title.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	vbox.add_child(title)
-
-	# Divider
-	_add_divider(vbox)
-
-	# Module list container
-	_module_list_container = VBoxContainer.new()
-	_module_list_container.add_theme_constant_override("separation", 4)
-	vbox.add_child(_module_list_container)
-
-	# Empty label (shown when no modules available)
-	_empty_label = Label.new()
-	_empty_label.text = "All modules installed"
-	_empty_label.add_theme_font_size_override("font_size", 18)
-	_empty_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_empty_label.visible = false
-	vbox.add_child(_empty_label)
-
-	# Detail area
-	var detail_panel := PanelContainer.new()
+	# Detail panel
+	var detail_panel: PanelContainer = _description_label.get_parent().get_parent() as PanelContainer
 	var detail_style := StyleBoxFlat.new()
 	detail_style.bg_color = COLOR_SLOT_BG
 	detail_style.set_corner_radius_all(4)
 	detail_style.set_content_margin_all(12)
 	detail_panel.add_theme_stylebox_override("panel", detail_style)
-	vbox.add_child(detail_panel)
 
-	var detail_vbox := VBoxContainer.new()
-	detail_vbox.add_theme_constant_override("separation", 4)
-	detail_panel.add_child(detail_vbox)
+	# Divider style
+	var outer_vbox: VBoxContainer = _main_panel.get_child(0) as VBoxContainer
+	for child: Node in outer_vbox.get_children():
+		if child is HSeparator:
+			var div_style := StyleBoxFlat.new()
+			div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
+			div_style.set_content_margin_all(0)
+			(child as HSeparator).add_theme_stylebox_override("separator", div_style)
 
-	_description_label = Label.new()
-	_description_label.add_theme_font_size_override("font_size", 16)
-	_description_label.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	_description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	detail_vbox.add_child(_description_label)
+	# Cancel button
+	_style_close_button(_cancel_button)
 
-	_cost_label = Label.new()
-	_cost_label.add_theme_font_size_override("font_size", 18)
-	_cost_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	detail_vbox.add_child(_cost_label)
-
-	_power_label = Label.new()
-	_power_label.add_theme_font_size_override("font_size", 18)
-	_power_label.add_theme_color_override("font_color", COLOR_AMBER)
-	detail_vbox.add_child(_power_label)
-
-	_tech_tree_label = Label.new()
-	_tech_tree_label.add_theme_font_size_override("font_size", 18)
-	_tech_tree_label.add_theme_color_override("font_color", COLOR_TEAL)
-	_tech_tree_label.visible = false
-	detail_vbox.add_child(_tech_tree_label)
-
-	# Feedback label
-	_feedback_label = Label.new()
-	_feedback_label.add_theme_font_size_override("font_size", 18)
-	_feedback_label.add_theme_color_override("font_color", COLOR_CORAL)
-	_feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(_feedback_label)
-
-	# Footer row: instructions + cancel button
-	var footer := HBoxContainer.new()
-	footer.alignment = BoxContainer.ALIGNMENT_CENTER
-	footer.add_theme_constant_override("separation", 16)
-	vbox.add_child(footer)
-
-	var instructions := Label.new()
-	instructions.text = "[Up/Down] Select  [Enter] Install  [Esc] Cancel"
-	instructions.add_theme_font_size_override("font_size", 14)
-	instructions.add_theme_color_override("font_color", COLOR_TEXT_SECONDARY)
-	footer.add_child(instructions)
-
-	var cancel_button := Button.new()
-	cancel_button.text = "Cancel"
-	cancel_button.custom_minimum_size = Vector2(80, 32)
-	cancel_button.add_theme_font_size_override("font_size", 14)
-	_style_close_button(cancel_button)
-	cancel_button.pressed.connect(close)
-	footer.add_child(cancel_button)
+func _connect_signals() -> void:
+	_cancel_button.pressed.connect(close)
+	ModuleManager.install_failed.connect(_on_install_failed)
 
 func _build_available_module_list() -> void:
 	# Filter to modules not already installed
@@ -439,14 +354,6 @@ func _style_close_button(button: Button) -> void:
 	button.add_theme_stylebox_override("pressed", pressed_style)
 	button.add_theme_color_override("font_color", COLOR_NEUTRAL)
 	button.add_theme_color_override("font_hover_color", COLOR_TEXT_PRIMARY)
-
-func _add_divider(parent: Node) -> void:
-	var divider := HSeparator.new()
-	var div_style := StyleBoxFlat.new()
-	div_style.bg_color = Color(COLOR_NEUTRAL, 0.4)
-	div_style.set_content_margin_all(0)
-	divider.add_theme_stylebox_override("separator", div_style)
-	parent.add_child(divider)
 
 func _animate_open() -> void:
 	_dim_rect.modulate.a = 0.0

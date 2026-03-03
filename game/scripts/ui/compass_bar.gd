@@ -38,8 +38,7 @@ var _ship_target: Node3D = null
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	# Anchors and offsets set in compass_bar.tscn / game_hud.tscn (TICKET-0152)
-	custom_minimum_size = Vector2(COMPASS_WIDTH, 56)
+	# Anchors, offsets, and custom_minimum_size set in compass_bar.tscn / game_hud.tscn
 	_font = ThemeDB.fallback_font
 	_font_mono = ThemeDB.fallback_font
 	_center_icon_tex = load("res://assets/icons/hud/icon_hud_compass_center.svg") as Texture2D

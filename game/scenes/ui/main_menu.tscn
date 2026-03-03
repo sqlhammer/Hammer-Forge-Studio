@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_script"]
 
 [node name="MainMenu" type="Control"]
+process_mode = 3
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -10,3 +11,45 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.102, 0.102, 0.18, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MenuLayout" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="LogoZone" type="Control" parent="CenterContainer/MenuLayout"]
+layout_mode = 2
+custom_minimum_size = Vector2(400, 120)
+
+[node name="Spacer1" type="Control" parent="CenterContainer/MenuLayout"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+
+[node name="PlayButton" type="Button" parent="CenterContainer/MenuLayout"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(200, 60)
+size_flags_horizontal = 4
+text = "Play"
+
+[node name="Spacer2" type="Control" parent="CenterContainer/MenuLayout"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+
+[node name="FooterZone" type="Control" parent="CenterContainer/MenuLayout"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)

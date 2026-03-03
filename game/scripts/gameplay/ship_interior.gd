@@ -187,9 +187,13 @@ func is_player_near_cockpit_console() -> bool:
 func get_nearby_zone_index() -> int:
 	if not _player_ref:
 		return -1
-	for i: int in range(_zone_areas.size()):
-		var zone: Area3D = _zone_areas[i]
-		if zone.get_overlapping_bodies().has(_player_ref):
+	var zone_centers: Array[Vector3] = [ZONE_A_CENTER, ZONE_B_CENTER, ZONE_C_CENTER, ZONE_D_CENTER]
+	var player_local: Vector3 = _player_ref.global_position - global_position
+	for i: int in range(zone_centers.size()):
+		var center: Vector3 = zone_centers[i]
+		var dx: float = absf(player_local.x - center.x)
+		var dz: float = absf(player_local.z - center.z)
+		if dx <= INTERACT_RANGE and dz <= INTERACT_RANGE:
 			return i
 	return -1
 

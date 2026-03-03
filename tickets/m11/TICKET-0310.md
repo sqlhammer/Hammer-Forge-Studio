@@ -2,7 +2,7 @@
 id: TICKET-0310
 title: "BUG — compass_bar._on_tree_node_added infinite loop during terrain generation in tests"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: qa-engineer
@@ -117,3 +117,4 @@ ERROR: Parameter "data.tree" is null.
 
 - 2026-03-03 [qa-engineer] Filed — P2 regression from TICKET-0300; compass_bar.gd causes infinite loop in headless test runner. Prevents test_travel_sequence_unit and test_world_boundary_unit from running. Blocks TICKET-0304 Phase Gate QA sign-off.
 - 2026-03-03 [gameplay-programmer] Starting work — adding is_inside_tree() guard to _on_tree_node_added callback.
+- 2026-03-03 [gameplay-programmer] DONE — Added is_inside_tree() guard to _on_tree_node_added. Commit 32290db, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/344 (merged).

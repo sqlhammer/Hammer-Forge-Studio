@@ -37,8 +37,6 @@ var _player: CharacterBody3D = null
 var _current_prompt: Dictionary = {}
 var _is_prompt_visible: bool = false
 var _fade_tween: Tween = null
-var _headlamp_row: HBoxContainer = null
-var _headlamp_key_label: Label = null
 ## Maps action names to their KeyLabel nodes for device-aware refresh
 var _persistent_controls: Dictionary = {}  # { String -> Label }
 
@@ -49,20 +47,22 @@ var _persistent_controls: Dictionary = {}  # { String -> Label }
 @onready var _key_label: Label = $ContextualPrompt/PromptPanel/PromptBox/KeyBadge/KeyLabel
 @onready var _action_label: Label = $ContextualPrompt/PromptPanel/PromptBox/ActionLabel
 @onready var _controls_list: VBoxContainer = $PersistentControls/ControlsList
+@onready var _headlamp_row: HBoxContainer = $PersistentControls/ControlsList/HeadlampRow
+@onready var _headlamp_key_label: Label = $PersistentControls/ControlsList/HeadlampRow/KeyLabel
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	_contextual_prompt.modulate.a = 0.0
-	_contextual_prompt.visible = false
-	_add_jump_control_row()
-	# Headlamp controls panel entry — show if already equipped, listen for future equip
+	# ContextualPrompt starts hidden with zero alpha — set in scene (visible=false, modulate.a=0)
+	# JumpRow and HeadlampRow are scene children — HeadlampRow starts hidden
 	HeadLamp.head_lamp_equipped.connect(_on_head_lamp_equipped)
 	if HeadLamp.is_equipped():
-		_add_headlamp_control()
-	# Register scene-defined persistent controls for device-aware label updates
+		_headlamp_row.visible = true
+	# Register all scene-defined persistent controls for device-aware label updates
 	_persistent_controls["ping"] = $PersistentControls/ControlsList/PingRow/KeyLabel as Label
 	_persistent_controls["inventory_toggle"] = $PersistentControls/ControlsList/InventoryRow/KeyLabel as Label
+	_persistent_controls["jump"] = $PersistentControls/ControlsList/JumpRow/KeyLabel as Label
+	_persistent_controls[HEADLAMP_ACTION] = _headlamp_key_label
 	# Refresh prompt labels when input device changes (keyboard ↔ gamepad)
 	InputManager.input_device_changed.connect(_on_input_device_changed)
 	# Set initial labels based on the current device at startup
@@ -89,7 +89,7 @@ func set_camera(camera: Camera3D) -> void:
 
 ## Returns true if the headlamp control row is visible in the controls panel.
 func has_headlamp_control() -> bool:
-	return _headlamp_row != null and _headlamp_row.is_inside_tree()
+	return _headlamp_row != null and _headlamp_row.visible
 
 ## Returns the currently displayed key label for the headlamp control, or empty string if absent.
 func get_headlamp_key_label() -> String:
@@ -205,30 +205,10 @@ func _hide_prompt() -> void:
 		_contextual_prompt.visible = false
 	)
 
-func _add_jump_control_row() -> void:
-	var key_text: String = get_action_input_label("jump")
-	if key_text == "?":
-		key_text = "\u2014"
-	var row: HBoxContainer = _create_control_row(key_text, "Jump", 50.0)
-	row.name = "JumpRow"
-	_controls_list.add_child(row)
-	_persistent_controls["jump"] = row.get_node("KeyLabel") as Label
-
 func _on_head_lamp_equipped() -> void:
-	_add_headlamp_control()
-
-func _add_headlamp_control() -> void:
 	if _headlamp_row:
-		return
-	var key_text: String = get_action_input_label(HEADLAMP_ACTION)
-	if key_text == "?":
-		key_text = "\u2014"
-	_headlamp_row = _create_control_row(key_text, HEADLAMP_LABEL)
-	# Store key label reference for dynamic refresh
-	_headlamp_key_label = _headlamp_row.get_node("KeyLabel") as Label
-	_persistent_controls[HEADLAMP_ACTION] = _headlamp_key_label
-	_controls_list.add_child(_headlamp_row)
-	Global.debug_log("InteractionPromptHUD: headlamp control added [%s]" % key_text)
+		_headlamp_row.visible = true
+		Global.debug_log("InteractionPromptHUD: headlamp control shown")
 
 func _on_input_device_changed(_device: String) -> void:
 	# Force the contextual prompt to re-evaluate its key label on next frame
@@ -285,45 +265,3 @@ func _joy_axis_name(axis: int) -> String:
 		_:
 			return "?"
 
-func _create_control_row(key_text: String, label_text: String, key_min_width: float = 28.0) -> HBoxContainer:
-	var row: HBoxContainer = HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-
-	# Key badge label — matches persistent controls style from the scene
-	var key_label: Label = Label.new()
-	key_label.name = "KeyLabel"
-	key_label.custom_minimum_size = Vector2(key_min_width, 28)
-	key_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	key_label.add_theme_color_override("font_color", COLOR_PERSISTENT_KEY)
-	key_label.add_theme_font_size_override("font_size", 13)
-	var key_style: StyleBoxFlat = StyleBoxFlat.new()
-	key_style.bg_color = COLOR_KEY_BG
-	key_style.border_color = COLOR_PERSISTENT_KEY
-	key_style.set_border_width_all(1)
-	key_style.set_corner_radius_all(3)
-	key_style.content_margin_left = 6.0
-	key_style.content_margin_top = 2.0
-	key_style.content_margin_right = 6.0
-	key_style.content_margin_bottom = 2.0
-	key_label.add_theme_stylebox_override("normal", key_style)
-	key_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	key_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	key_label.text = key_text
-	row.add_child(key_label)
-
-	# Icon placeholder — matches existing PingIcon / InventoryIcon
-	var icon: ColorRect = ColorRect.new()
-	icon.custom_minimum_size = Vector2(20, 20)
-	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	icon.color = Color(1, 1, 1, 0.3)
-	row.add_child(icon)
-
-	# Action label
-	var action_label: Label = Label.new()
-	action_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	action_label.add_theme_color_override("font_color", COLOR_PERSISTENT_LABEL)
-	action_label.add_theme_font_size_override("font_size", 13)
-	action_label.text = label_text
-	row.add_child(action_label)
-
-	return row

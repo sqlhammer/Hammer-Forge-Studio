@@ -32,9 +32,7 @@ var _last_used_type: ResourceDefs.ResourceType = ResourceDefs.ResourceType.NONE
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	visible = false
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# visible, mouse_filter, and anchors set in game_hud.tscn (scene-first)
 	_build_segments()
 
 

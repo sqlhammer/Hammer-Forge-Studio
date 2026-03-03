@@ -3,6 +3,8 @@
 [ext_resource type="Script" uid="uid://bm22em53lh45" path="res://scripts/ui/mining_progress.gd" id="1_mpg"]
 
 [node name="MiningProgress" type="Control"]
+custom_minimum_size = Vector2(240, 40)
+visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5

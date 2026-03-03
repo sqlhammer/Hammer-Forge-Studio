@@ -61,6 +61,8 @@ layer = 1
 script = ExtResource("1_iph")
 
 [node name="ContextualPrompt" type="Control" parent="."]
+visible = false
+modulate = Color(1, 1, 1, 0)
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
@@ -124,8 +126,8 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -160.0
-offset_top = -100.0
+offset_left = -170.0
+offset_top = -140.0
 offset_right = -16.0
 offset_bottom = -16.0
 grow_horizontal = 0
@@ -192,3 +194,60 @@ size_flags_vertical = 4
 theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
 theme_override_font_sizes/font_size = 13
 text = "Inventory"
+
+[node name="JumpRow" type="HBoxContainer" parent="PersistentControls/ControlsList"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="KeyLabel" type="Label" parent="PersistentControls/ControlsList/JumpRow"]
+custom_minimum_size = Vector2(50, 28)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_persistent_key")
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Space"
+
+[node name="JumpIcon" type="ColorRect" parent="PersistentControls/ControlsList/JumpRow"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_vertical = 4
+color = Color(1, 1, 1, 0.3)
+
+[node name="ActionLabel" type="Label" parent="PersistentControls/ControlsList/JumpRow"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+theme_override_font_sizes/font_size = 13
+text = "Jump"
+
+[node name="HeadlampRow" type="HBoxContainer" parent="PersistentControls/ControlsList"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="KeyLabel" type="Label" parent="PersistentControls/ControlsList/HeadlampRow"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.831, 0.667, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_persistent_key")
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "L"
+
+[node name="HeadlampIcon" type="ColorRect" parent="PersistentControls/ControlsList/HeadlampRow"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_vertical = 4
+color = Color(1, 1, 1, 0.3)
+
+[node name="ActionLabel" type="Label" parent="PersistentControls/ControlsList/HeadlampRow"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.58, 0.639, 0.722, 1)
+theme_override_font_sizes/font_size = 13
+text = "Headlamp"

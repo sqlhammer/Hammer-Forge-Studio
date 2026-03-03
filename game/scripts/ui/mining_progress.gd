@@ -30,10 +30,9 @@ var _mining_icon_tex: Texture2D = null
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(BAR_WIDTH, TOTAL_HEIGHT)
+	# custom_minimum_size and visible set in mining_progress.tscn (scene-first)
 	_font = ThemeDB.fallback_font
 	_mining_icon_tex = load("res://assets/icons/hud/icon_hud_mining_active.svg") as Texture2D
-	visible = false
 
 func _process(delta: float) -> void:
 	if _is_completing:

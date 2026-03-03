@@ -32,10 +32,8 @@ var _font: Font = null
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(OVERLAY_WIDTH, OVERLAY_HEIGHT)
+	# custom_minimum_size, visible, and mouse_filter set in mining_minigame_overlay.tscn (scene-first)
 	_font = ThemeDB.fallback_font
-	visible = false
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _process(delta: float) -> void:
 	if _showing_result:

@@ -3,4 +3,5 @@
 [ext_resource type="Script" uid="uid://uqmjts0j0xtv" path="res://scripts/ui/battery_bar.gd" id="1_bat"]
 
 [node name="BatteryBar" type="Control"]
+custom_minimum_size = Vector2(200, 48)
 script = ExtResource("1_bat")

@@ -30,7 +30,6 @@ var _mining_ref: Mining = null
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	layer = 1
 	_setup_hud_positions()
 
 func _process(_delta: float) -> void:
@@ -144,37 +143,12 @@ func get_resource_wheel() -> ResourceTypeWheel:
 # ── Private Methods ───────────────────────────────────────
 
 func _setup_hud_positions() -> void:
-	# Compass bar — anchors/offsets set in game_hud.tscn (center-top, 32px margin)
-	# Mining progress — anchors/offsets set in game_hud.tscn (center, 60px below crosshair)
-
 	# Crosshair — center dot (only element still created programmatically)
 	_crosshair = _create_crosshair()
 	_crosshair.set_anchors_preset(Control.PRESET_CENTER)
 	_crosshair.position = Vector2(-2, -2)
 	_hud_root.add_child(_crosshair)
-
-	# Scanner readout — center-right
-	_scanner_readout.anchor_left = 1.0
-	_scanner_readout.anchor_right = 1.0
-	_scanner_readout.anchor_top = 0.5
-	_scanner_readout.anchor_bottom = 0.5
-	_scanner_readout.position = Vector2(-ScannerReadout.READOUT_WIDTH - 80, -160)
-
-	# Battery bar — anchors/offsets set in game_hud.tscn (bottom-left, 32px margin)
-	# Fuel gauge — anchors/offsets set in game_hud.tscn (bottom-center, 32px margin)
-
-	# Pickup notifications — center-right, stacking
-	_pickup_notifications.anchor_left = 1.0
-	_pickup_notifications.anchor_right = 1.0
-	_pickup_notifications.anchor_top = 0.5
-	_pickup_notifications.anchor_bottom = 0.5
-	_pickup_notifications.position = Vector2(-PickupNotificationManager.TOAST_WIDTH - 32, 0)
-
-	# Minigame overlay — anchors/offsets set in game_hud.tscn (center, 10px below crosshair)
-
-	# Ship globals — bottom-right (hidden by default, shown when inside ship)
-	_ship_globals.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_ship_globals.position = Vector2(-ShipGlobalsHUD.PANEL_WIDTH - 32, -ShipGlobalsHUD.PANEL_HEIGHT - 32)
+	# All other HUD element anchors/offsets set in game_hud.tscn
 
 func _create_crosshair() -> Control:
 	var dot := ColorRect.new()

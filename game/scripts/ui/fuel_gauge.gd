@@ -38,7 +38,7 @@ var _icon_texture: Texture2D = null
 # ── Built-in Virtual Methods ──────────────────────────────
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(TOTAL_WIDTH, TOTAL_HEIGHT)
+	# custom_minimum_size set in fuel_gauge.tscn (scene-first)
 	_font_mono = ThemeDB.fallback_font
 	_icon_texture = load("res://assets/icons/item/icon_item_fuel_cell.svg") as Texture2D
 	FuelSystem.fuel_changed.connect(_on_fuel_changed)

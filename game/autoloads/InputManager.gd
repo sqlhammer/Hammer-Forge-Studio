@@ -149,7 +149,7 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("move_right", [KEY_D, KEY_RIGHT])
 	_add_action_if_missing("camera_look_horizontal", [])  # Mouse only
 	_add_action_if_missing("camera_look_vertical", [])  # Mouse only
-	_add_action_if_missing("interact", [KEY_E], [], [JOY_BUTTON_A])
+	_add_action_if_missing("interact", [KEY_E], [], [JOY_BUTTON_X])
 	_add_action_if_missing("scan", [KEY_Q])
 	_add_action_if_missing("use_tool", [], [MOUSE_BUTTON_LEFT])
 	_add_action_if_missing("switch_view", [KEY_TAB])

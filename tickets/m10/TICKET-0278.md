@@ -2,7 +2,7 @@
 id: TICKET-0278
 title: "M10 Input — Assign gamepad A to 'use_item', RB to 'toggle_head_lamp'"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -71,3 +71,4 @@ and note any edge cases in Handoff Notes.
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — M10 gamepad: A→use_item, RB→toggle_head_lamp
+- 2026-03-03 [gameplay-programmer] Starting work

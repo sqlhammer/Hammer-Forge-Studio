@@ -2,7 +2,7 @@
 id: TICKET-0277
 title: "M10 Input — Assign gamepad A to 'jump', LB to 'ping'; rename action 'scan' → 'ping'"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -80,7 +80,12 @@ mechanism in InputManager suppresses `jump` when UI is open, preventing conflict
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+- Modified `game/autoloads/InputManager.gd`: renamed `scan` to `ping` in GAMEPLAY_ACTIONS array and `_setup_input_actions()`, added `JOY_BUTTON_A` to `jump`, added `JOY_BUTTON_LEFT_SHOULDER` to `ping`
+- Modified `game/scripts/gameplay/scanner.gd` line 84: `_check_ping_input()` now uses `"ping"` action string
+- Modified `game/scripts/ui/interaction_prompt_hud.gd` line 64: `_persistent_controls` key changed from `"scan"` to `"ping"`
+- Modified `game/test/test_input_manager.gd`: debug display variable and label updated from scan to ping
+- Modified `game/tests/test_input_manager_unit.gd`: action existence assertion updated from `"scan"` to `"ping"`
+- Full codebase grep confirmed zero remaining `"scan"` input action references
 
 ---
 
@@ -88,3 +93,4 @@ mechanism in InputManager suppresses `jump` when UI is open, preventing conflict
 
 - 2026-03-03 [producer] Created ticket — M10 gamepad: A→jump, LB→ping, rename scan→ping
 - 2026-03-03 [gameplay-programmer] Starting work
+- 2026-03-03 [gameplay-programmer] DONE — commit 3bef52d, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/308

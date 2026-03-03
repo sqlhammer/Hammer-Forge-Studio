@@ -2,7 +2,7 @@
 id: TICKET-0289
 title: "M11 GDScript Standards Audit — full codebase compliance report"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: systems-programmer
 created_by: producer
@@ -144,3 +144,4 @@ Suggested search patterns:
 
 - 2026-03-03 [producer] Created ticket — full GDScript standards audit, Scene-First Rule priority
 - 2026-03-03 [systems-programmer] Starting work — static analysis audit of all game/ .gd files
+- 2026-03-03 [systems-programmer] DONE — Report at docs/studio/reports/2026-03-03-m11-gdscript-audit.md. 82 files scanned, 65 violations found (44 Scene-First, 21 other), 51 fully compliant. Commit 269b33c.

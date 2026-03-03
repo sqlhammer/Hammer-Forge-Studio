@@ -152,6 +152,7 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("interact", [KEY_E], [], [JOY_BUTTON_X])
 	_add_action_if_missing("scan", [KEY_Q])
 	_add_action_if_missing("use_tool", [], [MOUSE_BUTTON_LEFT])
+	_add_joy_axis_to_existing_action("use_tool", JOY_AXIS_TRIGGER_RIGHT)
 	_add_action_if_missing("switch_view", [KEY_TAB])
 	_add_action_if_missing("pause", [KEY_ESCAPE])
 	_add_action_if_missing("jump", [KEY_SPACE])
@@ -206,6 +207,21 @@ func _add_joy_button_to_existing_action(action_name: String, joy_button: int) ->
 				return
 	var event := InputEventJoypadButton.new()
 	event.button_index = joy_button
+	InputMap.action_add_event(action_name, event)
+
+## Adds a joypad axis (trigger) to an existing input action if not already mapped.
+## Unlike _add_action_if_missing, this works on actions that already exist using InputEventJoypadMotion.
+func _add_joy_axis_to_existing_action(action_name: String, axis: int, axis_value: float = 0.5) -> void:
+	if not InputMap.has_action(action_name):
+		return
+	for existing_event: InputEvent in InputMap.action_get_events(action_name):
+		if existing_event is InputEventJoypadMotion:
+			var existing_axis: InputEventJoypadMotion = existing_event as InputEventJoypadMotion
+			if existing_axis.axis == axis:
+				return
+	var event := InputEventJoypadMotion.new()
+	event.axis = axis
+	event.axis_value = axis_value
 	InputMap.action_add_event(action_name, event)
 
 ## Applies dead zone to a 2D axis input (typically from analog stick).

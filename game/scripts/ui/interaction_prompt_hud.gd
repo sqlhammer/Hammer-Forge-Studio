@@ -251,6 +251,8 @@ func _get_action_joypad_label(action: String) -> String:
 	for event: InputEvent in events:
 		if event is InputEventJoypadButton:
 			return _joy_button_name(event.button_index)
+		if event is InputEventJoypadMotion:
+			return _joy_axis_name(event.axis)
 	return "?"
 
 func _joy_button_name(button: int) -> String:
@@ -271,6 +273,15 @@ func _joy_button_name(button: int) -> String:
 			return "Start"
 		JOY_BUTTON_BACK:
 			return "Back"
+		_:
+			return "?"
+
+func _joy_axis_name(axis: int) -> String:
+	match axis:
+		JOY_AXIS_TRIGGER_LEFT:
+			return "LT"
+		JOY_AXIS_TRIGGER_RIGHT:
+			return "RT"
 		_:
 			return "?"
 

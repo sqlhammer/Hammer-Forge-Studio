@@ -79,7 +79,7 @@ func _draw() -> void:
 	var pip_start_x: float = center_x - total_pips_width / 2.0
 	var pip_y: float = 26.0
 
-	for i in range(_line_count):
+	for i: int in range(_line_count):
 		var pip_x: float = pip_start_x + i * (PIP_WIDTH + PIP_GAP)
 		var pip_color: Color = _get_pip_color(i)
 		draw_rect(Rect2(pip_x, pip_y, PIP_WIDTH, PIP_HEIGHT), pip_color, true)
@@ -96,7 +96,7 @@ func show_minigame(line_count: int) -> void:
 	_pip_states.clear()
 	_active_index = -1
 	_showing_result = false
-	for i in range(line_count):
+	for i: int in range(line_count):
 		_pip_states.append(0)
 	visible = true
 	modulate.a = 1.0
@@ -118,7 +118,7 @@ func show_result(success: bool, bonus: int) -> void:
 	_result_timer = RESULT_HOLD
 	_active_index = -1
 	# Mark untraced pips as missed
-	for i in range(_pip_states.size()):
+	for i: int in range(_pip_states.size()):
 		if _pip_states[i] != 2:
 			_pip_states[i] = 3
 

@@ -50,7 +50,7 @@ static func get_unlock_cost(node_id: String) -> Dictionary:
 static func get_prerequisites(node_id: String) -> Array[String]:
 	var entry: Dictionary = TECH_TREE_CATALOG.get(node_id, {})
 	var result: Array[String] = []
-	var raw: Array = entry.get("prerequisites", [])
+	var raw: Array[String] = entry.get("prerequisites", [] as Array[String])
 	for item: Variant in raw:
 		result.append(item as String)
 	return result

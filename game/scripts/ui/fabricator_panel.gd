@@ -505,7 +505,7 @@ func _build_recipe_row(recipe_id: String) -> PanelContainer:
 	text_vbox.add_child(name_label)
 
 	# Input cost summary
-	var inputs: Array = FabricatorDefs.get_inputs(recipe_id)
+	var inputs: Array[Dictionary] = FabricatorDefs.get_inputs(recipe_id)
 	var cost_text: String = ""
 	for input: Dictionary in inputs:
 		var resource_type: ResourceDefs.ResourceType = input.get("resource_type", ResourceDefs.ResourceType.NONE) as ResourceDefs.ResourceType
@@ -611,7 +611,7 @@ func _refresh_detail() -> void:
 		_cached_output_tex = null
 
 	# Input slot
-	var inputs: Array = FabricatorDefs.get_inputs(recipe_id)
+	var inputs: Array[Dictionary] = FabricatorDefs.get_inputs(recipe_id)
 	if inputs.size() > 0:
 		var input: Dictionary = inputs[0]
 		var resource_type: ResourceDefs.ResourceType = input.get("resource_type", ResourceDefs.ResourceType.NONE) as ResourceDefs.ResourceType
@@ -689,7 +689,7 @@ func _refresh_progress() -> void:
 		_progress_label.text = ""
 
 func _can_afford_recipe(recipe_id: String) -> bool:
-	var inputs: Array = FabricatorDefs.get_inputs(recipe_id)
+	var inputs: Array[Dictionary] = FabricatorDefs.get_inputs(recipe_id)
 	for input: Dictionary in inputs:
 		var resource_type: ResourceDefs.ResourceType = input.get("resource_type", ResourceDefs.ResourceType.NONE) as ResourceDefs.ResourceType
 		var quantity: int = input.get("quantity", 0) as int

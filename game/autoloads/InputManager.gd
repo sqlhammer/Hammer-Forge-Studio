@@ -177,20 +177,20 @@ func _setup_input_actions() -> void:
 	_add_action_if_missing("ship_emergency_stop", [KEY_X])
 
 ## Adds an input action if it doesn't already exist.
-func _add_action_if_missing(action_name: String, keys: Array = [], mouse_buttons: Array = [], joy_buttons: Array = []) -> void:
+func _add_action_if_missing(action_name: String, keys: Array[int] = [], mouse_buttons: Array[int] = [], joy_buttons: Array[int] = []) -> void:
 	if InputMap.has_action(action_name):
 		return
 
 	InputMap.add_action(action_name)
-	for key in keys:
+	for key: int in keys:
 		var event := InputEventKey.new()
 		event.keycode = key
 		InputMap.action_add_event(action_name, event)
-	for button in mouse_buttons:
+	for button: int in mouse_buttons:
 		var event := InputEventMouseButton.new()
 		event.button_index = button
 		InputMap.action_add_event(action_name, event)
-	for joy_button in joy_buttons:
+	for joy_button: int in joy_buttons:
 		var event := InputEventJoypadButton.new()
 		event.button_index = joy_button
 		InputMap.action_add_event(action_name, event)

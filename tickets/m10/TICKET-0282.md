@@ -2,7 +2,7 @@
 id: TICKET-0282
 title: "M10 Scanner — Animated ping propagation ring with progressive compass reveal (D-015)"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -67,7 +67,10 @@ Suggested `PING_SPEED = 100.0` m/s — ring reaches max range in 10 seconds. Tun
 
 ## Handoff Notes
 
-(Leave blank until handoff occurs.)
+- Modified `game/scripts/gameplay/scanner.gd`: Replaced tween-based ring with frame-driven propagation system. Added `deposit_ping_revealed` signal, `PING_SPEED` (100 m/s), updated `PING_RANGE` (320→1000m). New methods: `_start_ping_propagation()`, `_update_ping_propagation()`, `_stop_ping_propagation()`. Ring expands at constant speed, deposits revealed progressively as ring reaches them.
+- Modified `game/scripts/ui/game_hud.gd`: Connected `deposit_ping_revealed` signal. Compass markers now added one-by-one as ring reaches each deposit instead of all at once on `ping_completed`.
+- Modified `game/tests/test_scanner_unit.gd`: Updated PING_RANGE assertion from 320.0 to 1000.0.
+- `ping_completed` still fires immediately with full deposit list — no regression to downstream consumers.
 
 ---
 
@@ -75,3 +78,4 @@ Suggested `PING_SPEED = 100.0` m/s — ring reaches max range in 10 seconds. Tun
 
 - 2026-03-03 [producer] Created ticket — M10 scanner: animated ping propagation (D-015)
 - 2026-03-03 [gameplay-programmer] Starting work
+- 2026-03-03 [gameplay-programmer] DONE — commit ba2900d, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/314

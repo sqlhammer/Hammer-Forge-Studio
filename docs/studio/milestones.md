@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-03-03 (TICKET-0286 added; TICKET-0284 DONE)
+**Last Updated:** 2026-03-03 (TICKET-0287 added — radial wheel centering bug)
 
 > Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
@@ -35,7 +35,7 @@
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Complete | 56 | 0 | 56 | 2026-03-01 |
 | M9 | Foundation & Hardening — Canonical game launch architecture, orchestrator hardening, gamepad fixes, and M8 playtest polish | — | Complete | 39 | 0 | 39 | 2026-03-02 |
-| M10 | Input & Feel Refinement — Gamepad remapping, scanner UX, boarding feel, orchestrator cleanup, resource respawn | — | Active | 11 | 10 | 1 | — |
+| M10 | Input & Feel Refinement — Gamepad remapping, scanner UX, boarding feel, orchestrator cleanup, resource respawn | — | Active | 12 | 11 | 1 | — |
 | M11 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
 | M12 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
 | M13 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |

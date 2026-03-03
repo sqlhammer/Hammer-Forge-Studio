@@ -314,9 +314,9 @@ def get_model(config: dict, agent_slug: str) -> str:
     return overrides.get(agent_slug, config["models"]["default_worker"])
 
 
-def get_budget(config: dict, agent_slug: str) -> float:
-    overrides = config["budgets"].get("overrides", {})
-    return overrides.get(agent_slug, config["budgets"]["default_worker_usd"])
+def get_max_turns(config: dict, agent_slug: str) -> int:
+    overrides = config["max_turns"].get("overrides", {})
+    return overrides.get(agent_slug, config["max_turns"]["default"])
 
 
 def get_timeout(config: dict, agent_slug: str) -> int:
@@ -774,7 +774,7 @@ def _build_resume_briefing(ticket_id: str, checkpoint: dict) -> str:
 async def run_claude(
     prompt: str,
     model: str,
-    budget: float,
+    max_turns: int,
     blocked_tools: list[str],
     agent_claude_md: Path | None = None,
     output_json: bool = True,
@@ -787,8 +787,7 @@ async def run_claude(
     """Run claude -p as a subprocess. Returns (exit_code, stdout, stderr, usage_meta)."""
     cmd = ["claude", "-p", "--model", model, "--verbose"]
 
-    if budget > 0:
-        cmd.extend(["--max-turns", "200"])
+    cmd.extend(["--max-turns", str(max_turns)])
 
     if blocked_tools:
         cmd.extend(["--disallowed-tools", ",".join(blocked_tools)])
@@ -1171,13 +1170,13 @@ class Conductor:
 
         # Call Producer
         model = self.config["models"]["producer"]
-        budget = self.config["budgets"]["producer_usd"]
+        max_turns = get_max_turns(self.config, "producer")
         blocked = get_blocked_tools(self.config, "producer")
 
         exit_code, stdout, stderr, usage_meta = await self._run_claude(
             prompt=prompt,
             model=model,
-            budget=budget,
+            max_turns=max_turns,
             blocked_tools=blocked,
             output_json=True,
             cwd=REPO_ROOT,
@@ -1390,7 +1389,7 @@ class Conductor:
                         "(producer planning error)")
                 continue
 
-            budget = assignment.get("budget_usd", get_budget(self.config, agent_slug))
+            max_turns = assignment.get("max_turns", get_max_turns(self.config, agent_slug))
             needs_worktree = assignment.get("needs_worktree", True)
             needs_godot = assignment.get("needs_godot_mcp", False)
             supplement = assignment.get("prompt_supplement", "")
@@ -1437,7 +1436,7 @@ class Conductor:
             workers.append({
                 "agent": agent_slug,
                 "ticket": ticket_id,
-                "budget_usd": budget,
+                "max_turns": max_turns,
                 "needs_worktree": needs_worktree,
                 "needs_godot_mcp": needs_godot,
                 "worktree_path": str(worktree_path) if worktree_path else None,
@@ -1767,7 +1766,7 @@ class Conductor:
         """Run a single worker agent."""
         agent_slug = worker["agent"]
         ticket_id = worker["ticket"]
-        budget = worker["budget_usd"]
+        max_turns = worker["max_turns"]
         supplement = worker.get("prompt_supplement", "")
 
         # Build worker prompt
@@ -1841,7 +1840,7 @@ class Conductor:
         log_path = self.paths.logs_dir / f"{agent_slug}-{ticket_id}-{ts}.log"
 
         self.logger.log("DISPATCH",
-            f"{agent_slug} -> {ticket_id} (model={model}, budget={format_cost(budget)})")
+            f"{agent_slug} -> {ticket_id} (model={model}, max_turns={max_turns})")
 
         # Log resume_dispatched if this is a retry with checkpoint context
         if checkpoint_context and retry_count > 0:
@@ -1864,7 +1863,7 @@ class Conductor:
         exit_code, stdout, stderr, usage_meta = await self._run_claude(
             prompt=prompt,
             model=model,
-            budget=budget,
+            max_turns=max_turns,
             blocked_tools=blocked,
             agent_claude_md=agent_md,
             output_json=True,

@@ -2,7 +2,7 @@
 id: TICKET-0283
 title: "M10 Tooling — Replace dead USD budget caps with configurable per-agent --max-turns (D-033)"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: tools-devops-engineer
 created_by: producer
@@ -77,3 +77,4 @@ dead-code removal with a simple config-driven replacement.
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — M10 tooling: replace USD budget caps (D-033)
+- 2026-03-03 [tools-devops-engineer] Starting work — removing get_budget() and budget_usd fields; adding get_max_turns() with configurable per-agent max_turns in config

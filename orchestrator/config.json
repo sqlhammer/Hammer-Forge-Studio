@@ -19,14 +19,15 @@
     }
   },
   "budgets": {
-    "producer_usd": 1.00,
-    "default_worker_usd": 3.00,
-    "overrides": {
-      "gameplay-programmer": 5.00,
-      "systems-programmer": 5.00,
-      "qa-engineer": 5.00
-    },
     "session_ceiling_usd": 100.00
+  },
+  "max_turns": {
+    "default": 75,
+    "overrides": {
+      "producer": 25,
+      "gameplay-programmer": 150,
+      "qa-engineer": 100
+    }
   },
   "timeouts": {
     "default_minutes": 30,

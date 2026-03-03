@@ -205,7 +205,7 @@ func _handle_resource_spawn(
 	result: TerrainGenerationResult,
 	seed_value: int
 ) -> void:
-	var positions: Array = []
+	var positions: Array[Vector3] = []
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	# Combine seed with request index for unique but deterministic placement
 	rng.seed = seed_value + request_index * 7919

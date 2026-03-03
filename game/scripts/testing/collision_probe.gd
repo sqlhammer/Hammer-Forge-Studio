@@ -76,8 +76,8 @@ func sweep_toward(origin: Vector3, target_center: Vector3, target_aabb: AABB, ma
 
 
 ## Sweeps from 16 compass directions at specified height fractions, returning all results.
-func sweep_all_directions(center: Vector3, aabb: AABB, mask: int, heights: Array[float], radius_mult: float) -> Array:
-	var results: Array = []
+func sweep_all_directions(center: Vector3, aabb: AABB, mask: int, heights: Array[float], radius_mult: float) -> Array[ProbeResult]:
+	var results: Array[ProbeResult] = []
 	var aabb_size: Vector3 = aabb.size
 	var sweep_radius: float = maxf(aabb_size.x, aabb_size.z) * radius_mult
 
@@ -128,8 +128,8 @@ func sweep_all_directions(center: Vector3, aabb: AABB, mask: int, heights: Array
 ## center: world-space center of the model. aabb: world-space AABB. mask: collision mask.
 ## heights: height fractions within the AABB. surface_offset: distance from face to start sweep.
 ## segment_count: number of probe positions per face edge.
-func sweep_tangential(_center: Vector3, aabb: AABB, mask: int, heights: Array[float], surface_offset: float, segment_count: int) -> Array:
-	var results: Array = []
+func sweep_tangential(_center: Vector3, aabb: AABB, mask: int, heights: Array[float], surface_offset: float, segment_count: int) -> Array[ProbeResult]:
+	var results: Array[ProbeResult] = []
 	var aabb_min: Vector3 = aabb.position
 	var aabb_max: Vector3 = aabb.end
 	var aabb_size: Vector3 = aabb.size

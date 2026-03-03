@@ -2,7 +2,7 @@
 id: TICKET-0309
 title: "BUG — NavigationConsole._biome_node_ids missing debris_field after TICKET-0292"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: qa-engineer
@@ -80,3 +80,4 @@ Test output from M11 Phase Gate QA run (2026-03-03):
 
 - 2026-03-03 [qa-engineer] Filed — P2 regression from TICKET-0292; debris_field biome absent from NavigationConsole destinations. Blocks TICKET-0304 Phase Gate QA sign-off.
 - 2026-03-03 [gameplay-programmer] Starting work
+- 2026-03-03 [gameplay-programmer] Completed — commit 4e62f6e, PR #348 (https://github.com/sqlhammer/Hammer-Forge-Studio/pull/348). Added null guards to _refresh_biome_nodes() and _clamp_panel_to_viewport() so _biome_node_ids is fully populated regardless of scene node availability.

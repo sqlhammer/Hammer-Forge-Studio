@@ -2,7 +2,7 @@
 id: TICKET-0303
 title: "M11 Standards remediation — Fix single-# docstrings to ## format (3 files)"
 type: TASK
-status: OPEN
+status: DONE
 priority: P2
 owner: systems-programmer
 created_by: producer
@@ -23,10 +23,10 @@ Fix non-compliant single-# comment headers that should use ## docstring format p
 
 ## Acceptance Criteria
 
-- [ ] `debug_ship_boarding_handler.gd` lines 1–4: change single `#` comments to `##` format
-- [ ] `game.gd` line 4: change single `#` comment to `##` (lines 1–3 already use `##` correctly)
-- [ ] `inventory_action_popup.gd` line 1: change `#` to `##` (lines 2–5 already use `##`)
-- [ ] No functional behavior changes; purely formatting
+- [x] `debug_ship_boarding_handler.gd` lines 1–4: change single `#` comments to `##` format
+- [x] `game.gd` line 4: change single `#` comment to `##` (lines 1–3 already use `##` correctly)
+- [x] `inventory_action_popup.gd` line 1: change `#` to `##` (lines 2–5 already use `##`)
+- [x] No functional behavior changes; purely formatting
 
 ---
 
@@ -45,3 +45,5 @@ See audit report `docs/studio/reports/2026-03-03-m11-gdscript-audit.md` Section 
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — Phase 2 remediation from M11 GDScript audit report (TICKET-0290)
+- 2026-03-03 [systems-programmer] Starting work — fixing single-# docstrings to ## format in 3 files
+- 2026-03-03 [systems-programmer] DONE — commit 5ccd8a2, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/320 (merged)

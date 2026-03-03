@@ -8,16 +8,16 @@ Automated agent orchestration system. A Python Conductor script runs the main lo
 
 ```bash
 cd /c/repos/Hammer-Forge-Studio
-python orchestrator/start_milestone.py M8
-python orchestrator/conductor.py M8
+python orchestrator/start_milestone.py M11
+python orchestrator/conductor.py M11
 ```
 
-`start_milestone.py` writes a fresh `state.json` for the new milestone. Without it, the conductor resumes the previous milestone's saved state and ignores the CLI argument.
+`start_milestone.py` writes a fresh `state.json` for the new milestone instance. Without it, the conductor resumes the previous instance's saved state.
 
 **Resuming an in-progress milestone after a crash:**
 
 ```bash
-python orchestrator/conductor.py M8   # state.json already exists — resumes automatically
+python orchestrator/conductor.py M11   # state.json already exists — resumes automatically
 ```
 
 ## How It Works
@@ -26,8 +26,8 @@ python orchestrator/conductor.py M8   # state.json already exists — resumes au
 2. Producer reads tickets and outputs a JSON wave plan
 3. Conductor spawns **worker agents** (Claude) in parallel, each in its own git worktree
 4. Workers execute their assigned tickets autonomously
-5. Conductor merges branches into `main` and loops back to step 1
-6. When a phase is complete, the system halts for **Studio Head approval** (human gate)
+5. Workers push branches and self-merge via GitHub PR
+6. When a phase is complete, the system emits a gate and blocks until a `gate_response.json` is written
 
 ## Commands
 
@@ -35,75 +35,71 @@ python orchestrator/conductor.py M8   # state.json already exists — resumes au
 
 ```bash
 python orchestrator/start_milestone.py <milestone>
-python orchestrator/start_milestone.py <milestone> "<phase>"  # specify starting phase
-python orchestrator/start_milestone.py <milestone> --force    # skip confirmation
+python orchestrator/start_milestone.py <milestone> "<phase>"      # specify starting phase
+python orchestrator/start_milestone.py <milestone> --force        # skip confirmation
+python orchestrator/start_milestone.py <milestone> --instance X   # custom instance name
 
 # Then run the conductor:
 python orchestrator/conductor.py <milestone>
 ```
 
-`start_milestone.py` must be run before the conductor whenever beginning a new milestone. The conductor only creates fresh state when `state.json` is absent — if a previous milestone's state file exists, it will resume that state regardless of the milestone argument.
+`start_milestone.py` must be run before the conductor whenever beginning a new milestone. If a previous instance's `state.json` exists, the conductor resumes that state.
 
 ### Resume or Continue Orchestration
 
 ```bash
 python orchestrator/conductor.py <milestone>
+python orchestrator/conductor.py <milestone> --instance X   # target a named instance
 ```
 
-### Resume After Crash
-
-```bash
-python orchestrator/conductor.py --resume
-```
+Re-running the same command resumes from saved state automatically — no special flag needed.
 
 ### Check Status
 
 ```bash
-python orchestrator/status.py
-python orchestrator/status.py --json       # raw JSON
-python orchestrator/status.py --log 20     # include last 20 log entries
+python orchestrator/status.py                  # auto-detect instance
+python orchestrator/status.py --instance M11   # target a specific instance
+python orchestrator/status.py --all            # one-line summary of all instances
+python orchestrator/status.py --json           # raw JSON state
+python orchestrator/status.py --log 20         # include last 20 log entries
 ```
 
 ### Approve a Phase Gate
 
-When a phase completes, the system halts and prints a notification. To continue:
+When a phase completes, the conductor transitions to `GATE_BLOCKED` and writes `pending_gate.json` inside the instance directory. To approve, create `gate_response.json` in the same directory:
 
 ```bash
-python orchestrator/approve_gate.py                    # approve (default)
-python orchestrator/approve_gate.py --reject           # reject
-python orchestrator/approve_gate.py --comment "LGTM"   # approve with note
+# Write gate_response.json to the instance directory:
+echo '{"next_phase": "Phase 2 — Remediation"}' > orchestrator/instances/M11/gate_response.json
 ```
+
+The conductor polls for this file every 30 seconds. Once found, it reads `next_phase`, cleans up both gate files, and advances to `PLANNING`.
 
 ### Resume Planning After New Tickets Are Added
 
-If the conductor has gone `IDLE` (all known tickets were DONE) and new tickets are then created, use this helper to reset it to `PLANNING` so it picks them up:
+If the conductor has gone `IDLE` (all known tickets were DONE) and new tickets are then created:
 
 ```bash
-python orchestrator/resume_planning.py          # confirms before writing
-python orchestrator/resume_planning.py --force  # no prompt
+python orchestrator/resume_planning.py                    # auto-detect instance, confirm first
+python orchestrator/resume_planning.py --force            # no prompt
+python orchestrator/resume_planning.py --instance M11     # target a specific instance
 ```
 
-Then re-run the conductor as normal:
-
-```bash
-python orchestrator/conductor.py <milestone>
-```
-
-The script is a no-op if the conductor is not currently `IDLE`.
+Then re-run the conductor as normal. The script is a no-op if the conductor is not currently `IDLE`.
 
 ### View Logs
 
 ```bash
-# Activity log (all events)
-tail -50 orchestrator/activity.log
+# Instance activity log (all events)
+tail -50 orchestrator/instances/M11/activity.log
 
 # Specific agent's execution log
-cat orchestrator/logs/gameplay-programmer-TICKET-0092-*.log
+cat orchestrator/instances/M11/logs/gameplay-programmer-TICKET-0092-*.log
 ```
 
 ### Stop Gracefully
 
-Press `Ctrl+C` in the conductor terminal. It catches the signal, waits for active workers to finish, saves state, and exits. Use `--resume` to continue later.
+Press `Ctrl+C` in the conductor terminal. It catches the signal, waits for active workers to finish, saves state, and exits. Re-run the same command to continue later.
 
 ## Configuration
 
@@ -116,41 +112,51 @@ Edit `orchestrator/config.json` to adjust:
 - **Retries**: Max retry attempts per failed ticket
 - **Tool tiers**: Which Godot MCP tools each agent tier can access
 
+Create `orchestrator/config.local.json` for local overrides — it deep-merges on top of `config.json` and is gitignored.
+
 ## File Structure
 
 ```
 orchestrator/
 ├── conductor.py          # Main loop (entry point)
-├── start_milestone.py    # CLI: initialize fresh state for a new milestone (run before conductor)
-├── approve_gate.py       # CLI: approve/reject a gate
+├── start_milestone.py    # CLI: initialize fresh state for a new milestone
 ├── resume_planning.py    # CLI: reset IDLE → PLANNING when new tickets added
 ├── status.py             # CLI: show current state
-├── config.json           # Configuration
-├── state.json            # Runtime state (auto-created, gitignored)
-├── activity.log          # Audit trail (auto-created, gitignored)
-├── pending_gate.json     # Gate notification (auto-created, gitignored)
-├── gate_response.json    # Gate response (auto-created, gitignored)
+├── instance_paths.py     # Shared path resolution for multi-instance support
+├── config.json           # Configuration (shared across instances)
+├── config.local.json     # Local config overrides (gitignored)
 ├── prompts/
 │   ├── plan_wave.md      # Producer planning prompt template
 │   └── worker_dispatch.md # Worker execution prompt template
 ├── schemas/
 │   ├── wave_plan.json    # JSON schema for Producer output
 │   └── worker_result.json # JSON schema for worker output
-├── results/              # Per-ticket result files (gitignored)
-├── logs/                 # Per-agent execution logs (gitignored)
+├── checkpoints/          # Agent checkpoint files for crash recovery (gitignored)
+├── instances/<name>/     # Per-instance runtime directories (e.g. instances/M11/)
+│   ├── state.json        # Runtime state (auto-created, gitignored)
+│   ├── activity.log      # Audit trail (auto-created, gitignored)
+│   ├── pending_gate.json # Gate notification (auto-created, gitignored)
+│   ├── gate_response.json # Gate approval (user-created, gitignored)
+│   ├── results/          # Per-ticket result files (gitignored)
+│   └── logs/             # Per-agent execution logs (gitignored)
+├── test_harness.py       # Test harness for dry-run orchestration
+├── test_usage_limit.py   # Usage limit simulation tests
+├── usage.jsonl           # API usage tracking (gitignored)
 └── README.md             # This file
 ```
 
 ## State Machine
 
 ```
-[fresh] -> PLANNING (start_milestone.py — new milestone kickoff)
-IDLE -> PLANNING -> DISPATCHING -> WORKING -> EVALUATING -> PLANNING (loop)
-IDLE -> PLANNING (resume_planning.py — new tickets added)
-                                                         -> GATE_BLOCKED (phase done)
-                                                         -> HALTED (error)
-GATE_BLOCKED -> PLANNING (approved) | HALTED (rejected)
-HALTED -> PLANNING (--resume) | IDLE (abort)
+PLANNING → DISPATCHING → WORKING → EVALUATING → PLANNING (main loop)
+                                               → GATE_BLOCKED (phase done)
+                                               → LIMIT_WAIT (API rate limit)
+                                               → HALTED (error)
+GATE_BLOCKED → PLANNING (gate_response.json written)
+LIMIT_WAIT   → WORKING (cooldown elapsed, retries remaining)
+             → HALTED (max cooldown cycles exhausted)
+HALTED       → PLANNING (re-run conductor after resolving issue)
+IDLE         → PLANNING (resume_planning.py when new tickets added)
 ```
 
 ## Failure Recovery
@@ -159,12 +165,13 @@ HALTED -> PLANNING (--resume) | IDLE (abort)
 |---------|----------|
 | Worker crash | Retry up to 3x, then HALT |
 | Worker timeout | Kill and retry |
+| API rate limit | LIMIT_WAIT with cooldown, then retry |
 | Budget exceeded | Worker exits cleanly, logged |
 | Session budget hit | HALT with warning |
 | Merge conflict | HALT, manual resolution required |
 | Producer bad JSON | Retry up to 3x, then HALT |
-| Conductor crash | `--resume` reads state.json |
+| Conductor crash | Re-run same command — reads state.json |
 
 ## Human Gates
 
-Gates **never** auto-approve. The Conductor blocks indefinitely until `approve_gate.py` is run. On Windows, a toast notification is fired when a gate is reached.
+Gates **never** auto-approve. The conductor blocks in `GATE_BLOCKED` and polls every 30 seconds for `gate_response.json`. On Windows, a toast notification is fired when a gate is reached. Write the response file to the instance directory to unblock.

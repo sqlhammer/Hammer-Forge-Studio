@@ -2,7 +2,7 @@
 id: TICKET-0304
 title: "M11 QA — regression suite + editor compliance verification"
 type: TASK
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: qa-engineer
 created_by: producer
@@ -46,3 +46,4 @@ This is the final gate for M11. All Phase 2 remediation tickets must be complete
 ## Activity Log
 
 - 2026-03-03 [producer] Created ticket — Phase 3 QA gate for M11 remediation (TICKET-0290)
+- 2026-03-03 [qa-engineer] Starting work — all dependencies (TICKET-0291–0303) confirmed DONE

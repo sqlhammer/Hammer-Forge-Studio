@@ -41,11 +41,13 @@ var _biome_container: Node3D = null
 ## The currently active biome scene node inside _biome_container.
 var _current_biome_node: Node3D = null
 
-## CanvasLayer for the full-screen fade overlay.
-var _fade_layer: CanvasLayer = null
+# ── Onready Variables ─────────────────────────────────────
 
-## ColorRect used as the fade-to-black overlay.
-var _fade_rect: ColorRect = null
+## CanvasLayer for the full-screen fade overlay (authored in travel_sequence_manager.tscn).
+@onready var _fade_layer: CanvasLayer = $TravelFadeLayer
+
+## ColorRect used as the fade-to-black overlay (authored in travel_sequence_manager.tscn).
+@onready var _fade_rect: ColorRect = $TravelFadeLayer/TravelFadeRect
 
 
 # ── Public Methods ────────────────────────────────────────
@@ -60,7 +62,6 @@ func setup(player: Node3D, ship_exterior: ShipExterior, biome_container: Node3D,
 	_biome_container = biome_container
 	_ship_interior = ship_interior
 	NavigationSystem.travel_completed.connect(_on_travel_completed)
-	_build_fade_overlay()
 	Global.debug_log("TravelSequenceManager: setup complete")
 
 
@@ -198,25 +199,6 @@ func _execute_travel_transition(destination_id: String) -> void:
 	_is_transitioning = false
 	travel_sequence_completed.emit(destination_id)
 	Global.debug_log("TravelSequenceManager: travel sequence completed → '%s'" % destination_id)
-
-
-## Builds the full-screen fade overlay (CanvasLayer + ColorRect).
-func _build_fade_overlay() -> void:
-	if not is_inside_tree():
-		return
-
-	_fade_layer = CanvasLayer.new()
-	_fade_layer.name = "TravelFadeLayer"
-	_fade_layer.layer = 10
-	add_child(_fade_layer)
-
-	_fade_rect = ColorRect.new()
-	_fade_rect.name = "TravelFadeRect"
-	_fade_rect.color = Color.BLACK
-	_fade_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_fade_rect.modulate.a = 0.0
-	_fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_fade_layer.add_child(_fade_rect)
 
 
 ## Fades the overlay to fully opaque (black screen). No-op if no overlay exists.

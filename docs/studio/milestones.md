@@ -2,7 +2,7 @@
 
 **Owner:** producer
 **Status:** Draft
-**Last Updated:** 2026-03-03 (TICKET-0286 added; TICKET-0284 DONE)
+**Last Updated:** 2026-03-03 (M11 GDScript Standards Compliance Pass added; M11–M17 renumbered M12–M18)
 
 > Tracks all project milestones, their completion status, and phase structure. Studio Head sets milestone goals and approves phase definitions; Producer maintains this document.
 
@@ -35,14 +35,15 @@
 | M7 | Ship Interior — Cockpit, machine room, scene architecture overhaul | — | Complete | 39 | 0 | 39 | 2026-02-26 |
 | M8 | Ship Navigation — Biome-to-biome travel, fuel system | — | Complete | 56 | 0 | 56 | 2026-03-01 |
 | M9 | Foundation & Hardening — Canonical game launch architecture, orchestrator hardening, gamepad fixes, and M8 playtest polish | — | Complete | 39 | 0 | 39 | 2026-03-02 |
-| M10 | Input & Feel Refinement — Gamepad remapping, scanner UX, boarding feel, orchestrator cleanup, resource respawn | — | Active | 11 | 10 | 1 | — |
-| M11 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
-| M12 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
-| M13 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
-| M14 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
-| M15 | Mega-Project Arc — Full tech tree, endgame sequence | — | Planning | — | — | — | — |
-| M16 | Alpha — Full playthrough possible | — | Planning | — | — | — | — |
-| M17 | Beta — External testing | — | Planning | — | — | — | — |
+| M10 | Input & Feel Refinement — Gamepad remapping, scanner UX, boarding feel, orchestrator cleanup, resource respawn | — | Active | 13 | 12 | 1 | — |
+| M11 | GDScript Standards Compliance Pass — Full codebase audit and Scene-First Rule remediation | — | Active | 2 | 2 | 0 | — |
+| M12 | Visual Asset Refinement — Polished art pass on existing assets | — | Planning | — | — | — | — |
+| M13 | Movement & Usability Refinement — Game feel, controls, HUD/UX tuning | — | Planning | — | — | — | — |
+| M14 | Content Expansion — Material resources, crafting recipes, tech tree depth | — | Planning | — | — | — | — |
+| M15 | Biome Progression — Tier 1–3 biomes, escalating threats | — | Planning | — | — | — | — |
+| M16 | Mega-Project Arc — Full tech tree, endgame sequence | — | Planning | — | — | — | — |
+| M17 | Alpha — Full playthrough possible | — | Planning | — | — | — | — |
+| M18 | Beta — External testing | — | Planning | — | — | — | — |
 
 ### Tooling Milestones
 
@@ -567,23 +568,34 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M11 — Visual Asset Refinement
+### M11 — GDScript Standards Compliance Pass ✅ Kicked off 2026-03-03
 
-**Goal:** Polished art pass on all existing game assets — terrain, ship interior, player character, resource nodes, and UI surfaces.
+**Goal:** Bring the entire `game/` codebase into full compliance with the current coding
+standards, with special emphasis on the Scene-First Rule added in commit `2abd0ba`.
 
-**Scope:** TBD — to be defined at M11 kickoff following M10 close.
+**Scope:**
+- Systems Programmer audits all GDScript files against `docs/engineering/coding-standards.md`
+- Audit report documents every violation by file, line, category, and severity
+- Scene-First Rule violations (`.new()` for persistent nodes, `CanvasLayer.new()` overlays,
+  layout set in `_ready()`, runtime scene construction) receive a dedicated report section
+- Producer translates audit findings into one remediation ticket per violating component
+- All fix tickets are parallel — no inter-dependency among remediation work
+- QA Engineer runs full regression suite to verify nothing was broken
 
-**Phases:** To be defined at M11 kickoff — requires Studio Head approval before agents begin work.
+**Phases:** Audit → Remediation → QA
+
+**Tickets:** TICKET-0289 through TICKET-0290 (Phase 1 only; Phase 2+3 tickets created by
+Producer after audit completes)
 
 **Dependencies:** M10
 
 ---
 
-### M12 — Movement & Usability Refinement
+### M12 — Visual Asset Refinement
 
-**Goal:** Game feel, first-person controls, and HUD/UX tuning pass.
+**Goal:** Polished art pass on all existing game assets — terrain, ship interior, player character, resource nodes, and UI surfaces.
 
-**Scope:** TBD — to be defined after M11 closes.
+**Scope:** TBD — to be defined at M12 kickoff following M11 close.
 
 **Phases:** To be defined at M12 kickoff — requires Studio Head approval before agents begin work.
 
@@ -591,9 +603,9 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M13 — Content Expansion
+### M13 — Movement & Usability Refinement
 
-**Goal:** Additional material resources, crafting recipes, and tech tree depth.
+**Goal:** Game feel, first-person controls, and HUD/UX tuning pass.
 
 **Scope:** TBD — to be defined after M12 closes.
 
@@ -603,9 +615,9 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M14 — Biome Progression
+### M14 — Content Expansion
 
-**Goal:** Full Tier 1–3 biome progression with escalating threats and resource gates.
+**Goal:** Additional material resources, crafting recipes, and tech tree depth.
 
 **Scope:** TBD — to be defined after M13 closes.
 
@@ -615,11 +627,11 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M15 — Mega-Project Arc
+### M15 — Biome Progression
 
-**Goal:** Complete tech tree and endgame sequence playable end-to-end.
+**Goal:** Full Tier 1–3 biome progression with escalating threats and resource gates.
 
-**Scope:** TBD
+**Scope:** TBD — to be defined after M14 closes.
 
 **Phases:** To be defined at M15 kickoff — requires Studio Head approval before agents begin work.
 
@@ -627,9 +639,9 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M16 — Alpha
+### M16 — Mega-Project Arc
 
-**Goal:** Full playthrough from ship start to Naer-Reth activation is possible.
+**Goal:** Complete tech tree and endgame sequence playable end-to-end.
 
 **Scope:** TBD
 
@@ -639,15 +651,27 @@ TICKET-0188 (documentation) — depends on ALL of the above
 
 ---
 
-### M17 — Beta / External Testing
+### M17 — Alpha
 
-**Goal:** External testers can complete the game. Polish and bug-fix pass.
+**Goal:** Full playthrough from ship start to Naer-Reth activation is possible.
 
 **Scope:** TBD
 
 **Phases:** To be defined at M17 kickoff — requires Studio Head approval before agents begin work.
 
 **Dependencies:** M16
+
+---
+
+### M18 — Beta / External Testing
+
+**Goal:** External testers can complete the game. Polish and bug-fix pass.
+
+**Scope:** TBD
+
+**Phases:** To be defined at M18 kickoff — requires Studio Head approval before agents begin work.
+
+**Dependencies:** M17
 
 ---
 

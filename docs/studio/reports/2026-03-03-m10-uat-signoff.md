@@ -15,7 +15,7 @@
 | **Prepared By** | qa-engineer |
 | **Date Prepared** | 2026-03-03 |
 | **Test Build** | 0c5c02f (main branch — all 10 M10 implementation tickets merged) |
-| **Sign-Off Status** | ⏳ Pending Studio Head review |
+| **Sign-Off Status** | ⏳ DRAFT — 13/15 UAT items covered; items 14–15 pending TICKET-0287 and TICKET-0288 |
 
 ---
 

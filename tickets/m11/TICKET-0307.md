@@ -2,7 +2,7 @@
 id: TICKET-0307
 title: "BUG — HUD CompassBar/MiningProgress/MiningMinigameOverlay anchor presets reset to 0 after TICKET-0300"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 assigned_to: gameplay-programmer
@@ -99,3 +99,4 @@ Test output from M11 Phase Gate QA run (2026-03-03):
 - 2026-03-04 [gameplay-programmer] Starting work (3rd attempt) — root cause confirmed: stored_layout_preset unreliable for sub-scene instances in headless mode. Fix: replace 3 anchors_preset test specs with individual anchor_left/right/top/bottom property checks in test_scene_properties_unit.gd.
 - 2026-03-04 [gameplay-programmer] DONE — commit ec8ae47, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/356 (merged). Replaced 3 anchors_preset specs with 12 individual anchor_* property checks.
 - 2026-03-04 [gameplay-programmer] Starting work (4th fix) — prior test change checks anchor floats but game_hud.tscn still lacks explicit anchor_left/right/top/bottom for 3 nodes. Preset setter may not populate floats in headless mode. Adding explicit anchor float values to game_hud.tscn instance overrides.
+- 2026-03-04 [gameplay-programmer] DONE — commit 2137746, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/360 (merged). Added explicit anchor float values to CompassBar, MiningProgress, MiningMinigameOverlay instances in game_hud.tscn.

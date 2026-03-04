@@ -81,7 +81,10 @@ static func get_recipe_name(recipe_id: String) -> String:
 static func get_inputs(recipe_id: String) -> Array[Dictionary]:
 	var entry: Dictionary = RECIPE_CATALOG.get(recipe_id, {})
 	var raw: Array = entry.get("inputs", [])
-	return raw as Array[Dictionary]
+	var result: Array[Dictionary] = []
+	for item in raw:
+		result.append(item as Dictionary)
+	return result
 
 ## Returns the output_mode for a recipe ID.
 static func get_output_mode(recipe_id: String) -> String:

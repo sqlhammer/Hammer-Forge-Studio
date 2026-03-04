@@ -2,7 +2,7 @@
 id: TICKET-0311
 title: "BUG — fabricator_panel.gd Array[Dictionary] type mismatch + travel_sequence_manager.gd missing TravelFadeLayer nodes"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: producer
@@ -107,3 +107,4 @@ If these nodes were removed or reparented, restore them or update the `get_node(
 ## Activity Log
 
 - 2026-03-04 [producer] Filed — two runtime errors reported: fabricator_panel.gd Array[Dictionary] type mismatch and travel_sequence_manager.gd missing TravelFadeLayer nodes.
+- 2026-03-04 [gameplay-programmer] Starting work — fixing both runtime errors.

@@ -212,31 +212,95 @@ func _build_game_hud_specs() -> void:
 		2  # MOUSE_FILTER_IGNORE
 	))
 
-	# CompassBar — center-top anchor
+	# CompassBar — center-top anchor (individual values; anchors_preset unreliable
+	# for sub-scene instances in headless mode)
 	_specs.append(ScenePropertySpec.create_property(
-		"game_hud_compass_bar_anchors_preset",
+		"game_hud_compass_bar_anchor_left",
 		"res://scenes/ui/game_hud.tscn",
 		"HUDRoot/CompassBar",
-		"anchors_preset",
-		ANCHOR_PRESET_CENTER_TOP
+		"anchor_left",
+		0.5
+	))
+	_specs.append(ScenePropertySpec.create_property(
+		"game_hud_compass_bar_anchor_right",
+		"res://scenes/ui/game_hud.tscn",
+		"HUDRoot/CompassBar",
+		"anchor_right",
+		0.5
+	))
+	_specs.append(ScenePropertySpec.create_property(
+		"game_hud_compass_bar_anchor_top",
+		"res://scenes/ui/game_hud.tscn",
+		"HUDRoot/CompassBar",
+		"anchor_top",
+		0.0
+	))
+	_specs.append(ScenePropertySpec.create_property(
+		"game_hud_compass_bar_anchor_bottom",
+		"res://scenes/ui/game_hud.tscn",
+		"HUDRoot/CompassBar",
+		"anchor_bottom",
+		0.0
 	))
 
-	# MiningProgress — center anchor
+	# MiningProgress — center anchor (individual values)
 	_specs.append(ScenePropertySpec.create_property(
-		"game_hud_mining_progress_anchors_preset",
+		"game_hud_mining_progress_anchor_left",
 		"res://scenes/ui/game_hud.tscn",
 		"HUDRoot/MiningProgress",
-		"anchors_preset",
-		ANCHOR_PRESET_CENTER
+		"anchor_left",
+		0.5
+	))
+	_specs.append(ScenePropertySpec.create_property(
+		"game_hud_mining_progress_anchor_right",
+		"res://scenes/ui/game_hud.tscn",
+		"HUDRoot/MiningProgress",
+		"anchor_right",
+		0.5
+	))
+	_specs.append(ScenePropertySpec.create_property(
+		"game_hud_mining_progress_anchor_top",
+		"res://scenes/ui/game_hud.tscn",
+		"HUDRoot/MiningProgress",
+		"anchor_top",
+		0.5
+	))
+	_specs.append(ScenePropertySpec.create_property(
+		"game_hud_mining_progress_anchor_bottom",
+		"res://scenes/ui/game_hud.tscn",
+		"HUDRoot/MiningProgress",
+		"anchor_bottom",
+		0.5
 	))
 
-	# MiningMinigameOverlay — center anchor
+	# MiningMinigameOverlay — center anchor (individual values)
 	_specs.append(ScenePropertySpec.create_property(
-		"game_hud_mining_minigame_overlay_anchors_preset",
+		"game_hud_mining_minigame_overlay_anchor_left",
 		"res://scenes/ui/game_hud.tscn",
 		"HUDRoot/MiningMinigameOverlay",
-		"anchors_preset",
-		ANCHOR_PRESET_CENTER
+		"anchor_left",
+		0.5
+	))
+	_specs.append(ScenePropertySpec.create_property(
+		"game_hud_mining_minigame_overlay_anchor_right",
+		"res://scenes/ui/game_hud.tscn",
+		"HUDRoot/MiningMinigameOverlay",
+		"anchor_right",
+		0.5
+	))
+	_specs.append(ScenePropertySpec.create_property(
+		"game_hud_mining_minigame_overlay_anchor_top",
+		"res://scenes/ui/game_hud.tscn",
+		"HUDRoot/MiningMinigameOverlay",
+		"anchor_top",
+		0.5
+	))
+	_specs.append(ScenePropertySpec.create_property(
+		"game_hud_mining_minigame_overlay_anchor_bottom",
+		"res://scenes/ui/game_hud.tscn",
+		"HUDRoot/MiningMinigameOverlay",
+		"anchor_bottom",
+		0.5
 	))
 
 	# BatteryBar — bottom-left (anchor_top = 1.0, anchor_bottom = 1.0)

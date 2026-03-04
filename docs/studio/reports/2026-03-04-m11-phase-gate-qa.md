@@ -4,15 +4,34 @@
 **Phase:** QA Phase Gate (TICKET-0304)
 **QA Engineer:** qa-engineer
 **Report Date:** 2026-03-04
-**Gate Status:** ❌ BLOCKED — 3 test failures remain (see details below)
+**Gate Status:** ✅ PASSED — 1009 tests, 0 failures
 
 ---
 
 ## Test Suite Results
 
-**Run Date/Time:** 2026-03-04 15:30:46
+### Final Re-Test (after TICKET-0307 and TICKET-0312 fixes)
+
+**Run Date/Time:** 2026-03-04 16:57:38
 **Test Runner:** `res://addons/hammer_forge_tests/test_runner.tscn` (headless)
-**Report File:** `user://test_reports/test_report_2026-03-04 15-30-46.json`
+**Report File:** `user://test_reports/test_report_2026-03-04 16-57-38.json`
+
+| Metric        | Result |
+|---------------|--------|
+| Total Tests   | 1009   |
+| Passed        | **1009** |
+| Failed        | 0      |
+| Skipped       | 0      |
+
+All previously failing tests now pass:
+
+| Test Name | Suite | Result | Fix |
+|-----------|-------|--------|-----|
+| `game_hud_compass_bar_anchors_preset` | test_scene_properties_unit | ✅ PASS | TICKET-0307: explicit float anchor values in game_hud.tscn |
+| `game_hud_mining_progress_anchors_preset` | test_scene_properties_unit | ✅ PASS | TICKET-0307: explicit float anchor values in game_hud.tscn |
+| `game_hud_mining_minigame_overlay_anchors_preset` | test_scene_properties_unit | ✅ PASS | TICKET-0307: explicit float anchor values in game_hud.tscn |
+
+### Previous Blocked Run (2026-03-04 15:30:46)
 
 | Metric        | Result |
 |---------------|--------|
@@ -20,20 +39,6 @@
 | Passed        | 997    |
 | Failed        | **3**  |
 | Skipped       | 0      |
-
-### Failing Tests
-
-All 3 failures are in `test_scene_properties_unit` — HUD anchor preset assertions:
-
-| Test Name | Suite | Expected | Actual | Root Cause |
-|-----------|-------|----------|--------|------------|
-| `game_hud_compass_bar_anchors_preset` | test_scene_properties_unit | 5 (CENTER_TOP) | 0 (TOP_LEFT) | Base scene anchor_* props reset stored_layout_preset |
-| `game_hud_mining_progress_anchors_preset` | test_scene_properties_unit | 8 (CENTER) | 0 (TOP_LEFT) | Base scene anchor_* props reset stored_layout_preset |
-| `game_hud_mining_minigame_overlay_anchors_preset` | test_scene_properties_unit | 8 (CENTER) | 0 (TOP_LEFT) | Base scene anchor_* props reset stored_layout_preset |
-
-**Analysis:** TICKET-0307 (gameplay-programmer) removed the redundant `anchor_*` overrides from the three *instance* nodes in `game_hud.tscn`, which was the correct partial fix. However, the **base scene** files (`compass_bar.tscn`, `mining_progress.tscn`, `mining_minigame_overlay.tscn`) still contain explicit `anchor_left`, `anchor_right`, etc. properties stored after `anchors_preset`. When Godot instantiates these base scenes, those explicit anchor properties reset `stored_layout_preset` to 0 (PRESET_NONE/TOP_LEFT). The `anchors_preset = 5/8` override in `game_hud.tscn` is then applied on top, but may still be overridden by the base scene's stored anchor values depending on Godot 4.5's load order.
-
-**TICKET-0307 has been reopened** (status: OPEN) and reassigned to gameplay-programmer with detailed re-test notes. The fix must also be applied to the base scene .tscn files.
 
 ---
 
@@ -59,18 +64,20 @@ All Phase 2 implementation tickets (TICKET-0291–TICKET-0303) confirmed DONE:
 
 ---
 
-## QA Phase Bug Fixes (TICKET-0305 through TICKET-0310)
+## QA Phase Bug Fixes (TICKET-0305 through TICKET-0312)
 
-Six regressions identified during QA testing and fixed by implementing agents:
+Eight regressions identified during QA testing and fixed by implementing agents:
 
 | Ticket | Priority | Title | Status | Notes |
 |--------|----------|-------|--------|-------|
 | TICKET-0305 | P2 | Ship boarding ContextualPrompt shows when not aiming at hull | ✅ DONE | Synced _aim_valid with prompt display |
 | TICKET-0306 | **P1** | tech_tree_defs.gd get_prerequisites() returns empty (Array[String] type mismatch) | ✅ DONE | Critical tech tree fix; changed to untyped interim var |
-| TICKET-0307 | P2 | HUD CompassBar/MiningProgress/MiningMinigameOverlay anchor presets reset to 0 | 🔴 OPEN | Fix incomplete — re-test failed; base scene anchor_* properties not addressed |
+| TICKET-0307 | P2 | HUD CompassBar/MiningProgress/MiningMinigameOverlay anchor presets reset to 0 | ✅ DONE | Final fix: explicit float anchor values in game_hud.tscn (commit 2137746) |
 | TICKET-0308 | P2 | InventoryActionPopup visible by default and not found as child | ✅ DONE | Corrected popup visibility and signal routing |
 | TICKET-0309 | P2 | NavigationConsole._biome_node_ids missing debris_field | ✅ DONE | Corrected biome discovery logic |
 | TICKET-0310 | P2 | compass_bar._on_tree_node_added infinite loop during terrain generation | ✅ DONE | Added is_inside_tree() guard |
+| TICKET-0311 | P2 | fabricator_panel.gd Array[Dictionary] type mismatch | ✅ DONE | Fixed type mismatch in fabricator panel |
+| TICKET-0312 | P2 | fabricator_defs.gd get_inputs() Array[Dictionary] cast regression | ✅ DONE | Replaced as-cast with element-wise Array[Dictionary] construction |
 
 ---
 
@@ -100,28 +107,36 @@ M11 addressed GDScript standards compliance violations identified in the audit r
 ### Scripts Remediated
 
 Key scripts modified during M11:
-`recycler_panel.gd`, `fabricator_panel.gd`, `automation_hub_panel.gd`, `navigation_console.gd`, `module_placement_ui.gd`, `inventory_screen.gd`, `inventory_action_popup.gd`, `scanner_readout.gd`, `ship_globals_hud.gd`, `ship_stats_sidebar.gd`, `tech_tree_panel.gd`, `main_menu.gd`, `ship_interior.gd`, `game_world.gd`, `ship_status_display.gd`, `travel_sequence_manager.gd`, `game_hud.gd`, `interaction_prompt_hud.gd`, `resource_type_wheel.gd`, `mining_minigame_overlay.gd`, `compass_bar.gd`, `battery_bar.gd`, `fuel_gauge.gd`, `mining_progress.gd`, `input_manager.gd`, `collision_probe.gd`, `terrain_generator.gd`, `mining_minigame_overlay.gd`, `tech_tree_defs.gd`, `debug_ship_boarding_handler.gd`, `game.gd`, `ship_enter_zone.gd`
+`recycler_panel.gd`, `fabricator_panel.gd`, `automation_hub_panel.gd`, `navigation_console.gd`, `module_placement_ui.gd`, `inventory_screen.gd`, `inventory_action_popup.gd`, `scanner_readout.gd`, `ship_globals_hud.gd`, `ship_stats_sidebar.gd`, `tech_tree_panel.gd`, `main_menu.gd`, `ship_interior.gd`, `game_world.gd`, `ship_status_display.gd`, `travel_sequence_manager.gd`, `game_hud.gd`, `interaction_prompt_hud.gd`, `resource_type_wheel.gd`, `mining_minigame_overlay.gd`, `compass_bar.gd`, `battery_bar.gd`, `fuel_gauge.gd`, `mining_progress.gd`, `input_manager.gd`, `collision_probe.gd`, `terrain_generator.gd`, `mining_minigame_overlay.gd`, `tech_tree_defs.gd`, `debug_ship_boarding_handler.gd`, `game.gd`, `ship_enter_zone.gd`, `fabricator_defs.gd`
 
 ---
 
 ## Gate Decision
 
-**Status: ❌ BLOCKED**
+**Status: ✅ PASSED**
 
-The M11 Phase Gate QA sign-off CANNOT be granted because:
+All acceptance criteria met:
 
-1. **Test suite has 3 failing tests** — Acceptance criteria require zero failures. The 3 failing tests are in `test_scene_properties_unit` for HUD anchor presets.
-2. **TICKET-0307 fix was ineffective** — The gameplay-programmer's fix (commit b552175) removed redundant anchor overrides from `game_hud.tscn` instance nodes but did not address the root cause in the base scene .tscn files. TICKET-0307 has been reopened and reassigned to gameplay-programmer.
+1. **Full test suite passes** — 1009 tests, 0 failures (run 2026-03-04 16:57:38). Report: `user://test_reports/test_report_2026-03-04 16-57-38.json`
+2. **All Phase 2 tickets DONE** — TICKET-0291 through TICKET-0303 confirmed DONE
+3. **All QA-phase bugs resolved** — TICKET-0305 through TICKET-0312 all DONE
+4. **Editor compliance verified** — No errors or warnings in remediated scripts
 
-**Required to unblock:**
-- gameplay-programmer must fix TICKET-0307 by removing redundant `anchor_*` properties from `compass_bar.tscn`, `mining_progress.tscn`, and `mining_minigame_overlay.tscn` (or use a different anchoring approach that survives scene instantiation)
-- All 3 failing tests must pass
-- QA re-test must confirm zero failures
+**All Findings Log (P0–P3):**
 
-**P2 and P3 Findings Log:**
+- 2026-03-04 [qa-engineer] FINDING [P2]: fabricator_panel.gd — Array[Dictionary] type mismatch. Disposition: fixed — TICKET-0311 DONE.
+- 2026-03-04 [qa-engineer] FINDING [P2]: travel_sequence_manager.gd — Missing TravelFadeLayer/TravelFadeRect nodes in GameWorld. Disposition: fixed — TICKET-0311 DONE.
+- 2026-03-04 [qa-engineer] FINDING [P2]: game_hud.tscn — HUD anchor presets (CompassBar/MiningProgress/MiningMinigameOverlay) reset to 0 after TICKET-0300. Disposition: fixed — TICKET-0307 DONE (final commit 2137746).
+- 2026-03-04 [qa-engineer] FINDING [P2]: navigation_console.gd — Missing debris_field in _biome_node_ids after TICKET-0292. Disposition: fixed — TICKET-0309 DONE.
+- 2026-03-04 [qa-engineer] FINDING [P2]: inventory_action_popup.gd — Popup visible by default, not found via get_node() after TICKET-0293. Disposition: fixed — TICKET-0308 DONE.
+- 2026-03-04 [qa-engineer] FINDING [P2]: tech_tree_defs.gd — get_prerequisites() empty due to Array[String] mismatch. Disposition: fixed — TICKET-0306 DONE.
+- 2026-03-04 [qa-engineer] FINDING [P2]: compass_bar.gd — _on_tree_node_added infinite loop during terrain generation. Disposition: fixed — TICKET-0310 DONE.
+- 2026-03-04 [qa-engineer] FINDING [P2]: game.gd — ContextualPrompt for ship boarding showed without hull raycast. Disposition: fixed — TICKET-0305 DONE.
+- 2026-03-04 [qa-engineer] FINDING [P2]: fabricator_defs.gd — get_inputs() SCRIPT ERROR from Array[Dictionary] as-cast regression in TICKET-0311. Disposition: fixed — TICKET-0312 DONE.
 
-- 2026-03-04 [qa-engineer] FINDING [P2]: game_hud.tscn HUDRoot/CompassBar, MiningProgress, MiningMinigameOverlay — anchors_preset returns 0 at runtime despite fix in TICKET-0307. Disposition: blocking sign-off (test failure). Tracked in TICKET-0307 (OPEN).
+**M11 QA Phase Gate is CLEARED. Producer may proceed with milestone close.**
 
 ---
 
 *Report generated by qa-engineer as part of TICKET-0304 M11 QA Phase Gate.*
+*Final re-test completed 2026-03-04 after TICKET-0307 and TICKET-0312 fixes landed on main.*

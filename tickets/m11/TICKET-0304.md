@@ -2,7 +2,7 @@
 id: TICKET-0304
 title: "M11 QA — regression suite + editor compliance verification"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: qa-engineer
 created_by: producer
@@ -23,11 +23,11 @@ Run full test suite, verify zero editor errors in all remediated scripts, and po
 
 ## Acceptance Criteria
 
-- [ ] Run full test suite via `res://addons/hammer_forge_tests/test_runner.tscn`; zero failures
+- [x] Run full test suite via `res://addons/hammer_forge_tests/test_runner.tscn`; zero failures
 - [x] Open all M11 remediated scripts in the Godot editor; zero errors or warnings
 - [x] Confirm all Phase 2 tickets (TICKET-0291--0303) are DONE
-- [ ] Post Phase Gate Summary report to `docs/studio/reports/YYYY-MM-DD-m11-phase-gate-qa.md`
-- [ ] QA Engineer marks ticket DONE and notifies Producer
+- [x] Post Phase Gate Summary report to `docs/studio/reports/YYYY-MM-DD-m11-phase-gate-qa.md`
+- [x] QA Engineer marks ticket DONE and notifies Producer
 
 ---
 
@@ -58,3 +58,6 @@ This is the final gate for M11. All Phase 2 remediation tickets must be complete
 - 2026-03-04 [qa-engineer] Test suite run (after all M11 fixes including TICKET-0311) -- 1000 tests, 997 passed, 3 failed. Report: user://test_reports/test_report_2026-03-04 15-30-46.json. Failures in test_scene_properties_unit: game_hud_compass_bar_anchors_preset (expected 5, got 0), game_hud_mining_progress_anchors_preset (expected 8, got 0), game_hud_mining_minigame_overlay_anchors_preset (expected 8, got 0). NOTE: Earlier scene-file inspection claimed tests pass but runtime test execution contradicts this -- the .tscn file has correct values but Godot runtime returns 0 for anchors_preset on these instanced nodes.
 - 2026-03-04 [qa-engineer] TICKET-0307 re-test FAILED -- gameplay-programmer fix (commit b552175) removed redundant anchor_* from game_hud.tscn instances but base scenes (compass_bar.tscn, mining_progress.tscn, mining_minigame_overlay.tscn) still have explicit anchor_* properties that reset stored_layout_preset at instantiation. TICKET-0307 reopened (OPEN), reassigned to gameplay-programmer.
 - 2026-03-04 [qa-engineer] Phase Gate BLOCKED -- 3 failing tests in test_scene_properties_unit. Acceptance criteria require zero failures. Phase Gate Summary posted to docs/studio/reports/2026-03-04-m11-phase-gate-qa.md. Gate cannot close until TICKET-0307 is fully resolved and all 1000 tests pass.
+- 2026-03-04 [qa-engineer] FINDING [P2]: fabricator_defs.gd -- get_inputs() SCRIPT ERROR from Array[Dictionary] as-cast regression introduced by TICKET-0311. Disposition: fixed -- TICKET-0312 DONE (commit 17d5d48).
+- 2026-03-04 [qa-engineer] Re-test PASSED after TICKET-0307 (commit 2137746) and TICKET-0312 (commit 17d5d48) fixes -- Full suite: 1009 tests, 1009 passed, 0 failed. Report: user://test_reports/test_report_2026-03-04 16-57-38.json. All acceptance criteria met. Phase Gate Summary updated: docs/studio/reports/2026-03-04-m11-phase-gate-qa.md. Gate status: CLEARED.
+- 2026-03-04 [qa-engineer] DONE -- M11 Phase Gate QA sign-off granted. All tests pass. Producer may proceed with milestone close.

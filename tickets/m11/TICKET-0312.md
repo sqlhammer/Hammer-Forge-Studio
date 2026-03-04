@@ -2,7 +2,7 @@
 id: TICKET-0312
 title: "BUG — fabricator_defs.gd get_inputs() Array[Dictionary] cast regression"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -62,3 +62,4 @@ return result
 - 2026-03-04 [gameplay-programmer] DONE — Fixed get_inputs() to use element-wise Array[Dictionary] construction. 5 fabricator/cryonite test failures resolved (997/1000 passing; 3 remaining are pre-existing HUD anchor issues). Commit: 17d5d48, PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/358 (merged as 9f3b156)
 - 2026-03-04 [producer] REOPENED — wave 7 retry; element-wise `item as Dictionary` cast also fails at runtime.
 - 2026-03-04 [gameplay-programmer] Starting work — replacing element-wise cast with `Array.assign()` which is the idiomatic Godot 4.x typed array conversion.
+- 2026-03-04 [gameplay-programmer] DONE — Replaced element-wise `item as Dictionary` append with `Array.assign()`. Commit: 29ec240, PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/362 (merged as fea2d34)

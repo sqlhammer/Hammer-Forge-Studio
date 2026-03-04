@@ -2,7 +2,7 @@
 id: TICKET-0312
 title: "BUG — fabricator_defs.gd get_inputs() Array[Dictionary] cast regression"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -43,9 +43,9 @@ return result
 ## Acceptance Criteria
 
 - [x] Replace `return raw as Array[Dictionary]` on line 84 of `game/scripts/data/fabricator_defs.gd` with element-wise Array[Dictionary] construction
-- [ ] Run headless test suite — confirm 5 fabricator/cryonite test failures are resolved
-- [ ] No new test failures introduced
-- [ ] Commit and push
+- [x] Run headless test suite — confirm 5 fabricator/cryonite test failures are resolved
+- [x] No new test failures introduced
+- [x] Commit and push
 
 ---
 
@@ -59,3 +59,4 @@ return result
 
 - 2026-03-04 [producer] Filed — regression from TICKET-0311; `as Array[Dictionary]` cast does not work for untyped arrays in GDScript.
 - 2026-03-04 [gameplay-programmer] Starting work — applying element-wise Array[Dictionary] construction fix.
+- 2026-03-04 [gameplay-programmer] DONE — Fixed get_inputs() to use element-wise Array[Dictionary] construction. 5 fabricator/cryonite test failures resolved (997/1000 passing; 3 remaining are pre-existing HUD anchor issues). Commit: 17d5d48, PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/358 (merged as 9f3b156)

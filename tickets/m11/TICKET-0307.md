@@ -2,7 +2,7 @@
 id: TICKET-0307
 title: "BUG — HUD CompassBar/MiningProgress/MiningMinigameOverlay anchor presets reset to 0 after TICKET-0300"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 assigned_to: gameplay-programmer
@@ -95,3 +95,4 @@ Test output from M11 Phase Gate QA run (2026-03-03):
 - 2026-03-03 [gameplay-programmer] DONE — commit b552175, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/346 (merged). Removed redundant anchor/grow overrides from 3 instanced nodes.
 - 2026-03-04 [qa-engineer] RE-TEST FAILED — Ran full test suite (test_report_2026-03-04 15-30-46.json; 1000 tests, 997 passed, 3 failed). All three HUD anchor preset tests still fail with same assertion errors: game_hud_compass_bar_anchors_preset Expected '5' got '0'; game_hud_mining_progress_anchors_preset Expected '8' got '0'; game_hud_mining_minigame_overlay_anchors_preset Expected '8' got '0'. Root cause analysis: game_hud.tscn instance override now correctly has anchors_preset without redundant anchor_* entries, but the BASE scenes (compass_bar.tscn, mining_progress.tscn, mining_minigame_overlay.tscn) each still have explicit anchor_left/anchor_right/etc. properties stored after anchors_preset. When Godot instantiates these scenes, the explicit anchor_* properties reset stored_layout_preset. The fix must be applied to the BASE scene .tscn files to remove redundant anchor_* properties, or game_hud.tscn must use explicit anchor_left/right/top/bottom overrides instead of anchors_preset. Reopening and reassigning to gameplay-programmer. Blocks TICKET-0304 phase gate.
 - 2026-03-04 [gameplay-programmer] Starting work — removing redundant anchor_left/right/top/bottom from base scenes compass_bar.tscn, mining_progress.tscn, mining_minigame_overlay.tscn
+- 2026-03-04 [gameplay-programmer] DONE — commit 4db26b5, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/354 (merged). Removed explicit anchor_left/right/top/bottom from 3 base scene files so anchors_preset is respected.

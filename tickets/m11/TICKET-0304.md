@@ -47,3 +47,6 @@ This is the final gate for M11. All Phase 2 remediation tickets must be complete
 
 - 2026-03-03 [producer] Created ticket — Phase 3 QA gate for M11 remediation (TICKET-0290)
 - 2026-03-03 [qa-engineer] Starting work — all dependencies (TICKET-0291–0303) confirmed DONE
+- 2026-03-04 [qa-engineer] Test suite run complete — 1000 tests, 997 passed, 3 failed. Failures in test_scene_properties_unit: HUD anchor presets for CompassBar (expected 5, got 0), MiningProgress (expected 8, got 0), MiningMinigameOverlay (expected 8, got 0). Report: user://test_reports/test_report_2026-03-04 15-30-46.json.
+- 2026-03-04 [qa-engineer] TICKET-0307 re-test FAILED — gameplay-programmer's fix (commit b552175) removed redundant anchor_* overrides from game_hud.tscn instance nodes but root cause (explicit anchor_* in base scenes) remains. TICKET-0307 reopened (OPEN) and reassigned to gameplay-programmer.
+- 2026-03-04 [qa-engineer] Phase Gate BLOCKED — test suite has 3 failing tests; acceptance criteria require zero failures. Phase Gate Summary posted to docs/studio/reports/2026-03-04-m11-phase-gate-qa.md. Gate cannot close until TICKET-0307 is fixed and tests pass.

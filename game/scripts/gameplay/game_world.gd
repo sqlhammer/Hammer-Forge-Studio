@@ -150,9 +150,12 @@ func _position_entities_and_setup(biome: Node3D) -> void:
 	var player_pos: Vector3 = spawns["player"] as Vector3
 	var ship_pos: Vector3 = spawns["ship"] as Vector3
 
-	# Position ship — offset Y above terrain so hull/landing gear don't clip ground
+	# Position ship — offset Y above terrain so hull/landing gear don't clip ground.
+	# Reset basis to identity so the ship sits upright regardless of any rotation
+	# introduced during scene instantiation or collision generation.
 	var ship: Node3D = get_node_or_null("Ship") as Node3D
 	if ship != null:
+		ship.basis = Basis.IDENTITY
 		ship.position = Vector3(ship_pos.x, ship_pos.y + SHIP_Y_OFFSET, ship_pos.z)
 
 	# Position player and set up gameplay systems

@@ -20,6 +20,10 @@ signal travel_sequence_completed(destination_id: String)
 ## Duration of the fade-to-black and fade-from-black transitions in seconds.
 const FADE_DURATION: float = 0.5
 
+## Ship exterior Y offset — must match GameWorld.SHIP_Y_OFFSET to prevent
+## hull/landing gear from clipping into terrain after biome travel.
+const SHIP_Y_OFFSET: float = 3.0
+
 
 # ── Private Variables ─────────────────────────────────────
 
@@ -264,5 +268,5 @@ func _reposition_at_spawn(biome_node: Node3D) -> void:
 		Global.debug_log("TravelSequenceManager: player is inside ship — skipping reposition")
 
 	if _ship_exterior:
-		_ship_exterior.position = ship_spawn
-		Global.debug_log("TravelSequenceManager: ship repositioned to %s" % str(ship_spawn))
+		_ship_exterior.position = Vector3(ship_spawn.x, ship_spawn.y + SHIP_Y_OFFSET, ship_spawn.z)
+		Global.debug_log("TravelSequenceManager: ship repositioned to %s" % str(_ship_exterior.position))

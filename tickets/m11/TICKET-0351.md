@@ -2,7 +2,7 @@
 id: TICKET-0351
 title: "BUG — tech_tree_defs.gd line 53: var raw: Array still untyped after TICKET-0302"
 type: BUG
-status: OPEN
+status: DONE
 priority: P3
 owner: systems-programmer
 created_by: play-tester
@@ -63,3 +63,5 @@ Code inspection during TICKET-0331 VERIFY of TICKET-0302. Screenshot: Debug Laun
 ## Activity Log
 
 - 2026-03-07 [play-tester] Created BUG ticket — found during VERIFY of TICKET-0302 (TICKET-0331)
+- 2026-03-07 [systems-programmer] Starting work — applying typed Array fix to tech_tree_defs.gd line 53
+- 2026-03-07 [systems-programmer] DONE — commit db67357, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/378 merged to main

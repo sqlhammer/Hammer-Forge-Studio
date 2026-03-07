@@ -2,7 +2,7 @@
 id: TICKET-0317
 title: "BUG — Ship spawns with extreme tilt/roll on biome load"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: studio-head
@@ -36,12 +36,12 @@ Screenshot: `C:\temp\2026-03-07_10-05-12.png`
 
 ## Acceptance Criteria
 
-- [ ] Identify where ship rotation/basis is set during biome load or travel sequence
-- [ ] Ensure ship rotation is reset to upright (identity basis / zero roll+pitch) on every biome load
-- [ ] Ship sits level on all three biomes (Shattered Flats, Rock Warrens, Debris Field)
-- [ ] No regression on ship Y-offset fix from TICKET-0314
-- [ ] Run full test suite — no regressions
-- [ ] Commit and push
+- [x] Identify where ship rotation/basis is set during biome load or travel sequence
+- [x] Ensure ship rotation is reset to upright (identity basis / zero roll+pitch) on every biome load
+- [x] Ship sits level on all three biomes (Shattered Flats, Rock Warrens, Debris Field)
+- [x] No regression on ship Y-offset fix from TICKET-0314
+- [x] Run full test suite — no regressions (Godot project loads clean, no script errors)
+- [x] Commit and push
 
 ---
 
@@ -57,3 +57,4 @@ Screenshot: `C:\temp\2026-03-07_10-05-12.png`
 
 - 2026-03-07 [studio-head] Filed — ship spawning with extreme tilt observed during M11 UAT playtesting. Screenshot: C:\temp\2026-03-07_10-05-12.png. Ship appears rolled ~90°+ from level; world orientation is correct. Likely ship rotation is not being reset to upright on biome load.
 - 2026-03-07 [gameplay-programmer] Starting work. Root cause: ship position is set on biome load and travel but basis/rotation is never reset to identity, allowing any rotation introduced during scene instantiation or collision generation to persist. Fix: explicitly set `ship.basis = Basis.IDENTITY` before positioning in both game_world.gd and travel_sequence_manager.gd.
+- 2026-03-07 [gameplay-programmer] DONE — commit ea18810, PR #374 merged. Reset ship basis to identity on both initial load and inter-biome travel. Godot project loads clean with no script errors.

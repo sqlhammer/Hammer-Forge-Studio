@@ -1,0 +1,113 @@
+---
+id: TICKET-0312
+title: "BUG — fabricator_defs.get_inputs() SCRIPT ERROR: as Array[Dictionary] cast fails at runtime (regression from TICKET-0311)"
+type: BUG
+status: OPEN
+priority: P2
+owner: gameplay-programmer
+assigned_to: gameplay-programmer
+created_by: qa-engineer
+created_at: 2026-03-04
+updated_at: 2026-03-04
+milestone: "M11"
+phase: "QA"
+depends_on: []
+blocks: [TICKET-0304]
+tags: [fabricator-defs, array-type, type-mismatch, regression, m11]
+---
+
+## Summary
+
+`FabricatorDefs.get_inputs()` throws a runtime SCRIPT ERROR and returns an empty `Array[Dictionary]` instead of the recipe's actual inputs. This is a regression introduced by TICKET-0311's fix, which changed the return type from `Array` to `Array[Dictionary]` using an `as` cast that fails at runtime in Godot 4.5.
+
+---
+
+## Severity
+
+**P2 — Defect in expected behavior, workaround exists**: The Fabricator cannot process recipes that require input validation, because `get_inputs()` returns empty instead of the recipe ingredients. 5 unit tests fail as a result.
+
+---
+
+## Reproduction Steps
+
+1. Run the full test suite headless: `Godot_v4.5.1-stable_win64_console.exe --headless --path game addons/hammer_forge_tests/test_runner.tscn --quit`
+2. Observe SCRIPT ERROR in output:
+   ```
+   SCRIPT ERROR: Trying to return an array of type "Array" where expected return type is "Array[Dictionary]".
+      at: get_inputs (res://scripts/data/fabricator_defs.gd:84)
+   ```
+3. Observe test failures for `test_cryonite_unit` and `test_fabricator_unit`.
+
+---
+
+## Regression Source
+
+**TICKET-0311** changed `fabricator_defs.gd:get_inputs()` from:
+```gdscript
+static func get_inputs(recipe_id: String) -> Array:
+    var entry: Dictionary = RECIPE_CATALOG.get(recipe_id, {})
+    return entry.get("inputs", [])
+```
+To:
+```gdscript
+static func get_inputs(recipe_id: String) -> Array[Dictionary]:
+    var entry: Dictionary = RECIPE_CATALOG.get(recipe_id, {})
+    var raw: Array = entry.get("inputs", [])
+    return raw as Array[Dictionary]
+```
+
+In Godot 4.5, `untyped_array as Array[T]` fails at runtime with a SCRIPT ERROR when the source array was not originally declared as `Array[T]`. The `RECIPE_CATALOG` const uses plain untyped Arrays for its "inputs" entries, so `entry.get("inputs", [])` returns a plain `Array`. The `as Array[Dictionary]` cast then fails.
+
+**Correct fix:** Build a new typed array element by element:
+```gdscript
+static func get_inputs(recipe_id: String) -> Array[Dictionary]:
+    var entry: Dictionary = RECIPE_CATALOG.get(recipe_id, {})
+    var raw: Array = entry.get("inputs", [])
+    var result: Array[Dictionary] = []
+    for item in raw:
+        result.append(item as Dictionary)
+    return result
+```
+
+---
+
+## Expected Behavior
+
+`FabricatorDefs.get_inputs("fuel_cell")` returns an `Array[Dictionary]` with 2 elements (Metal input and Cryonite input). `FabricatorDefs.get_inputs("spare_battery")` returns an `Array[Dictionary]` with 1 element (Metal input).
+
+## Actual Behavior
+
+SCRIPT ERROR fires at line 84. `get_inputs()` returns empty `Array[Dictionary]` (`[]`). All downstream callers (fabricator_panel.gd, fabricator.gd) receive no inputs for any recipe.
+
+---
+
+## Evidence
+
+Test failures from `test_report_2026-03-04 16-02-15.json` (1000 tests, 992 passed, 8 failed):
+
+```
+SCRIPT ERROR: Trying to return an array of type "Array" where expected return type is "Array[Dictionary]".
+   at: get_inputs (res://scripts/data/fabricator_defs.gd:84)
+   GDScript backtrace:
+       [0] get_inputs (res://scripts/data/fabricator_defs.gd:84)
+       [1] _test_fuel_cell_recipe_has_two_inputs (res://tests/test_cryonite_unit.gd:168)
+
+[1736] --- Suite: test_cryonite_unit --- 25/28 passed
+FAIL: fuel_cell_recipe_has_two_inputs -- Expected '2' but got '0'
+FAIL: fuel_cell_recipe_requires_metal_2 -- Expected '2' but got '<null>'
+FAIL: fuel_cell_recipe_requires_cryonite_1 -- Expected '1' but got '<null>'
+```
+
+Fabricator test failures (queue_job_deducts_input_resources, queue_job_fails_insufficient_resources) confirmed by same report.
+
+---
+
+## Files Involved
+
+- `game/scripts/data/fabricator_defs.gd` — line 84: `return raw as Array[Dictionary]`
+
+---
+
+## Activity Log
+
+- 2026-03-04 [qa-engineer] Filed — P2 regression from TICKET-0311; fabricator_defs.get_inputs() SCRIPT ERROR breaks 5 tests (3 cryonite + 2 fabricator). Blocks TICKET-0304 phase gate. Fix: replace as-cast with element-wise Array[Dictionary] construction.

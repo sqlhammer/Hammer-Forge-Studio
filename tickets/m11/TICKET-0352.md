@@ -2,7 +2,7 @@
 id: TICKET-0352
 title: "BUG — InventoryActionPopup test suite crashes test_runner: _update_focus_visual null instance error"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: play-tester
@@ -96,3 +96,4 @@ without its scene tree (node not found errors at lines 50-61 also appear), causi
 ## Activity Log
 
 - 2026-03-07 [play-tester] Filed — discovered during TICKET-0334 verification run. TICKET-0308 fix was marked DONE but the crash persists. Test runner cannot complete the full suite, blocking QA sign-off.
+- 2026-03-07 [gameplay-programmer] Fix committed in aa63e09 (PR #381) — test now instantiates InventoryActionPopup from .tscn instead of bare script, ensuring @onready vars are populated. Verified fix is correct. Marking DONE.

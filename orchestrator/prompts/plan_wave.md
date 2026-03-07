@@ -40,6 +40,26 @@ You are the Producer agent in orchestration mode. Analyze the ticket queue and o
 - Set `budget_usd` based on the complexity visible in the ticket's acceptance criteria.
 - Use `prompt_supplement` to pass any extra context the worker needs (e.g., "Run the full test suite after implementation").
 
+## VERIFY Ticket Convention
+
+When an implementation ticket completes (status: DONE) and its acceptance criteria include behavioral or visual outcomes, create a VERIFY ticket in the `new_tickets` array:
+
+- `type`: `TASK`
+- `title`: `"VERIFY — <description> after <TICKET-NNNN>"`
+- `owner`: `play-tester`
+- `depends_on`: `[<implementation-ticket-id>]`
+- `phase`: QA (or current phase if verification is urgent)
+- For wave assignments: `needs_godot_mcp: true`, `needs_worktree: false`
+
+Include in `acceptance_criteria`:
+- Visual verification of the specific behavior
+- State dump assertions (if applicable)
+- Unit test suite passes with zero failures
+- No runtime errors during verification
+
+**Use VERIFY tickets for:** Bug fixes, visual/behavioral features, gameplay mechanics.
+**Skip VERIFY for:** Documentation-only tickets, config/process tickets, code review tickets.
+
 ## Retry Queue
 
 If `{retry_tickets}` is non-empty, these tickets previously failed and are being retried. Include them in this wave if their dependencies are still met. Note this in the `prompt_supplement`.

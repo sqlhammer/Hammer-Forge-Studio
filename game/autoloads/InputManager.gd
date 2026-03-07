@@ -169,6 +169,9 @@ func _setup_input_actions() -> void:
 	# UI Context Actions
 	_add_action_if_missing("ui_action_menu", [], [], [JOY_BUTTON_Y])
 
+	# Debug Context Actions
+	_add_action_if_missing("debug_state_dump", [KEY_F12])
+
 	# Ensure Godot built-in UI actions include gamepad buttons (Godot 4 defaults
 	# only map keyboard keys — Enter/Space for ui_accept, Escape for ui_cancel)
 	_add_joy_button_to_existing_action("ui_accept", JOY_BUTTON_A)

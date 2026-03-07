@@ -15,7 +15,8 @@
       "technical-writer": "sonnet",
       "ui-ux-designer": "sonnet",
       "audio-engineer": "opus",
-      "vfx-artist": "sonnet"
+      "vfx-artist": "sonnet",
+      "play-tester": "sonnet"
     }
   },
   "budgets": {
@@ -26,14 +27,16 @@
     "overrides": {
       "producer": 25,
       "gameplay-programmer": 150,
-      "qa-engineer": 100
+      "qa-engineer": 100,
+      "play-tester": 100
     }
   },
   "timeouts": {
     "default_minutes": 30,
     "overrides": {
       "gameplay-programmer": 45,
-      "qa-engineer": 45
+      "qa-engineer": 45,
+      "play-tester": 45
     }
   },
   "concurrency": {
@@ -53,7 +56,7 @@
     "0": ["producer"],
     "1": ["game-designer", "narrative-designer", "technical-writer"],
     "2": ["environment-artist", "character-animator", "ui-ux-designer", "audio-engineer", "vfx-artist", "qa-engineer"],
-    "3": ["systems-programmer", "gameplay-programmer", "tools-devops-engineer", "technical-artist"]
+    "3": ["systems-programmer", "gameplay-programmer", "tools-devops-engineer", "technical-artist", "play-tester"]
   },
   "plan_limits": {
     "plan_tier": "Max 20",

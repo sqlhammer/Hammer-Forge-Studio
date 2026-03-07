@@ -2,7 +2,7 @@
 id: TICKET-0315
 title: "BUG — Terrain features render as untextured grey boxes (missing material)"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: studio-head
@@ -66,3 +66,4 @@ Screenshot: `C:\temp\2026-03-07_07-41-46.png`
 - 2026-03-07 [gameplay-programmer] Starting work. Root cause: _build_terrain_mesh() and _create_rock_formation() both missing StandardMaterial3D assignment. Other biomes (Shattered Flats, Debris Field) have materials; Rock Warrens was the only one missing them.
 - 2026-03-07 [gameplay-programmer] Fixed. Added StandardMaterial3D to terrain mesh (dark earthy brown, roughness 0.9) and rock formation CSGBox3D blocks (darker stone, roughness 0.95). Verified Shattered Flats and Debris Field already have correct materials. Commit cc855b4, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/369
 - 2026-03-07 [gameplay-programmer] Retry: Previous fix insufficient — material_override on biome MeshInstance3D was present but underlying ArrayMesh surfaces had null material. Fixed in terrain_generator.gd by setting StandardMaterial3D on SurfaceTool before commit() in both _build_single_chunk and _assemble_full_mesh. All three biomes (Rock Warrens, Shattered Flats, Debris Field) now have material at the mesh surface level.
+- 2026-03-07 [gameplay-programmer] Marking DONE. All acceptance criteria verified complete. Fix committed at 59771fe.

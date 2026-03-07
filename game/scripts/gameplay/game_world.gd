@@ -134,12 +134,17 @@ func _add_ship() -> void:
 		add_child(ship)
 
 
-## Adds the player to the world at origin (positioned later).
+## Adds the player to the world with processing disabled (positioned later).
+## Processing is disabled until _position_entities_and_setup to prevent the
+## CharacterBody3D from running _physics_process at origin before repositioning.
+## Without this, gravity + move_and_slide can push the player below the terrain
+## surface during the pre-positioning frame, causing a below-terrain spawn.
 func _add_player() -> void:
 	var player_scene: PackedScene = load("res://player/player.tscn") as PackedScene
 	if player_scene:
 		var player: Node3D = player_scene.instantiate()
 		player.name = "Player"
+		player.process_mode = Node.PROCESS_MODE_DISABLED
 		add_child(player)
 
 
@@ -162,6 +167,14 @@ func _position_entities_and_setup(biome: Node3D) -> void:
 	var player: Node3D = get_node_or_null("Player") as Node3D
 	if player != null:
 		player.position = player_pos
+		# Reset FirstPersonController local position and velocity to clear any
+		# drift from pre-positioning physics (belt-and-suspenders with PROCESS_MODE_DISABLED).
+		var first_person_node: CharacterBody3D = player.get_node_or_null("FirstPersonController") as CharacterBody3D
+		if first_person_node:
+			first_person_node.position = Vector3.ZERO
+			first_person_node.velocity = Vector3.ZERO
+		# Re-enable processing now that the player is correctly positioned
+		player.process_mode = Node.PROCESS_MODE_INHERIT
 		_setup_gameplay(player)
 
 	# Debug overlay for sessions with debug features active

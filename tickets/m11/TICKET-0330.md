@@ -75,3 +75,4 @@ after TICKET-0301.
   **Acceptance Criteria PASS:** All TICKET-0301 acceptance criteria verified — no direct
   Input.is_action_* calls remain outside InputManager.gd, inventory_toggle behavior preserved
   via compliant unsuppressed method, zero console errors related to this change.
+  Commit e8dba6e.

@@ -2,7 +2,7 @@
 id: TICKET-0347
 title: "BLOCKER — TICKET-0320 visual verification requires Godot MCP tools"
 type: BLOCKER
-status: OPEN
+status: DONE
 priority: P1
 owner: producer
 created_by: play-tester
@@ -44,3 +44,4 @@ must be active in the agent session for visual verification to proceed.
 ## Activity Log
 
 - 2026-03-07 [play-tester] Created — visual/interactive verification of TICKET-0320 requires Godot MCP tools not available in this session
+- 2026-03-07 [play-tester] RESOLVED — Godot MCP tools available in new session. All visual verification for TICKET-0320 completed successfully. Closing blocker.

@@ -2,7 +2,7 @@
 id: TICKET-0320
 title: "VERIFY — Scene-First remediation: Ship Machine Panels (TICKET-0291)"
 type: TASK
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: play-tester
 created_by: producer
@@ -24,20 +24,26 @@ function correctly after the Scene-First refactor in TICKET-0291.
 
 ## Acceptance Criteria
 
-- [ ] Visual verification: Recycler panel opens when interacting with the Recycler in the ship
-      interior — grid and controls are visible and correctly laid out
-- [ ] Visual verification: Fabricator panel opens with a populated recipe list; input
-      requirements display correctly (not blank)
-- [ ] Visual verification: Automation Hub panel opens without errors
-- [ ] State dump: No ERROR lines in console during panel open/close for any of the three panels
+- [x] Visual verification: Recycler panel opens when interacting with the Recycler in the ship
+      interior — grid and controls are visible and correctly laid out (screenshot verified 2026-03-07)
+- [x] Visual verification: Fabricator panel opens with a populated recipe list; input
+      requirements display correctly (not blank) — 3 recipes shown with costs (screenshot verified 2026-03-07)
+- [x] Visual verification: Automation Hub panel opens without errors (screenshot verified 2026-03-07)
+- [x] State dump: No ERROR lines in console during panel open/close for any of the three panels (verified 2026-03-07)
 - [x] Unit test suite: zero failures across all tests — 1009/1009 passed (headless run 2026-03-07)
-- [ ] No runtime errors during any verification scenario
+- [x] No runtime errors during any verification scenario (verified 2026-03-07)
 
 ---
 
 ## Handoff Notes
 
-(Leave blank until verification is complete.)
+All three panels verified via Godot MCP runtime testing:
+
+- **Recycler Panel**: Opens with correct layout — title, status ("Ready"), input/output slots with icons, recipe label ("3 Scrap Metal → 1 Metal (5s)"), progress bar, Start/Collect buttons, feedback area, close button. No runtime errors.
+- **Fabricator Panel**: Opens with populated recipe list (3 recipes: Spare Battery, Head Lamp, Fuel Cell) across categories (COMPONENTS, EQUIPMENT, OTHER). Auto-selects first recipe with detail view showing input (Metal x10), output (Spare Battery x1), "Have: 0 Metal" label. Cost labels visible on all rows. No runtime errors.
+- **Automation Hub Panel**: Opens with two-column layout — left: Drone Program config (Deposit Type, Min Purity, Tool Tier, Extraction Radius slider, Priority), right: Active Drones status (0/2). Pool stats displayed. ACTIVATE DRONES and Close buttons visible. No runtime errors.
+
+Console log confirmed zero ERROR lines across all three panel open scenarios. Only pre-existing warnings (Vulkan driver fallback, enum cast hints) appeared — none related to the panels.
 
 ---
 
@@ -75,3 +81,4 @@ Headless run via `Godot_v4.5.1-stable_win64.exe --headless`:
 Visual panel open/close verification and state dump (runtime ERROR check) require Godot MCP tools (`play_scene`, `simulate_input`, `get_running_scene_screenshot`, `get_godot_errors`) which are not available in this session. Re-dispatch through orchestrator with Tier 3 MCP configured.
 
 - 2026-03-07 [play-tester] BLOCKED — see TICKET-0347
+- 2026-03-07 [play-tester] UNBLOCKED — Godot MCP tools available. Ran visual verification for all three panels via runtime test scenes. All panels open correctly with expected layouts. Zero ERROR lines in console. All acceptance criteria satisfied. Marking DONE.

@@ -203,11 +203,8 @@ func _test_dropped_item_has_collision_shape() -> void:
 
 
 func _test_inventory_screen_drop_signal_defined() -> void:
-	var screen: InventoryScreen = InventoryScreen.new()
-	add_child(screen)
-	assert_true(screen.has_signal("item_drop_requested"),
+	assert_true(ClassDB.class_has_signal("InventoryScreen", "item_drop_requested"),
 		"InventoryScreen should have item_drop_requested signal")
-	screen.queue_free()
 
 
 # ── Helper Methods ────────────────────────────────────────

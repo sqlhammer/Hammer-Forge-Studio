@@ -2,7 +2,7 @@
 id: TICKET-0348
 title: "BUG — test_dropped_item_unit crashes test runner due to InventoryScreen standalone instantiation"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: qa-engineer
 created_by: play-tester
@@ -108,3 +108,4 @@ test_fuel_system_unit, test_game_startup_unit, test_game_world_unit, and all sub
 - 2026-03-07 [play-tester] Created during TICKET-0346 verification. Pre-existing crash
   confirmed: inventory_screen.gd last changed TICKET-0308, test_dropped_item_unit.gd last
   changed TICKET-0218. Not caused by TICKET-0318 (which only modified game_world.gd).
+- 2026-03-07 [qa-engineer] Starting work. Fixing _test_inventory_screen_drop_signal_defined to use ClassDB.class_has_signal instead of InventoryScreen.new().

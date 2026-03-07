@@ -203,8 +203,11 @@ func _test_dropped_item_has_collision_shape() -> void:
 
 
 func _test_inventory_screen_drop_signal_defined() -> void:
-	assert_true(ClassDB.class_has_signal("InventoryScreen", "item_drop_requested"),
-		"InventoryScreen should have item_drop_requested signal")
+	var scene: PackedScene = load("res://scenes/ui/inventory_screen.tscn") as PackedScene
+	var instance: Node = scene.instantiate()
+	var has_sig: bool = instance.has_signal("item_drop_requested")
+	instance.free()
+	assert_true(has_sig, "InventoryScreen should have item_drop_requested signal")
 
 
 # ── Helper Methods ────────────────────────────────────────

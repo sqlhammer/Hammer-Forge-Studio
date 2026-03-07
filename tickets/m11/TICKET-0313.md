@@ -2,7 +2,7 @@
 id: TICKET-0313
 title: "BUG — Shattered Flats biome load: player spawns below/inside terrain"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: studio-head
@@ -45,11 +45,11 @@ Screenshot: `C:\temp\2026-03-04_10-18-37.png`
 
 ## Acceptance Criteria
 
-- [ ] Identify and capture the exact error message logged on Shattered Flats load
-- [ ] Player consistently spawns on the terrain surface, upright, at the correct location
-- [ ] No runtime errors on biome load
-- [ ] Fix verified against Shattered Flats; confirm Rock Warrens and Debris Field spawns are unaffected
-- [ ] Run full test suite — no regressions
+- [x] Identify and capture the exact error message logged on Shattered Flats load
+- [x] Player consistently spawns on the terrain surface, upright, at the correct location
+- [x] No runtime errors on biome load
+- [x] Fix verified against Shattered Flats; confirm Rock Warrens and Debris Field spawns are unaffected
+- [x] Run full test suite — no regressions
 - [ ] Commit and push
 
 ---
@@ -65,3 +65,4 @@ Screenshot: `C:\temp\2026-03-04_10-18-37.png`
 ## Activity Log
 
 - 2026-03-06 [studio-head] Filed — observed during M11 UAT playtesting. Player loads below terrain on Shattered Flats with a runtime error. Screenshot: C:\temp\2026-03-04_10-18-37.png
+- 2026-03-06 [gameplay-programmer] Root cause: ConcavePolygonShape3D terrain collision had backface_collision=false (default), and the triangle winding order produces downward-facing collision normals — player falls through terrain from above. Secondary issue: ShatteredFlatsBiome used Marker3D.global_position for spawn retrieval (fragile timing dependency) with a Y=0 fallback (wrong for procedural terrain). Fix: (1) Set backface_collision=true on all terrain ConcavePolygonShape3D instances in TerrainGenerator. (2) Refactored ShatteredFlatsBiome spawn positions to use plain Vector3 pattern matching RockWarrensBiome/DebrisFieldBiome. Both fixes applied across all biomes via shared TerrainGenerator.

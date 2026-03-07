@@ -109,3 +109,4 @@ test_fuel_system_unit, test_game_startup_unit, test_game_world_unit, and all sub
   confirmed: inventory_screen.gd last changed TICKET-0308, test_dropped_item_unit.gd last
   changed TICKET-0218. Not caused by TICKET-0318 (which only modified game_world.gd).
 - 2026-03-07 [qa-engineer] Starting work. Fixing _test_inventory_screen_drop_signal_defined to use ClassDB.class_has_signal instead of InventoryScreen.new().
+- 2026-03-07 [qa-engineer] DONE. Replaced InventoryScreen.new() with ClassDB.class_has_signal("InventoryScreen", "item_drop_requested"). Commit a2bfd98, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/377.

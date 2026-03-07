@@ -11,6 +11,12 @@ extends Node3D
 ## Ship interior Y offset — underground isolation from exterior world.
 const INTERIOR_Y_OFFSET: float = -50.0
 
+## Ship exterior Y offset — lifts the ship above terrain surface so the hull
+## and landing gear do not clip into the ground. The ShipExterior scene has
+## geometry extending below its node origin (RechargeZone collision bottom at
+## local Y=-3), so this offset compensates for that underhang.
+const SHIP_Y_OFFSET: float = 3.0
+
 ## Default purity for starting inventory resource grants.
 const DEFAULT_PURITY: ResourceDefs.Purity = ResourceDefs.Purity.THREE_STAR
 
@@ -144,10 +150,10 @@ func _position_entities_and_setup(biome: Node3D) -> void:
 	var player_pos: Vector3 = spawns["player"] as Vector3
 	var ship_pos: Vector3 = spawns["ship"] as Vector3
 
-	# Position ship
+	# Position ship — offset Y above terrain so hull/landing gear don't clip ground
 	var ship: Node3D = get_node_or_null("Ship") as Node3D
 	if ship != null:
-		ship.position = ship_pos
+		ship.position = Vector3(ship_pos.x, ship_pos.y + SHIP_Y_OFFSET, ship_pos.z)
 
 	# Position player and set up gameplay systems
 	var player: Node3D = get_node_or_null("Player") as Node3D

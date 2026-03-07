@@ -204,28 +204,32 @@ func _apply_styles() -> void:
 
 	# Map panel background
 	var map_panel: PanelContainer = _dest_row.get_parent().get_parent() as PanelContainer
-	var map_bg := StyleBoxFlat.new()
-	map_bg.bg_color = COLOR_PANEL_BG
-	map_bg.set_content_margin_all(20)
-	map_bg.set_corner_radius_all(4)
-	map_panel.add_theme_stylebox_override("panel", map_bg)
+	if map_panel != null:
+		var map_bg := StyleBoxFlat.new()
+		map_bg.bg_color = COLOR_PANEL_BG
+		map_bg.set_content_margin_all(20)
+		map_bg.set_corner_radius_all(4)
+		map_panel.add_theme_stylebox_override("panel", map_bg)
 
 	# Current biome panel style
 	var current_node_panel: PanelContainer = _current_biome_label.get_parent() as PanelContainer
-	var current_style := StyleBoxFlat.new()
-	current_style.bg_color = Color("#1A2736", 0.9)
-	current_style.border_color = COLOR_TEAL
-	current_style.set_border_width_all(2)
-	current_style.set_corner_radius_all(4)
-	current_style.set_content_margin_all(8)
-	current_node_panel.add_theme_stylebox_override("panel", current_style)
+	if current_node_panel != null:
+		var current_style := StyleBoxFlat.new()
+		current_style.bg_color = Color("#1A2736", 0.9)
+		current_style.border_color = COLOR_TEAL
+		current_style.set_border_width_all(2)
+		current_style.set_corner_radius_all(4)
+		current_style.set_content_margin_all(8)
+		current_node_panel.add_theme_stylebox_override("panel", current_style)
 
 	# Vertical divider style
-	var v_divider: VSeparator = _main_panel.get_child(0).get_child(2) as VSeparator
-	var vdiv_style := StyleBoxFlat.new()
-	vdiv_style.bg_color = Color(COLOR_NEUTRAL, 0.3)
-	vdiv_style.set_content_margin_all(0)
-	v_divider.add_theme_stylebox_override("separator", vdiv_style)
+	var v_divider_parent: Node = _main_panel.get_child(0) if _main_panel.get_child_count() > 0 else null
+	var v_divider: VSeparator = v_divider_parent.get_child(2) as VSeparator if v_divider_parent != null and v_divider_parent.get_child_count() > 2 else null
+	if v_divider != null:
+		var vdiv_style := StyleBoxFlat.new()
+		vdiv_style.bg_color = Color(COLOR_NEUTRAL, 0.3)
+		vdiv_style.set_content_margin_all(0)
+		v_divider.add_theme_stylebox_override("separator", vdiv_style)
 
 	# Divider styles
 	_apply_divider_styles()
@@ -250,10 +254,11 @@ func _apply_divider_styles() -> void:
 		if child is HSeparator:
 			(child as HSeparator).add_theme_stylebox_override("separator", div_style.duplicate())
 	# Detail column dividers
-	var detail_col: VBoxContainer = _detail_container.get_child(0) as VBoxContainer
-	for child: Node in detail_col.get_children():
-		if child is HSeparator:
-			(child as HSeparator).add_theme_stylebox_override("separator", div_style.duplicate())
+	var detail_col: VBoxContainer = _detail_container.get_child(0) as VBoxContainer if _detail_container.get_child_count() > 0 else null
+	if detail_col != null:
+		for child: Node in detail_col.get_children():
+			if child is HSeparator:
+				(child as HSeparator).add_theme_stylebox_override("separator", div_style.duplicate())
 
 func _connect_signals() -> void:
 	FuelSystem.fuel_changed.connect(_on_fuel_changed)

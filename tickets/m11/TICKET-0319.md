@@ -2,7 +2,7 @@
 id: TICKET-0319
 title: "M11 Studio Head — UAT play-test sign-off"
 type: TASK
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: studio-head
 created_by: producer
@@ -89,3 +89,4 @@ testing in the Godot editor. Automated items are pre-verified and require no act
 - 2026-03-07 [producer] Created ticket — M11 Studio Head UAT play-test sign-off. All QA and
   bug-fix dependencies (TICKET-0304, TICKET-0313–0318) are DONE. UAT doc updated to remove
   TICKET-0313 open-issue caveats; biome travel test is now fully unblocked.
+- 2026-03-07 [studio-head] Starting work — reviewing UAT sign-off document and marking features.

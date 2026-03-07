@@ -14,7 +14,7 @@
 | **Date Prepared** | 2026-03-06 |
 | **Test Build** | `99340ce` (main, post TICKET-0312) |
 | **Test Suite** | 1009 tests, 0 failures (run 2026-03-04 16:57:38) |
-| **Sign-Off Status** | ⏳ Pending |
+| **Sign-Off Status** | ✅ Approved |
 
 ---
 
@@ -52,7 +52,7 @@
 
 **Automated coverage:** `test_inventory_unit` — item add/remove/stack logic covered
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — Inventory screen opens cleanly via Tab, item grid displays correctly with icons and labels, closes without errors. Picked up resource item confirmed in inventory.
 
 ---
 
@@ -73,7 +73,7 @@
 
 **Automated coverage:** `test_inventory_unit` — item drop/destroy logic covered
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — Popup is hidden on inventory open, appears correctly positioned on right-click, Drop and Destroy actions both function correctly.
 
 ---
 
@@ -97,7 +97,7 @@
 
 **Automated coverage:** `test_navigation_unit` — biome registry and fuel logic covered
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — Navigation Console opens correctly. All three biomes listed: Shattered Flats, Rock Warrens, Debris Field. No missing entries.
 
 ---
 
@@ -118,7 +118,7 @@
 
 **Automated coverage:** `test_navigation_unit`, `test_biome_unit`
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — Travel fade sequence plays correctly (fade out → load → fade in) for all three biomes. Player spawns on solid terrain in Shattered Flats, Rock Warrens, and Debris Field. No spawn-below-terrain errors observed.
 
 ---
 
@@ -142,7 +142,7 @@
 
 **Automated coverage:** `test_tech_tree_unit` — prerequisite lookup and unlock gating covered
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — Tech tree panel opens and displays entries. Prerequisites are correctly listed and non-empty. Unlock gating functions correctly — items with unmet prerequisites cannot be unlocked.
 
 ---
 
@@ -166,7 +166,7 @@
 
 **Automated coverage:** `test_fabricator_unit` — recipe lookup, input resolution, and job queueing covered
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — Fabricator panel opens with full recipe list. Input requirements display correctly (not blank). Recipe queueing initiates processing without errors.
 
 ---
 
@@ -190,7 +190,7 @@
 
 **Automated coverage:** None — manual only
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — Boarding prompt is context-sensitive. No prompt when near ship without hull aim. Prompt appears correctly when crosshair is on hull. Prompt disappears when crosshair moves away.
 
 ---
 
@@ -218,7 +218,7 @@
 
 **Automated coverage:** `test_scene_properties_unit` — anchor values for CompassBar, MiningProgress, MiningMinigameOverlay verified (3 tests)
 
-- [ ] ✅ Approved / ❌ Rejected — _Notes:_
+- [x] ✅ Approved — All HUD elements correctly positioned. Compass bar visible and aligned. Battery bar and fuel gauge in expected locations. Scanner readout appears on scan key. Mining progress bar appears and updates during mining. Mining minigame overlay correctly positioned.
 
 ---
 

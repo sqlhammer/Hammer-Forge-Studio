@@ -1380,6 +1380,12 @@ class Conductor:
                     f"{ticket_id} already in active_ticket_ids — skipping duplicate dispatch")
                 continue
 
+            # Studio Head guard: never execute studio-head tickets automatically
+            if agent_slug == "studio-head":
+                self.logger.log("SKIP",
+                    f"{ticket_id} owner=studio-head — requires human action, not dispatching")
+                continue
+
             # Dependency validation: skip if depends_on not satisfied
             completed = self.state.get("completed_this_session", [])
             deps_ok, unmet = validate_dependencies(

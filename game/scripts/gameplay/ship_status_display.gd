@@ -98,9 +98,15 @@ func _update_colors() -> void:
 	var color: Color = _get_status_color()
 	_value_label.add_theme_color_override("font_color", color)
 
-	var fill_style: StyleBoxFlat = _bar.get_theme_stylebox("fill").duplicate() as StyleBoxFlat
-	fill_style.bg_color = color
-	_bar.add_theme_stylebox_override("fill", fill_style)
+	var existing: StyleBox = _bar.get_theme_stylebox("fill")
+	if existing == null:
+		var new_style: StyleBoxFlat = StyleBoxFlat.new()
+		new_style.bg_color = color
+		_bar.add_theme_stylebox_override("fill", new_style)
+	else:
+		var fill_style: StyleBoxFlat = existing.duplicate() as StyleBoxFlat
+		fill_style.bg_color = color
+		_bar.add_theme_stylebox_override("fill", fill_style)
 
 func _get_status_color() -> Color:
 	match variable_type:

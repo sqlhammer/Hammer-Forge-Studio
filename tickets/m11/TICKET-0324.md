@@ -2,7 +2,7 @@
 id: TICKET-0324
 title: "VERIFY — Scene-First remediation: Tech Tree Panel (TICKET-0295)"
 type: TASK
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: play-tester
 created_by: producer
@@ -44,3 +44,4 @@ after the Scene-First refactor in TICKET-0295.
 ## Activity Log
 
 - 2026-03-07 [producer] Created VERIFY ticket for TICKET-0295 — Scene-First: Tech Tree Panel
+- 2026-03-07 [play-tester] Starting work — verifying Tech Tree Panel Scene-First remediation

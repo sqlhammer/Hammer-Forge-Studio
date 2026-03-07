@@ -2,7 +2,7 @@
 id: TICKET-0317
 title: "BUG — Ship spawns with extreme tilt/roll on biome load"
 type: BUG
-status: OPEN
+status: IN_PROGRESS
 priority: P2
 owner: gameplay-programmer
 created_by: studio-head
@@ -56,3 +56,4 @@ Screenshot: `C:\temp\2026-03-07_10-05-12.png`
 ## Activity Log
 
 - 2026-03-07 [studio-head] Filed — ship spawning with extreme tilt observed during M11 UAT playtesting. Screenshot: C:\temp\2026-03-07_10-05-12.png. Ship appears rolled ~90°+ from level; world orientation is correct. Likely ship rotation is not being reset to upright on biome load.
+- 2026-03-07 [gameplay-programmer] Starting work. Root cause: ship position is set on biome load and travel but basis/rotation is never reset to identity, allowing any rotation introduced during scene instantiation or collision generation to persist. Fix: explicitly set `ship.basis = Basis.IDENTITY` before positioning in both game_world.gd and travel_sequence_manager.gd.

@@ -268,5 +268,6 @@ func _reposition_at_spawn(biome_node: Node3D) -> void:
 		Global.debug_log("TravelSequenceManager: player is inside ship — skipping reposition")
 
 	if _ship_exterior:
+		_ship_exterior.basis = Basis.IDENTITY
 		_ship_exterior.position = Vector3(ship_spawn.x, ship_spawn.y + SHIP_Y_OFFSET, ship_spawn.z)
 		Global.debug_log("TravelSequenceManager: ship repositioned to %s" % str(_ship_exterior.position))

@@ -96,11 +96,11 @@ var _ruins_container: Node3D = null
 var _deposits_container: Node3D = null
 var _spawn_points: Node3D = null
 
-## Player spawn marker.
-var _player_spawn: Marker3D = null
+## Resolved player spawn position in world space.
+var _player_spawn_position: Vector3 = Vector3(250.0, 0.0, 425.0)
 
-## Ship spawn marker.
-var _ship_spawn: Marker3D = null
+## Resolved ship spawn position in world space.
+var _ship_spawn_position: Vector3 = Vector3(250.0, 0.0, 430.0)
 
 ## Feature request indices for position lookup.
 var _plateau_request_idx: int = -1
@@ -146,16 +146,12 @@ func generate() -> void:
 
 ## Returns the player spawn position in world space.
 func get_player_spawn_position() -> Vector3:
-	if _player_spawn != null:
-		return _player_spawn.global_position
-	return Vector3(250.0, 0.0, 425.0)
+	return _player_spawn_position
 
 
 ## Returns the ship spawn position in world space.
 func get_ship_spawn_position() -> Vector3:
-	if _ship_spawn != null:
-		return _ship_spawn.global_position
-	return Vector3(250.0, 0.0, 430.0)
+	return _ship_spawn_position
 
 
 ## Returns the WorldBoundaryManager instance.
@@ -411,7 +407,7 @@ func _create_resource_deposits() -> void:
 		_deposits_container.add_child(deep_cryo)
 
 
-## Creates player and ship spawn point markers.
+## Resolves player and ship spawn positions from terrain generation result and creates markers.
 func _create_spawn_points() -> void:
 	_spawn_points = Node3D.new()
 	_spawn_points.name = "SpawnPoints"
@@ -419,20 +415,22 @@ func _create_spawn_points() -> void:
 
 	# Ship spawn — at the confirmed clearing position
 	var ship_positions: Array = _generation_result.confirmed_positions.get(_ship_clearing_request_idx, [])
-	var ship_pos: Vector3 = Vector3(SHIP_SPAWN_HINT.x, 0.0, SHIP_SPAWN_HINT.y)
 	if not ship_positions.is_empty():
-		ship_pos = ship_positions[0]
-
-	_ship_spawn = Marker3D.new()
-	_ship_spawn.name = "ShipSpawn"
-	_ship_spawn.position = ship_pos
-	_spawn_points.add_child(_ship_spawn)
+		_ship_spawn_position = ship_positions[0]
 
 	# Player spawn — offset in front of ship
-	_player_spawn = Marker3D.new()
-	_player_spawn.name = "PlayerSpawn"
-	_player_spawn.position = ship_pos + PLAYER_SPAWN_OFFSET
-	_spawn_points.add_child(_player_spawn)
+	_player_spawn_position = _ship_spawn_position + PLAYER_SPAWN_OFFSET
+
+	# Create scene markers for visual debugging and scene hierarchy
+	var ship_marker: Marker3D = Marker3D.new()
+	ship_marker.name = "ShipSpawn"
+	ship_marker.position = _ship_spawn_position
+	_spawn_points.add_child(ship_marker)
+
+	var player_marker: Marker3D = Marker3D.new()
+	player_marker.name = "PlayerSpawn"
+	player_marker.position = _player_spawn_position
+	_spawn_points.add_child(player_marker)
 
 
 # ── Private Methods: Geometry Builders ────────────────────

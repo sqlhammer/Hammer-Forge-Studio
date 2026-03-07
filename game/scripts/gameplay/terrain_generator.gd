@@ -379,6 +379,7 @@ func _build_single_chunk(heightmap: PackedFloat32Array, cx: int, cz: int) -> Ter
 
 		# Bake collision shape from triangle vertices
 		var collision: ConcavePolygonShape3D = ConcavePolygonShape3D.new()
+		collision.backface_collision = true
 		collision.set_faces(triangle_vertices)
 		chunk.collision_shape = collision
 	else:
@@ -430,10 +431,13 @@ func _assemble_full_mesh(result: TerrainGenerationResult) -> void:
 	# Build the unified collision shape
 	if all_collision_faces.size() > 0:
 		var collision: ConcavePolygonShape3D = ConcavePolygonShape3D.new()
+		collision.backface_collision = true
 		collision.set_faces(all_collision_faces)
 		result.collision_shape = collision
 	else:
-		result.collision_shape = ConcavePolygonShape3D.new()
+		var empty_collision: ConcavePolygonShape3D = ConcavePolygonShape3D.new()
+		empty_collision.backface_collision = true
+		result.collision_shape = empty_collision
 
 
 # ── Private Methods: Helpers ──────────────────────────────

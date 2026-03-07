@@ -2,7 +2,7 @@
 id: TICKET-0314
 title: "BUG — Ship clips into/through terrain mesh on biome load"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: studio-head
@@ -57,3 +57,4 @@ Screenshot: `C:\temp\2026-03-07_07-41-46.png`
 
 - 2026-03-07 [studio-head] Filed — ship clipping into terrain observed in Rock Warrens during M11 UAT playtesting. Screenshot: C:\temp\2026-03-07_07-41-46.png. May be resolved by TICKET-0313 fix — verify first.
 - 2026-03-07 [gameplay-programmer] Starting work. TICKET-0313 fix (backface_collision) was for player falling through terrain — independent of ship placement. Ship clips because ShipExterior mesh extends below node origin (ShipMesh at Y=6.5 scale 24, RechargeZone collision bottom at Y=-3). Ship placed at raw terrain surface Y with no offset.
+- 2026-03-07 [gameplay-programmer] Fix: Added SHIP_Y_OFFSET (3.0) constant to GameWorld and TravelSequenceManager. Ship position Y is now offset above terrain surface on initial load and after biome travel. Commit c72a627, PR #370 merged.

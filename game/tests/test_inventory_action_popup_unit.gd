@@ -13,7 +13,8 @@ var _spy: SignalSpy = null
 # ── Setup / Teardown ──────────────────────────────────────
 
 func before_each() -> void:
-	_popup = InventoryActionPopup.new()
+	var scene: PackedScene = load("res://scenes/ui/inventory_action_popup.tscn")
+	_popup = scene.instantiate() as InventoryActionPopup
 	add_child(_popup)
 	_spy = SignalSpy.new()
 	_spy.watch(_popup, "action_requested")

@@ -49,11 +49,8 @@ static func get_unlock_cost(node_id: String) -> Dictionary:
 ## Returns the prerequisite node IDs for a node ID.
 static func get_prerequisites(node_id: String) -> Array[String]:
 	var entry: Dictionary = TECH_TREE_CATALOG.get(node_id, {})
-	var result: Array[String] = []
-	var raw: Array = entry.get("prerequisites", [])
-	for item in raw:
-		result.append(item as String)
-	return result
+	var raw: Array[String] = Array(entry.get("prerequisites", []), TYPE_STRING, "", null)
+	return raw
 
 ## Returns the icon path for a node ID, or empty string if none defined.
 static func get_icon_path(node_id: String) -> String:

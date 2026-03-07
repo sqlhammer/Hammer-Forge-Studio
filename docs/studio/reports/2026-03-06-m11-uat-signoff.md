@@ -27,7 +27,7 @@
 3. Mark each checkbox `✅ Approved` or `❌ Rejected` (add notes on rejections).
 4. Sign off at the bottom once all items are marked.
 
-> **Known Open Issue:** TICKET-0313 — Shattered Flats biome load spawns player below terrain. Filed 2026-03-06. This is a pre-existing defect not introduced by M11. The Navigation Console travel feature below should be tested using Rock Warrens or Debris Field to avoid hitting this issue.
+> **Known Open Issue:** TICKET-0313 — All biome loads spawn player below/inside terrain with a runtime error. Affects Shattered Flats, Rock Warrens, and Debris Field. Filed 2026-03-06. The Navigation Console travel feature below cannot be fully manual-tested until this is resolved — verify the console UI and biome list only; skip the travel execution step.
 
 ---
 
@@ -111,12 +111,13 @@
 
 **How to test:**
 1. Open the Navigation Console with enough Fuel Cells in inventory
-2. Select **Rock Warrens** as destination (avoid Shattered Flats due to TICKET-0313)
+2. Select any destination biome
 3. Confirm travel — the screen should fade out, load the new biome, and fade back in
 4. Confirm the player spawns on solid terrain in the new biome
-5. Optionally repeat for **Debris Field**
 
-**Expected result:** Travel fade plays correctly, biome loads, player spawns on the surface without errors.
+> **Note:** TICKET-0313 (all-biome spawn bug) is currently open. If the player spawns below terrain, that is a known pre-existing issue — mark the travel fade itself as approved if it plays correctly, and note the spawn failure separately.
+
+**Expected result:** Travel fade plays correctly (fade out → load → fade in). Player spawn position is blocked on TICKET-0313.
 
 **Automated coverage:** `test_navigation_unit`, `test_biome_unit`
 
@@ -282,7 +283,7 @@ These issues exist as of the UAT sign-off date and are tracked separately. They 
 
 | Ticket | Priority | Description | Status |
 |--------|----------|-------------|--------|
-| TICKET-0313 | P1 | Shattered Flats biome load: player spawns below/inside terrain with runtime error | OPEN — not a M11 regression; pre-existing |
+| TICKET-0313 | P1 | All biomes: player spawns below/inside terrain on biome load with runtime error | OPEN — affects Shattered Flats, Rock Warrens, Debris Field; pre-existing |
 
 ---
 

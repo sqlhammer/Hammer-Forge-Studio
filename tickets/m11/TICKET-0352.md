@@ -2,7 +2,7 @@
 id: TICKET-0352
 title: "BUG — InventoryActionPopup test suite crashes test_runner: _update_focus_visual null instance error"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: play-tester
@@ -96,3 +96,5 @@ without its scene tree (node not found errors at lines 50-61 also appear), causi
 ## Activity Log
 
 - 2026-03-07 [play-tester] Filed — discovered during TICKET-0334 verification run. TICKET-0308 fix was marked DONE but the crash persists. Test runner cannot complete the full suite, blocking QA sign-off.
+- 2026-03-07 [gameplay-programmer] Starting work. Root cause: InventoryActionPopup.new() bypasses scene tree, leaving @onready vars null. Fix: instantiate from .tscn instead.
+- 2026-03-07 [gameplay-programmer] DONE. Commit: 7a34a58. PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/381

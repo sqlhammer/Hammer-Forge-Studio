@@ -24,6 +24,9 @@ const HEIGHTMAP_RESOLUTION: int = 251
 ## Smoothing radius (in grid cells) for feature-to-terrain blending.
 const BLEND_MARGIN_CELLS: int = 3
 
+## Default albedo color for the terrain surface material.
+const DEFAULT_TERRAIN_COLOR: Color = Color(0.4, 0.37, 0.33)
+
 ## Position hint constants
 const HINT_CENTER: String = "center"
 const HINT_EDGE: String = "edge"
@@ -37,6 +40,9 @@ const EDGE_MARGIN: float = 40.0
 ## Feature request dispatch table: FeatureType -> handler Callable.
 var _dispatch_table: Dictionary = {}
 
+## Cached default surface material instance for mesh construction.
+var _default_material: StandardMaterial3D = null
+
 
 # ── Built-in Virtual Methods ──────────────────────────────
 
@@ -47,6 +53,9 @@ func _init() -> void:
 		TerrainFeatureRequest.FeatureType.RESOURCE_SPAWN: _handle_resource_spawn,
 		TerrainFeatureRequest.FeatureType.WALKABLE_CLEARANCE: _handle_walkable_clearance,
 	}
+	_default_material = StandardMaterial3D.new()
+	_default_material.albedo_color = DEFAULT_TERRAIN_COLOR
+	_default_material.roughness = 0.9
 
 
 # ── Public Methods ────────────────────────────────────────
@@ -375,6 +384,7 @@ func _build_single_chunk(heightmap: PackedFloat32Array, cx: int, cz: int) -> Ter
 	chunk.vertex_count = vertex_count
 
 	if vertex_count > 0:
+		surface_tool.set_material(_default_material)
 		chunk.mesh_section = surface_tool.commit()
 
 		# Bake collision shape from triangle vertices
@@ -424,6 +434,7 @@ func _assemble_full_mesh(result: TerrainGenerationResult) -> void:
 		for i: int in range(all_vertices.size()):
 			surface_tool.set_normal(all_normals[i])
 			surface_tool.add_vertex(all_vertices[i])
+		surface_tool.set_material(_default_material)
 		result.terrain_mesh = surface_tool.commit()
 	else:
 		result.terrain_mesh = ArrayMesh.new()

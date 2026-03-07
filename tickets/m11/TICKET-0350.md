@@ -2,7 +2,7 @@
 id: TICKET-0350
 title: "BUG — test_dropped_item_unit::inventory_screen_drop_signal_defined is flaky (ClassDB registration timing)"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P3
 owner: qa-engineer
 created_by: play-tester
@@ -87,3 +87,7 @@ script-level metadata check that does not depend on ClassDB registration timing.
   NOT related to TICKET-0301.
 - 2026-03-07 [qa-engineer] Starting work. Replacing ClassDB.class_has_signal with instance-based
   has_signal check using load("res://scenes/ui/inventory_screen.tscn").instantiate().
+- 2026-03-07 [qa-engineer] DONE. Fixed _test_inventory_screen_drop_signal_defined in
+  game/tests/test_dropped_item_unit.gd. Replaced ClassDB.class_has_signal with instance-based
+  has_signal() call on a loaded InventoryScreen scene instance. Commit aba878d,
+  PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/379.

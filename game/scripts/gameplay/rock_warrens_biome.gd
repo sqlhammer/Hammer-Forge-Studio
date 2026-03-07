@@ -347,6 +347,12 @@ func _build_terrain_mesh() -> void:
 	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
 	mesh_instance.name = "TerrainMesh"
 	mesh_instance.mesh = _terrain_result.terrain_mesh
+
+	var terrain_material: StandardMaterial3D = StandardMaterial3D.new()
+	terrain_material.albedo_color = Color(0.35, 0.30, 0.25)
+	terrain_material.roughness = 0.9
+	mesh_instance.material_override = terrain_material
+
 	add_child(mesh_instance)
 
 	var static_body: StaticBody3D = StaticBody3D.new()
@@ -457,6 +463,11 @@ func _create_rock_formation(
 		# Slight yaw rotation for natural rocky appearance
 		block.rotation.y = formation_rng.randf_range(-0.3, 0.3)
 		block.use_collision = true
+
+		var rock_material: StandardMaterial3D = StandardMaterial3D.new()
+		rock_material.albedo_color = Color(0.30, 0.27, 0.23)
+		rock_material.roughness = 0.95
+		block.material = rock_material
 
 		formation.add_child(block)
 		current_y += block_height

@@ -51,7 +51,7 @@ test_scene_properties_unit anchor assertions verified directly from scene files 
 
 - 2026-03-07 [producer] Created VERIFY ticket for TICKET-0300 — Scene-First: HUD layout properties
 - 2026-03-07 [play-tester] Starting work — TICKET-0300 dependency confirmed DONE (commit e4052b3)
-- 2026-03-07 [play-tester] DONE — OVERALL VERDICT: PASS
+- 2026-03-07 [play-tester] DONE — commit 903e6a2 — OVERALL VERDICT: PASS
 
   **Visual verification (game_world.tscn, Shattered Flats biome):**
   - CompassBar: Visible at top center (W/SW/S/SE/E), not collapsed, not displaced — PASS

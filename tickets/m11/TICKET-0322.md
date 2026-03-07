@@ -31,7 +31,7 @@ Popup appears on item interaction after the Scene-First refactor in TICKET-0293.
 - [~] Visual verification: Right-clicking an item shows the action popup with options
       (Drop, Destroy); actions execute correctly
 - [~] State dump: INVENTORY_USED count decreases by 1 after dropping an item
-- [~] Unit test suite: zero failures across all tests
+- [ ] Unit test suite: zero failures across all tests
 - [x] No runtime errors during any verification scenario
 
 ---
@@ -87,7 +87,9 @@ Popup appears on item interaction after the Scene-First refactor in TICKET-0293.
   - Log evidence: `starting_inventory: {}` (no items — launched without Begin Wealthy). Could not verify INVENTORY_USED decrement via state dump.
   - Code analysis: `_drop_focused_slot()` calls `PlayerInventory.remove_from_slot()` → signal `slot_changed` emitted → INVENTORY_USED would decrement. Implementation correct.
 
-  **Unit Test Suite (PARTIAL — pre-existing TICKET-0348 blocks full run):**
+  **Unit Test Suite (FAIL — new regression crash in test_inventory_action_popup_unit):**
+
+  Run 1 (before TICKET-0348 fix was pulled):
   - test_debris_field_biome_unit: 25/25 ✓
   - test_debug_launcher_unit: 6/6 ✓
   - test_deep_resource_node_scene: 14/14 ✓
@@ -96,10 +98,34 @@ Popup appears on item interaction after the Scene-First refactor in TICKET-0293.
   - test_deposit_unit: 20/20 ✓
   - test_drone_agent_unit: 15/15 ✓
   - test_drone_program_unit: 10/10 ✓
-  - test_dropped_item_unit: CRASH at `_test_inventory_screen_drop_signal_defined` (line 207) — test calls `InventoryScreen.new()` outside scene context; @onready nodes null; `_connect_signals()` crashes on null slot panel. Tracked by TICKET-0348 (pre-existing; same crash seen in TICKET-0346 run).
-  - Suites after abort: NOT RUN (test_fabricator_unit onward) — same abort as TICKET-0346.
+  - test_dropped_item_unit: CRASH (TICKET-0348 — old pre-existing crash; now FIXED)
+
+  Run 2 (after pulling TICKET-0348 fix, commit a2bfd98):
+  - test_dropped_item_unit: PASSES (TICKET-0348 fix works)
+  - test_fuel_system_unit: 44/44 ✓
+  - test_game_startup_unit: 20/20 ✓
+  - test_game_world_unit: 14/14 ✓
+  - test_head_lamp_unit: 17/17 ✓
+  - test_input_manager_unit: 11/11 ✓
+  - test_interaction_prompt_hud_unit: 7/7 ✓
+  - test_inventory_action_popup_unit: CRASH at `_test_show_for_slot_makes_visible` (line 81)
+    — test calls `InventoryActionPopup.new()` outside scene context; @onready nodes null;
+    `_update_focus_visual()` crashes on null `_indicator_labels[i].text`. NEW regression
+    introduced by TICKET-0293 (inventory_action_popup.gd switched to @onready vars).
+    BUG ticket created: TICKET-0349 (owner: qa-engineer).
+  - Suites after abort: NOT RUN (test_inventory_screen_unit and subsequent).
 
   **Runtime Errors During Verification:**
-  - No inventory-related runtime errors in game context. UID fallback warnings for player.tscn and ship_exterior.tscn are pre-existing (functional). GDScript::reload warnings are pre-existing editor warnings (not runtime errors).
+  - No inventory-related runtime errors in game context. UID fallback warnings for player.tscn
+    and ship_exterior.tscn are pre-existing (functional). GDScript::reload warnings are
+    pre-existing editor warnings (not runtime errors).
+  - test_inventory_action_popup_unit crash IS a regression from TICKET-0293.
 
-  **VERDICT: PASS** — TICKET-0293 Scene-First remediation for InventoryScreen and InventoryActionPopup is correctly implemented. Both .tscn scenes exist with proper node structure and unique_name_in_owner declarations. Scripts use @onready vars exclusively — no programmatic UI construction. Scenes start hidden by default. Game loads without inventory-related runtime errors. The unit test crash (test_dropped_item_unit) is a pre-existing test infrastructure issue tracked by TICKET-0348 — the test uses InventoryScreen.new() which bypasses the .tscn; the fix belongs to the QA Engineer. TICKET-0293 implementation itself is verified correct.
+  **VERDICT: PASS (game), FAIL (unit tests — TICKET-0349 created)**
+  TICKET-0293 Scene-First remediation is correctly implemented for game functionality:
+  both .tscn scenes exist with proper node structure, @onready vars populate correctly
+  in game context, scenes start hidden by default, no inventory runtime errors in gameplay.
+  However, the unit test suite has a NEW regression crash in test_inventory_action_popup_unit
+  introduced by TICKET-0293's scene-first refactor — tracked as TICKET-0349 (same pattern
+  as TICKET-0348; QA Engineer must update test to use scene instantiation). This is a test
+  infrastructure issue, not a gameplay regression.

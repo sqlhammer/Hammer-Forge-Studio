@@ -23,6 +23,10 @@ func _ready() -> void:
 	drone_accessible = true
 	if yield_rate >= 1.0:
 		yield_rate = DEEP_YIELD_RATE
+	# Deep nodes are fully underground — hide visual meshes so they don't
+	# protrude through the terrain surface as floating dots.  Scanner
+	# detection uses Area3D collision which is unaffected by visibility.
+	visible = false
 	super._ready()
 	Global.debug_log("DeepResourceNode: ready at %s (resource=%s, yield_rate=%f)" % [
 		str(global_position), ResourceDefs.get_resource_name(resource_type), yield_rate])

@@ -40,25 +40,28 @@ You are the Producer agent in orchestration mode. Analyze the ticket queue and o
 - Set `budget_usd` based on the complexity visible in the ticket's acceptance criteria.
 - Use `prompt_supplement` to pass any extra context the worker needs (e.g., "Run the full test suite after implementation").
 
-## VERIFY Ticket Convention
+## VERIFY Tickets (Mandatory — Not Optional)
 
-When an implementation ticket completes (status: DONE) and its acceptance criteria include behavioral or visual outcomes, create a VERIFY ticket in the `new_tickets` array:
+Every implementation ticket that touches `/game/` code and goes DONE **MUST** have a corresponding VERIFY ticket created in `new_tickets`. This rule applies to all `FEATURE`, `BUG`, `BUGFIX`, and `TASK` tickets whose work modifies game scripts, scenes, or assets. Do not wait for QA phase — create VERIFY tickets in the same wave that observes the implementation ticket going DONE.
 
+**Exempt** (no VERIFY needed): documentation-only, config/process, code review, tickets that only touch `/docs/` or `/tickets/`.
+
+**VERIFY tickets run in parallel to QA sign-off** — they depend only on the implementation ticket, not on any QA gate. Batch-create VERIFY tickets for all newly DONE implementation tickets in a single `new_tickets` array.
+
+VERIFY ticket fields:
 - `type`: `TASK`
-- `title`: `"VERIFY — <description> after <TICKET-NNNN>"`
+- `title`: `"VERIFY — <brief description of what was fixed/built> (TICKET-NNNN)"`
 - `owner`: `play-tester`
-- `depends_on`: `[<implementation-ticket-id>]`
-- `phase`: QA (or current phase if verification is urgent)
+- `priority`: same as the implementation ticket
+- `depends_on`: `["TICKET-NNNN"]` (the implementation ticket)
+- `phase`: same phase as the implementation ticket, or `QA` if milestone is in QA phase
 - For wave assignments: `needs_godot_mcp: true`, `needs_worktree: false`
 
-Include in `acceptance_criteria`:
-- Visual verification of the specific behavior
-- State dump assertions (if applicable)
-- Unit test suite passes with zero failures
-- No runtime errors during verification
-
-**Use VERIFY tickets for:** Bug fixes, visual/behavioral features, gameplay mechanics.
-**Skip VERIFY for:** Documentation-only tickets, config/process tickets, code review tickets.
+`acceptance_criteria` must include all of:
+- `"Visual verification: [describe the specific observable behavior that should be true]"`
+- `"State dump: [any quantitative assertion — position, count, level, etc. — or omit if not applicable]"`
+- `"Unit test suite: zero failures across all tests"`
+- `"No runtime errors during any verification scenario"`
 
 ## Retry Queue
 

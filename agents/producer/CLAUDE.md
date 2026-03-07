@@ -86,7 +86,8 @@ The Studio Head communicates milestone goals and priority overrides directly via
 2. Review all `OPEN` tickets in `tickets/` and sort by priority
 3. Assign tickets to agents by updating `owner: <slug>` and adding an Activity Log entry
 4. Batch assignments logically — avoid giving any agent more than can reasonably be completed in one sprint
-5. Document the sprint plan in `docs/studio/reports/YYYY-MM-DD-sprint.md`
+5. **VERIFY coverage check:** Scan all `DONE` implementation tickets in the current milestone that touch `/game/` code. For any that do not already have a corresponding VERIFY ticket (a TASK ticket titled `"VERIFY — ... (TICKET-NNNN)"` or with `owner: play-tester` depending on the same implementation ticket), create those VERIFY tickets before closing the sprint plan.
+6. Document the sprint plan in `docs/studio/reports/YYYY-MM-DD-sprint.md`
 
 ### Blocker Resolution Protocol
 When a `BLOCKER` ticket arrives (`owner: producer`):
@@ -255,9 +256,11 @@ During orchestration, the Producer may create new tickets by including a `new_ti
 **Producer MAY create tickets autonomously for:**
 - `REVIEW` — code review after an implementation ticket is committed
 - `BUGFIX` — defect found during a wave (e.g., a worker reports a failing test caused by another ticket)
-- `TASK` — operational follow-up or gap identified during wave execution
+- `TASK` — operational follow-up or gap identified during wave execution; **includes mandatory VERIFY tickets** (see below)
 - `BLOCKER` — routing a blocking issue to the appropriate agent for resolution
 - `SPIKE` — research or investigation needed before a subsequent implementation ticket
+
+**Mandatory VERIFY tickets:** Every implementation ticket (`FEATURE`, `BUG`, `BUGFIX`, `TASK`) that touches `/game/` code and goes DONE must have a corresponding VERIFY ticket created for the `play-tester`. Create these in the same `new_tickets` array as the wave that observes the implementation going DONE. VERIFY tickets depend only on the implementation ticket — they do not depend on QA sign-off tickets and can run in parallel to them. See `orchestrator/prompts/plan_wave.md` for the exact field format.
 
 **Producer MUST escalate to Studio Head (not create autonomously):**
 - New features or scope additions not in the current milestone goals

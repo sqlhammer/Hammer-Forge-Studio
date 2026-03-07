@@ -73,3 +73,4 @@ aimed at the ship hull — not when merely near the ship — after the fix in TI
 
   **Overall Verdict: PASS**
   The ship boarding contextual prompt fix from TICKET-0305 is correctly implemented and verified. The aim gate (`_aim_valid`) prevents the "Enter Ship" prompt from appearing when the player is in the enter zone but not aiming at the hull. The pre-existing test suite crash (TICKET-0349) is unrelated to this fix.
+  Commit: 14a3ef9

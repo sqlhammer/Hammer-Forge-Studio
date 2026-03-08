@@ -2,7 +2,7 @@
 id: TICKET-0365
 title: "BUG — test_navigation_console_unit crashes in before_each() due to NavigationConsole.new() missing scene nodes"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: qa-engineer
 created_by: play-tester
@@ -104,3 +104,5 @@ and TICKET-0359 for `test_mouse_interaction_unit`.
 ## Activity Log
 
 - 2026-03-07 [play-tester] Filed — discovered during TICKET-0339 unit test run; pre-existing issue unrelated to TICKET-0311 changes.
+- 2026-03-07 [qa-engineer] Starting work — replacing NavigationConsole.new() with scene instantiation in before_each().
+- 2026-03-07 [qa-engineer] DONE — Fixed. Commit 8cb626b, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/387.

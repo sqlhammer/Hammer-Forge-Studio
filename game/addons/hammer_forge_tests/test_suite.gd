@@ -183,7 +183,7 @@ func _run_single_test(test_name: String, test_callable: Callable) -> void:
 	_current_test_result.test_name = test_name
 
 	var start_time: float = Time.get_ticks_msec()
-	before_each()
+	await before_each()
 	await test_callable.call()
 	after_each()
 	var elapsed: float = Time.get_ticks_msec() - start_time

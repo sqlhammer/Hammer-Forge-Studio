@@ -2,7 +2,7 @@
 id: TICKET-0353
 title: "BUG — InventoryScreen._connect_signals crashes on null slot panels when instantiated without .tscn"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: gameplay-programmer
 created_by: play-tester
@@ -107,3 +107,5 @@ Confirmed test results before crash:
 ## Activity Log
 
 - 2026-03-07 [play-tester] Filed — P2 crash in test_inventory_screen_popup_unit exposed by TICKET-0308 fix. Blocks TICKET-0336 VERIFY.
+- 2026-03-07 [gameplay-programmer] Starting work — adding null guard for _slot_panels iteration in _connect_signals().
+- 2026-03-07 [gameplay-programmer] DONE — null guard added. Commit 6e8fba5, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/383 (merged).

@@ -400,13 +400,42 @@ func _build_single_chunk(heightmap: PackedFloat32Array, cx: int, cz: int) -> Ter
 
 
 ## Assembles the full terrain mesh and collision shape from all chunks.
+## Uses a two-pass approach: first counts total vertices and collision faces to
+## pre-size PackedVector3Arrays with a single allocation each, then fills by index.
+## This prevents the repeated reallocation (doubling pattern) from append_array that
+## fragments the native heap across many consecutive generate() calls in headless tests.
+## ArrayMesh.add_surface_from_arrays() replaces SurfaceTool to avoid its large internal
+## Variant buffer (~22-28 MB for a full 500 m terrain) which was the proximate OOM site.
 func _assemble_full_mesh(result: TerrainGenerationResult) -> void:
+	var chunks_per_axis: int = ceili(TERRAIN_SIZE / CHUNK_SIZE)
+
+	# Pass 1: count total vertices and collision faces so arrays can be pre-sized.
+	var total_vertex_count: int = 0
+	var total_collision_count: int = 0
+	for cz: int in range(chunks_per_axis):
+		for cx: int in range(chunks_per_axis):
+			var key: Vector2i = Vector2i(cx, cz)
+			if not result.chunk_grid.has(key):
+				continue
+			var chunk: TerrainChunk = result.chunk_grid[key]
+			if chunk.mesh_section == null or chunk.mesh_section.get_surface_count() == 0:
+				continue
+			var arrays: Array = chunk.mesh_section.surface_get_arrays(0)
+			total_vertex_count += (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+			if chunk.collision_shape != null:
+				total_collision_count += chunk.collision_shape.get_faces().size()
+
+	# Pre-size arrays with a single allocation each — no reallocation during fill.
 	var all_vertices: PackedVector3Array = PackedVector3Array()
 	var all_normals: PackedVector3Array = PackedVector3Array()
 	var all_collision_faces: PackedVector3Array = PackedVector3Array()
+	all_vertices.resize(total_vertex_count)
+	all_normals.resize(total_vertex_count)
+	all_collision_faces.resize(total_collision_count)
 
-	# Iterate chunks in order for deterministic assembly
-	var chunks_per_axis: int = ceili(TERRAIN_SIZE / CHUNK_SIZE)
+	# Pass 2: fill pre-sized arrays by index — deterministic chunk order preserved.
+	var vert_idx: int = 0
+	var coll_idx: int = 0
 	for cz: int in range(chunks_per_axis):
 		for cx: int in range(chunks_per_axis):
 			var key: Vector2i = Vector2i(cx, cz)
@@ -419,23 +448,27 @@ func _assemble_full_mesh(result: TerrainGenerationResult) -> void:
 			var arrays: Array = chunk.mesh_section.surface_get_arrays(0)
 			var chunk_verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 			var chunk_normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
-			all_vertices.append_array(chunk_verts)
-			all_normals.append_array(chunk_normals)
+			for i: int in range(chunk_verts.size()):
+				all_vertices[vert_idx + i] = chunk_verts[i]
+				all_normals[vert_idx + i] = chunk_normals[i]
+			vert_idx += chunk_verts.size()
 
-			# Collision faces from the chunk
 			if chunk.collision_shape != null:
 				var faces: PackedVector3Array = chunk.collision_shape.get_faces()
-				all_collision_faces.append_array(faces)
+				for i: int in range(faces.size()):
+					all_collision_faces[coll_idx + i] = faces[i]
+				coll_idx += faces.size()
 
-	# Build the unified terrain mesh
+	# Build the unified terrain mesh directly via ArrayMesh (no SurfaceTool internal buffer).
 	if all_vertices.size() > 0:
-		var surface_tool: SurfaceTool = SurfaceTool.new()
-		surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-		for i: int in range(all_vertices.size()):
-			surface_tool.set_normal(all_normals[i])
-			surface_tool.add_vertex(all_vertices[i])
-		surface_tool.set_material(_default_material)
-		result.terrain_mesh = surface_tool.commit()
+		var mesh_arrays: Array = []
+		mesh_arrays.resize(Mesh.ARRAY_MAX)
+		mesh_arrays[Mesh.ARRAY_VERTEX] = all_vertices
+		mesh_arrays[Mesh.ARRAY_NORMAL] = all_normals
+		var terrain_mesh: ArrayMesh = ArrayMesh.new()
+		terrain_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_arrays)
+		terrain_mesh.surface_set_material(0, _default_material)
+		result.terrain_mesh = terrain_mesh
 	else:
 		result.terrain_mesh = ArrayMesh.new()
 

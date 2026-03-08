@@ -2,7 +2,7 @@
 id: TICKET-0367
 title: "BUG — test_procedural_terrain_unit crashes with OOM in terrain_generator.gd _assemble_full_mesh when running headlessly"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: qa-engineer
 created_by: play-tester
@@ -100,3 +100,4 @@ passing parameters that cause the generator to attempt an unbounded allocation. 
 
 - 2026-03-08 [play-tester] Filed — discovered during TICKET-0366 headless test suite run. Pre-existing issue unrelated to TICKET-0365 fix.
 - 2026-03-07 [qa-engineer] Starting work — investigating OOM in _assemble_full_mesh. Root cause: repeated PackedVector3Array reallocation (doubling pattern via append_array) across 20+ consecutive generate() calls fragments the native heap; the 22-28MB SurfaceTool internal buffer then fails to allocate on the fragmented heap. Fix: two-pass pre-sizing of packed arrays (single allocation each) + replace SurfaceTool with ArrayMesh.add_surface_from_arrays() to eliminate the secondary internal buffer.
+- 2026-03-08 [qa-engineer] DONE — fix merged via PR #391 (commit e3547be). Two-pass pre-sizing eliminates repeated PackedVector3Array reallocation and removes the SurfaceTool internal buffer. No test file changes needed — production fix removes the OOM trigger for all 26 generate() calls in the terrain test suite.

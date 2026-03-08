@@ -2,7 +2,7 @@
 id: TICKET-0355
 title: "BUG — Tech tree panel inaccessible in gameplay: DebugShipBoardingHandler missing terminal interaction"
 type: BUG
-status: OPEN
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: play-tester
@@ -115,3 +115,8 @@ Code audit during TICKET-0324 verification (2026-03-07):
   get_tech_tree_panel() exists in GameHUD but neither is wired in the boarding handler.
   Pre-existing gap not introduced by TICKET-0295 (scene-first refactor), but blocks
   visual verification of TICKET-0324 acceptance criteria.
+- 2026-03-07 [gameplay-programmer] Starting work. Adding tech tree terminal interaction
+  to DebugShipBoardingHandler._process().
+- 2026-03-07 [gameplay-programmer] DONE. Added is_player_near_terminal() check in
+  DebugShipBoardingHandler._process() to open TechTreePanel when player interacts near
+  the tech tree terminal. Commit: 0b23470, PR: https://github.com/sqlhammer/Hammer-Forge-Studio/pull/385

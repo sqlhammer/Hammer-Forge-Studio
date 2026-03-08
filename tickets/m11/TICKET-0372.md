@@ -2,7 +2,7 @@
 id: TICKET-0372
 title: "BUG — test_ship_interior_unit fails in-editor: null material_override in ShipInterior._ready"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: systems-programmer
 created_by: qa-engineer
@@ -74,3 +74,5 @@ so the SubViewport has time to initialize in editor play mode.
 ## Activity Log
 
 - 2026-03-08 [qa-engineer] Bug discovered during TICKET-0371 in-editor verification. Observed while running test_runner.tscn in-editor after the async before_each fix. Ship interior test fails before the navigation console suite. Filed as P2 — headless workaround available.
+- 2026-03-08 [systems-programmer] Starting work. Adding null guards for _viewport_window and _sub_viewport in ShipInterior._ready() to prevent crash when scene children are not present (e.g., instantiated via .new() in tests or editor play context).
+- 2026-03-08 [systems-programmer] Fix complete. Committed 42c2ffd, merged via PR #395 (https://github.com/sqlhammer/Hammer-Forge-Studio/pull/395). Added null guards for _viewport_window, _sub_viewport, and viewport_mat in _ready(). No new scripts created.

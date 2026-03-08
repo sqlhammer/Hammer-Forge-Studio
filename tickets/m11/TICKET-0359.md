@@ -2,7 +2,7 @@
 id: TICKET-0359
 title: "BUG — test_mouse_interaction_unit fails: FabricatorPanel instantiated with .new() instead of .tscn"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: qa-engineer
 created_by: play-tester
@@ -113,3 +113,5 @@ SCRIPT ERROR: Cannot call method 'add_theme_stylebox_override' on a null value.
 ## Activity Log
 
 - 2026-03-07 [play-tester] Filed — P2 pre-existing test failure discovered during TICKET-0338 verification. Every test in test_mouse_interaction_unit fails with node-not-found errors due to .new() instantiation pattern. Fix: use .tscn instantiation per TICKET-0354 pattern. Owner: qa-engineer.
+- 2026-03-07 [qa-engineer] Starting work — updating before_each() to use .tscn instantiation for all four UI panels following TICKET-0354 pattern.
+- 2026-03-07 [qa-engineer] DONE — Fixed before_each() in test_mouse_interaction_unit.gd to use load().instantiate() for all four UI panels. Full test suite: 1009/1009 passed, 0 failed. Commit ee97be8, PR #386.

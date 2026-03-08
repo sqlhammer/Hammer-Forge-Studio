@@ -27,7 +27,7 @@ import signal
 import subprocess
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 from instance_paths import InstancePaths, load_config, resolve_instance
@@ -111,7 +111,7 @@ ALL_GODOT_TOOLS = TIER_1_TOOLS + TIER_2_TOOLS + TIER_3_TOOLS
 # ---------------------------------------------------------------------------
 
 def now_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    return datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
 
 def load_json(path: Path) -> dict:
@@ -178,7 +178,7 @@ def acquire_godot_mcp_lock(
             acquired_at = data.get("acquired_at", "")
             if acquired_at:
                 lock_time = datetime.fromisoformat(acquired_at)
-                age = (datetime.now(timezone.utc) - lock_time).total_seconds()
+                age = (datetime.now() - lock_time).total_seconds()
                 if age > STALE_LOCK_SECONDS:
                     if logger:
                         logger.log("WARNING",
@@ -471,7 +471,7 @@ def write_ticket_file(
     milestone_dir.mkdir(parents=True, exist_ok=True)
 
     # Build frontmatter
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = datetime.now().strftime("%Y-%m-%d")
     depends_on = ticket_data.get("depends_on", [])
     depends_str = ", ".join(depends_on) if depends_on else ""
 

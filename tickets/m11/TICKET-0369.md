@@ -2,7 +2,7 @@
 id: TICKET-0369
 title: "BUGFIX — Terrain renders black due to lighting regression"
 type: BUGFIX
-status: IN_PROGRESS
+status: DONE
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -67,3 +67,4 @@ WorldEnvironment and DirectionalLight3D, appearing in the biome's appropriate co
 | 2026-03-08 | producer | Ticket created. Regression reported by Studio Head via screenshot (2026-03-07). |
 | 2026-03-08 | gameplay-programmer | Starting work. Investigating terrain lighting regression. |
 | 2026-03-08 | gameplay-programmer | Root cause identified: triangle winding order in _build_single_chunk is reversed — front face points DOWN while normals point UP, causing Godot's shader to compute zero lighting for the visible surface. Winding was wrong since TICKET-0162 but only manifested as a visible regression in Godot 4.5.1. Fix: swap vertex order in both triangles (v00,v10,v01→v00,v01,v10 and v10,v11,v01→v10,v01,v11) so front face points UP, matching stored normals. Verified fix in editor: terrain renders with correct lighting and color. All biomes use same TerrainGenerator so fix applies globally. |
+| 2026-03-08 | gameplay-programmer | DONE. Fix merged via PR #392 (commit 5a40db5). All acceptance criteria verified. |

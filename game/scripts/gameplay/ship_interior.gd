@@ -214,6 +214,8 @@ func _update_zone_visual(zone_index: int) -> void:
 	if zone_index < 0 or zone_index >= _zone_floor_markers.size():
 		return
 	var marker: MeshInstance3D = _zone_floor_markers[zone_index]
+	if not marker:
+		return
 	var mat: StandardMaterial3D = marker.material_override as StandardMaterial3D
 	if _zone_occupied[zone_index]:
 		mat.albedo_color = COLOR_ZONE_TEAL_OCCUPIED

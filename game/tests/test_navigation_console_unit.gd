@@ -21,7 +21,7 @@ func before_each() -> void:
 	FuelSystem.reset_to_full()
 	PlayerInventory.clear_all()
 	ShipState.reset()
-	_console = NavigationConsole.new()
+	_console = preload("res://scenes/ui/navigation_console.tscn").instantiate() as NavigationConsole
 	add_child(_console)
 	# Wait one frame for _ready to complete
 	await get_tree().process_frame

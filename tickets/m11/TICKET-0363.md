@@ -65,3 +65,4 @@ Verify that InventoryActionPopup no longer crashes the test runner with _update_
 
   **Verdict: PASS** — TICKET-0352 fix confirmed working. InventoryActionPopup tests complete
   without null instance crash. Zero `_update_focus_visual` errors in godot.log.
+  Commit: fff110eb79b8cfa58b5ae88ebed9570a9827b9b5

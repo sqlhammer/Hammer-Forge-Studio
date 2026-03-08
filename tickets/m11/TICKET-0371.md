@@ -2,7 +2,7 @@
 id: TICKET-0371
 title: "BUG — test_navigation_console_unit fails in-editor: _spy is null in _test_console_emits_panel_closed_on_close"
 type: BUG
-status: IN_PROGRESS
+status: DONE
 priority: P2
 owner: qa-engineer
 created_by: play-tester
@@ -78,3 +78,4 @@ instantiation patterns).
 
 - 2026-03-08 [play-tester] Bug discovered during TICKET-0370 verification. In-editor test run shows _spy null in _test_console_emits_panel_closed_on_close. TICKET-0369 terrain fix is not the cause.
 - 2026-03-08 [qa-engineer] Starting work. Fixing test_suite.gd:_run_single_test to await before_each() so async before_each bodies complete before the test callable runs.
+- 2026-03-08 [qa-engineer] DONE. Changed bare before_each() to await before_each() in test_suite.gd:186. Verified: test_navigation_console_unit passes 15/15 in-editor (no _spy null errors). Full suite headless: 1009 passed, 0 failed, 0 skipped. New in-editor only bug observed (test_ship_interior_unit null material_override at ship_interior.gd:71) — filed as TICKET-0372. Commit b7833ac, PR https://github.com/sqlhammer/Hammer-Forge-Studio/pull/393.

@@ -2,7 +2,7 @@
 id: TICKET-0374
 title: "BUG — test_ship_interior_unit crashes in-editor at ship_interior.gd:217: null marker in _update_zone_visual"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: systems-programmer
 created_by: play-tester
@@ -91,3 +91,5 @@ if not marker:
 - 2026-03-08 [play-tester] Discovered during TICKET-0373 in-editor verification. The TICKET-0372
   fix correctly eliminated the line 71 crash, but exposed a pre-existing null dereference at
   line 217. Filed as P2 — same severity as TICKET-0372.
+- 2026-03-08 [systems-programmer] Starting work. Adding null guard for marker in _update_zone_visual after line 216.
+- 2026-03-08 [systems-programmer] DONE. Null guard added at line 217. Commit 02aa259, PR #396 merged to main. https://github.com/sqlhammer/Hammer-Forge-Studio/pull/396

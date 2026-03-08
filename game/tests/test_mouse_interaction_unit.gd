@@ -15,13 +15,13 @@ var _module_placement_ui: ModulePlacementUI = null
 # ── Setup / Teardown ──────────────────────────────────────
 
 func before_each() -> void:
-	_inventory_screen = InventoryScreen.new()
+	_inventory_screen = load("res://scenes/ui/inventory_screen.tscn").instantiate() as InventoryScreen
 	add_child(_inventory_screen)
-	_fabricator_panel = FabricatorPanel.new()
+	_fabricator_panel = load("res://scenes/ui/fabricator_panel.tscn").instantiate() as FabricatorPanel
 	add_child(_fabricator_panel)
-	_tech_tree_panel = TechTreePanel.new()
+	_tech_tree_panel = load("res://scenes/ui/tech_tree_panel.tscn").instantiate() as TechTreePanel
 	add_child(_tech_tree_panel)
-	_module_placement_ui = ModulePlacementUI.new()
+	_module_placement_ui = load("res://scenes/ui/module_placement_ui.tscn").instantiate() as ModulePlacementUI
 	add_child(_module_placement_ui)
 
 

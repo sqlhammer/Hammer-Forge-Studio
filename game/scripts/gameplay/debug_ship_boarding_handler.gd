@@ -46,6 +46,15 @@ func _process(_delta: float) -> void:
 					_navigation_console.open_panel()
 				return
 
+	# Tech tree terminal — open tech tree panel when near terminal
+	if _ship_interior.is_player_inside() and _hud:
+		var tech_tree_panel: TechTreePanel = _hud.get_tech_tree_panel()
+		if tech_tree_panel and not tech_tree_panel.is_open():
+			if _ship_interior.is_player_near_terminal():
+				if InputManager.is_action_just_pressed("interact"):
+					tech_tree_panel.open()
+					return
+
 	# Machine slot — open module placement UI when near a placement zone
 	if _ship_interior.is_player_inside() and _hud:
 		var module_ui: ModulePlacementUI = _hud.get_module_placement_ui()

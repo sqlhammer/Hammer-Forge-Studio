@@ -67,4 +67,4 @@ Verify that pressing interact near the tech tree terminal in the ship interior o
   Session errors are all pre-existing environment warnings (Vulkan/audio init, GDScript reload
   hints). No null reference errors or script errors introduced by the TICKET-0355 fix. PASS.
 
-  **VERDICT: ALL PASS**
+  **VERDICT: ALL PASS** — commit f191a91

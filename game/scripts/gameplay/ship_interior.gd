@@ -68,8 +68,10 @@ func _ready() -> void:
 	_zone_floor_markers = [_zone_marker_0, _zone_marker_1, _zone_marker_2, _zone_marker_3]
 	_zone_areas = [_placement_zone_0, _placement_zone_1, _placement_zone_2, _placement_zone_3]
 	# Viewport window texture must be assigned at runtime from the SubViewport
-	var viewport_mat: StandardMaterial3D = _viewport_window.material_override as StandardMaterial3D
-	viewport_mat.albedo_texture = _sub_viewport.get_texture()
+	if _viewport_window and _sub_viewport:
+		var viewport_mat: StandardMaterial3D = _viewport_window.material_override as StandardMaterial3D
+		if viewport_mat:
+			viewport_mat.albedo_texture = _sub_viewport.get_texture()
 	Global.debug_log("ShipInterior: initialized — 24m×12m multi-room layout")
 
 # ── Public Methods ────────────────────────────────────────

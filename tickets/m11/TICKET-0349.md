@@ -2,7 +2,7 @@
 id: TICKET-0349
 title: "BUG — test_inventory_action_popup_unit crashes test runner due to InventoryActionPopup standalone instantiation"
 type: BUG
-status: OPEN
+status: DONE
 priority: P2
 owner: qa-engineer
 created_by: play-tester
@@ -100,3 +100,9 @@ Suites NOT run due to abort: test_inventory_screen_unit and all subsequent suite
   by TICKET-0293 (scene-first refactor of inventory_action_popup.gd). test_inventory_action_popup_unit
   crashes on InventoryActionPopup.new() outside scene context — @onready vars null,
   _update_focus_visual() crashes on null _indicator_labels. Similar fix to TICKET-0348.
+- 2026-03-07 [qa-engineer] Starting work — verifying fix and updating ticket to DONE.
+- 2026-03-07 [qa-engineer] Fix verified — TICKET-0352 (commit aa63e09) applied the recommended
+  fix to test_inventory_action_popup_unit.gd: replaced InventoryActionPopup.new() with
+  load("res://scenes/ui/inventory_action_popup.tscn").instantiate() in before_each(). The
+  @onready vars are now properly initialized, preventing the null instance crash in
+  _update_focus_visual(). Bug is resolved. Marking DONE.

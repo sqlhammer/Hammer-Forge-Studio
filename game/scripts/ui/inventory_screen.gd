@@ -332,8 +332,9 @@ func _connect_signals() -> void:
 		_cancel_confirm_button.pressed.connect(_close_destroy_confirm)
 	# Mouse hover and click for each slot
 	for i: int in range(_slot_panels.size()):
-		_slot_panels[i].mouse_entered.connect(_on_slot_mouse_entered.bind(i))
-		_slot_panels[i].gui_input.connect(_on_slot_gui_input.bind(i))
+		if _slot_panels[i]:
+			_slot_panels[i].mouse_entered.connect(_on_slot_mouse_entered.bind(i))
+			_slot_panels[i].gui_input.connect(_on_slot_gui_input.bind(i))
 
 func _refresh_all_slots() -> void:
 	for i: int in range(Inventory.MAX_SLOTS):

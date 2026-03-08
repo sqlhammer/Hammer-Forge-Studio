@@ -14,7 +14,7 @@ var _spy: SignalSpy = null
 # ── Setup / Teardown ──────────────────────────────────────
 
 func before_each() -> void:
-	_screen = InventoryScreen.new()
+	_screen = load("res://scenes/ui/inventory_screen.tscn").instantiate()
 	add_child(_screen)
 	# Open the inventory so input and UI are active
 	_screen.open_inventory()

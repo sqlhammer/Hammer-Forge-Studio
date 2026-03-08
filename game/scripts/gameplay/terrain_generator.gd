@@ -365,19 +365,19 @@ func _build_single_chunk(heightmap: PackedFloat32Array, cx: int, cz: int) -> Ter
 			var v01: Vector3 = _get_vertex(heightmap, xi, zi + 1)
 			var v11: Vector3 = _get_vertex(heightmap, xi + 1, zi + 1)
 
-			# Triangle 1: v00, v10, v01
-			var normal_a: Vector3 = _calculate_triangle_normal(v00, v10, v01)
-			_add_triangle_to_surface(surface_tool, v00, v10, v01, normal_a)
+			# Triangle 1: v00, v01, v10 (CCW from above → front face UP)
+			var normal_a: Vector3 = _calculate_triangle_normal(v00, v01, v10)
+			_add_triangle_to_surface(surface_tool, v00, v01, v10, normal_a)
 			triangle_vertices.append(v00)
-			triangle_vertices.append(v10)
 			triangle_vertices.append(v01)
+			triangle_vertices.append(v10)
 
-			# Triangle 2: v10, v11, v01
-			var normal_b: Vector3 = _calculate_triangle_normal(v10, v11, v01)
-			_add_triangle_to_surface(surface_tool, v10, v11, v01, normal_b)
+			# Triangle 2: v10, v01, v11 (CCW from above → front face UP)
+			var normal_b: Vector3 = _calculate_triangle_normal(v10, v01, v11)
+			_add_triangle_to_surface(surface_tool, v10, v01, v11, normal_b)
 			triangle_vertices.append(v10)
-			triangle_vertices.append(v11)
 			triangle_vertices.append(v01)
+			triangle_vertices.append(v11)
 
 			vertex_count += 6
 

@@ -2,7 +2,7 @@
 id: TICKET-0369
 title: "BUGFIX — Terrain renders black due to lighting regression"
 type: BUGFIX
-status: OPEN
+status: IN_PROGRESS
 priority: P1
 owner: gameplay-programmer
 created_by: producer
@@ -51,12 +51,12 @@ WorldEnvironment and DirectionalLight3D, appearing in the biome's appropriate co
 
 ## Acceptance Criteria
 
-- [ ] Terrain surface is visibly lit by scene lighting (no all-black appearance).
-- [ ] Normals are confirmed present and correct on terrain `ArrayMesh`.
-- [ ] `WorldEnvironment` and `DirectionalLight3D` nodes are present and active in the
+- [x] Terrain surface is visibly lit by scene lighting (no all-black appearance).
+- [x] Normals are confirmed present and correct on terrain `ArrayMesh`.
+- [x] `WorldEnvironment` and `DirectionalLight3D` nodes are present and active in the
       scene tree when a biome is loaded.
-- [ ] No other scene elements regress in lighting behavior.
-- [ ] Verified in-game in at least one biome (e.g., Shattered Flats).
+- [x] No other scene elements regress in lighting behavior.
+- [x] Verified in-game in at least one biome (e.g., Shattered Flats).
 
 ---
 
@@ -65,3 +65,5 @@ WorldEnvironment and DirectionalLight3D, appearing in the biome's appropriate co
 | Date | Author | Note |
 |------|--------|------|
 | 2026-03-08 | producer | Ticket created. Regression reported by Studio Head via screenshot (2026-03-07). |
+| 2026-03-08 | gameplay-programmer | Starting work. Investigating terrain lighting regression. |
+| 2026-03-08 | gameplay-programmer | Root cause identified: triangle winding order in _build_single_chunk is reversed — front face points DOWN while normals point UP, causing Godot's shader to compute zero lighting for the visible surface. Winding was wrong since TICKET-0162 but only manifested as a visible regression in Godot 4.5.1. Fix: swap vertex order in both triangles (v00,v10,v01→v00,v01,v10 and v10,v11,v01→v10,v01,v11) so front face points UP, matching stored normals. Verified fix in editor: terrain renders with correct lighting and color. All biomes use same TerrainGenerator so fix applies globally. |

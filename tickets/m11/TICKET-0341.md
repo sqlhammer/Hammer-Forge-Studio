@@ -2,7 +2,7 @@
 id: TICKET-0341
 title: "VERIFY — BUG fix: Player spawns on solid terrain in all biomes on biome load (TICKET-0313)"
 type: TASK
-status: TODO
+status: IN_PROGRESS
 priority: P1
 owner: play-tester
 created_by: producer
@@ -44,3 +44,4 @@ loading any biome, after the root-cause fix in TICKET-0313.
 ## Activity Log
 
 - 2026-03-07 [producer] Created VERIFY ticket for TICKET-0313 — BUG: Player spawn below terrain
+- 2026-03-07 [play-tester] Starting work — verifying TICKET-0313 fix across all three biomes
